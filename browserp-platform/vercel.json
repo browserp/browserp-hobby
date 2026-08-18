@@ -1,0 +1,55 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 15,
+      "memory": 512
+    }
+  },
+  "rewrites": [
+    { "source": "/api/platforms", "destination": "/api/router?_route=platforms" },
+    { "source": "/api/categories", "destination": "/api/router?_route=categories" },
+    { "source": "/api/public/overview", "destination": "/api/router?_route=public/overview" },
+    { "source": "/api/auth/discord", "destination": "/api/router?_route=auth/discord" },
+    { "source": "/api/auth/callback", "destination": "/api/router?_route=auth/callback" },
+    { "source": "/api/auth/session", "destination": "/api/router?_route=auth/session" },
+    { "source": "/api/auth/logout", "destination": "/api/router?_route=auth/logout" },
+    { "source": "/api/me/overview", "destination": "/api/router?_route=me/overview" },
+    { "source": "/api/admin/overview", "destination": "/api/router?_route=admin/overview" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/staff", "destination": "/staff.html" },
+    { "source": "/developers", "destination": "/developers.html" },
+    { "source": "/resources", "destination": "/resources.html" },
+    { "source": "/legal", "destination": "/legal.html" },
+    { "source": "/server/:slug", "destination": "/server.html?slug=:slug" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    },
+    {
+      "source": "/(.*).(css|js|svg|png|jpg|jpeg|webp|ico)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }
+      ]
+    }
+  ]
+}

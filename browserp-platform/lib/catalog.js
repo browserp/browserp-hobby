@@ -1,0 +1,31 @@
+export const platforms = [
+  { id: "fivem", name: "FiveM", short_name: "5M", accent: "#625bf6" },
+  { id: "redm", name: "RedM", short_name: "RM", accent: "#b76a3a" },
+  { id: "minecraft", name: "Minecraft", short_name: "MC", accent: "#3d8c61" },
+  { id: "roblox", name: "Roblox", short_name: "RX", accent: "#eb5b63" },
+  { id: "gmod", name: "Garry's Mod", short_name: "GM", accent: "#3c78d8" },
+  { id: "ets2", name: "Euro Truck Simulator", short_name: "ET", accent: "#d28a2d" }
+];
+
+export const servers = [
+  { id:"2c7dca2a-5c27-48a2-8eb3-1f10418fd001", name:"Northstar Roleplay", slug:"northstar-roleplay", platform_id:"fivem", platform_name:"FiveM", platform_short:"5M", description:"A welcoming city-life community with thoughtful stories, active services and quality-first moderation.", region:"North America", language:"English", framework:"QBox", tags:["Serious RP","Economy","Emergency Services","Beginner Friendly"], players:186, capacity:256, online:true, verified:true, beginner_friendly:true, quality_score:94, engagement_score:91, uptime_percent:99.8, boost_score:84, theme_start:"#1f245c", theme_end:"#6b5cff", created_at:"2026-06-12T10:00:00.000Z" },
+  { id:"2c7dca2a-5c27-48a2-8eb3-1f10418fd002", name:"Everwild Realms", slug:"everwild-realms", platform_id:"minecraft", platform_name:"Minecraft", platform_short:"MC", description:"Collaborative fantasy worldbuilding, player-led towns and seasonal stories with a friendly community.", region:"Europe", language:"English", framework:"Paper", tags:["Fantasy","Whitelisted","Worldbuilding","Family Friendly"], players:78, capacity:120, online:true, verified:true, beginner_friendly:true, quality_score:92, engagement_score:88, uptime_percent:99.4, boost_score:62, theme_start:"#173f32", theme_end:"#4fa36f", created_at:"2026-05-04T12:00:00.000Z" },
+  { id:"2c7dca2a-5c27-48a2-8eb3-1f10418fd003", name:"Harborline Stories", slug:"harborline-stories", platform_id:"roblox", platform_name:"Roblox", platform_short:"RX", description:"A modern coastal setting for community stories, public services and creator-led events.", region:"Global", language:"English", framework:"Custom", tags:["Casual RP","City Life","Events","Controller Friendly"], players:112, capacity:180, online:true, verified:true, beginner_friendly:true, quality_score:87, engagement_score:93, uptime_percent:98.9, boost_score:71, theme_start:"#243f68", theme_end:"#55a6d9", created_at:"2026-07-20T09:00:00.000Z" },
+  { id:"2c7dca2a-5c27-48a2-8eb3-1f10418fd004", name:"Dust & Honor", slug:"dust-and-honor", platform_id:"redm", platform_name:"RedM", platform_short:"RM", description:"Character-first frontier storytelling with a measured economy and carefully moderated long-form arcs.", region:"North America", language:"English", framework:"VORP", tags:["Serious RP","Whitelisted","Realistic Economy","Long-form"], players:54, capacity:96, online:true, verified:true, beginner_friendly:false, quality_score:96, engagement_score:86, uptime_percent:99.6, boost_score:48, theme_start:"#4e2e20", theme_end:"#b87543", created_at:"2026-04-14T16:00:00.000Z" },
+  { id:"2c7dca2a-5c27-48a2-8eb3-1f10418fd005", name:"Outpost 47", slug:"outpost-47", platform_id:"gmod", platform_name:"Garry's Mod", platform_short:"GM", description:"Cooperative science-fiction roleplay built around exploration, teamwork and structured events.", region:"Europe", language:"English", framework:"Helix", tags:["Sci-Fi","Whitelisted","Custom Content","Events"], players:39, capacity:72, online:true, verified:false, beginner_friendly:false, quality_score:84, engagement_score:79, uptime_percent:97.8, boost_score:30, theme_start:"#252d42", theme_end:"#607598", created_at:"2026-08-02T11:00:00.000Z" },
+  { id:"2c7dca2a-5c27-48a2-8eb3-1f10418fd006", name:"Horizon Logistics RP", slug:"horizon-logistics", platform_id:"ets2", platform_name:"Euro Truck Simulator", platform_short:"ET", description:"Relaxed virtual logistics, organised convoys and a reputation system made for steady progression.", region:"Global", language:"Multilingual", framework:"TruckersMP", tags:["Simulation","Casual RP","Multilingual","Beginner Friendly"], players:67, capacity:150, online:true, verified:true, beginner_friendly:true, quality_score:89, engagement_score:82, uptime_percent:99.1, boost_score:40, theme_start:"#29445d", theme_end:"#d18b2f", created_at:"2026-07-05T15:00:00.000Z" },
+  { id:"2c7dca2a-5c27-48a2-8eb3-1f10418fd007", name:"Civic State RP", slug:"civic-state-rp", platform_id:"fivem", platform_name:"FiveM", platform_short:"5M", description:"Public-access city roleplay with creator-owned businesses, regular events and an open onboarding path.", region:"Oceania", language:"English", framework:"QBCore", tags:["Public","Economy","Custom Jobs","Active Staff"], players:91, capacity:160, online:true, verified:false, beginner_friendly:true, quality_score:82, engagement_score:90, uptime_percent:96.8, boost_score:55, theme_start:"#30305f", theme_end:"#a65394", created_at:"2026-08-11T08:00:00.000Z" },
+  { id:"2c7dca2a-5c27-48a2-8eb3-1f10418fd008", name:"Ember County", slug:"ember-county", platform_id:"fivem", platform_name:"FiveM", platform_short:"5M", description:"Small-community roleplay focused on grounded characters, polished systems and balanced discovery.", region:"Europe", language:"English", framework:"ESX", tags:["Semi-Realism","Economy","Custom Scripts","New Community"], players:0, capacity:128, online:false, verified:false, beginner_friendly:true, quality_score:80, engagement_score:68, uptime_percent:94.2, boost_score:22, theme_start:"#532b35", theme_end:"#da735e", created_at:"2026-08-16T18:00:00.000Z" }
+];
+
+export function categoriesFromServers(items = servers) {
+  const counts = new Map();
+  for (const server of items) for (const tag of server.tags || []) counts.set(tag, (counts.get(tag) || 0) + 1);
+  return [...counts].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+}
+
+export const promotionPacks = Object.freeze({
+  starter: { key: "starter", name: "Starter spotlight", credits: 5, maxQuantity: 4 },
+  growth: { key: "growth", name: "Growth spotlight", credits: 15, maxQuantity: 3 },
+  launch: { key: "launch", name: "Launch spotlight", credits: 40, maxQuantity: 2 }
+});
