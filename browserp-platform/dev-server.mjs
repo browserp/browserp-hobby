@@ -24,7 +24,11 @@ const apiRoutes = new Map([
   ["POST /api/checkout", "api/checkout.js"],
   ["POST /api/webhooks/stripe", "api/webhooks/stripe.js"],
   ["GET /api/me/overview", ["api/router.js", "me/overview"]],
+  ["GET /api/me/favorites", ["api/router.js", "me/favorites"]],
+  ["POST /api/me/favorites", ["api/router.js", "me/favorites"]],
+  ["POST /api/me/notifications/read", ["api/router.js", "me/notifications/read"]],
   ["GET /api/admin/overview", ["api/router.js", "admin/overview"]],
+  ["POST /api/admin/action", ["api/router.js", "admin/action"]],
   ["GET /api/resources", "api/resources.js"],
   ["GET /api/developers", "api/developers.js"]
 ]);

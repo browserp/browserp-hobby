@@ -1,6 +1,10 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 const escapeHtml = (value) => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
 const initials = (name) => String(name || "BR").split(/\s+/).slice(0,2).map((word)=>word[0]).join("").toUpperCase();
+const dateLabel = (value) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Unknown" : date.toLocaleString([], {day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
+};
 
 async function api(path, options={}) {
   const response = await fetch(path,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});
@@ -19,35 +23,100 @@ async function updateAuth() {
   try {
     const session=await api("/api/auth/session");
     if(session.authenticated){button.textContent=session.user.profile?.display_name||"Dashboard";button.href="/dashboard";}
+    else {
+      const authState=new URLSearchParams(location.search).get("auth");
+      if(authState==="failed") session.error="Discord could not finish signing you in. Please try again.";
+      if(authState==="discord-not-configured") session.error="Discord sign-in still needs to be enabled in the BrowseRP authentication settings.";
+      if(authState==="backend-not-configured") session.error="BrowseRP sign-in is waiting for its production backend environment variables.";
+    }
     return session;
-  } catch { return {authenticated:false}; }
+  } catch (error) { return {authenticated:false, error:error.message, status:error.status}; }
 }
 
 function metric(label,value,note){return `<article class="metric-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`;}
 
+function staffButtons(kind,id,actions,enabled=true){
+  if(!enabled) return "";
+  return `<div class="portal-actions">${actions.map(([action,label,tone="secondary"])=>`<button type="button" class="staff-action staff-action-${escapeHtml(tone)}" data-staff-kind="${escapeHtml(kind)}" data-staff-id="${escapeHtml(id)}" data-staff-action="${escapeHtml(action)}">${escapeHtml(label)}</button>`).join("")}</div>`;
+}
+
+function staffQueueSection({id,title,description,items,empty,render}){
+  return `<section class="portal-panel staff-panel-wide" id="${escapeHtml(id)}"><div class="staff-panel-head"><div><h2>${escapeHtml(title)}</h2><p>${escapeHtml(description)}</p></div><span>${items.length}</span></div><div class="portal-list">${items.length?items.map(render).join(""):`<p class="queue-empty">${escapeHtml(empty)}</p>`}</div></section>`;
+}
+
 async function dashboardPage(session){
   const root=$("#page-content");
-  if(!session?.authenticated){root.innerHTML=signInGate("Your BrowseRP dashboard","Sign in to manage submissions, owned communities, favourites, notifications and fixed promotion credits.");return;}
+  if(!session?.authenticated){root.innerHTML=signInGate("Your BrowseRP dashboard",session?.error||"Sign in to manage submissions, owned communities, favourites, notifications and fixed promotion credits.");return;}
   try{
     const {overview}=await api("/api/me/overview");
     const profile=overview?.profile||session.user.profile||{};
     const servers=overview?.servers||[];
     const submissions=overview?.submissions||[];
+    const favourites=overview?.favoriteServers||[];
+    const notifications=overview?.notifications||[];
     root.innerHTML=`
       <div class="portal-welcome"><div><span class="section-kicker">OWNER CENTRE</span><h1>Welcome, ${escapeHtml(profile.display_name||"member")}.</h1><p>Everything important, with no noisy vanity metrics.</p></div><button class="button button-secondary" id="logout-button">Sign out</button></div>
       <div class="metric-grid">${metric("Owned servers",servers.length,"Current account")}${metric("Promotion credits",overview?.promotionCredits||0,"No cash value")}${metric("Favourites",overview?.favorites||0,"Saved communities")}${metric("Unread",overview?.unreadNotifications||0,"Notifications")}</div>
       <div class="portal-grid"><section class="portal-panel"><h2>Your communities</h2><p>Published listings and work in review.</p><div class="portal-list">${servers.length?servers.map((server)=>`<a class="portal-row" href="/server/${encodeURIComponent(server.slug)}"><span>${escapeHtml(initials(server.name))}</span><span><strong>${escapeHtml(server.name)}</strong><small>${escapeHtml(server.status)}</small></span><span>Open →</span></a>`).join(""):'<div class="portal-row"><span>＋</span><span><strong>No owned listing yet</strong><small>Submit one from the directory.</small></span><a href="/#discover">Start</a></div>'}</div></section>
-      <section class="portal-panel"><h2>Review queue</h2><p>Your latest listing submissions.</p><div class="portal-list">${submissions.length?submissions.map((item)=>`<div class="portal-row"><span>◇</span><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.status)}</small></span><time>${new Date(item.created_at).toLocaleDateString()}</time></div>`).join(""):'<p>No submissions yet.</p>'}</div></section></div>`;
+      <section class="portal-panel"><h2>Review queue</h2><p>Your latest listing submissions.</p><div class="portal-list">${submissions.length?submissions.map((item)=>`<div class="portal-row"><span>◇</span><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.status)}</small></span><time>${dateLabel(item.created_at)}</time></div>`).join(""):'<p>No submissions yet.</p>'}</div></section></div>
+      <div class="portal-grid"><section class="portal-panel"><h2>Saved communities</h2><p>Favourites synced to this account.</p><div class="portal-list">${favourites.length?favourites.map((server)=>`<a class="portal-row" href="/server/${encodeURIComponent(server.slug)}"><span>♥</span><span><strong>${escapeHtml(server.name)}</strong><small>Saved ${dateLabel(server.created_at)}</small></span><span>Open →</span></a>`).join(""):'<p>No saved communities yet.</p>'}</div></section>
+      <section class="portal-panel"><div class="staff-panel-head"><div><h2>Notifications</h2><p>Account and review updates.</p></div>${Number(overview?.unreadNotifications||0)>0?'<button class="staff-action" type="button" id="read-notifications">Mark all read</button>':''}</div><div class="portal-list">${notifications.length?notifications.map((item)=>`<div class="portal-row"><span>${item.read_at?'✓':'•'}</span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.body)}</small></span><time>${dateLabel(item.created_at)}</time></div>`).join(""):'<p>No notifications yet.</p>'}</div></section></div>`;
     $("#logout-button")?.addEventListener("click",async()=>{await api("/api/auth/logout",{method:"POST",body:"{}"});location.assign("/");});
+    $("#read-notifications")?.addEventListener("click",async(event)=>{event.currentTarget.disabled=true;try{await api("/api/me/notifications/read",{method:"POST",body:"{}"});await dashboardPage(session);}catch(error){event.currentTarget.disabled=false;event.currentTarget.textContent=error.message;}});
   }catch(error){root.innerHTML=signInGate("Dashboard connection pending",error.message);}
 }
 
 async function staffPage(session){
   const root=$("#page-content");
-  if(!session?.authenticated){root.innerHTML=signInGate("Staff access","Sign in with the Discord account attached to your authorized staff membership.");return;}
+  if(!session?.authenticated){root.innerHTML=signInGate("Staff access",session?.error||"Sign in with the Discord account attached to your authorized staff membership.");return;}
   try{
     const {overview}=await api("/api/admin/overview");
-    root.innerHTML=`<div class="portal-welcome"><div><span class="section-kicker">ACCOUNTABLE OPERATIONS</span><h1>Staff centre</h1><p>Permission-scoped tools with append-only action records.</p></div><a class="button button-secondary" href="/legal#standards">Standards</a></div><div class="metric-grid">${metric("Listing reviews",overview.pendingSubmissions,"Awaiting review")}${metric("Moderation",overview.openModeration,"Open cases")}${metric("Reports",overview.openReports,"Needs triage")}${metric("Security",overview.securityAlerts,"High-priority alerts")}</div><div class="portal-grid"><section class="portal-panel"><h2>Recent staff actions</h2><p>Every consequential action records actor, target, reason and request context.</p><div class="portal-list">${(overview.recentAudit||[]).map((item)=>`<div class="portal-row"><span>✓</span><span><strong>${escapeHtml(item.action)}</strong><small>${escapeHtml(item.target_type)} · ${escapeHtml(item.reason)}</small></span><time>${new Date(item.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</time></div>`).join("")||'<p>No staff actions recorded.</p>'}</div></section><section class="portal-panel"><h2>Safety controls</h2><p>Sensitive network signals remain hashed. Mass enforcement triggers automatic account containment and owner alerts.</p><div class="portal-list"><div class="portal-row"><span>⌾</span><span><strong>Privacy masking</strong><small>On by default</small></span><span>Active</span></div><div class="portal-row"><span>!</span><span><strong>Mass-action guard</strong><small>Five-minute window</small></span><span>Active</span></div></div></section></div>`;
+    const permissions=new Set(overview.permissions||[]);
+    const listings=overview.listingQueue||[];
+    const reports=overview.reportQueue||[];
+    const moderation=overview.moderationQueue||[];
+    const security=overview.securityEvents||[];
+    const audit=overview.recentAudit||[];
+    const sections=[];
+    if(permissions.has("servers.review")) sections.push(staffQueueSection({
+      id:"listings",title:"Listing reviews",description:"Approve safe submissions, request changes, or reject with a recorded reason.",items:listings,empty:"No listing submissions need review.",
+      render:(item)=>`<div class="portal-row staff-queue-row"><span>◇</span><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.platform_id)} · ${escapeHtml(item.region)} · ${escapeHtml(item.moderation_confidence)} (${escapeHtml(item.moderation_score)}) · ${dateLabel(item.created_at)}</small></span>${staffButtons("listing",item.id,[["approved","Approve","success"],["changes_requested","Changes"],["rejected","Reject","danger"]])}</div>`
+    }));
+    if(permissions.has("reports.read")) sections.push(staffQueueSection({
+      id:"reports",title:"Member reports",description:"Triage and close reports without exposing private reporter details in the queue.",items:reports,empty:"No reports need attention.",
+      render:(item)=>`<div class="portal-row staff-queue-row"><span>!</span><span><strong>${escapeHtml(item.category)}</strong><small>${escapeHtml(item.target_type)} · ${escapeHtml(item.status)} · ${dateLabel(item.created_at)}</small></span>${staffButtons("report",item.id,[["triaged","Triage"],["resolved","Resolve","success"],["dismissed","Dismiss","danger"]],permissions.has("reports.resolve"))}</div>`
+    }));
+    if(permissions.has("moderation.read")) sections.push(staffQueueSection({
+      id:"moderation",title:"Moderation queue",description:"Review deterministic safety flags and record each outcome.",items:moderation,empty:"The moderation queue is clear.",
+      render:(item)=>`<div class="portal-row staff-queue-row"><span>✓</span><span><strong>${escapeHtml(item.target_type)}</strong><small>${escapeHtml(item.confidence)} · score ${escapeHtml(item.score)} · ${escapeHtml(item.status)} · ${dateLabel(item.created_at)}</small></span>${staffButtons("moderation",item.id,[["claimed","Claim"],["resolved","Resolve","success"],["dismissed","Dismiss","danger"]],permissions.has("moderation.resolve"))}</div>`
+    }));
+    if(permissions.has("security.read")) sections.push(staffQueueSection({
+      id:"security",title:"Security signals",description:"Only privacy-preserving event summaries are shown here.",items:security,empty:"No unresolved security signals.",
+      render:(item)=>`<div class="portal-row staff-queue-row"><span>⌾</span><span><strong>${escapeHtml(item.event_type)}</strong><small>${escapeHtml(item.severity)} · ${dateLabel(item.created_at)}</small></span>${staffButtons("security",item.id,[["resolved","Mark resolved","success"]],permissions.has("settings.manage"))}</div>`
+    }));
+    if(permissions.has("audit.read")) sections.push(staffQueueSection({
+      id:"audit",title:"Audit log",description:"Actor, target, reason, and request context are retained for every staff decision.",items:audit,empty:"No staff actions have been recorded.",
+      render:(item)=>`<div class="portal-row"><span>↗</span><span><strong>${escapeHtml(item.action)}</strong><small>${escapeHtml(item.target_type)} · ${escapeHtml(item.reason)}</small></span><time>${dateLabel(item.created_at)}</time></div>`
+    }));
+    root.innerHTML=`<div class="portal-welcome"><div><span class="section-kicker">ACCOUNTABLE OPERATIONS · ${escapeHtml(overview.role?.name||"Staff")}</span><h1>Staff centre</h1><p>Permission-scoped queues with audited decisions and no bulk enforcement shortcuts.</p></div><div class="portal-welcome-actions"><a class="button button-secondary" href="/legal#standards">Standards</a><button class="button button-secondary" id="staff-logout" type="button">Sign out</button></div></div><div class="metric-grid">${metric("Listing reviews",overview.pendingSubmissions,"Awaiting review")}${metric("Moderation",overview.openModeration,"Open cases")}${metric("Reports",overview.openReports,"Needs triage")}${metric("Security",overview.securityAlerts,"High-priority alerts")}</div><p class="staff-live-status" id="staff-live-status" role="status" aria-live="polite"></p><div class="staff-workspace">${sections.join("")||'<section class="portal-panel"><h2>No assigned queues</h2><p>Your staff role is active but has no readable operations queues.</p></section>'}</div>`;
+    $("#staff-logout")?.addEventListener("click",async()=>{await api("/api/auth/logout",{method:"POST",body:"{}"});location.assign("/");});
+    root.querySelectorAll("[data-staff-action]").forEach((button)=>button.addEventListener("click",async()=>{
+      const label=button.textContent.trim();
+      const reason=window.prompt(`${label}: enter the reason that will be written to the audit log.`);
+      if(reason===null) return;
+      if(reason.trim().length<5){window.alert("Enter a reason of at least five characters.");return;}
+      if(!window.confirm(`Confirm ${label.toLowerCase()} for this one item?`)) return;
+      root.querySelectorAll("[data-staff-action]").forEach((item)=>item.disabled=true);
+      const status=$("#staff-live-status");
+      if(status) status.textContent="Saving the audited staff action…";
+      try{
+        await api("/api/admin/action",{method:"POST",body:JSON.stringify({kind:button.dataset.staffKind,id:button.dataset.staffId,action:button.dataset.staffAction,reason})});
+        await staffPage(session);
+      }catch(error){
+        root.querySelectorAll("[data-staff-action]").forEach((item)=>item.disabled=false);
+        if(status) status.textContent=error.message;
+      }
+    }));
   }catch(error){root.innerHTML=signInGate("Staff permission required",error.status===403||error.status===401?"This account does not have access to staff systems.":error.message);}
 }
 

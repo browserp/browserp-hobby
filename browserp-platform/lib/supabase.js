@@ -84,6 +84,11 @@ export async function getSession(req, res, { required = false } = {}) {
   return user ? { user, accessToken } : null;
 }
 
+export async function authCapabilities() {
+  const { data } = await supabaseRequest("auth/v1/settings");
+  return { discord: Boolean(data?.external?.discord) };
+}
+
 export function beginDiscordOAuth(req, res) {
   const config = supabaseConfig();
   if (!config.configured) throw Object.assign(new Error("Discord sign-in will be available after the new backend is connected."), { status: 503 });

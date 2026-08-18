@@ -152,19 +152,37 @@ function renderServerCard(server) {
 function bindServerCards() {
   $$(".server-card[data-server-id]").forEach((card) => {
     const id = card.dataset.serverId;
-    $(".favorite-button", card).addEventListener("click", (event) => {
-      if (state.favourites.has(id)) state.favourites.delete(id);
-      else state.favourites.add(id);
-      localStorage.setItem("browserp:favourites", JSON.stringify([...state.favourites]));
-      const active = state.favourites.has(id);
-      event.currentTarget.classList.toggle("active", active);
-      event.currentTarget.textContent = active ? "♥" : "♡";
-      event.currentTarget.setAttribute("aria-pressed", String(active));
-      event.currentTarget.setAttribute("aria-label", `${active ? "Remove from" : "Add to"} favourites`);
-      showToast(active ? "Saved to your local favourites." : "Removed from favourites.");
+    $(".favorite-button", card).addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        let active;
+        if (state.session?.authenticated) {
+          const { result } = await api("/api/me/favorites", { method: "POST", body: JSON.stringify({ serverId: id }) });
+          active = Boolean(result.favorited);
+          if (active) state.favourites.add(id); else state.favourites.delete(id);
+        } else {
+          if (state.favourites.has(id)) state.favourites.delete(id); else state.favourites.add(id);
+          active = state.favourites.has(id);
+        }
+        localStorage.setItem("browserp:favourites", JSON.stringify([...state.favourites]));
+        button.classList.toggle("active", active);
+        button.textContent = active ? "♥" : "♡";
+        button.setAttribute("aria-pressed", String(active));
+        button.setAttribute("aria-label", `${active ? "Remove from" : "Add to"} favourites`);
+        showToast(active ? `Saved ${state.session?.authenticated ? "to your account" : "on this device"}.` : "Removed from favourites.");
+      } catch (error) {
+        showToast(error.message, "error");
+      } finally {
+        button.disabled = false;
+      }
     });
 
     $(".boost-button", card).addEventListener("click", async (event) => {
+      if (!state.session?.authenticated) {
+        $("#sign-in-dialog").showModal();
+        return;
+      }
       const button = event.currentTarget;
       button.disabled = true;
       button.textContent = "Boosting…";
@@ -521,6 +539,11 @@ async function loadSession() {
     if (state.session.authenticated) {
       const name = state.session.user.profile?.display_name || "Dashboard";
       $("#sign-in-button").textContent = name.length > 16 ? "Dashboard" : name;
+      try {
+        const { serverIds } = await api("/api/me/favorites");
+        state.favourites = new Set(serverIds || []);
+        localStorage.setItem("browserp:favourites", JSON.stringify([...state.favourites]));
+      } catch { /* Keep device favourites if account sync is temporarily unavailable. */ }
     }
   } catch {
     state.session = { authenticated: false, user: null };
@@ -578,7 +601,10 @@ async function init() {
   } catch (error) {
     showToast(`BrowseRP could not initialise: ${error.message}`, "error");
   }
-  if (new URLSearchParams(location.search).get("auth") === "failed") showToast("Discord sign-in could not be completed. Please try again.", "error");
+  const authState = new URLSearchParams(location.search).get("auth");
+  if (authState === "failed") showToast("Discord sign-in could not be completed. Please try again.", "error");
+  if (authState === "backend-not-configured") showToast("Sign-in is waiting for the production backend settings.", "error");
+  if (authState === "discord-not-configured") showToast("Discord must still be enabled in the authentication provider settings.", "error");
 }
 
 init();

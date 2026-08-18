@@ -13,6 +13,13 @@ export function json(res, status, payload, extraHeaders = {}) {
   res.end(JSON.stringify(payload));
 }
 
+export function publicJson(res, payload, maxAge = 30) {
+  const ttl = Math.min(Math.max(Number(maxAge) || 30, 1), 300);
+  return json(res, 200, payload, {
+    "Cache-Control": `public, max-age=0, s-maxage=${ttl}, stale-while-revalidate=${ttl * 4}`
+  });
+}
+
 export function redirect(res, location, status = 302) {
   res.statusCode = status;
   res.setHeader("Location", location);

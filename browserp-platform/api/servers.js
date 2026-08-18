@@ -1,6 +1,7 @@
-import { endpoint, ok } from "../lib/api.js";
+import { endpoint } from "../lib/api.js";
 import { servers as fallbackServers } from "../lib/catalog.js";
 import { filterServers } from "../lib/directory.js";
+import { publicJson } from "../lib/http.js";
 import { rpc } from "../lib/supabase.js";
 
 export default endpoint("GET", async (req, res) => {
@@ -22,5 +23,5 @@ export default endpoint("GET", async (req, res) => {
     if (error.code !== "BACKEND_NOT_CONFIGURED" && error.status !== 404) console.warn("Directory fallback:", error.message);
     servers = filterServers(fallbackServers, filters);
   }
-  return ok(res, { servers, total: servers.length });
+  return publicJson(res, { servers, total: servers.length }, 20);
 });

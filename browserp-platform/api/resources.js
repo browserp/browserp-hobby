@@ -1,4 +1,5 @@
-import { endpoint, ok } from "../lib/api.js";
+import { endpoint } from "../lib/api.js";
+import { publicJson } from "../lib/http.js";
 import { rest } from "../lib/supabase.js";
 
 const fallback = [
@@ -9,9 +10,9 @@ const fallback = [
 export default endpoint("GET", async (_req, res) => {
   try {
     const resources = await rest("resource_directory?select=*&order=published_at.desc&limit=50");
-    return ok(res, { resources });
+    return publicJson(res, { resources }, 60);
   } catch (error) {
     if (error.code !== "BACKEND_NOT_CONFIGURED" && error.status !== 404) console.warn("Resource fallback:", error.message);
-    return ok(res, { resources: fallback });
+    return publicJson(res, { resources: fallback }, 60);
   }
 });

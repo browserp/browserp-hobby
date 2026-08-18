@@ -1,6 +1,6 @@
 {
   "name": "browserp-platform",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "BrowseRP clean-slate roleplay discovery platform for Vercel, Supabase and Stripe.",
   "type": "module",
