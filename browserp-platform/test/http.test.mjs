@@ -80,7 +80,7 @@ test("the synthetic staff demo route is absent from a production runtime", async
 test("public pages and fallback API load without external secrets", async () => withServer(async (origin) => {
   const home = await fetch(origin);
   assert.equal(home.status, 200);
-  assert.match(await home.text(), /Find a roleplay server that[\s\S]*actually fits/);
+  assert.match(await home.text(), /Find the world you want to[\s\S]*live in/);
   for (const path of ["/servers", "/list-server", "/dashboard", "/staffpanel", "/legal", "/about", "/blog", "/appeal", "/advertise", "/coins", "/server/northstar-roleplay"]) {
     const response = await fetch(`${origin}${path}`);
     assert.equal(response.status, 200, path);

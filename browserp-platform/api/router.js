@@ -83,6 +83,34 @@ function plainBlock(value, limit, label) {
   return text;
 }
 
+function qrCodeDataUri(value) {
+  const source = String(value || "").trim();
+  if (!source) return null;
+  if (/^data:image\/svg\+xml(?:;base64)?,/i.test(source)) return source;
+  if (/^<svg[\s>]/i.test(source)) {
+    return `data:image/svg+xml;base64,${Buffer.from(source, "utf8").toString("base64")}`;
+  }
+  return null;
+}
+
+function reviewedAvatarUrl(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  if (raw.length > 500) throw Object.assign(new Error("The profile picture address is too long."), { status: 400 });
+  try {
+    const url = new URL(raw);
+    const allowed = url.protocol === "https:" && (
+      (url.hostname === "cdn.discordapp.com" && url.pathname.startsWith("/avatars/"))
+      || (url.hostname === "lh3.googleusercontent.com")
+      || (url.hostname === "kywabzfgjoqiznnxygbq.supabase.co" && url.pathname.startsWith("/storage/v1/object/public/profile-media/"))
+    );
+    if (!allowed || url.username || url.password || url.port || url.hash) throw new Error("unsafe");
+    return url.toString();
+  } catch {
+    throw Object.assign(new Error("Use your Discord/Google picture or a reviewed BrowseRP profile-media address."), { status: 400 });
+  }
+}
+
 async function recordActivitySafely(req, res, details) {
   try { await recordAccountActivity(req, res, details); }
   catch (error) {
@@ -154,7 +182,7 @@ const routes = {
     if (!session) return ok(res, { authenticated: false, user: null, csrfToken });
     let profile = null;
     try {
-      profile = (await rest(`profiles?select=id,username,display_name,avatar_url,bio,joined_at,profile_visibility&id=eq.${encodeURIComponent(session.user.id)}&limit=1`, { useSecret: true }))?.[0] || null;
+      profile = (await rest(`profiles?select=id,username,display_name,avatar_url,avatar_review_status,bio,bio_review_status,joined_at,profile_visibility&id=eq.${encodeURIComponent(session.user.id)}&limit=1`, { useSecret: true }))?.[0] || null;
     } catch { /* Auth identity remains usable while profile provisioning catches up. */ }
     return ok(res, {
       authenticated: true,
@@ -191,7 +219,7 @@ const routes = {
     return ok(res, {
       factor: {
         id: factor?.id,
-        qrCode: factor?.totp?.qr_code,
+        qrCode: qrCodeDataUri(factor?.totp?.qr_code),
         secret: factor?.totp?.secret,
         uri: factor?.totp?.uri
       }
@@ -266,16 +294,17 @@ const routes = {
     const displayName = sanitizePlainText(body.displayName, 48);
     const bio = String(body.bio || "").replace(/\r\n?/g, "\n").trim();
     const visibility = String(body.visibility || "public").trim().toLowerCase();
+    const avatarUrl = reviewedAvatarUrl(body.avatarUrl);
     if (displayName.length < 2 || bio.length > 500 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(bio)
       || !["public", "members", "private"].includes(visibility)) {
       throw Object.assign(new Error("Check your display name, bio and visibility."), { status: 400 });
     }
     const profile = await rpc("member_update_profile", {
-      p_display_name: displayName, p_bio: bio, p_visibility: visibility
+      p_display_name: displayName, p_bio: bio, p_visibility: visibility, p_avatar_url: avatarUrl
     }, session.accessToken);
     await recordActivitySafely(req, res, {
       userId: session.user.id, eventType: "profile.updated", provider: session.provider,
-      metadata: { bioSubmitted: Boolean(bio) }
+      metadata: { bioSubmitted: Boolean(bio), avatarSubmitted: Boolean(avatarUrl) }
     });
     return ok(res, { profile });
   }),
@@ -403,15 +432,19 @@ const routes = {
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true, provider: "discord" });
     if (req.method === "GET") {
-      const [status, activity, revealRequests] = await Promise.all([
+      const [status, activity, revealRequests, flags, retention] = await Promise.all([
         rpc("staff_security_status", {}, session.accessToken),
         rpc("staff_account_activity", { p_limit: 150 }, session.accessToken),
-        rpc("staff_network_reveal_control", {}, session.accessToken)
+        rpc("staff_network_reveal_control", {}, session.accessToken),
+        rpc("staff_security_flag_control", {}, session.accessToken),
+        rpc("staff_account_retention", {}, session.accessToken)
       ]);
       return ok(res, {
         status,
         activity: Array.isArray(activity) ? activity : [],
-        revealRequests: Array.isArray(revealRequests) ? revealRequests : []
+        revealRequests: Array.isArray(revealRequests) ? revealRequests : [],
+        flags: Array.isArray(flags) ? flags : [],
+        retention: Array.isArray(retention) ? retention : []
       });
     }
     await rateLimit(req, "staff-security", 20, 300);
@@ -447,6 +480,12 @@ const routes = {
         p_request_id: body.requestId ? uuid(body.requestId, "Choose a valid reveal request.") : null
       }, session.accessToken);
       result = { address: unsealAddress(evidence?.ciphertext), expiresInSeconds: 60 };
+    } else if (action === "resolve_flag") {
+      const eventId = Number(body.eventId);
+      if (!Number.isSafeInteger(eventId) || eventId < 1) throw Object.assign(new Error("Choose a valid security signal."), { status: 400 });
+      result = await rpc("staff_resolve_security_flag", {
+        p_event_id: eventId, p_reason: reason(body.reason, 5), p_request_id: id
+      }, session.accessToken);
     } else {
       throw Object.assign(new Error("Choose a valid security action."), { status: 400 });
     }
@@ -499,6 +538,7 @@ const routes = {
       p_body: sanitizePlainText(body.body, 300),
       p_cta_label: sanitizePlainText(body.ctaLabel, 40),
       p_destination_url: String(body.destinationUrl || "").trim().slice(0, 500),
+      p_image_url: String(body.imageUrl || "").trim().slice(0, 500) || null,
       p_starts_at: body.startsAt || null,
       p_ends_at: body.endsAt || null,
       p_expected_version: version,

@@ -274,14 +274,14 @@
   function dashboardListings(servers) {
     const section = panel("listings", "Your published listings", "Open the public page for any server already approved and published.", link("/list-server", "small-button small-button-primary", "List another server"));
     if (!servers.length) {
-      section.append(emptyState("No published listings yet", "Submit your FiveM community and its progress will appear below.", link("/list-server", "button button-primary", "Create a listing")));
+      section.append(emptyState("No published listings yet", "Submit your roleplay community and its progress will appear below.", link("/list-server", "button button-primary", "Create a listing")));
       return section;
     }
     const list = make("ul", "portal-list");
     servers.forEach((server) => {
       const actions = [];
       if (server.slug && String(server.status).toLowerCase() === "published") actions.push(link(`/server/${encodeURIComponent(server.slug)}`, "small-button", "View listing"));
-      list.append(listItem(server.name || "FiveM server", `Updated ${dateLabel(server.updated_at)}`, actions, { status: server.status }));
+      list.append(listItem(server.name || "Roleplay server", `Updated ${dateLabel(server.updated_at)}`, actions, { status: server.status }));
     });
     section.append(list);
     return section;
@@ -310,6 +310,9 @@
     const bioField = make("label", "portal-field");
     append(bioField, make("span", "", "Bio"));
     const bio = make("textarea"); bio.name = "bio"; bio.maxLength = 500; bio.value = profile?.bio || ""; bioField.append(bio);
+    const avatarField = make("label", "portal-field");
+    append(avatarField, make("span", "", "Profile picture URL"));
+    const avatar = make("input"); avatar.name = "avatarUrl"; avatar.type = "url"; avatar.maxLength = 500; avatar.placeholder = "Discord, Google or reviewed BrowseRP profile image"; avatar.value = profile?.avatar_url || profile?.avatarUrl || ""; avatarField.append(avatar, make("small", "portal-help", "New pictures are hidden until staff screening is complete."));
     const visibilityField = make("label", "portal-field");
     append(visibilityField, make("span", "", "Profile visibility"));
     const visibility = make("select"); visibility.name = "visibility";
@@ -319,7 +322,7 @@
     visibilityField.append(visibility);
     const review = make("p", "portal-status", `Profile picture: ${profile?.avatar_review_status || profile?.avatarStatus || "not set"} · Bio: ${profile?.bio_review_status || profile?.bioStatus || "not set"}`);
     const submit = button("button button-primary", "Save profile"); submit.type = "submit";
-    form.append(nameField, bioField, visibilityField, review, submit);
+    form.append(nameField, avatarField, bioField, visibilityField, review, submit);
     form.addEventListener("submit", async (event) => {
       event.preventDefault(); submit.disabled = true;
       const data = Object.fromEntries(new FormData(form));
@@ -352,7 +355,7 @@
           toast(error.message, "error");
         }
       });
-      list.append(listItem(server.name || "FiveM server", `Saved ${dateLabel(server.created_at)}`, [view, remove]));
+      list.append(listItem(server.name || "Roleplay server", `Saved ${dateLabel(server.created_at)}`, [view, remove]));
     });
     section.append(list);
     return section;
@@ -485,9 +488,9 @@
         return;
       }
 
-      document.title = `${server.name || "FiveM server"} — BrowseRP`;
+      document.title = `${server.name || "Roleplay server"} — BrowseRP`;
       const descriptionMeta = document.querySelector('meta[name="description"]');
-      if (descriptionMeta) descriptionMeta.content = String(server.description || "Read this FiveM roleplay server listing on BrowseRP.").slice(0, 155);
+      if (descriptionMeta) descriptionMeta.content = String(server.description || "Read this roleplay server listing on BrowseRP.").slice(0, 155);
 
       let favoriteIds = [];
       if (session?.authenticated) {
@@ -506,7 +509,7 @@
       const hero = make("section", "server-hero-v2");
       append(hero, make("div", "server-logo-v2", initials(server.name)));
       const title = make("div", "server-title-v2");
-      append(title, make("span", "portal-kicker", `FiveM roleplay · ${server.region || "Region not listed"}`), make("h1", "", server.name || "FiveM server"));
+      append(title, make("span", "portal-kicker", `${server.platform_name || server.platform_id || "Roleplay"} · ${server.region || "Region not listed"}`), make("h1", "", server.name || "Roleplay server"));
       const liveLine = server.online
         ? `${count(server.players)}${Number(server.capacity) > 0 ? ` of ${count(server.capacity)}` : ""} players online`
         : "Live status is currently unavailable";
@@ -1249,7 +1252,7 @@
         id: "listings", title: "Listing reviews", description: "Check the submitted details before approving, requesting changes or rejecting.",
         items: Array.isArray(overview.listingQueue) ? overview.listingQueue : [], empty: "No listings need review", kind: "listing", permissions, symbol: "L",
         itemTitle: (item) => item.name || "Server submission",
-        itemMeta: (item) => `${item.platform_id || "FiveM"} · ${item.region || "Region not listed"} · submitted ${dateLabel(item.created_at)}`
+        itemMeta: (item) => `${item.platform_name || item.platform_id || "Roleplay"} · ${item.region || "Region not listed"} · submitted ${dateLabel(item.created_at)}`
       }));
       if (permissions.has("reports.read")) sections.push(staffQueueSection({
         id: "reports", title: "Member reports", description: "Inspect report evidence before triage or resolution.",

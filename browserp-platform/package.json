@@ -1,8 +1,8 @@
 {
   "name": "browserp-platform",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
-  "description": "BrowseRP FiveM roleplay server directory and owner listing platform.",
+  "description": "BrowseRP cross-game roleplay server directory and owner listing platform.",
   "type": "module",
   "scripts": {
     "dev": "node dev-server.mjs",

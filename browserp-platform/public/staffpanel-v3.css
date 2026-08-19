@@ -1,6 +1,7 @@
 body.staff-v3 { background: #08090c; }
 .staff-login-v3 { min-height: calc(100vh - 72px); display: grid; place-items: center; padding: 48px 20px; }
-.staff-login-card-v3 { width: min(100%, 520px); border: 1px solid #303743; background: #11141a; padding: 34px; }
+.staff-login-card-v3 { position: relative; width: min(100%, 540px); overflow: hidden; border: 1px solid #303743; border-radius: 16px; background: linear-gradient(150deg,#141820,#0e1116); padding: 40px; box-shadow: 0 34px 100px rgba(0,0,0,.52); }
+.staff-login-card-v3::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg,#d2519a,#8d73ff,#6bd5ed); }
 .staff-login-card-v3 .logo-v3 { display: block; margin-bottom: 32px; }
 .staff-login-card-v3 h1 { margin: 0 0 12px; font-size: 36px; letter-spacing: -.03em; }
 .staff-login-card-v3 p { color: #bdc4cf; }
@@ -38,6 +39,7 @@ body.staff-v3 { background: #08090c; }
 .security-banner-v3.good { border-color: #2d6551; background: #0e1a16; color: #83dfba; }
 .staff-mobile-bar-v3 { display: none; }
 .qr-v3 { width: 220px; height: 220px; padding: 10px; background: #fff; margin: 18px 0; }
+.qr-frame-v3 .qr-v3 { margin: 0; padding: 0; background: transparent; }
 .secret-v3 { display: block; padding: 10px; background: #090b0e; border: 1px solid #303743; overflow-wrap: anywhere; font-family: ui-monospace,monospace; }
 .staff-row-actions-v3 { display: flex; flex-wrap: wrap; gap: 7px; min-width: 170px; }
 .staff-row-actions-v3 .button-v3 { min-height: 36px; padding: 7px 10px; font-size: 12px; }

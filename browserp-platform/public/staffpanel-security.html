@@ -6,9 +6,9 @@
   <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
   <title>Security, bans & appeals — BrowseRP Staff</title>
   <link rel="icon" href="/browserp-mark-v3.png">
-  <link rel="stylesheet" href="/browserp-v3.css?v=2.1.1">
-  <link rel="stylesheet" href="/staffpanel-v3.css?v=2.1.1">
-  <script src="/staffpanel-v3.js?v=2.1.1" defer></script>
+  <link rel="stylesheet" href="/browserp-v3.css?v=2.2.0">
+  <link rel="stylesheet" href="/staffpanel-v3.css?v=2.2.0">
+  <script src="/staffpanel-v3.js?v=2.2.0" defer></script>
 </head>
 <body class="staff-v3" data-staff-page="security">
   <div class="staff-mobile-bar-v3"><span class="logo-lockup-v3"><span class="logo-word-v3">Browse</span><img src="/browserp-mark-v3.png" alt="RP"></span><button class="button-v3 button-secondary-v3" id="staff-menu-v3">Menu</button></div>
@@ -26,6 +26,8 @@
         <button class="button-v3 button-primary-v3" type="submit">Activate MFA requirement</button>
       </form>
       <section class="staff-section-v3"><div class="staff-section-head-v3"><div><h2>Protected IP requests</h2><p>Only owners can approve a request. Approved access expires after ten minutes and can be used once.</p></div></div><div class="staff-table-wrap-v3"><table class="staff-table-v3"><thead><tr><th>Requester</th><th>Masked network</th><th>Reason</th><th>Status</th><th>Requested</th><th>Decision</th></tr></thead><tbody id="network-request-rows"></tbody></table></div></section>
+      <section class="staff-section-v3"><div class="staff-section-head-v3"><div><h2>Security flags</h2><p>Staff-only signals for duplicate names, repeated links and suspicious listing behaviour. A flag requests review; it is not an automatic punishment.</p></div></div><div class="staff-table-wrap-v3"><table class="staff-table-v3"><thead><tr><th>Signal</th><th>Account</th><th>Severity</th><th>Evidence</th><th>Created</th><th>Action</th></tr></thead><tbody id="security-flag-rows"></tbody></table></div></section>
+      <section class="staff-section-v3"><div class="staff-section-head-v3"><div><h2>Inactive account warnings</h2><p>Members are warned after 45 days and due for guarded removal after 60 days. Staff, financial records and unresolved media are excluded.</p></div></div><div class="staff-table-wrap-v3"><table class="staff-table-v3"><thead><tr><th>Account</th><th>Status</th><th>Last active</th><th>Due</th><th>Protection</th></tr></thead><tbody id="retention-flag-rows"></tbody></table></div></section>
       <section class="staff-section-v3"><div class="staff-section-head-v3"><div><h2>Active bans</h2><p>Account, first-party device token or network-prefix hashes. Raw IPs are not needed to enforce a ban.</p></div></div><div class="staff-table-wrap-v3"><table class="staff-table-v3"><thead><tr><th>Reference</th><th>Target</th><th>Scope</th><th>Reason</th><th>Created</th><th>Actions</th></tr></thead><tbody id="security-ban-rows"></tbody></table></div></section>
       <section class="staff-section-v3"><div class="staff-section-head-v3"><div><h2>Open appeals</h2><p>Approving an appeal revokes the associated ban.</p></div></div><div class="staff-table-wrap-v3"><table class="staff-table-v3"><thead><tr><th>Reference</th><th>Statement</th><th>Submitted</th><th>Decision</th></tr></thead><tbody id="security-appeal-rows"></tbody></table></div></section>
       <p id="staff-status-v3" role="status"></p>

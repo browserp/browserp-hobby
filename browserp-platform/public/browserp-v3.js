@@ -12,6 +12,26 @@
     return element;
   }
 
+  function preferredTheme() {
+    let saved = "";
+    try { saved = localStorage.getItem("browserp-theme") || ""; } catch { /* Use the operating-system preference when storage is unavailable. */ }
+    return ["light", "dark"].includes(saved) ? saved : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+  }
+
+  function saveTheme(theme) {
+    try { localStorage.setItem("browserp-theme", theme); } catch { /* Theme still applies for this page view. */ }
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    $$('[data-theme-label]').forEach((label) => { label.textContent = theme === "light" ? "Use dark mode" : "Use light mode"; });
+  }
+
+  function initials(value) {
+    return String(value || "BrowseRP member").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+  }
+
   async function api(path, options = {}) {
     const method = String(options.method || "GET").toUpperCase();
     const changing = !["GET", "HEAD"].includes(method);
@@ -69,9 +89,28 @@
   async function session() {
     try { state.session = await api("/api/auth/session"); }
     catch { state.session = { authenticated: false, csrfToken: "" }; }
-    $$('[data-account-v3]').forEach((link) => {
-      link.textContent = state.session.authenticated ? "My account" : "Sign in";
-      link.href = state.session.authenticated ? "/dashboard" : "/dashboard";
+    $$('[data-account-v3], [data-account-link]').forEach((link) => {
+      if (!state.session.authenticated) { link.textContent = "Sign in"; link.href = "/dashboard"; return; }
+      const profile = state.session.user?.profile || {};
+      const name = profile.display_name || profile.username || "BrowseRP member";
+      const avatarApproved = profile.avatar_review_status === "approved" && /^https:\/\//i.test(profile.avatar_url || "");
+      const wrap = node("div", "account-menu-v3");
+      const button = node("button", "account-trigger-v3"); button.type = "button"; button.setAttribute("aria-haspopup", "menu"); button.setAttribute("aria-expanded", "false"); button.setAttribute("aria-label", `Open account menu for ${name}`);
+      const avatar = avatarApproved ? new Image() : node("span", "account-initials-v3", initials(name));
+      if (avatarApproved) { avatar.className = "account-avatar-v3"; avatar.src = profile.avatar_url; avatar.alt = ""; avatar.referrerPolicy = "no-referrer"; }
+      button.append(avatar, node("span", "account-name-v3", name), node("span", "account-chevron-v3", "⌄"));
+      const menu = node("div", "account-popover-v3"); menu.hidden = true; menu.setAttribute("role", "menu");
+      const dashboard = node("a", "", "Dashboard"); dashboard.href = "/dashboard"; dashboard.setAttribute("role", "menuitem");
+      const settings = node("a", "", "Profile & settings"); settings.href = "/dashboard#account"; settings.setAttribute("role", "menuitem");
+      const theme = node("button", "", ""); theme.type = "button"; theme.dataset.themeLabel = ""; theme.setAttribute("role", "menuitem");
+      const logout = node("button", "account-danger-v3", "Sign out"); logout.type = "button"; logout.setAttribute("role", "menuitem");
+      function setOpen(open) { menu.hidden = !open; button.setAttribute("aria-expanded", String(open)); wrap.classList.toggle("open", open); }
+      button.addEventListener("click", () => setOpen(menu.hidden));
+      theme.addEventListener("click", () => { const next = document.documentElement.dataset.theme === "light" ? "dark" : "light"; saveTheme(next); applyTheme(next); setOpen(false); });
+      logout.addEventListener("click", async () => { try { await api("/api/auth/logout", { method: "POST", body: JSON.stringify({}) }); location.assign("/"); } catch (error) { toast(error.message, "error"); } });
+      document.addEventListener("click", (event) => { if (!wrap.contains(event.target)) setOpen(false); });
+      wrap.addEventListener("keydown", (event) => { if (event.key === "Escape") { setOpen(false); button.focus(); } });
+      menu.append(dashboard, settings, theme, logout); wrap.append(button, menu); link.replaceWith(wrap); applyTheme(document.documentElement.dataset.theme || preferredTheme());
     });
     return state.session;
   }
@@ -85,32 +124,97 @@
     return "";
   }
 
+  const ADVERT_ARTWORK = Object.freeze([
+    "/assets/adverts/serious-roleplay.jpg",
+    "/assets/adverts/custom-cars.jpg",
+    "/assets/adverts/community-stories.jpg"
+  ]);
+  const HOUSE_ADVERTS = Object.freeze([
+    { name: "BrowseRP discovery", headline: "Find the roleplay that fits you", body: "Explore communities across games, worlds and simulators.", ctaLabel: "Browse communities", destinationUrl: "/servers", imageUrl: ADVERT_ARTWORK[0] },
+    { name: "BrowseRP advertising", headline: "Put your community in front of roleplayers", body: "Personalised picture placements are reviewed before they go live.", ctaLabel: "Advertise here", destinationUrl: "/advertise", imageUrl: ADVERT_ARTWORK[1] },
+    { name: "BrowseRP stories", headline: "Every game has a roleplay community", body: "From city life to westerns, block worlds, survival and driving groups.", ctaLabel: "Explore the directory", destinationUrl: "/servers", imageUrl: ADVERT_ARTWORK[2] }
+  ]);
+
+  function safeAdvertImage(value, fallbackIndex = 0) {
+    try {
+      const url = new URL(String(value || ""), location.origin);
+      const localAsset = url.origin === location.origin
+        && /^\/assets\/adverts\/[a-z0-9][a-z0-9_\/-]*\.(?:avif|webp|png|jpe?g)$/i.test(url.pathname);
+      const reviewedStorage = url.origin === "https://kywabzfgjoqiznnxygbq.supabase.co"
+        && /^\/storage\/v1\/object\/public\/advertisements\/[a-z0-9][a-z0-9_.\/-]*\.(?:avif|webp|png|jpe?g)$/i.test(url.pathname)
+        && !url.pathname.includes("..");
+      if (localAsset) return url.pathname;
+      if (reviewedStorage) return url.toString();
+    } catch { /* Invalid advert artwork falls back to a first-party image. */ }
+    return ADVERT_ARTWORK[fallbackIndex % ADVERT_ARTWORK.length];
+  }
+
   async function adverts() {
     const placements = [...new Set($$("[data-ad-placement]").map((element) => element.dataset.adPlacement))];
+    $$('[data-ad-placement="side"]').forEach((root) => {
+      state.ads.set("side", [...HOUSE_ADVERTS]);
+      renderAdvertPlacement(root);
+    });
     await Promise.all(placements.map(async (placement) => {
       try {
         const payload = await api(`/api/public/adverts?placement=${encodeURIComponent(placement)}`);
-        state.ads.set(placement, Array.isArray(payload.adverts) ? payload.adverts : []);
-      } catch { state.ads.set(placement, []); }
+        const adverts = Array.isArray(payload.adverts) ? payload.adverts : [];
+        state.ads.set(placement, placement === "side" && !adverts.length ? [...HOUSE_ADVERTS] : adverts);
+      } catch { state.ads.set(placement, placement === "side" ? [...HOUSE_ADVERTS] : []); }
     }));
     $$('[data-ad-placement]').forEach(renderAdvertPlacement);
   }
 
   function renderAdvertPlacement(root) {
+    root._browserpAdvertCleanup?.();
     const list = state.ads.get(root.dataset.adPlacement) || [];
     if (!list.length) { root.hidden = true; return; }
     root.hidden = false;
     let index = 0;
-    const copy = $("[data-ad-copy]", root);
-    if (list.length > 1 && !$("[data-ad-direction]", root)) {
-      const controls = node("div", "ad-controls-v3");
-      const previous = node("button", "ad-arrow-v3", "‹"); previous.type = "button"; previous.dataset.adDirection = "previous"; previous.setAttribute("aria-label", "Previous advert");
-      const next = node("button", "ad-arrow-v3", "›"); next.type = "button"; next.dataset.adDirection = "next"; next.setAttribute("aria-label", "Next advert");
-      controls.append(previous, next); root.append(controls);
+    const visual = root.classList.contains("side-ad-v3");
+    let copy = $("[data-ad-copy]", root);
+    let image;
+    let dots;
+    if (visual) {
+      root.setAttribute("role", "region");
+      root.setAttribute("aria-roledescription", "carousel");
+      root.setAttribute("aria-label", "Advertisements");
+      root.tabIndex = 0;
+      const label = node("span", "ad-label-v3", "Advertisement");
+      const stage = node("div", "side-ad-stage-v3");
+      image = new Image();
+      image.className = "side-ad-image-v3";
+      image.alt = "";
+      image.loading = "eager";
+      const shade = node("div", "side-ad-shade-v3");
+      copy = node("div", "side-ad-copy-v3");
+      copy.dataset.adCopy = "";
+      stage.append(image, shade, copy);
+      if (list.length > 1) {
+        const previous = node("button", "ad-arrow-v3 ad-arrow-previous-v3", "‹");
+        previous.type = "button"; previous.dataset.adDirection = "previous"; previous.setAttribute("aria-label", "Previous advert");
+        const next = node("button", "ad-arrow-v3 ad-arrow-next-v3", "›");
+        next.type = "button"; next.dataset.adDirection = "next"; next.setAttribute("aria-label", "Next advert");
+        stage.append(previous, next);
+        dots = node("div", "ad-dots-v3");
+        list.forEach((advert, position) => {
+          const dot = node("button", "ad-dot-v3");
+          dot.type = "button";
+          dot.setAttribute("aria-label", `Show advert ${position + 1}: ${advert.headline || advert.name || "BrowseRP advert"}`);
+          dot.addEventListener("click", () => { index = position; draw(); restart(); });
+          dots.append(dot);
+        });
+      }
+      root.replaceChildren(label, stage, ...(dots ? [dots] : []));
     }
     function draw() {
       const advert = list[index];
       if (!copy) return;
+      if (image) {
+        image.classList.add("is-changing");
+        image.src = safeAdvertImage(advert.imageUrl, index);
+        image.addEventListener("load", () => image.classList.remove("is-changing"), { once: true });
+      }
       const strong = node("strong", "", advert.headline || advert.name || "BrowseRP advert");
       const body = node("span", "", advert.body || "");
       copy.replaceChildren(strong, body);
@@ -121,12 +225,38 @@
         if (destination.startsWith("https://")) link.rel = "noopener noreferrer";
         copy.append(link);
       }
+      $$('button', dots || document.createElement("div")).forEach((dot, position) => {
+        dot.setAttribute("aria-current", position === index ? "true" : "false");
+      });
+    }
+    let timer;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    function stop() { window.clearInterval(timer); }
+    root._browserpAdvertCleanup = stop;
+    function restart() {
+      stop();
+      if (visual && list.length > 1 && !reducedMotion.matches) {
+        timer = window.setInterval(() => { index = (index + 1) % list.length; draw(); }, 7000);
+      }
     }
     $$('[data-ad-direction]', root).forEach((button) => button.addEventListener("click", () => {
       index = (index + (button.dataset.adDirection === "next" ? 1 : -1) + list.length) % list.length;
-      draw();
+      draw(); restart();
     }));
+    if (visual) {
+      root.addEventListener("mouseenter", stop);
+      root.addEventListener("mouseleave", restart);
+      root.addEventListener("focusin", stop);
+      root.addEventListener("focusout", restart);
+      root.addEventListener("keydown", (event) => {
+        if (!['ArrowLeft','ArrowRight'].includes(event.key)) return;
+        event.preventDefault();
+        index = (index + (event.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length;
+        draw(); restart();
+      });
+    }
     draw();
+    restart();
   }
 
   function readableDate(value) {
@@ -140,7 +270,7 @@
     const grid = node("div", "shell-v3 footer-grid-v3");
     const brand = node("div", "footer-brand-v3");
     const lockup = node("span", "logo-lockup-v3"); const mark = new Image(); mark.src = "/browserp-mark-v3.png"; mark.alt = "RP";
-    lockup.append(node("span", "logo-word-v3", "Browse"), mark); brand.append(lockup, node("p", "", "A clearer way to discover FiveM roleplay communities."));
+    lockup.append(node("span", "logo-word-v3", "Browse"), mark); brand.append(lockup, node("p", "", "A clearer way to discover roleplay communities across games and simulators."));
     grid.append(brand);
     const groups = [
       ["Discover", [["Browse servers","/servers"],["UK servers","/servers?region=United%20Kingdom"],["US servers","/servers?region=United%20States"],["Guides & blog","/blog"]]],
@@ -214,9 +344,11 @@
       const server = payload.servers?.[0];
       if (!server) throw Object.assign(new Error("Server not found"), { status: 404 });
       const engagement = payload.engagement || {};
+      const platform = server.platform_name || server.platform_id || "Roleplay";
       $("#server-name-v3").textContent = server.name;
       $("#server-description-v3").textContent = server.description;
-      $("#server-meta-v3").textContent = [server.region, server.language, server.framework, engagement.accessType].filter(Boolean).join(" · ");
+      $("#server-platform-v3").textContent = `${platform} roleplay listing`;
+      $("#server-meta-v3").textContent = [platform, server.region, server.language, server.framework, engagement.accessType].filter(Boolean).join(" · ");
       $("#server-votes-v3").textContent = `${Number(engagement.voteCount || 0).toLocaleString()} votes`;
       $("#server-status-v3").textContent = server.online ? `${server.players || 0} / ${server.capacity || "?"} online` : "Status unavailable";
       $("#server-initials-v3").textContent = String(server.name || "RP").split(/\s+/).slice(0,2).map((part) => part[0]).join("").toUpperCase();
@@ -228,7 +360,7 @@
       if (destination) { join.href = destination; join.rel = "noopener noreferrer"; }
       const connect = $("#server-connect-v3");
       connect.hidden = !engagement.cfxJoinUrl;
-      if (engagement.cfxJoinUrl) { connect.href = engagement.cfxJoinUrl; connect.rel = "noopener noreferrer"; }
+      if (engagement.cfxJoinUrl) { connect.href = engagement.cfxJoinUrl; connect.rel = "noopener noreferrer"; connect.textContent = "Connect via Cfx"; }
       $("#vote-server-v3").dataset.serverId = server.id;
       $("#comment-form-v3").dataset.serverId = server.id;
       $("#report-form-v3").dataset.serverId = server.id;
@@ -239,7 +371,7 @@
         return item;
       }));
       $("#comments-empty-v3").hidden = (engagement.comments || []).length > 0;
-      document.title = `${server.name} — FiveM server | BrowseRP`;
+      document.title = `${server.name} — ${platform} roleplay | BrowseRP`;
     } catch {
       const empty = node("section", "empty-v3 server-missing-v3");
       empty.append(
@@ -297,6 +429,7 @@
   }
 
   async function init() {
+    applyTheme(preferredTheme());
     menu();
     footer();
     $$('[data-year-v3]').forEach((element) => { element.textContent = String(new Date().getFullYear()); });

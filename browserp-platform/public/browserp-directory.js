@@ -4,7 +4,7 @@
   const page = document.body.dataset.page || "";
   const state = {
     session: { authenticated: false, user: null },
-    filters: { query: "", region: "all", online: false, verified: false, beginner: false, sort: "recommended" }
+    filters: { query: "", platform: "all", region: "all", online: false, verified: false, beginner: false, sort: "recommended" }
   };
   const select = (selector, root = document) => root.querySelector(selector);
 
@@ -52,7 +52,9 @@
 
   function serverCard(server) {
     const slug = String(server.slug || "").trim();
-    const card = element("a", "server-card");
+    const platformId = String(server.platform_id || "other").toLowerCase();
+    const platformName = server.platform_name || server.platform_short || "Roleplay";
+    const card = element("a", `server-card platform-${platformId.replace(/[^a-z0-9-]/g, "")}`);
     card.href = `/server/${encodeURIComponent(slug)}`;
     card.setAttribute("aria-label", `View ${String(server.name || "server")}`);
 
@@ -62,10 +64,10 @@
     top.append(status);
     card.append(top);
 
-    card.append(element("h3", "", server.name || "FiveM server"));
-    const details = [server.region, server.framework, server.language].filter(Boolean);
+    card.append(element("h3", "", server.name || "Roleplay server"));
+    const details = [platformName, server.region, server.framework, server.language].filter(Boolean);
     if (server.verified) details.push("Owner verified");
-    card.append(element("div", "server-meta", details.join(" · ") || "FiveM roleplay"));
+    card.append(element("div", "server-meta", details.join(" · ") || "Roleplay community"));
     card.append(element("p", "server-description", server.description || "Open the listing to learn more about this community."));
 
     const tags = element("div", "server-tags");
@@ -91,7 +93,7 @@
     const empty = select("#featured-empty");
     if (!list || !empty) return;
     try {
-      const payload = await api("/api/servers?platform=fivem&sort=recommended&limit=3");
+      const payload = await api("/api/servers?sort=recommended&limit=4");
       const servers = Array.isArray(payload.servers) ? payload.servers : [];
       renderServers(list, servers);
       list.hidden = servers.length === 0;
@@ -121,6 +123,7 @@
   function readFilters() {
     const params = new URLSearchParams(location.search);
     state.filters.query = (params.get("q") || "").slice(0, 120);
+    state.filters.platform = (params.get("platform") || "all").slice(0, 40);
     state.filters.region = (params.get("region") || "all").slice(0, 60);
     state.filters.sort = (params.get("sort") || "recommended").slice(0, 30);
     state.filters.online = params.get("online") === "true";
@@ -130,9 +133,11 @@
 
   function syncControls() {
     const search = select("#directory-search");
+    const platform = select("#platform-filter");
     const region = select("#region-filter");
     const sort = select("#sort-filter");
     search.value = state.filters.query;
+    platform.value = [...platform.options].some((option) => option.value === state.filters.platform) ? state.filters.platform : "all";
     region.value = [...region.options].some((option) => option.value === state.filters.region) ? state.filters.region : "all";
     sort.value = [...sort.options].some((option) => option.value === state.filters.sort) ? state.filters.sort : "recommended";
     select("#online-filter").checked = state.filters.online;
@@ -143,6 +148,7 @@
   function syncUrl() {
     const params = new URLSearchParams();
     if (state.filters.query) params.set("q", state.filters.query);
+    if (state.filters.platform !== "all") params.set("platform", state.filters.platform);
     if (state.filters.region !== "all") params.set("region", state.filters.region);
     if (state.filters.sort !== "recommended") params.set("sort", state.filters.sort);
     if (state.filters.online) params.set("online", "true");
@@ -158,7 +164,8 @@
     list.setAttribute("aria-busy", "true");
     empty.hidden = true;
 
-    const params = new URLSearchParams({ platform: "fivem", sort: state.filters.sort, limit: "100" });
+    const params = new URLSearchParams({ sort: state.filters.sort, limit: "100" });
+    if (state.filters.platform !== "all") params.set("platform", state.filters.platform);
     if (state.filters.query) params.set("query", state.filters.query);
     if (state.filters.region !== "all") params.set("region", state.filters.region);
     if (state.filters.online) params.set("online", "true");
@@ -171,13 +178,13 @@
       renderServers(list, servers);
       list.hidden = servers.length === 0;
       empty.hidden = servers.length !== 0;
-      const filtersActive = Boolean(state.filters.query || state.filters.region !== "all" || state.filters.online || state.filters.verified || state.filters.beginner);
+      const filtersActive = Boolean(state.filters.query || state.filters.platform !== "all" || state.filters.region !== "all" || state.filters.online || state.filters.verified || state.filters.beginner);
       select("#result-count").textContent = `${servers.length} ${servers.length === 1 ? "server" : "servers"}`;
       if (!servers.length) {
         select("h3", empty).textContent = filtersActive ? "No servers match those filters." : "No servers are live yet.";
         select("p", empty).textContent = filtersActive
           ? "Clear a filter or try a broader search."
-          : "Run a FiveM community? Submit it for review and be one of the first listings.";
+          : "Run a roleplay community? Submit it for review and be one of the first listings.";
       }
       syncUrl();
     } catch (error) {
@@ -193,13 +200,25 @@
   }
 
   function resetFilters() {
-    state.filters = { query: "", region: "all", online: false, verified: false, beginner: false, sort: "recommended" };
+    state.filters = { query: "", platform: "all", region: "all", online: false, verified: false, beginner: false, sort: "recommended" };
     syncControls();
     directoryResults();
   }
 
-  function directory() {
+  async function loadPlatforms(target, includeAll = false) {
+    if (!target) return [];
+    try {
+      const { platforms = [] } = await api("/api/platforms");
+      const first = includeAll ? [Object.assign(document.createElement("option"), { value: "all", textContent: "All games" })] : [];
+      const options = platforms.map((platform) => Object.assign(document.createElement("option"), { value: platform.id, textContent: platform.name }));
+      target.replaceChildren(...first, ...options);
+      return platforms;
+    } catch { return []; }
+  }
+
+  async function directory() {
     readFilters();
+    await loadPlatforms(select("#platform-filter"), true);
     syncControls();
     let searchTimer;
     select("#directory-search").addEventListener("input", (event) => {
@@ -207,6 +226,7 @@
       state.filters.query = event.target.value.trim().slice(0, 120);
       searchTimer = window.setTimeout(directoryResults, 220);
     });
+    select("#platform-filter").addEventListener("change", (event) => { state.filters.platform = event.target.value; directoryResults(); });
     select("#region-filter").addEventListener("change", (event) => { state.filters.region = event.target.value; directoryResults(); });
     select("#sort-filter").addEventListener("change", (event) => { state.filters.sort = event.target.value; directoryResults(); });
     [["#online-filter", "online"], ["#verified-filter", "verified"], ["#beginner-filter", "beginner"]].forEach(([selector, key]) => {
@@ -299,6 +319,17 @@
     const providerNote = select("#provider-note");
     let submissionAttemptKey = crypto.randomUUID();
     setupTagPicker(form);
+    const platformSelect = select('[name="platform"]', form);
+    await loadPlatforms(platformSelect, false);
+    const cfxField = select('[data-cfx-field]', form);
+    const frameworkInput = select('[name="framework"]', form);
+    function updatePlatformFields() {
+      const cfxPlatform = ["fivem", "redm"].includes(platformSelect?.value);
+      if (cfxField) { cfxField.hidden = !cfxPlatform; cfxField.inert = !cfxPlatform; }
+      if (frameworkInput) frameworkInput.placeholder = cfxPlatform ? "e.g. QBCore, ESX or custom" : "e.g. roleplay framework, modpack or game mode";
+    }
+    platformSelect?.addEventListener("change", updatePlatformFields);
+    updatePlatformFields();
 
     try {
       state.session = await api("/api/auth/session");
@@ -351,7 +382,7 @@
           method: "POST",
           headers: { "Idempotency-Key": submissionAttemptKey },
           body: JSON.stringify({
-            platform: "fivem",
+            platform: data.platform,
             name: data.name,
             region: data.region,
             language: data.language,
