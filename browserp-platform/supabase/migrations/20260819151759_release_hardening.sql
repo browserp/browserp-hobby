@@ -1,5 +1,4 @@
--- Staged outside the active migration path. Re-create with the Supabase CLI
--- only after v1.3.0 is deployed with SUPABASE_SECRET_KEY configured.
+-- Applied after the verified v1.3.0 production cutover.
 begin;
 
 revoke execute on function public.consume_rate_limit(text,text,integer,integer)

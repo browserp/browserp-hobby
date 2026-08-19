@@ -2,11 +2,11 @@
 
 ## Non-negotiable state
 
-Production currently runs v1.2.2. The historical GitHub `main` source is older. Do not trigger a production deployment from an unsynchronized branch. Use a preview branch, verify it, then promote the reviewed commit.
+Production runs v1.3.0. The historical GitHub `main` source is older. Do not trigger a production deployment from that unsynchronized branch. Use a preview deployment, verify it, then deploy the exact reviewed bundle.
 
 The production Supabase project is the clean BrowseRP project documented in the transfer guide. Do not point this application at the legacy BrowseRP_Global project.
 
-The FiveM-first public redesign remains in the release candidate. Production records the reviewed active migrations as `20260819143942_critical_security_boundaries.sql` and `20260819143947_public_server_join_links.sql`; no Stripe configuration was changed.
+The FiveM-first public redesign is live. Production records the reviewed active migrations as `20260819143942_critical_security_boundaries.sql`, `20260819143947_public_server_join_links.sql` and `20260819151759_release_hardening.sql`; no Stripe configuration was enabled.
 
 ## Vercel project settings
 
@@ -47,9 +47,9 @@ All secret values are entered directly in provider dashboards by the account own
 1. Confirm production records `20260819143942_critical_security_boundaries.sql`; it is compatible with the disabled-payment state and must precede account sign-in.
 2. Confirm production records `20260819143947_public_server_join_links.sql` immediately afterward; verify that only published directory results expose reviewed HTTPS links.
 3. Deploy and verify the v1.3 preview with `SUPABASE_SECRET_KEY` configured.
-4. After preview verification, run `supabase migration new release_hardening`, copy the reviewed SQL from `supabase/planned-migrations/20260819130000_release_hardening.sql` into that newly generated file, inspect `supabase db push --dry-run`, and apply it with the v1.3 cutover.
+4. Confirm production records `20260819151759_release_hardening.sql`, applied after the verified v1.3 cutover, and that only `service_role` can execute rate-limit, tool-run and fulfillment mutation RPCs while the legacy submission RPC has no executable grants.
 
-The planned hardening artifact must remain outside `supabase/migrations/` until step 4; otherwise a normal push applies it too early. Do not edit or reapply the production-recorded migrations from `20260819110256` through `20260819143947`.
+Do not edit or reapply the production-recorded migrations from `20260819110256` through `20260819151759`.
 
 ## OAuth
 

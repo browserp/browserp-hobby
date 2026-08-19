@@ -9,14 +9,9 @@ import {
 
 const root = resolve(import.meta.dirname, "..");
 const migrationDirectory = join(root, "supabase", "migrations");
-const plannedMigrationDirectory = join(root, "supabase", "planned-migrations");
 
 function migration(name) {
   return readFileSync(join(migrationDirectory, name), "utf8");
-}
-
-function plannedMigration(name) {
-  return readFileSync(join(plannedMigrationDirectory, name), "utf8");
 }
 
 test("privileged submissions use the production RPC name and payload contract", () => {
@@ -56,7 +51,8 @@ test("repository migrations reproduce the applied production history", () => {
     "20260819110256_server_slug_lookup.sql",
     "20260819112534_staff_review_details.sql",
     "20260819113549_staff_review_invoker.sql",
-    "20260819114235_server_submission_boundary.sql"
+    "20260819114235_server_submission_boundary.sql",
+    "20260819151759_release_hardening.sql"
   ];
 
   for (const name of productionHistory) assert.ok(names.includes(name), name);
@@ -131,7 +127,7 @@ test("the staff preview is synthetic, read-only and absent from production runti
 
 test("critical security migration closes staff and fulfillment bypasses", () => {
   const security = migration("20260819143942_critical_security_boundaries.sql");
-  const hardening = plannedMigration("20260819130000_release_hardening.sql");
+  const hardening = migration("20260819151759_release_hardening.sql");
 
   assert.match(security, /'providers'[\s\S]*= '\["discord"\]'::jsonb/i);
   assert.match(security, /from auth\.identities[\s\S]*i\.provider is distinct from 'discord'/i);
@@ -157,6 +153,16 @@ test("critical security migration closes staff and fulfillment bypasses", () => 
 
   assert.match(hardening, /revoke execute on function public\.create_server_submission[\s\S]*from public, anon, authenticated, service_role;/i);
   assert.doesNotMatch(hardening, /grant execute on function public\.create_server_submission[\s\S]*to service_role;/i);
+});
+
+test("production routes and legacy APIs match the deployed schema", () => {
+  const vercel = JSON.parse(readFileSync(join(root, "vercel.json"), "utf8"));
+  const serverRoute = vercel.rewrites.find((rewrite) => rewrite.source === "/server/:slug");
+  const resources = readFileSync(join(root, "api", "resources.js"), "utf8");
+
+  assert.equal(serverRoute?.destination, "/server?slug=:slug");
+  assert.match(resources, /resource_directory\?select=\*&order=published_at\.desc/);
+  assert.doesNotMatch(resources, /featured\.desc|created_at\.desc/);
 });
 
 test("Stripe launch gates fail closed and local secret files are ignored", () => {

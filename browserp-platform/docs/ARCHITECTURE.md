@@ -60,7 +60,7 @@ The v1.3 migrations are staged:
 2. confirm the recorded critical security-boundaries migration before enabling account sign-in;
 3. confirm the recorded public-server-join-links migration after it and verify that only published, staff-reviewed HTTPS links become public;
 4. deploy and verify v1.3 with the server-only Supabase key;
-5. generate the final release-hardening migration from the reviewed `supabase/planned-migrations/` artifact and apply it to revoke legacy public/authenticated privileged RPC access;
+5. retain the recorded `20260819151759_release_hardening.sql` boundary that revokes legacy public/authenticated privileged RPC access;
 6. leave payments off until Stripe end-to-end, retry, refund and dispute procedures pass.
 
-Production records the active v1.3 migrations as `20260819143942` and `20260819143947`. Application deployment and the final release-hardening migration remain separate cutover steps.
+Production records the active v1.3 migrations as `20260819143942`, `20260819143947` and `20260819151759`.

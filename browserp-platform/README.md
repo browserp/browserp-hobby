@@ -44,10 +44,10 @@ The local server runs on `http://127.0.0.1:8080`. Development-only catalog recor
 
 1. Never deploy the old `main` branch over the newer production release.
 2. Validate v1.3.0 on a preview deployment before promoting it.
-3. Production records `20260819143942_critical_security_boundaries.sql` and `20260819143947_public_server_join_links.sql` as applied. They close the anonymous fulfillment bypass, make staff suspension durable and expose only staff-reviewed HTTPS community links. Do not reapply them.
+3. Production records `20260819143942_critical_security_boundaries.sql`, `20260819143947_public_server_join_links.sql` and `20260819151759_release_hardening.sql` as applied. They close the anonymous fulfillment bypass, make staff suspension durable, expose only staff-reviewed HTTPS community links and remove legacy privileged RPC grants. Do not reapply them.
 4. Verify the public server journey against those recorded database boundaries before promotion.
 5. Keep `PAYMENTS_ENABLED=false` until the Vercel webhook, live Stripe mode, signing secret, server-only Supabase key, fulfillment secret and replay/idempotency tests are complete.
-6. Keep the release-hardening SQL under `supabase/planned-migrations/` until v1.3.0 is running with `SUPABASE_SECRET_KEY`. Then generate a fresh migration with the Supabase CLI, copy and review the staged SQL, and apply it; earlier v1.2.2 code depends on grants that plan removes.
+6. Keep the server-only v1.3 boundaries in place. A forced v1.2.2 rollback requires a deliberate, temporary restoration of its legacy submission, rate-limit and tool-run grants; never restore anonymous Stripe fulfillment.
 7. Never put passwords, OAuth secrets, privileged Supabase keys, Stripe secrets, recovery codes or raw network addresses in source, screenshots or chat.
 
 See [Deployment](docs/DEPLOYMENT.md), [Architecture](docs/ARCHITECTURE.md), [Security](docs/SECURITY.md) and the [v1.3.0 release record](docs/RELEASE_1.3.0.md).

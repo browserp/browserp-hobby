@@ -10,7 +10,7 @@ const fallback = [
 
 export default endpoint("GET", async (_req, res) => {
   try {
-    const resources = await rest("resource_directory?select=*&order=featured.desc,created_at.desc&limit=50");
+    const resources = await rest("resource_directory?select=*&order=published_at.desc&limit=50");
     return publicJson(res, { resources: Array.isArray(resources) ? resources : [] }, 60);
   } catch (error) {
     if (!developmentCatalogAllowed()) throw error;

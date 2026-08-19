@@ -92,7 +92,7 @@
     },
     {
       "source": "/server/:slug",
-      "destination": "/server.html?slug=:slug"
+      "destination": "/server?slug=:slug"
     }
   ],
   "headers": [

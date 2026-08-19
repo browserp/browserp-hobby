@@ -34,17 +34,13 @@ The application calls `create_server_submission_server`, matching that recorded
 history. `20260819143942_critical_security_boundaries.sql` is recorded in production
 and fixes NULL-secret fulfillment, anonymous execution, linked staff identities
 and automatic owner reactivation. `20260819143947_public_server_join_links.sql` is
-recorded after it and prepares the public
-directory to return only the staff-reviewed HTTPS community link stored on a
-published, non-adult listing. It must be reviewed and applied in that order before
-the public join journey is signed off. `supabase/planned-migrations/20260819130000_release_hardening.sql`
-is deliberately outside the active migration path so an ordinary database push
-cannot apply it early. After preview verification, its SQL must be copied into a
-fresh CLI-generated migration and reviewed before application.
+recorded after it and prepares the public directory to return only the
+staff-reviewed HTTPS community link stored on a published, non-adult listing.
+`20260819151759_release_hardening.sql` is recorded after the verified v1.3.0
+production cutover and removes the legacy privileged RPC grants.
 
 ## Deliberately incomplete at packaging
 
-- production deployment/promotion;
 - manual owner Discord login;
 - Google Cloud OAuth client creation and manual Google login;
 - payment enablement and live webhook replacement;
