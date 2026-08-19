@@ -18,14 +18,20 @@ export function integrationIdentifier(seed) {
   return `browserp_web_${[...bytes].map((value) => alphabet[value % alphabet.length]).join("")}`;
 }
 
-export default endpoint("POST", async (req, res) => {
+export default endpoint("POST", async (req, res, requestId) => {
   assertSameOrigin(req);
   const stripe = stripeConfig();
   if (!stripe.enabled) {
-    throw Object.assign(new Error("Payments are currently disabled while BrowseRP completes its launch checks."), { status: 503 });
+    return ok(res, {
+      error: "Payments are currently disabled while BrowseRP completes its launch checks.",
+      requestId
+    }, 503);
   }
   if (!stripe.checkoutReady || !stripe.fulfillmentReady) {
-    throw Object.assign(new Error("Checkout is not ready. No payment has been started."), { status: 503 });
+    return ok(res, {
+      error: "Checkout is not ready. No payment has been started.",
+      requestId
+    }, 503);
   }
 
   const session = await getSession(req, res, { required: true });

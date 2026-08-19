@@ -148,6 +148,14 @@ test("consolidated public and auth routes preserve their contracts", async () =>
   assert.equal(staffAction.status, 401);
   const crossOriginAction = await fetch(`${origin}/api/admin/action`, { method: "POST", headers: { "Content-Type": "application/json", Origin: "https://example.invalid" }, body: "{}" });
   assert.equal(crossOriginAction.status, 403);
+
+  const checkout = await fetch(`${origin}/api/checkout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Origin: origin },
+    body: "{}"
+  });
+  assert.equal(checkout.status, 503);
+  assert.match((await checkout.json()).error, /payments are currently disabled/i);
 }));
 
 test("signed unrelated Stripe sessions are ignored before fulfillment readiness", async () => {
