@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createHmac } from "node:crypto";
 import { filterServers } from "../lib/directory.js";
-import { servers } from "../lib/catalog.js";
 import { assessContent, sanitizePlainText } from "../lib/moderation.js";
 import { calculateDiscoveryScore } from "../lib/ranking.js";
 import {
@@ -29,9 +28,13 @@ test("name generation is deterministic and local", () => {
 });
 
 test("directory filtering and ranking preserve organic weight", () => {
-  const results = filterServers(servers, { platform: "minecraft", beginner: "true" });
+  const fixture = [
+    { slug: "fixture-public", platform_id: "fivem", beginner_friendly: true },
+    { slug: "fixture-whitelisted", platform_id: "fivem", beginner_friendly: false }
+  ];
+  const results = filterServers(fixture, { platform: "fivem", beginner: "true" });
   assert.equal(results.length, 1);
-  assert.equal(results[0].slug, "everwild-realms");
+  assert.equal(results[0].slug, "fixture-public");
   const weakButBoosted = { quality_score: 10, engagement_score: 10, uptime_percent: 50, players: 1, capacity: 100, verified: false, boost_score: 100 };
   const strongOrganic = { quality_score: 95, engagement_score: 90, uptime_percent: 99, players: 80, capacity: 100, verified: true, boost_score: 0 };
   assert.ok(calculateDiscoveryScore(strongOrganic) > calculateDiscoveryScore(weakButBoosted));

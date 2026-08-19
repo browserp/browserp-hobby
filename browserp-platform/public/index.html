@@ -3,136 +3,88 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#090a0e">
-    <meta name="description" content="Browse FiveM roleplay servers by region, play style and framework. Find a community that suits how you want to play.">
-    <meta property="og:title" content="BrowseRP — Find FiveM roleplay servers">
-    <meta property="og:description" content="Find a FiveM roleplay community that suits how you want to play.">
+    <meta name="theme-color" content="#0b0c0f">
+    <meta name="description" content="Find FiveM roleplay servers by region, framework and play style. Browse clear, reviewed community listings on BrowseRP.">
+    <meta property="og:title" content="BrowseRP — Find your next FiveM roleplay server">
+    <meta property="og:description" content="A clear, community-first directory for FiveM roleplay servers.">
     <meta property="og:type" content="website">
-    <link rel="canonical" href="/">
-    <link rel="stylesheet" href="/site.css?v=1.4.3">
+    <meta property="og:url" content="https://www.browserp.com/">
+    <link rel="canonical" href="https://www.browserp.com/">
+    <link rel="stylesheet" href="/browserp-v2.css?v=2.0.0">
     <title>BrowseRP — Find FiveM roleplay servers</title>
-    <script src="/site.js?v=1.4.0" defer></script>
-    <script src="/app.js?v=1.4.0" defer></script>
+    <script src="/browserp-shell.js?v=2.0.0" defer></script>
+    <script src="/browserp-directory.js?v=2.0.0" defer></script>
   </head>
   <body data-page="home">
     <a class="skip-link" href="#main-content">Skip to content</a>
 
     <header class="site-header" data-site-header>
-      <nav class="site-shell site-nav" aria-label="Main navigation">
-        <a class="site-brand" href="/" aria-label="BrowseRP home">
-          <span class="brand-icon" aria-hidden="true">B</span>
-          <span>Browse<span class="brand-rp">RP</span></span>
-        </a>
-        <button class="site-menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="site-menu" aria-label="Open menu">
-          <span></span><span></span><span></span>
-        </button>
-        <div class="site-menu" id="site-menu" data-site-menu>
-          <div class="site-links">
-            <a href="/" aria-current="page">Home</a>
-            <a href="/servers">Browse servers</a>
-            <a href="/list-server">List your server</a>
-          </div>
-          <div class="site-actions">
-            <a class="site-button site-button-secondary" href="/dashboard" data-account-link>My account</a>
-          </div>
+      <nav class="shell site-nav" aria-label="Main navigation">
+        <a class="brand" href="/" aria-label="BrowseRP home"><span class="brand-word">Browse</span><span class="brand-mark" aria-hidden="true"><img src="/browserp-rp-mark.png" alt=""></span></a>
+        <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="site-menu" aria-label="Open menu"><span></span><span></span><span></span></button>
+        <div class="nav-menu" id="site-menu" data-site-menu>
+          <div class="nav-links"><a href="/" aria-current="page">Home</a><a href="/servers">Browse servers</a><a href="/list-server">List your server</a></div>
+          <div class="nav-actions"><a class="button button-secondary" href="/dashboard" data-account-link>My account</a></div>
         </div>
       </nav>
     </header>
 
     <main id="main-content">
       <section class="hero">
-        <div class="site-shell hero-inner">
+        <div class="shell hero-grid">
           <div class="hero-copy">
-            <span class="hero-label">Built for FiveM roleplay</span>
-            <h1>Find a server that <em>feels right.</em></h1>
-            <p>Browse FiveM communities by region, play style and live player count. Read what each server is actually about before you join.</p>
-            <form class="hero-search" id="home-search-form" role="search">
+            <span class="eyebrow" data-content-key="home.hero.eyebrow">Made for FiveM roleplay</span>
+            <h1 data-content-key="home.hero.title" data-content-accent="tail">Find a server that <span>feels right.</span></h1>
+            <p class="hero-lead" data-content-key="home.hero.body">Search communities by region, framework and play style. Open a listing, understand the server, then decide if it is right for you.</p>
+            <form class="search-form" id="home-search-form" role="search">
               <label class="visually-hidden" for="home-search">Search FiveM servers</label>
-              <input id="home-search" name="q" type="search" autocomplete="off" placeholder="Search servers, tags or frameworks">
-              <button class="site-button site-button-primary" type="submit">Search servers</button>
+              <input id="home-search" name="q" type="search" autocomplete="off" maxlength="120" placeholder="Search a server name, framework or tag">
+              <button class="button button-primary" type="submit">Search servers</button>
             </form>
-            <div class="hero-actions">
-              <a class="site-button site-button-secondary" href="/servers">Browse all servers</a>
-              <a class="site-button site-button-secondary" href="/list-server">List your server</a>
-            </div>
-            <span class="hero-note">FiveM first. No tool clutter, paid rankings or filler.</span>
+            <div class="hero-links"><a class="button button-secondary" href="/servers">Browse every server</a><a class="button button-quiet" href="/list-server">List a community</a></div>
+            <ul class="hero-facts" aria-label="About the directory"><li>FiveM only</li><li>Listings reviewed</li><li>Clear owner controls</li></ul>
           </div>
-
-          <div class="hero-preview" aria-hidden="true">
-            <div class="preview-window">
-              <div class="preview-bar"><span>FiveM servers</span><span class="preview-dots" aria-hidden="true"><i></i><i></i><i></i></span></div>
-              <article class="preview-server">
-                <div class="preview-title"><span class="server-monogram">NR</span><span><strong>Northstar Roleplay</strong><small>Europe · QBox · 186 players</small></span></div>
-                <div class="preview-tags"><span>Serious RP</span><span>Economy</span><span>Beginner friendly</span></div>
-              </article>
-              <article class="preview-server preview-server-muted">
-                <div class="preview-title"><span class="server-monogram">CS</span><span><strong>Civic State RP</strong><small>Oceania · QBCore · 91 players</small></span></div>
-                <div class="preview-tags"><span>Public</span><span>Custom jobs</span></div>
-              </article>
-            </div>
-          </div>
+          <div class="hero-art" aria-hidden="true"><div class="hero-logo-crop"><img src="/browserp-rp-mark.png" alt=""></div></div>
         </div>
       </section>
 
-      <section class="section section-muted" aria-labelledby="featured-title">
-        <div class="site-shell">
-          <div class="section-head">
-            <div>
-              <span class="section-label">Active communities</span>
-              <h2 id="featured-title">Servers worth a look</h2>
-              <p>See the essentials at a glance, then open a listing for the full picture.</p>
-            </div>
-            <a class="site-button site-button-secondary" href="/servers">View every server</a>
+      <section class="section section-soft" aria-labelledby="featured-title">
+        <div class="shell">
+          <div class="section-heading">
+            <div><span class="eyebrow">From the directory</span><h2 id="featured-title">FiveM communities to explore</h2><p>Every card opens the full BrowseRP listing, so you can read the details before leaving the site.</p></div>
+            <a class="button button-secondary" href="/servers">View all servers</a>
           </div>
           <div class="server-grid" id="featured-server-list" aria-live="polite" aria-busy="true">
-            <article class="server-card loading-card" aria-label="Loading server"></article>
-            <article class="server-card loading-card" aria-label="Loading server"></article>
-            <article class="server-card loading-card" aria-label="Loading server"></article>
+            <article class="server-card loading-card" aria-label="Loading server"></article><article class="server-card loading-card" aria-label="Loading server"></article><article class="server-card loading-card" aria-label="Loading server"></article>
           </div>
-          <div class="empty-panel" id="featured-empty" hidden>
-            <h3>No FiveM servers are listed yet.</h3>
-            <p>Own a community? Be the first to submit a clear, useful listing.</p>
+          <div class="empty-state" id="featured-empty" hidden>
+            <h3>The directory is ready for its first community.</h3><p>Run a FiveM roleplay server? Submit a clear listing and we will review it before it goes live.</p><a class="button button-primary" href="/list-server">List your server</a>
           </div>
         </div>
       </section>
 
       <section class="section" aria-labelledby="how-title">
-        <div class="site-shell">
-          <div class="section-head">
-            <div><span class="section-label">Simple by design</span><h2 id="how-title">Find a community without the noise</h2></div>
-          </div>
-          <div class="steps-grid">
-            <article class="simple-step"><span>01</span><h3>Search what matters</h3><p>Look for a server name, framework or roleplay style.</p></article>
-            <article class="simple-step"><span>02</span><h3>Compare the basics</h3><p>Check region, player count, tags and whether the owner controls the listing.</p></article>
-            <article class="simple-step"><span>03</span><h3>Choose your community</h3><p>Open the server page, read the details and decide whether it suits you.</p></article>
+        <div class="shell">
+          <div class="section-heading"><div><span class="eyebrow">How BrowseRP works</span><h2 id="how-title">Enough information to choose well.</h2><p>One focused directory for finding, comparing and understanding FiveM roleplay communities.</p></div></div>
+          <div class="principles">
+            <article class="principle"><span class="principle-number">01</span><h3>Search your way</h3><p>Start with a name, framework, region or the sort of roleplay you want.</p></article>
+            <article class="principle"><span class="principle-number">02</span><h3>Read the real details</h3><p>Compare the setting, community style, language and live status where available.</p></article>
+            <article class="principle"><span class="principle-number">03</span><h3>Join when it feels right</h3><p>The server page keeps the important information together before you visit the community.</p></article>
           </div>
         </div>
       </section>
 
-      <section class="section">
-        <div class="site-shell owner-cta">
-          <div>
-            <span class="section-label">For server owners</span>
-            <h2>Show players what your community is really like.</h2>
-            <p>Create a straightforward listing with your region, framework and roleplay style. Every listing is reviewed before it appears publicly.</p>
-          </div>
-          <a class="site-button site-button-primary" href="/list-server">List your server</a>
-        </div>
-      </section>
+      <section class="section section-bordered"><div class="shell owner-band"><div><span class="eyebrow">For server owners</span><h2>Help the right players understand your community.</h2><p>Tell people what your server is actually like. Submissions are tied to your account and reviewed before publication.</p></div><a class="button button-primary" href="/list-server">Create a listing</a></div></section>
     </main>
 
     <footer class="site-footer">
-      <div class="site-shell footer-main">
-        <div class="footer-brand">
-          <a class="site-brand" href="/"><span class="brand-icon" aria-hidden="true">B</span><span>Browse<span class="brand-rp">RP</span></span></a>
-          <p>A focused place to find and list FiveM roleplay communities.</p>
-        </div>
+      <div class="shell footer-main">
+        <div class="footer-brand"><a class="brand" href="/" aria-label="BrowseRP home"><span class="brand-word">Browse</span><span class="brand-mark" aria-hidden="true"><img src="/browserp-rp-mark.png" alt=""></span></a><p data-content-key="footer.tagline">A straightforward place to find and list FiveM roleplay communities.</p></div>
         <div class="footer-column"><h2>BrowseRP</h2><a href="/servers">Browse servers</a><a href="/list-server">List your server</a><a href="/dashboard">My account</a></div>
         <div class="footer-column"><h2>Information</h2><a href="/legal#privacy">Privacy</a><a href="/legal#cookies">Cookies</a><a href="/legal#terms">Terms</a><a href="/legal#standards">Community rules</a></div>
       </div>
-      <div class="site-shell footer-bottom"><span>© <span data-current-year>2026</span> BrowseRP. An LCAPUK project.</span><span>Not affiliated with Rockstar Games, Cfx.re or Discord.</span></div>
+      <div class="shell footer-bottom"><span>© <span data-current-year>2026</span> BrowseRP. Operated by LCAPUK.</span><span>Not affiliated with Rockstar Games, Cfx.re or Discord.</span></div>
     </footer>
-
-    <div class="site-toast" id="site-toast" role="status" aria-live="polite"></div>
+    <div class="toast" id="site-toast" role="status" aria-live="polite"></div>
   </body>
 </html>

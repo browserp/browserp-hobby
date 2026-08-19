@@ -1,47 +1,70 @@
-# BrowseRP security model
+# BrowseRP v2 security model
 
-## Secrets
+Security is enforced at several independent boundaries. A hidden URL, disabled button or Cloudflare rule is never treated as the sole control for sensitive data or actions.
 
-No secret belongs in the browser bundle or repository. Vercel stores server-only Supabase, privacy-hash, Stripe, webhook and fulfillment values. OAuth provider secrets remain in Supabase/Auth provider dashboards. Recovery codes remain in an owner-controlled password manager or offline vault.
+## Edge and transport
 
-## Authentication and authorization
+- Cloudflare proxies only the public apex and `www` records; mail records remain DNS-only.
+- TLS uses Full (strict), HTTPS redirection, TLS 1.2 minimum and TLS 1.3. Vercel also sends a two-year HSTS policy with subdomains.
+- The managed WAF, basic bot protection, method/path blocks and `/api/` rate limit reduce commodity abuse.
+- Application rate limits, authentication and RLS still run when traffic reaches the origin. Do not create a broad edge bypass for admin APIs.
+- 0-RTT remains disabled because requests include authenticated and state-changing operations.
 
-- OAuth uses Supabase PKCE.
-- Production uses only essential Secure, HTTP-only, SameSite=Lax authentication and short-lived OAuth cookies.
-- Public pages do not use local storage or session storage and do not load analytics, advertising pixels or marketing trackers. Optional tracking must remain disabled until a separate privacy and consent review is complete.
-- Staff ownership is provisioned only for privately allowlisted Discord identities. A staff account with any linked non-Discord identity is denied, and an auth trigger cannot reactivate a suspended or revoked owner.
-- Staff actions are checked by permission inside the database; the interface is not an authorization boundary.
-- Google is a normal member identity path, not a staff-owner path.
-- `/staff` is intentionally absent from public navigation and the sitemap and sends `noindex`, `nofollow` and `noarchive`; these discovery controls do not replace Discord identity, API permission or RLS enforcement.
+## Browser policy
 
-## Database
+The Content Security Policy allows scripts, styles, fonts and connections only from BrowseRP. Images may additionally come from Discord's avatar CDN. Inline script/style execution, frames, objects, media and workers are blocked. The site also sends `nosniff`, `DENY` framing, strict-origin referrers, restrictive browser permissions and same-origin opener/resource policies.
 
-RLS protects exposed tables. `staff_review_item` runs as SECURITY INVOKER so evidence reads remain subject to the caller's RLS permissions. SECURITY DEFINER functions that remain are narrowly validated transactional/API boundaries and must have explicit grants.
+`/staff` and `/dashboard` are private/no-store and `noindex`. CSS and JavaScript use immediate revalidation to avoid mixed-release caching across Vercel and Cloudflare.
 
-`20260819143942_critical_security_boundaries.sql` is recorded in production. It removes anonymous Stripe fulfillment, fixes NULL-secret validation and closes staff identity/suspension gaps. The later release-hardening migration removes direct public/member execution from privacy rate-limit mutation, tool telemetry and the legacy submission RPC that accepted caller-supplied moderation output.
+## Authentication and CSRF
 
-`20260819143947_public_server_join_links.sql` is recorded in production after the critical boundary. Its scope is limited to adding a staff-reviewed HTTPS `community_url` to published, non-adult directory results; it does not expose `server_submissions` or any unreviewed owner link.
+- OAuth uses state, nonce and PKCE with short-lived cookies.
+- Production cookies are Secure, HTTP-only and SameSite=Lax. A host-only `__Host-` cookie is preferred; compatibility cookies must retain the same flags and narrow scope.
+- Redirects accept only local paths and trusted BrowseRP/Vercel hosts.
+- State-changing JSON requests require a synchroniser CSRF header plus same-origin validation.
+- Staff-owner access is Discord-only. Linked, duplicate or inconsistent identities fail closed.
+- The private Discord owner allowlist and active membership are checked in addition to permission-specific database functions.
+- Google, if enabled later, is member-only and cannot confer staff ownership.
+
+## HTTP and input handling
+
+Functions reject unsupported methods, non-JSON writes, oversized bodies and malformed JSON. Reads and writes use bounded fields. Listing descriptions are plain text; community links are canonical public HTTPS URLs with credentials, fragments, custom ports, local/reserved hosts and common shorteners rejected.
+
+Rate-limit identifiers use a keyed hash of Vercel's trusted client-address signal. Raw network addresses are not written to application records or logs, and production fails closed if the privacy secret is absent.
+
+Internal request IDs are generated server-side. Listing idempotency keys are stored as hashes and bound to a fingerprint of the accepted payload. Staff decisions and content mutations require explicit reasons and version/request identifiers.
+
+## Database boundaries
+
+RLS protects exposed tables. Browser roles do not receive broad direct insert/update/delete grants for profiles, favourites, notifications, reports, appeals, applications or private tables. Narrow RPCs perform member and staff mutations.
+
+`private.secrets`, the owner allowlist and staff-managed content tables remain outside public projections. Public content returns only allowlisted, published values. Staff content values are bounded strings or booleans; raw HTML is rejected. Draft/publish/rollback uses optimistic versions and an immutable revision trail.
+
+SECURITY DEFINER functions are treated as API boundaries: fixed search paths, validated identity/input, explicit grants and minimal return fields. The v2 migration is additive and must be reviewed/applied exactly once; previously recorded production migrations are immutable.
+
+## Secrets and logging
+
+No secret belongs in the browser bundle or repository. Supabase secret keys, privacy hashes, OAuth secrets, Stripe keys and webhook/fulfillment secrets stay in provider-managed environment settings. Recovery codes stay in an owner-controlled password manager or offline vault.
+
+Health responses expose only coarse readiness, release version and build SHA. Runtime errors use request IDs and must not log cookies, authorization headers, request bodies, secrets, raw network addresses or private database records.
 
 ## Payments
 
-Checkout is disabled by default. The client cannot enable it; `/api/health`, the checkout endpoint and the webhook derive readiness from server configuration. Before issuing a Checkout URL, the server verifies the configured active Price and Product metadata. Fulfillment verifies event and session live mode, a server-only Checkout metadata signature and re-fetched Stripe line items before writing an idempotent order/ledger transaction.
+Payments remain disabled and their public routes remain closed. Before any future launch, BrowseRP needs a Vercel-hosted webhook pointed at the clean project, minimal event subscriptions, untouched raw-body signature verification, live/test isolation, server-signed metadata, provider re-fetching, amount/currency/product checks and idempotent server-only fulfillment.
 
-Setting `PAYMENTS_ENABLED=false` stops new Checkout creation but deliberately allows a valid, already-issued session to settle. It cannot invalidate a Checkout URL that Stripe already issued. `STRIPE_FULFILLMENT_ENABLED=false` is the emergency settlement stop; using it requires immediate inspection and manual reconciliation of paid sessions before restoration.
+Refund and dispute reversals, paid-but-rejected reconciliation and replay behavior must be designed and tested before enabling checkout. Setting `PAYMENTS_ENABLED=false` stops new checkout creation but cannot cancel an already-issued Stripe URL; any emergency settlement stop requires immediate manual reconciliation. A success redirect never grants value.
 
-## Content and links
+## Privacy and UK legal review
 
-Listing input is length-limited, normalized and deterministically screened for unsafe patterns before entering review. Database constraints re-check trusted submission fields. Staff publication remains the final gate.
+The current technical design uses only essential authentication/OAuth cookies and no analytics or advertising tracking, so it does not add a non-essential-cookie consent flow. If analytics, marketing, embedded third-party media or similar storage is proposed, stop and complete a separate UK privacy/PECR and consent review before release.
 
-Public server pages accept only an HTTPS community link returned by the reviewed directory projection. External community links open with `nofollow`, `noopener` and `noreferrer`. Owner verification confirms control of the listing; it is not represented as a guarantee of server quality or third-party safety.
-
-## CSP and browser policy
-
-The site uses a restrictive CSP with no inline event handlers or style attributes. The exact homepage JSON-LD block is authorized by a SHA-256 hash. The verifier recalculates that hash and fails if markup/CSP drift apart. Frames, objects, camera, microphone, geolocation and browser-interest topics are disabled.
+This repository does not contain verified LCAPUK registered-company details. Do not invent a company number, registered address or controller identity. The owner must provide exact details and obtain appropriate legal review for published terms, privacy, moderation and future payment/refund wording.
 
 ## Incident priorities
 
-1. Revoke exposed provider tokens immediately.
-2. Set `PAYMENTS_ENABLED=false`. If settlement itself is unsafe, also set `STRIPE_FULFILLMENT_ENABLED=false`, then inspect Stripe for already-issued or paid sessions and reconcile them before restoration.
-3. Suspend compromised staff membership and preserve audit/security events.
-4. Rotate affected secrets in provider dashboards, then update Vercel.
-5. Review runtime logs using request IDs; never add request bodies or secrets to logs.
+1. Use Cloudflare attack controls for an active traffic event without disabling origin authentication.
+2. Roll Vercel back to the recorded known-good deployment if the application release is faulty.
+3. Disable new payments; if settlement itself is unsafe, stop fulfillment and reconcile every already-issued or paid session.
+4. Suspend a compromised staff membership and preserve audit/security evidence.
+5. Revoke and rotate affected provider credentials, then update Vercel/Supabase through their dashboards.
+6. Review request-ID-correlated logs and database audit events without exporting sensitive payloads.

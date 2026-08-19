@@ -1,4 +1,56 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>Staff centre — BrowseRP</title><link rel="stylesheet" href="/styles.css?v=1.3.0"><link rel="stylesheet" href="/pages.css?v=1.3.0"><link rel="stylesheet" href="/theme.css?v=1.3.0"><link rel="stylesheet" href="/site.css?v=1.4.5"><script src="/portal.js?v=1.4.2" defer></script><script src="/ui.js?v=1.3.0" defer></script></head>
-<body class="page-body" data-page="staff"><a class="skip-link" href="#page-content">Skip to content</a><header class="page-header"><nav class="shell page-nav" aria-label="Primary"><a class="brand" href="/"><span class="brand-mark"><span>B</span></span><span>Browse<span>RP</span></span></a><div class="page-nav-links"><a href="/">Public site</a><a href="/dashboard">Owner dashboard</a><a href="/legal#standards">Standards</a></div><a class="button button-secondary page-auth" id="page-auth" href="/api/auth/discord?returnTo=/staff">Sign in</a></nav></header>
-<div class="shell portal-shell"><nav class="portal-side" aria-label="Staff sections"><small>OPERATIONS</small><a class="active" aria-current="location" href="#overview"><i aria-hidden="true">⌂</i>Overview</a><a href="#listings"><i aria-hidden="true">◇</i>Listings</a><a href="#reports"><i aria-hidden="true">!</i>Reports</a><a href="#moderation"><i aria-hidden="true">✓</i>Moderation</a><a href="#security"><i aria-hidden="true">⌾</i>Security</a><a href="#audit"><i aria-hidden="true">↗</i>Audit log</a></nav><main class="portal-main" id="page-content"><div class="loading-block" aria-label="Loading staff centre"></div></main></div>
-<dialog class="review-dialog" id="review-dialog" aria-labelledby="review-dialog-title"><form class="review-dialog-shell" id="review-form"><div class="review-dialog-head"><div><span class="section-kicker">EVIDENCE-FIRST REVIEW</span><h2 id="review-dialog-title">Review queue item</h2></div><button class="dialog-close" type="button" data-review-close aria-label="Close review">×</button></div><div class="review-evidence" id="review-evidence"></div><label class="review-form">Decision reason<textarea id="review-reason" minlength="5" maxlength="1000" required aria-describedby="review-status" placeholder="Record the evidence and reasoning for this decision."></textarea></label><div class="review-actions" id="review-actions"></div><p class="staff-live-status" id="review-status" role="status" aria-live="polite"></p></form></dialog><footer class="page-footer"><div class="shell page-footer-inner"><span>BrowseRP accountable operations</span><div class="page-footer-links"><a href="/legal#privacy">Privacy</a><a href="/legal#standards">Standards</a></div></div></footer></body></html>
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b0c0f">
+    <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+    <meta name="description" content="Restricted BrowseRP operations workspace.">
+    <title>Staff centre — BrowseRP</title>
+    <link rel="stylesheet" href="/browserp-v2.css?v=2.0.0">
+    <link rel="stylesheet" href="/browserp-portal-v2.css?v=2.0.0">
+    <script src="/browserp-shell.js?v=2.0.0" defer></script>
+    <script src="/browserp-portal-v2.js?v=2.0.0" defer></script>
+  </head>
+  <body data-page="staff">
+    <a class="skip-link" href="#overview">Skip to staff workspace</a>
+
+    <header class="site-header" data-site-header>
+      <nav class="shell site-nav" aria-label="Staff navigation">
+        <a class="brand" href="/" aria-label="BrowseRP home"><span class="brand-word">Browse</span><span class="brand-mark" aria-hidden="true"><img src="/browserp-rp-mark.png" alt=""></span></a>
+        <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="site-menu" aria-label="Open menu"><span></span><span></span><span></span></button>
+        <div class="nav-menu" id="site-menu" data-site-menu>
+          <div class="nav-links"><a href="/">Public site</a><a href="/dashboard">My account</a><a href="/legal#standards">Community rules</a></div>
+          <div class="nav-actions"><a class="button button-secondary" href="/dashboard">Leave staff centre</a></div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="portal-stage portal-stage-staff" id="overview">
+      <div class="shell">
+        <section class="portal-loading" id="portal-root" aria-live="polite" aria-busy="true">
+          <div class="portal-loading-mark" aria-hidden="true"></div>
+          <p>Checking staff access…</p>
+        </section>
+      </div>
+    </main>
+
+    <dialog class="portal-dialog" id="review-dialog" aria-labelledby="review-dialog-title">
+      <form class="dialog-form" id="review-form">
+        <div class="dialog-head">
+          <div><span class="portal-kicker">Decision record</span><h2 id="review-dialog-title">Review item</h2></div>
+          <button class="icon-button" type="button" data-review-close aria-label="Close review">×</button>
+        </div>
+        <div class="review-evidence" id="review-evidence"></div>
+        <label class="portal-field" for="review-reason"><span>Reason for this decision</span><textarea id="review-reason" name="reason" minlength="5" maxlength="1000" required placeholder="Describe the evidence you used and why this action is appropriate."></textarea><small>This is written to the staff audit log.</small></label>
+        <div class="dialog-actions" id="review-actions"></div>
+        <p class="portal-status" id="review-status" role="status" aria-live="polite"></p>
+      </form>
+    </dialog>
+
+    <footer class="site-footer staff-footer">
+      <div class="shell footer-bottom"><span>BrowseRP accountable operations</span><span><a href="/legal#privacy">Privacy</a> · <a href="/legal#standards">Community rules</a></span></div>
+    </footer>
+    <div class="toast" id="site-toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

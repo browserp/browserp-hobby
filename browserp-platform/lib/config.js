@@ -1,4 +1,6 @@
-export const RELEASE_VERSION = "1.3.0";
+export const RELEASE_VERSION = "2.0.0";
+export const CURRENT_TERMS_VERSION = "2026-08-19";
+export const CURRENT_LISTING_STANDARDS_VERSION = "2026-08-19";
 
 export function env(name, { required = false } = {}) {
   const value = String(process.env[name] || "").trim();
@@ -14,6 +16,11 @@ export function booleanEnv(name, fallback = false) {
 
 export function isProductionRuntime() {
   return process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
+}
+
+export function buildSha() {
+  const value = env("VERCEL_GIT_COMMIT_SHA") || env("GIT_COMMIT_SHA");
+  return /^[a-f0-9]{7,64}$/i.test(value) ? value.toLowerCase() : "local";
 }
 
 function firstHeader(value) {
@@ -32,9 +39,9 @@ export function appUrl(req) {
   const requestHost = firstHeader(req?.headers?.["x-forwarded-host"] || req?.headers?.host);
   if (trustedRequestHost(requestHost)) {
     const forwardedProto = firstHeader(req?.headers?.["x-forwarded-proto"]);
-    const protocol = forwardedProto === "https" || forwardedProto === "http"
-      ? forwardedProto
-      : isProductionRuntime() ? "https" : "http";
+    const protocol = isProductionRuntime()
+      ? "https"
+      : forwardedProto === "https" || forwardedProto === "http" ? forwardedProto : "http";
     return `${protocol}://${requestHost}`;
   }
 
@@ -46,10 +53,10 @@ export function appUrl(req) {
         return parsed.origin;
       }
     } catch {
-      // Fall through to a safe local origin.
+      // Fall through to a fixed origin rather than trusting an invalid value.
     }
   }
-  return "http://localhost:8080";
+  return isProductionRuntime() ? "https://www.browserp.com" : "http://localhost:8080";
 }
 
 export function supabaseConfig() {

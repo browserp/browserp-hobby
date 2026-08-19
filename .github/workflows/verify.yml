@@ -3,15 +3,22 @@ name: Verify BrowseRP
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, "release/**"]
 
 permissions:
   contents: read
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: browserp-platform
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -20,7 +27,8 @@ jobs:
         with:
           node-version: 24.x
           cache: npm
-      - name: Install exact package metadata
+          cache-dependency-path: browserp-platform/package-lock.json
+      - name: Install exact dependencies
         run: npm ci
       - name: Run release verifier
         run: npm run verify

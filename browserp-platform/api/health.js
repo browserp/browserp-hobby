@@ -1,42 +1,42 @@
 import { endpoint, ok } from "../lib/api.js";
-import { env, RELEASE_VERSION, stripeConfig, supabaseConfig } from "../lib/config.js";
-import { authCapabilities } from "../lib/supabase.js";
+import { buildSha, env, RELEASE_VERSION, stripeConfig } from "../lib/config.js";
+import { authCapabilities, rest } from "../lib/supabase.js";
 
 export default endpoint("GET", async (_req, res) => {
-  const database = supabaseConfig();
   const stripe = stripeConfig();
-  const privacyHash = Boolean(env("PRIVACY_HASH_SECRET"));
-  let providers = { discord: false, google: false };
-  let authStatus = database.configured ? "backend-unreachable" : "awaiting-backend";
-  if (database.configured) {
-    try {
-      providers = await authCapabilities();
-      authStatus = providers.discord ? "configured" : "discord-disabled";
-    } catch {
-      authStatus = "backend-unreachable";
-    }
-  }
+  let backendStatus = "unavailable";
+  let authenticationStatus = "unavailable";
 
-  const coreReady = Boolean(database.configured && database.privileged && privacyHash && providers.discord);
+  try {
+    // This is deliberately a real, privileged and bounded read. A configured
+    // environment alone must never make the health endpoint report readiness.
+    await rest("platforms?select=id&limit=1", { useSecret: true });
+    backendStatus = "ready";
+  } catch { /* A high-level status is sufficient for a public health check. */ }
+
+  try {
+    const providers = await authCapabilities();
+    authenticationStatus = providers.discord ? "ready" : "unavailable";
+  } catch { /* Keep provider and configuration detail out of this response. */ }
+
+  const securityStatus = env("PRIVACY_HASH_SECRET") ? "ready" : "unavailable";
+  const coreReady = backendStatus === "ready"
+    && authenticationStatus === "ready"
+    && securityStatus === "ready";
   let paymentStatus = "disabled";
-  if (stripe.enabled) paymentStatus = stripe.checkoutReady && stripe.fulfillmentReady ? "ready" : "misconfigured";
+  if (stripe.enabled) paymentStatus = stripe.checkoutReady && stripe.fulfillmentReady ? "ready" : "unavailable";
 
   return ok(res, {
     status: coreReady ? "ok" : "degraded",
     service: "browserp",
     version: RELEASE_VERSION,
+    buildSha: buildSha(),
     time: new Date().toISOString(),
-    integrations: {
-      database: database.configured ? "ready" : "awaiting-project",
-      serverBoundary: database.privileged ? "ready" : "awaiting-secret-key",
-      privacyHash: privacyHash ? "ready" : "awaiting-secret",
-      authentication: { status: authStatus, discord: providers.discord, google: providers.google },
-      providers,
+    checks: {
+      backend: backendStatus,
+      authentication: authenticationStatus,
+      security: securityStatus,
       payments: paymentStatus
-    },
-    features: {
-      googleLogin: providers.google,
-      paymentsEnabled: paymentStatus === "ready"
     }
   });
 });

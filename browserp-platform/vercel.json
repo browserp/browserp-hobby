@@ -1,9 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "buildCommand": "npm run verify",
   "outputDirectory": "public",
   "cleanUrls": true,
   "trailingSlash": false,
+  "regions": [
+    "dub1"
+  ],
   "functions": {
     "api/**/*.js": {
       "maxDuration": 15
@@ -21,6 +25,10 @@
     {
       "source": "/api/public/overview",
       "destination": "/api/router?_route=public/overview"
+    },
+    {
+      "source": "/api/public/content",
+      "destination": "/api/router?_route=public/content"
     },
     {
       "source": "/api/auth/providers",
@@ -71,6 +79,10 @@
       "destination": "/api/router?_route=admin/action"
     },
     {
+      "source": "/api/admin/content",
+      "destination": "/api/router?_route=admin/content"
+    },
+    {
       "source": "/dashboard",
       "destination": "/dashboard.html"
     },
@@ -92,7 +104,7 @@
     },
     {
       "source": "/server/:slug",
-      "destination": "/server?slug=:slug"
+      "destination": "/server.html?slug=:slug"
     }
   ],
   "headers": [
@@ -102,6 +114,23 @@
         {
           "key": "X-Robots-Tag",
           "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/dashboard",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
         }
       ]
     },
@@ -110,7 +139,11 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; img-src 'self' data: https://cdn.discordapp.com; style-src 'self'; script-src 'self' 'sha256-mjT0FPG3NQWnJyjqoM1ha+xDb2mlOSS3l/dtDWVxA8c='; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests"
+          "value": "default-src 'self'; base-uri 'none'; connect-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' data: https://cdn.discordapp.com; manifest-src 'self'; media-src 'none'; object-src 'none'; script-src 'self'; style-src 'self'; worker-src 'none'; upgrade-insecure-requests"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains"
         },
         {
           "key": "Referrer-Policy",
@@ -135,15 +168,37 @@
         {
           "key": "Cross-Origin-Resource-Policy",
           "value": "same-origin"
+        },
+        {
+          "key": "X-DNS-Prefetch-Control",
+          "value": "off"
         }
       ]
     },
     {
-      "source": "/(.*).(css|js|svg|png|jpg|jpeg|webp|ico)",
+      "source": "/(.*).(css|js)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=3600, stale-while-revalidate=86400"
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(.*).(svg|png|jpg|jpeg|webp|ico)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    },
+    {
+      "source": "/(.*).(txt|xml)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }

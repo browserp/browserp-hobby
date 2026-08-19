@@ -3,38 +3,46 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b0c0f">
     <meta name="robots" content="noindex,nofollow">
-    <meta name="description" content="Manage your BrowseRP server listings and account.">
+    <meta name="description" content="Manage your BrowseRP listings, submissions, saved servers and notifications.">
     <title>My account — BrowseRP</title>
-    <link rel="stylesheet" href="/styles.css?v=1.3.0">
-    <link rel="stylesheet" href="/pages.css?v=1.3.0">
-    <link rel="stylesheet" href="/theme.css?v=1.3.0">
-    <link rel="stylesheet" href="/site.css?v=1.4.3">
-    <script src="/site.js?v=1.4.0" defer></script>
-    <script src="/portal.js?v=1.4.0" defer></script>
+    <link rel="stylesheet" href="/browserp-v2.css?v=2.0.0">
+    <link rel="stylesheet" href="/browserp-portal-v2.css?v=2.0.0">
+    <script src="/browserp-shell.js?v=2.0.0" defer></script>
+    <script src="/browserp-portal-v2.js?v=2.0.0" defer></script>
   </head>
-  <body class="page-body" data-page="dashboard">
-    <a class="skip-link" href="#page-content">Skip to content</a>
+  <body data-page="dashboard">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
     <header class="site-header" data-site-header>
-      <nav class="site-shell site-nav" aria-label="Main navigation">
-        <a class="site-brand" href="/" aria-label="BrowseRP home"><span class="brand-icon" aria-hidden="true">B</span><span>Browse<span class="brand-rp">RP</span></span></a>
-        <button class="site-menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="site-menu" aria-label="Open menu"><span></span><span></span><span></span></button>
-        <div class="site-menu" id="site-menu" data-site-menu>
-          <div class="site-links"><a href="/">Home</a><a href="/servers">Browse servers</a><a href="/list-server">List your server</a></div>
-          <div class="site-actions"><a class="site-button site-button-secondary" id="page-auth" href="/api/auth/discord?returnTo=/dashboard">Sign in</a></div>
+      <nav class="shell site-nav" aria-label="Main navigation">
+        <a class="brand" href="/" aria-label="BrowseRP home"><span class="brand-word">Browse</span><span class="brand-mark" aria-hidden="true"><img src="/browserp-rp-mark.png" alt=""></span></a>
+        <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="site-menu" aria-label="Open menu"><span></span><span></span><span></span></button>
+        <div class="nav-menu" id="site-menu" data-site-menu>
+          <div class="nav-links"><a href="/">Home</a><a href="/servers">Browse servers</a><a href="/list-server">List your server</a></div>
+          <div class="nav-actions"><a class="button button-secondary" href="/dashboard" aria-current="page" data-account-link>My account</a></div>
         </div>
       </nav>
     </header>
-    <div class="shell portal-shell">
-      <aside class="portal-side" aria-label="Account navigation">
-        <small>MY ACCOUNT</small>
-        <a class="active" href="/dashboard"><i>⌂</i>Overview</a>
-        <a href="/servers"><i>◇</i>Browse servers</a>
-        <a href="/list-server"><i>＋</i>List a server</a>
-        <a href="/legal"><i>?</i>Help and policies</a>
-      </aside>
-      <main class="portal-main" id="page-content"><div class="loading-block" aria-label="Loading account"></div></main>
-    </div>
-    <footer class="site-footer"><div class="site-shell footer-bottom"><span>© <span data-current-year>2026</span> BrowseRP. An LCAPUK project.</span><span><a href="/legal#privacy">Privacy</a> · <a href="/legal#terms">Terms</a></span></div></footer>
+
+    <main class="portal-stage" id="main-content">
+      <div class="shell">
+        <section class="portal-loading" id="portal-root" aria-live="polite" aria-busy="true">
+          <div class="portal-loading-mark" aria-hidden="true"></div>
+          <p>Loading your account…</p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-main">
+        <div class="footer-brand"><a class="brand" href="/" aria-label="BrowseRP home"><span class="brand-word">Browse</span><span class="brand-mark" aria-hidden="true"><img src="/browserp-rp-mark.png" alt=""></span></a><p data-content-key="footer.tagline">A straightforward place to find and list FiveM roleplay communities.</p></div>
+        <div class="footer-column"><h2>BrowseRP</h2><a href="/servers">Browse servers</a><a href="/list-server">List your server</a><a href="/dashboard">My account</a></div>
+        <div class="footer-column"><h2>Information</h2><a href="/legal#privacy">Privacy</a><a href="/legal#cookies">Cookies</a><a href="/legal#terms">Terms</a><a href="/legal#standards">Community rules</a></div>
+      </div>
+      <div class="shell footer-bottom"><span>© <span data-current-year>2026</span> BrowseRP. Operated by LCAPUK.</span><span>Not affiliated with Rockstar Games, Cfx.re or Discord.</span></div>
+    </footer>
+    <div class="toast" id="site-toast" role="status" aria-live="polite"></div>
   </body>
 </html>

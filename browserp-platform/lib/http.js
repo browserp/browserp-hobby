@@ -1,8 +1,13 @@
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { appUrl, env, isProductionRuntime } from "./config.js";
 
-export function requestId(req) {
-  return String(req.headers?.["x-vercel-id"] || req.headers?.["x-request-id"] || randomUUID()).slice(0, 160);
+const JSON_MIME = /^application\/json(?:\s*;\s*charset=(?:utf-8|"utf-8"))?$/i;
+const STATE_CHANGING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+export function requestId(_req) {
+  // Request identifiers are generated inside the trust boundary. Forwarded
+  // headers are useful for provider diagnostics, but callers can spoof them.
+  return randomUUID();
 }
 
 export function json(res, status, payload, extraHeaders = {}) {
@@ -36,20 +41,55 @@ export function only(req, res, methods) {
 }
 
 export async function readBody(req, maxBytes = 64 * 1024) {
-  if (req.body && typeof req.body === "object" && !Buffer.isBuffer(req.body)) return req.body;
+  const limit = Math.min(Math.max(Number(maxBytes) || 64 * 1024, 1), 1024 * 1024);
+  const contentType = String(req.headers?.["content-type"] || "").trim();
+  if (!JSON_MIME.test(contentType)) {
+    throw Object.assign(new Error("Content-Type must be application/json."), { status: 415 });
+  }
+  const declaredLength = Number(req.headers?.["content-length"]);
+  if (Number.isFinite(declaredLength) && declaredLength > limit) {
+    throw Object.assign(new Error("Payload too large."), { status: 413 });
+  }
+
+  if (req.body !== undefined && req.body !== null) {
+    let parsed = req.body;
+    let encoded;
+    try {
+      if (Buffer.isBuffer(parsed)) encoded = parsed;
+      else if (typeof parsed === "string") encoded = Buffer.from(parsed, "utf8");
+      else encoded = Buffer.from(JSON.stringify(parsed), "utf8");
+    } catch {
+      throw Object.assign(new Error("Invalid JSON."), { status: 400 });
+    }
+    if (encoded.length > limit) throw Object.assign(new Error("Payload too large."), { status: 413 });
+    if (Buffer.isBuffer(parsed) || typeof parsed === "string") {
+      try { parsed = JSON.parse(encoded.toString("utf8")); }
+      catch { throw Object.assign(new Error("Invalid JSON."), { status: 400 }); }
+    }
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw Object.assign(new Error("JSON body must be an object."), { status: 400 });
+    }
+    return parsed;
+  }
+
   const chunks = [];
   let size = 0;
   for await (const chunk of req) {
     size += chunk.length;
-    if (size > maxBytes) throw Object.assign(new Error("Payload too large."), { status: 413 });
+    if (size > limit) throw Object.assign(new Error("Payload too large."), { status: 413 });
     chunks.push(chunk);
   }
   if (!chunks.length) return {};
+  let parsed;
   try {
-    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+    parsed = JSON.parse(Buffer.concat(chunks).toString("utf8"));
   } catch {
     throw Object.assign(new Error("Invalid JSON."), { status: 400 });
   }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw Object.assign(new Error("JSON body must be an object."), { status: 400 });
+  }
+  return parsed;
 }
 
 export async function readRawBody(req, maxBytes = 512 * 1024) {
@@ -73,18 +113,37 @@ export function parseCookies(req) {
   }));
 }
 
+export function cookieName(baseName) {
+  return isProductionRuntime() ? `__Host-${baseName}` : baseName;
+}
+
+export function cookieNames(baseName) {
+  return [...new Set([cookieName(baseName), `__Host-${baseName}`, baseName])];
+}
+
+export function cookieValue(cookies, baseName) {
+  for (const name of cookieNames(baseName)) {
+    if (cookies?.[name]) return String(cookies[name]);
+  }
+  return "";
+}
+
 export function cookie(name, value, options = {}) {
-  const attributes = [`${name}=${encodeURIComponent(value)}`, `Path=${options.path || "/"}`];
+  const hostOnly = String(name).startsWith("__Host-");
+  const path = hostOnly ? "/" : options.path || "/";
+  const attributes = [`${name}=${encodeURIComponent(value)}`, `Path=${path}`];
   if (options.maxAge !== undefined) attributes.push(`Max-Age=${Math.max(0, Math.floor(options.maxAge))}`);
   if (options.httpOnly !== false) attributes.push("HttpOnly");
-  if (options.secure !== false && process.env.NODE_ENV !== "development") attributes.push("Secure");
+  if (hostOnly || options.secure === true || (options.secure !== false && isProductionRuntime())) attributes.push("Secure");
   attributes.push(`SameSite=${options.sameSite || "Lax"}`);
-  if (options.domain) attributes.push(`Domain=${options.domain}`);
+  if (options.domain && !hostOnly) attributes.push(`Domain=${options.domain}`);
   return attributes.join("; ");
 }
 
 export function setCookies(res, values) {
-  res.setHeader("Set-Cookie", values);
+  const existing = typeof res.getHeader === "function" ? res.getHeader("Set-Cookie") : undefined;
+  const current = Array.isArray(existing) ? existing : existing ? [existing] : [];
+  res.setHeader("Set-Cookie", [...current, ...values]);
 }
 
 export function clientSignal(req) {
@@ -112,6 +171,21 @@ export function assertSameOrigin(req) {
   const fetchSite = String(req.headers?.["sec-fetch-site"] || "").toLowerCase();
   if (fetchSite && !["same-origin", "same-site", "none"].includes(fetchSite)) {
     throw Object.assign(new Error("Cross-origin account actions are not allowed."), { status: 403 });
+  }
+}
+
+export function assertCsrf(req) {
+  if (!STATE_CHANGING_METHODS.has(String(req.method || "").toUpperCase())) return;
+  const cookies = parseCookies(req);
+  const cookieToken = cookieValue(cookies, "brp_csrf");
+  const headerToken = String(req.headers?.["x-browserp-csrf"] || "").trim();
+  if (!/^[A-Za-z0-9_-]{43,128}$/.test(cookieToken)
+      || !/^[A-Za-z0-9_-]{43,128}$/.test(headerToken)
+      || !secureEqual(cookieToken, headerToken)) {
+    throw Object.assign(new Error("Your security token expired. Refresh the page and try again."), {
+      status: 403,
+      code: "CSRF_TOKEN_INVALID"
+    });
   }
 }
 

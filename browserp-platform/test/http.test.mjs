@@ -75,8 +75,13 @@ test("public pages and fallback API load without external secrets", async () => 
   const directory = await fetch(`${origin}/api/servers?platform=fivem&online=true`);
   const payload = await directory.json();
   assert.equal(directory.status, 200);
-  assert.ok(payload.servers.length >= 1);
-  assert.ok(payload.servers.every((server) => server.platform_id === "fivem" && server.online));
+  assert.deepEqual(payload.servers, []);
+  assert.equal(payload.total, 0);
+
+  const developers = await (await fetch(`${origin}/api/developers`)).json();
+  const resources = await (await fetch(`${origin}/api/resources`)).json();
+  assert.deepEqual(developers.developers, []);
+  assert.deepEqual(resources.resources, []);
 }));
 
 test("free tools execute through HTTP", async () => withServer(async (origin) => {

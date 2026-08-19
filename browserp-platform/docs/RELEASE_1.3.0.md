@@ -39,11 +39,18 @@ staff-reviewed HTTPS community link stored on a published, non-adult listing.
 `20260819151759_release_hardening.sql` is recorded after the verified v1.3.0
 production cutover and removes the legacy privileged RPC grants.
 
-## Deliberately incomplete at packaging
+## Handover outcome
 
-- manual owner Discord login;
-- Google Cloud OAuth client creation and manual Google login;
-- payment enablement and live webhook replacement;
-- final release hardening, which waits for the preview and server-only key.
+v1.3.0 was preview-tested and published to `browserp.com`. The transferred verification record reports Node.js 24, 32 JavaScript syntax checks, exactly 12 Vercel Functions and 26 passing tests. Production health was `ok` with no unexpected runtime errors at the handover snapshot.
 
-The two active v1.3 migrations were applied to production during release preflight; application deployment and final release hardening remain separate cutover steps.
+The corresponding production snapshot contained two Discord users/profiles, one active owner and no listed servers, pending submissions, staff moderation actions or payment orders. Payments and Google login remained disabled. Northstar and Civic cards on that historical homepage were visual examples, not live listings.
+
+## Outstanding at handover
+
+- complete one real submit → staff review → publish journey;
+- replace and fully test the Stripe webhook, refunds, disputes and reconciliation before enabling payments;
+- decide whether both Discord owner-allowlist entries are still required;
+- review remaining Supabase advisor warnings;
+- synchronize the local v1.3 history to GitHub without overwriting it from the older remote `main` branch.
+
+All three final production migrations through `20260819151759_release_hardening.sql` were recorded as applied before this handover record was closed.

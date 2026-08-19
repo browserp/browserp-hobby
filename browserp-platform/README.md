@@ -1,34 +1,36 @@
 # BrowseRP
 
-BrowseRP is a dependency-light FiveM roleplay server directory. Its public surface is intentionally small: a focused home page, the server directory, individual server pages, a reviewed listing form, the signed-in member dashboard and plain-language legal information. The staff centre remains a direct, unlinked operations route protected by application and database permissions. Promotion checkout remains launch-gated and is not part of the current public navigation.
+BrowseRP is a focused FiveM roleplay server directory. The public product is a small multipage site: home, server directory, reviewed listing form, individual server pages, member dashboard and plain-language legal information. The staff centre is a direct, unlinked route protected by Discord identity, application permissions and database policies.
 
-## Current release line
+## Release state
 
-- **Production:** v1.2.2 at `https://www.browserp.com/`
-- **Prepared candidate:** v1.3.0
+- **Production at the transferred baseline:** v1.3.0 at `https://www.browserp.com/`
+- **Prepared candidate:** v2.0.0; do not describe it as live until the exact verified preview is promoted
 - **Application root:** `browserp-platform`
 - **Vercel output:** `public`
+- **Runtime:** Node.js 24.x in Vercel region `dub1`
 - **Vercel Functions:** exactly 12, within the Hobby limit
+- **Package manager:** npm with the committed `package-lock.json`
 
-v1.3.0 reconstructs and extends the missing v1.2.3 work while preserving the clean production database. Payments remain disabled unless every checkout, webhook and server-only fulfillment safeguard is present and `PAYMENTS_ENABLED=true` is set intentionally.
+The transfer record says v1.3.0 was healthy in production, while GitHub `main` still pointed to the old v1.1.0 source. Preserve that warning until the release branch has passed CI and `main` is updated without a force-push.
 
-## Product and safety model
+The transferred production-data snapshot contained two Discord users and profiles, one active owner, and no listings, submissions, staff actions or payment orders. Payments and Google login were disabled. Those counts are a snapshot, not fixtures to display on the public site.
 
-- The public routes are `/`, `/servers`, `/list-server`, `/server/:slug`, `/dashboard` and `/legal`.
-- Public developer, resource, tool and staff links have been removed. `/staff` remains available only as a direct, `noindex` operations route and still requires an authorised Discord staff identity.
-- Search, filtering, ranking and first-pass moderation rules are deterministic.
-- Public production requests do not silently fall back to demo records when the database is unavailable.
-- Published listings may expose only a staff-reviewed HTTPS community link; unreviewed submission links remain private to the owner and authorised staff.
-- Promotion contributes no more than 6% of the discovery score; organic quality remains dominant.
-- Staff review is permission-scoped, evidence-first and single-item. Consequential decisions require a reason and create an audit record.
-- Discord is the staff-owner identity path. Linked non-Discord identities are denied at both the application and database boundaries, and auth triggers cannot reactivate suspended owners.
-- The site uses only essential Secure, HTTP-only authentication cookies. It includes no analytics or advertising trackers and writes no public data to local or session storage.
-- Checkout uses Stripe-hosted Checkout Sessions. A success redirect never grants credits; only a verified, server-signed, idempotent webhook can do that.
-- Server-only Supabase functions protect privacy rate limiting, trusted moderation output and payment fulfillment.
+## v2 product boundary
+
+- Public routes are `/`, `/servers`, `/list-server`, `/server/:slug`, `/dashboard` and `/legal`.
+- The directory renders only published database records. v2 does not present Northstar, Civic or any other fictional card as a real listing.
+- Listing submission requires a signed-in member, explicit acceptance of the current terms and listing standards, bounded plain-text fields, a canonical public HTTPS community link and server-side review.
+- The member dashboard shows published listings, recent submission status, saved servers and notifications.
+- `/staff` is absent from public navigation and the sitemap, sends `noindex`, and still requires an authorised Discord staff session. Obscurity is never treated as access control.
+- Staff actions are permission-scoped and single-item. Review decisions require a reason and create an audit record.
+- Approved website copy can be managed in the staff centre through schema-defined plain-text/boolean keys with draft, publish, rollback, version checks and revision history. Staff cannot inject raw HTML.
+- The browser uses only essential authentication and short-lived OAuth cookies. No analytics, advertising pixels, local storage or session storage are used.
+- Payments have no public launch path in v2. Keep them disabled until checkout, webhook, refund, dispute and reconciliation flows have all passed live end-to-end review.
 
 ## Local verification
 
-Use Node.js 24.x:
+Run from this directory with Node.js 24.x:
 
 ```bash
 npm ci
@@ -36,18 +38,17 @@ npm run verify
 npm run dev
 ```
 
-`npm run verify` checks JavaScript syntax, the Vercel function limit, release-versioned assets, ordered migrations, static HTML/accessibility contracts, CSP consistency and the Node test suite.
+`npm run verify` checks JavaScript syntax, the Vercel function limit, static contracts, migrations and the Node test suite. Vercel runs the same command as its build command; a failed verifier must fail the deployment.
 
-The local server runs on `http://127.0.0.1:8080`. Development-only catalog records are available only when no production backend is configured and the runtime is not Vercel/production.
+The local site is served at `http://127.0.0.1:8080`. Synthetic development data is allowed only on loopback, only with its explicit development flag, and never in Vercel or production.
 
-## Production rules
+## Release rules
 
-1. Never deploy the old `main` branch over the newer production release.
-2. Validate v1.3.0 on a preview deployment before promoting it.
-3. Production records `20260819143942_critical_security_boundaries.sql`, `20260819143947_public_server_join_links.sql` and `20260819151759_release_hardening.sql` as applied. They close the anonymous fulfillment bypass, make staff suspension durable, expose only staff-reviewed HTTPS community links and remove legacy privileged RPC grants. Do not reapply them.
-4. Verify the public server journey against those recorded database boundaries before promotion.
-5. Keep `PAYMENTS_ENABLED=false` until the Vercel webhook, live Stripe mode, signing secret, server-only Supabase key, fulfillment secret and replay/idempotency tests are complete.
-6. Keep the server-only v1.3 boundaries in place. A forced v1.2.2 rollback requires a deliberate, temporary restoration of its legacy submission, rate-limit and tool-run grants; never restore anonymous Stripe fulfillment.
-7. Never put passwords, OAuth secrets, privileged Supabase keys, Stripe secrets, recovery codes or raw network addresses in source, screenshots or chat.
+1. Never deploy the historical GitHub `main` branch over v1.3.0.
+2. Apply the reviewed additive v2 migration exactly once; do not rename, edit or replay production-recorded migrations.
+3. Deploy a preview from the exact candidate source, verify the full browser-to-database story, then promote that same artifact.
+4. Keep `PAYMENTS_ENABLED=false` and Google disabled unless their separate launch checklists are completed.
+5. Keep provider secrets in their dashboards. Never commit or paste passwords, OAuth secrets, privileged Supabase keys, Stripe secrets, recovery codes or raw network addresses.
+6. After production verification, create a recovery reference for the historical remote state and update GitHub through a reviewed, non-force release flow.
 
-See [Deployment](docs/DEPLOYMENT.md), [Architecture](docs/ARCHITECTURE.md), [Security](docs/SECURITY.md) and the [v1.3.0 release record](docs/RELEASE_1.3.0.md).
+See [Deployment](docs/DEPLOYMENT.md), [Architecture](docs/ARCHITECTURE.md), [Security](docs/SECURITY.md), the [v1.3.0 handover record](docs/RELEASE_1.3.0.md) and the [v2.0.0 candidate record](docs/RELEASE_2.0.0.md).

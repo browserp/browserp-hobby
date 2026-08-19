@@ -3,10 +3,7 @@ import { developmentCatalogAllowed } from "../lib/config.js";
 import { publicJson } from "../lib/http.js";
 import { rest } from "../lib/supabase.js";
 
-const fallback = [
-  { id: "demo-developer-1", display_name: "Northlight Studio", headline: "Accessible UI and community tooling", verified: true, specialties: ["Web UI", "Discord", "FiveM"] },
-  { id: "demo-developer-2", display_name: "Waypoint Systems", headline: "Configuration and server operations", verified: false, specialties: ["Infrastructure", "RedM", "Documentation"] }
-];
+const fallback = Object.freeze([]);
 
 export default endpoint("GET", async (_req, res) => {
   try {

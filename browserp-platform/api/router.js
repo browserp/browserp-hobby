@@ -1,18 +1,67 @@
 import { endpoint, ok } from "../lib/api.js";
-import { appUrl, developmentCatalogAllowed } from "../lib/config.js";
+import { appUrl, developmentCatalogAllowed, supabaseConfig } from "../lib/config.js";
 import { categoriesFromServers, platforms as fallbackPlatforms, servers as fallbackServers } from "../lib/catalog.js";
-import { assertSameOrigin, parseCookies, publicJson, readBody, redirect, safeReturnPath } from "../lib/http.js";
+import { assertSameOrigin, cookieValue, parseCookies, publicJson, readBody, redirect, safeReturnPath } from "../lib/http.js";
 import { sanitizePlainText } from "../lib/moderation.js";
 import { rateLimit } from "../lib/rate-limit.js";
 import {
   authCapabilities,
   beginOAuth,
+  csrfTokenForRequest,
   finishOAuth,
   getSession,
   rest,
   rpc,
   signOut
 } from "../lib/supabase.js";
+
+const PUBLIC_OVERVIEW_FIELDS = ["servers", "online", "verified", "players"];
+
+function publicOverviewFields(value) {
+  const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  return Object.fromEntries(PUBLIC_OVERVIEW_FIELDS.map((key) => {
+    const number = Number(source[key]);
+    return [key, Number.isFinite(number) && number >= 0 ? Math.floor(number) : 0];
+  }));
+}
+
+function safeServerRead() {
+  return supabaseConfig().privileged ? { useSecret: true } : {};
+}
+
+function contentMutation(body) {
+  const key = String(body.key || "").trim().toLowerCase();
+  const action = String(body.action || "").trim().toLowerCase();
+  const reason = sanitizePlainText(body.reason, 500);
+  const expectedVersion = Number(body.expectedVersion);
+  if (!/^[a-z][a-z0-9_.-]{2,79}$/.test(key)) {
+    throw Object.assign(new Error("Choose a valid content field."), { status: 400 });
+  }
+  if (!["save_draft", "publish", "rollback"].includes(action)) {
+    throw Object.assign(new Error("Choose a valid content action."), { status: 400 });
+  }
+  if (!Number.isSafeInteger(expectedVersion) || expectedVersion < 0) {
+    throw Object.assign(new Error("Reload the content editor before saving."), { status: 409 });
+  }
+  if (reason.length < 5) {
+    throw Object.assign(new Error("Add a short reason for this content change."), { status: 400 });
+  }
+
+  let value = body.value;
+  if (value !== undefined && typeof value !== "string" && typeof value !== "boolean") {
+    throw Object.assign(new Error("Content values must be plain text or a true/false setting."), { status: 400 });
+  }
+  if (typeof value === "string") {
+    value = value.trim();
+    if (!value || value.length > 4_000 || /[<>\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value)) {
+      throw Object.assign(new Error("Content must be plain text between 1 and 4,000 characters."), { status: 400 });
+    }
+  }
+  if (action === "save_draft" && value === undefined) {
+    throw Object.assign(new Error("Enter content before saving a draft."), { status: 400 });
+  }
+  return { key, action, reason, expectedVersion, value: value ?? null };
+}
 
 function authFailure(req, res, provider, returnTo, state) {
   const destination = new URL(returnTo, appUrl(req));
@@ -22,6 +71,7 @@ function authFailure(req, res, provider, returnTo, state) {
 
 function providerRoute(provider) {
   return endpoint("GET", async (req, res) => {
+    assertSameOrigin(req);
     const requestUrl = new URL(req.url || `/api/auth/${provider}`, appUrl(req));
     const returnTo = safeReturnPath(requestUrl.searchParams.get("returnTo"), "/dashboard");
     let capabilities;
@@ -56,7 +106,7 @@ const routes = {
       const { returnTo } = await finishOAuth(req, res);
       return redirect(res, `${appUrl(req)}${returnTo}`);
     } catch {
-      const returnTo = safeReturnPath(parseCookies(req).brp_auth_return, "/dashboard");
+      const returnTo = safeReturnPath(cookieValue(parseCookies(req), "brp_auth_return"), "/dashboard");
       const destination = new URL(returnTo, appUrl(req));
       destination.searchParams.set("auth", "failed");
       return redirect(res, destination.toString());
@@ -64,15 +114,17 @@ const routes = {
   }),
 
   "auth/session": endpoint("GET", async (req, res) => {
+    const csrfToken = csrfTokenForRequest(req, res);
     const session = await getSession(req, res);
-    if (!session) return ok(res, { authenticated: false, user: null });
+    if (!session) return ok(res, { authenticated: false, user: null, csrfToken });
     let profile = null;
     try {
-      profile = (await rest(`profiles?select=id,username,display_name,avatar_url,bio,joined_at,profile_visibility&id=eq.${encodeURIComponent(session.user.id)}&limit=1`, { accessToken: session.accessToken }))?.[0] || null;
+      profile = (await rest(`profiles?select=id,username,display_name,avatar_url,bio,joined_at,profile_visibility&id=eq.${encodeURIComponent(session.user.id)}&limit=1`, { useSecret: true }))?.[0] || null;
     } catch { /* Auth identity remains usable while profile provisioning catches up. */ }
     return ok(res, {
       authenticated: true,
       provider: session.provider,
+      csrfToken: session.csrfToken,
       user: { id: session.user.id, email: session.user.email || null, profile }
     });
   }),
@@ -148,9 +200,34 @@ const routes = {
     return ok(res, { result });
   }),
 
+  "admin/content": endpoint(["GET", "POST"], async (req, res) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") {
+      const entries = await rpc("staff_list_site_content", {}, session.accessToken);
+      return ok(res, { entries: Array.isArray(entries) ? entries : [] });
+    }
+    await rateLimit(req, "staff-content", 30, 300);
+    const body = contentMutation(await readBody(req, 12 * 1024));
+    let result;
+    try {
+      result = await rpc("staff_mutate_site_content", {
+        p_key: body.key,
+        p_value: body.value,
+        p_action: body.action,
+        p_reason: body.reason,
+        p_expected_version: body.expectedVersion
+      }, session.accessToken);
+    } catch (error) {
+      if (error.code === "40001") error.status = 409;
+      throw error;
+    }
+    return ok(res, { result });
+  }),
+
   platforms: endpoint("GET", async (_req, res) => {
     try {
-      const platforms = await rest("platforms?select=id,name,short_name,accent&enabled=eq.true&order=sort_order.asc");
+      const platforms = await rest("platforms?select=id,name,short_name,accent&enabled=eq.true&order=sort_order.asc", safeServerRead());
       return publicJson(res, { platforms: Array.isArray(platforms) ? platforms : [] }, 300);
     } catch (error) {
       if (!developmentCatalogAllowed()) throw error;
@@ -160,7 +237,7 @@ const routes = {
 
   categories: endpoint("GET", async (_req, res) => {
     try {
-      const categories = await rest("category_directory?select=name,count&order=count.desc&limit=30");
+      const categories = await rest("category_directory?select=name,count&order=count.desc&limit=30", safeServerRead());
       return publicJson(res, { categories: Array.isArray(categories) ? categories : [] }, 60);
     } catch (error) {
       if (!developmentCatalogAllowed()) throw error;
@@ -170,21 +247,27 @@ const routes = {
 
   "public/overview": endpoint("GET", async (_req, res) => {
     try {
-      return publicJson(res, { overview: await rpc("public_overview", {}) }, 30);
+      return publicJson(res, { overview: publicOverviewFields(await rpc("public_overview", {})) }, 30);
     } catch (error) {
       if (!developmentCatalogAllowed()) throw error;
       return publicJson(res, {
-        overview: {
+        overview: publicOverviewFields({
           servers: fallbackServers.length,
           online: fallbackServers.filter((server) => server.online).length,
           verified: fallbackServers.filter((server) => server.verified).length,
-          players: fallbackServers.reduce((sum, server) => sum + server.players, 0),
-          pendingReviews: 0,
-          boostsToday: 0,
-          toolRunsToday: 0,
-          moderationHealth: "Development catalog"
-        }
+          players: fallbackServers.reduce((sum, server) => sum + server.players, 0)
+        })
       }, 30);
+    }
+  }),
+
+  "public/content": endpoint("GET", async (_req, res) => {
+    try {
+      const content = await rpc("public_site_content", {}, undefined, safeServerRead());
+      return publicJson(res, { content: content && typeof content === "object" ? content : {} }, 60);
+    } catch (error) {
+      if (!developmentCatalogAllowed()) throw error;
+      return publicJson(res, { content: {} }, 60);
     }
   })
 };

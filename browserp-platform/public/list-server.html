@@ -3,65 +3,70 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#090a0e">
-    <meta name="description" content="Submit a FiveM roleplay server to BrowseRP for review.">
+    <meta name="theme-color" content="#0b0c0f">
+    <meta name="description" content="Submit your FiveM roleplay server to BrowseRP for review.">
     <meta name="robots" content="noindex,follow">
-    <link rel="canonical" href="/list-server">
-    <link rel="stylesheet" href="/site.css?v=1.4.3">
+    <link rel="canonical" href="https://www.browserp.com/list-server">
+    <link rel="stylesheet" href="/browserp-v2.css?v=2.0.0">
     <title>List your FiveM server — BrowseRP</title>
-    <script src="/site.js?v=1.4.0" defer></script>
-    <script src="/app.js?v=1.4.0" defer></script>
+    <script src="/browserp-shell.js?v=2.0.0" defer></script>
+    <script src="/browserp-directory.js?v=2.0.0" defer></script>
   </head>
   <body data-page="list-server">
     <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header" data-site-header>
-      <nav class="site-shell site-nav" aria-label="Main navigation">
-        <a class="site-brand" href="/" aria-label="BrowseRP home"><span class="brand-icon" aria-hidden="true">B</span><span>Browse<span class="brand-rp">RP</span></span></a>
-        <button class="site-menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="site-menu" aria-label="Open menu"><span></span><span></span><span></span></button>
-        <div class="site-menu" id="site-menu" data-site-menu>
-          <div class="site-links"><a href="/">Home</a><a href="/servers">Browse servers</a><a href="/list-server" aria-current="page">List your server</a></div>
-          <div class="site-actions"><a class="site-button site-button-secondary" href="/dashboard" data-account-link>My account</a></div>
+      <nav class="shell site-nav" aria-label="Main navigation">
+        <a class="brand" href="/" aria-label="BrowseRP home"><span class="brand-word">Browse</span><span class="brand-mark" aria-hidden="true"><img src="/browserp-rp-mark.png" alt=""></span></a>
+        <button class="menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="site-menu" aria-label="Open menu"><span></span><span></span><span></span></button>
+        <div class="nav-menu" id="site-menu" data-site-menu>
+          <div class="nav-links"><a href="/">Home</a><a href="/servers">Browse servers</a><a href="/list-server" aria-current="page">List your server</a></div>
+          <div class="nav-actions"><a class="button button-secondary" href="/dashboard" data-account-link>My account</a></div>
         </div>
       </nav>
     </header>
 
     <main id="main-content">
-      <section class="page-intro">
-        <div class="site-shell">
-          <span class="hero-label">For FiveM owners</span>
-          <h1>List your server.</h1>
-          <p>Give players a clear reason to join. We review every submission before it appears in the directory.</p>
-        </div>
-      </section>
+      <section class="page-hero"><div class="shell"><span class="eyebrow">For FiveM server owners</span><h1 data-content-key="listing.heading">Give players a clear reason to join.</h1><p data-content-key="listing.intro">Describe the community you have actually built. We review every submission before it becomes a public BrowseRP listing.</p></div></section>
 
-      <div class="site-shell listing-layout">
-        <aside class="listing-copy">
-          <span class="section-label">What happens next</span>
-          <h2>A useful listing, not an advert wall.</h2>
-          <p>Tell people what your server is actually like. Clear information makes it easier for the right players to find you.</p>
-          <div class="listing-points">
-            <div class="listing-point"><span>1</span><div><strong>You submit the details</strong><small>Server name, region, framework, description and a community link.</small></div></div>
-            <div class="listing-point"><span>2</span><div><strong>We review the listing</strong><small>We check that it is relevant, readable and safe to publish.</small></div></div>
-            <div class="listing-point"><span>3</span><div><strong>You manage it from your account</strong><small>Review updates and your published servers appear in the owner dashboard.</small></div></div>
+      <div class="shell listing-layout">
+        <aside class="listing-guide">
+          <span class="eyebrow">What happens next</span>
+          <h2>A proper listing, tied to your account.</h2>
+          <p>You stay in control of the server information while BrowseRP keeps the public directory useful and safe.</p>
+          <div class="steps">
+            <div class="step"><span class="step-number">1</span><div><strong>Sign in</strong><p>Your account connects you to the submission and its review updates.</p></div></div>
+            <div class="step"><span class="step-number">2</span><div><strong>Describe the server</strong><p>Explain the setting, play style and what a new player should expect.</p></div></div>
+            <div class="step"><span class="step-number">3</span><div><strong>We review it</strong><p>Approved submissions become public listings you can manage.</p></div></div>
           </div>
         </aside>
 
-        <section class="listing-panel" aria-labelledby="listing-form-title">
-          <h2 id="listing-form-title">FiveM server details</h2>
-          <p>Use normal language. Players want to know what they can do and what kind of roleplay to expect.</p>
-          <div class="form-notice" id="auth-notice">Checking your account…</div>
-          <form class="listing-form" id="listing-form">
-            <input type="hidden" name="platform" value="fivem">
-            <label class="form-field">Server name<input name="name" maxlength="80" required placeholder="Example: Northstar Roleplay"></label>
-            <div class="field-grid">
-              <label class="form-field">Region<select name="region" required><option value="">Choose a region</option><option>Europe</option><option>North America</option><option>Oceania</option><option>Global</option></select></label>
-              <label class="form-field">Primary language<input name="language" maxlength="60" required value="English"></label>
+        <section class="panel" aria-labelledby="listing-title">
+          <h2 id="listing-title">Your server details</h2>
+          <p>Use plain language and accurate information. A clear description is more useful than a page of slogans.</p>
+
+          <div class="auth-gate" id="listing-auth-gate">
+            <h3>Sign in before you start</h3>
+            <p>We need an account to connect the listing to its owner and return review decisions securely.</p>
+            <div class="auth-options">
+              <a class="button button-primary button-full" data-auth-provider="discord" href="/api/auth/discord?returnTo=/list-server" hidden>Continue with Discord</a>
+              <a class="button button-secondary button-full" data-auth-provider="google" href="/api/auth/google?returnTo=/list-server" hidden>Continue with Google</a>
+              <p class="form-status" id="provider-note">Checking the available sign-in option…</p>
             </div>
-            <label class="form-field">Framework <span class="optional">Optional</span><input name="framework" maxlength="80" placeholder="QBox, QBCore, ESX or custom"></label>
-            <label class="form-field">About your server<textarea name="description" minlength="40" maxlength="1500" required placeholder="Explain the roleplay style, setting, jobs, economy and what a new player should expect."></textarea><small>40–1,500 characters. Avoid slogans and repeated keywords.</small></label>
-            <label class="form-field">Community link<input name="communityUrl" type="url" pattern="https://.*" maxlength="300" required placeholder="https://discord.gg/yourserver"><small>Use an HTTPS Discord invite or official community website.</small></label>
-            <label class="inline-check"><input name="agreement" type="checkbox" required><span>I confirm that I am authorised to list this server and that the information follows the community rules.</span></label>
-            <button class="site-button site-button-primary site-button-full" id="submit-listing" type="submit">Submit for review</button>
+          </div>
+
+          <form class="form" id="listing-form" hidden inert>
+            <input type="hidden" name="platform" value="fivem">
+            <p class="form-status success" id="listing-account-notice"></p>
+            <label class="field">Server name<input name="name" maxlength="80" autocomplete="organization" required placeholder="Your server name"></label>
+            <div class="field-row">
+              <label class="field">Region<select name="region" required><option value="">Choose a region</option><option>Europe</option><option>North America</option><option>Oceania</option><option>Global</option></select></label>
+              <label class="field">Primary language<input name="language" maxlength="60" required value="English"></label>
+            </div>
+            <label class="field">Framework <span class="optional">Optional</span><input name="framework" maxlength="80" placeholder="QBox, QBCore, ESX or custom"></label>
+            <label class="field">About the server<textarea name="description" minlength="40" maxlength="1500" required placeholder="What kind of roleplay happens here? What makes the community different? What should a new player expect?"></textarea><small>40–1,500 characters. Please avoid repeated keywords and unsupported claims.</small></label>
+            <label class="field">Community link<input name="communityUrl" type="url" pattern="https://.*" maxlength="300" inputmode="url" required placeholder="https://discord.gg/yourserver"><small>Use an HTTPS Discord invite or the official community website.</small></label>
+            <label class="agreement"><input name="agreement" type="checkbox" required><span>I am authorised to list this server, the details are accurate, and the submission follows the <a href="/legal#standards">community rules</a>.</span></label>
+            <button class="button button-primary button-full" id="submit-listing" type="submit">Submit for review</button>
             <p class="form-status" id="listing-status" role="status" aria-live="polite"></p>
           </form>
         </section>
@@ -69,25 +74,13 @@
     </main>
 
     <footer class="site-footer">
-      <div class="site-shell footer-main">
-        <div class="footer-brand"><a class="site-brand" href="/"><span class="brand-icon" aria-hidden="true">B</span><span>Browse<span class="brand-rp">RP</span></span></a><p>A focused place to find and list FiveM roleplay communities.</p></div>
+      <div class="shell footer-main">
+        <div class="footer-brand"><a class="brand" href="/" aria-label="BrowseRP home"><span class="brand-word">Browse</span><span class="brand-mark" aria-hidden="true"><img src="/browserp-rp-mark.png" alt=""></span></a><p data-content-key="footer.tagline">A straightforward place to find and list FiveM roleplay communities.</p></div>
         <div class="footer-column"><h2>BrowseRP</h2><a href="/servers">Browse servers</a><a href="/dashboard">My account</a></div>
         <div class="footer-column"><h2>Information</h2><a href="/legal#privacy">Privacy</a><a href="/legal#cookies">Cookies</a><a href="/legal#terms">Terms</a><a href="/legal#standards">Community rules</a></div>
       </div>
-      <div class="site-shell footer-bottom"><span>© <span data-current-year>2026</span> BrowseRP. An LCAPUK project.</span><span>Not affiliated with Rockstar Games, Cfx.re or Discord.</span></div>
+      <div class="shell footer-bottom"><span>© <span data-current-year>2026</span> BrowseRP. Operated by LCAPUK.</span><span>Not affiliated with Rockstar Games, Cfx.re or Discord.</span></div>
     </footer>
-
-    <dialog class="site-dialog" id="sign-in-dialog">
-      <div class="dialog-inner">
-        <button class="dialog-close" type="button" data-close-dialog aria-label="Close sign-in">×</button>
-        <h2>Sign in to submit</h2>
-        <p>We use your account to show review updates and let you manage approved listings.</p>
-        <div class="provider-list" id="auth-provider-list">
-          <a class="site-button site-button-primary site-button-full" data-auth-provider="discord" href="/api/auth/discord?returnTo=/list-server" hidden>Continue with Discord</a>
-          <a class="site-button site-button-secondary site-button-full" data-auth-provider="google" href="/api/auth/google?returnTo=/list-server" hidden>Continue with Google</a>
-        </div>
-      </div>
-    </dialog>
-    <div class="site-toast" id="site-toast" role="status" aria-live="polite"></div>
+    <div class="toast" id="site-toast" role="status" aria-live="polite"></div>
   </body>
 </html>

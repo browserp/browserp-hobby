@@ -1,66 +1,75 @@
-# BrowseRP architecture
+# BrowseRP v2 architecture
 
-## Request boundaries
+## Product shape
 
-### Browser
+BrowseRP v2 is a dependency-light multipage website, not a single crowded application. Static HTML, CSS and JavaScript provide the public pages and authenticated workspaces:
 
-Static HTML, CSS and JavaScript provide the FiveM-first public experience and authenticated portal rendering. The public routes are `/`, `/servers`, `/list-server`, `/server/:slug`, `/dashboard` and `/legal`. Public developer, resource and tool pages are not part of the current surface. The browser receives only published directory fields, a staff-reviewed HTTPS community link, or data authorised for the signed-in member. It never receives Supabase server keys, Stripe secrets, OAuth client secrets, fulfillment secrets, private owner identifiers, unreviewed submission links or raw network addresses.
+- `/` — purpose, search entry and listing-owner call to action
+- `/servers` — published FiveM directory and filters
+- `/server/:slug` — one reviewed public listing
+- `/list-server` — authentication-first submission flow
+- `/dashboard` — a member's listings, submissions, saved servers and notifications
+- `/legal` — privacy, terms and listing standards
+- `/staff` — direct, unlinked staff operations route
 
-### Vercel Functions
+The browser receives only public directory fields or data authorised for the signed-in user. It never receives Supabase secret keys, OAuth client secrets, Stripe secrets, private allowlists, unreviewed community links or raw network addresses.
 
-Twelve functions provide validation, provider discovery, PKCE OAuth cookies, member/staff routing, privacy-preserving rate limiting, hosted Checkout creation and signed webhook verification. Production data failures are surfaced rather than replaced with sample records.
+## Request path
 
-### Supabase
+```text
+Browser
+  -> Cloudflare DNS/TLS/WAF/rate limit
+  -> Vercel static files or Node.js Function in dub1
+  -> Supabase Auth/Postgres in eu-west-1
+```
 
-Postgres stores profiles, platforms, listings, submissions, favorites, moderation queues, staff permissions/audits, promotion orders/ledger, developer profiles and resources. RLS is enabled throughout exposed schemas. Trusted operations use narrowly granted RPC functions.
+Cloudflare is defence in depth. Vercel Functions still validate method, media type, body size, origin/CSRF signal, authentication, permissions and input. Supabase RLS/RPC boundaries remain the final data-authorisation layer.
 
-### Stripe
+## Vercel Functions
 
-BrowseRP uses one-time, Stripe-hosted Checkout Sessions. The webhook re-fetches line items and verifies live/test mode, payment status, a server-only metadata signature, user identity, product metadata, price, quantity, amount, currency and catalog version before calling the service-role-only idempotent database ledger.
+The repository contains exactly 12 deployable JavaScript functions, within the Vercel Hobby limit. `api/router.js` consolidates provider discovery, OAuth, sessions, member operations, staff review and website-content operations. Dedicated functions serve health, directory search, listing submission and retained compatibility endpoints.
 
-## Authentication
+The public v2 navigation does not expose developer, resource, free-tool, boost or payment surfaces. Their retained handlers are not a statement that those products are launched; payments remain disabled and the edge policy keeps retired routes closed.
 
-Supabase Auth performs OAuth with PKCE. Discord and Google share the verified callback implementation, but staff access requires a Discord-only account. Both the application and `has_staff_permission` reject linked non-Discord identities; owner access also requires a currently enabled private allowlist entry. Provider buttons are derived from live Supabase provider settings, so Google remains hidden until configured.
+All functions run on Node.js 24 in `dub1`. The Vercel build runs `npm run verify`, and a failed verifier blocks the deployment.
 
-Session and PKCE values are stored in Secure, HTTP-only, SameSite=Lax cookies in production. Redirect paths are restricted to local relative paths. Canonical BrowseRP and Vercel preview hosts take precedence over stale `APP_URL` values.
+## Authentication and browser state
 
-These essential authentication and short-lived OAuth cookies are the site's only browser storage. Public code does not use local storage or session storage, and no analytics, advertising pixel or marketing tracker is loaded. Optional tracking must not be introduced without a separate privacy and consent review.
+Supabase Auth performs OAuth with state, nonce and PKCE. Discord is the staff-owner identity path. A staff session must contain one consistent Discord identity, map to an enabled private owner allowlist entry and pass application plus database permission checks.
 
-## Discovery score
+Session and short-lived OAuth values use Secure, HTTP-only, SameSite=Lax cookies in production. State-changing requests also require a synchroniser CSRF header derived from the authenticated session and a same-origin request. Redirects are restricted to local paths and trusted canonical hosts.
 
-Organic signals total 94%:
+These essential cookies are the only browser storage. v2 does not use local storage, session storage, analytics, advertising pixels or marketing trackers.
 
-- quality: 28%
-- engagement: 22%
-- uptime: 18%
-- player activity: 18%
-- owner verification: 8%
+## Listings
 
-Seven-day boost activity is capped at 6%. Paid visibility cannot replace community quality.
+Public directory reads use the reviewed `search_server_directory` projection. Only published, non-adult records can appear. A community action is rendered only for a canonical HTTPS value returned by that projection and opens with `nofollow`, `noopener` and `noreferrer`.
 
-## Staff operations
+Submission writes use a server-only Supabase function. The v2 boundary adds a request UUID, a one-way idempotency key, a request fingerprint, accepted terms/standards versions and a per-owner open-submission cap. Replaying the same request returns the existing submission; replaying a changed payload under the same key fails.
 
-The staff centre is not linked from the public site or sitemap. `/staff` remains a direct operations route with HTML and response-level `noindex` controls, but obscurity is not an authorization boundary. It requires an authorised Discord staff identity, and its API and database calls remain permission-scoped.
+The member dashboard reads only the signed-in owner's records. Staff review is evidence-first and single-item: retrieve the permitted item, choose an allowed action, provide a reason, and write one audited decision using an internal request ID.
 
-After authorization, the staff centre loads a permission-scoped queue snapshot. Before a decision button becomes actionable, `/api/admin/item` retrieves a safe evidence view under the caller's RLS permissions. The mutation then calls the audited single-item resolver with an explicit reason and request ID. There are no bulk enforcement controls.
+## Staff-managed website content
 
-## Published community links
+Website copy is not arbitrary HTML and the staff panel is not a general code editor. The v2 database migration defines an allowlist of known keys and value types in a private schema. Public readers receive only published values. Authorised Discord staff can:
 
-Listing owners can submit an HTTPS community link, but submissions and their links remain private during review. The recorded `20260819143947_public_server_join_links.sql` migration adds the reviewed link to the published directory projection after `20260819143942_critical_security_boundaries.sql`. The server page accepts only an HTTPS value and opens it with `nofollow`, `noopener` and `noreferrer`. The migration does not replace staff review or URL moderation.
+- save a bounded plain-text or boolean draft;
+- publish against the version they loaded;
+- roll back to an earlier published revision;
+- review current and published versions.
 
-## Privacy and abuse controls
+Optimistic version checks prevent silent overwrites. Publish/rollback requires the stronger permission, every mutation requires a reason, and revisions are retained for audit.
 
-The application HMAC-hashes the trusted Vercel client-address signal before database use. In production, write paths fail closed when `PRIVACY_HASH_SECRET` is absent. The server-only Supabase boundary is required before privileged rate-limit, trusted moderation and fulfillment grants are hardened.
+## Caching and security headers
 
-## Release strategy
+Vercel serves HTML with revalidation defaults. Authenticated shells (`/dashboard` and `/staff`) are explicitly private/no-store. CSS and JavaScript revalidate on every use so an HTML page cannot remain paired with a stale mixed-release bundle; stable images may be cached for one day.
 
-The v1.3 migrations are staged:
+The global response policy includes HSTS, a self-only CSP with no inline script/style allowance, frame/object/media blocking, `nosniff`, strict referrer handling, restrictive permissions, and same-origin opener/resource policy. `/staff` and `/dashboard` also emit `noindex`, but search exclusion is not an access-control mechanism.
 
-1. additive slug lookup, staff evidence and server-only submission functions coexist with v1.2.2;
-2. confirm the recorded critical security-boundaries migration before enabling account sign-in;
-3. confirm the recorded public-server-join-links migration after it and verify that only published, staff-reviewed HTTPS links become public;
-4. deploy and verify v1.3 with the server-only Supabase key;
-5. retain the recorded `20260819151759_release_hardening.sql` boundary that revokes legacy public/authenticated privileged RPC access;
-6. leave payments off until Stripe end-to-end, retry, refund and dispute procedures pass.
+## Payments
 
-Production records the active v1.3 migrations as `20260819143942`, `20260819143947` and `20260819151759`.
+The historical Stripe implementation remains quarantined. No public v2 navigation launches checkout, and `PAYMENTS_ENABLED` stays false. Payment work is a separate release requiring a replacement Vercel webhook plus tested fulfillment, replay, refund, dispute and reconciliation flows. A browser redirect is never proof of payment.
+
+## Release boundary
+
+The v2 migration is additive to the production v1.3 schema. It must be applied before code that calls its new submission/content RPCs is promoted. Preview validation covers browser, API, authentication and real database state; production promotion reuses that exact deployment artifact. GitHub synchronization happens only after production is healthy and the historical remote state has a recovery reference.
