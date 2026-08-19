@@ -319,11 +319,25 @@
       if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024) {
         toast("Choose a PNG, JPEG or WebP image under 5 MB.", "error"); return;
       }
-      const url = URL.createObjectURL(file);
-      const image = new Image(); image.src = url;
-      try { await image.decode(); } catch { URL.revokeObjectURL(url); toast("That image could not be read.", "error"); return; }
+      let url;
+      try {
+        url = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.addEventListener("load", () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("invalid image")), { once: true });
+          reader.addEventListener("error", () => reject(reader.error || new Error("image read failed")), { once: true });
+          reader.readAsDataURL(file);
+        });
+      } catch { toast("That image could not be read.", "error"); return; }
+      const image = new Image();
+      try {
+        await new Promise((resolve, reject) => {
+          image.addEventListener("load", resolve, { once: true });
+          image.addEventListener("error", () => reject(new Error("image decode failed")), { once: true });
+          image.src = url;
+        });
+      } catch { toast("That image could not be read.", "error"); return; }
       if (image.naturalWidth < 128 || image.naturalHeight < 128 || image.naturalWidth > 6000 || image.naturalHeight > 6000) {
-        URL.revokeObjectURL(url); toast("Choose an image between 128 and 6000 pixels.", "error"); return;
+        toast("Choose an image between 128 and 6000 pixels.", "error"); return;
       }
       const dialog = make("dialog", "portal-dialog avatar-crop-dialog-v3");
       const form = make("form", "dialog-form"); form.method = "dialog";
@@ -360,7 +374,7 @@
         try { await api("/api/me/avatar",{method:"POST",body:JSON.stringify({imageData:canvas.toDataURL("image/png")})});dialog.close();toast("Profile picture uploaded for staff screening.");await refresh(); }
         catch(error){toast(error.message,"error");save.disabled=false;save.textContent="Save cropped picture";}
       });
-      dialog.addEventListener("close",()=>{URL.revokeObjectURL(url);dialog.remove();},{once:true});
+      dialog.addEventListener("close",()=>dialog.remove(),{once:true});
       dialog.showModal(); render();
     });
     return shell;

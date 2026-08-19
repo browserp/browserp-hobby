@@ -75,3 +75,11 @@ test("search suggestions cover games, frameworks, tags, access and regions", () 
   assert.match(directory, /ArrowDown/);
   assert.match(directory, /role", "listbox"/);
 });
+
+test("profile picture previews remain compatible with the strict image CSP", () => {
+  const portal = read("public/browserp-portal-v2.js");
+  assert.match(portal, /new FileReader\(\)/);
+  assert.match(portal, /reader\.readAsDataURL\(file\)/);
+  assert.doesNotMatch(portal, /URL\.createObjectURL\(file\)/);
+  assert.doesNotMatch(portal, /URL\.revokeObjectURL\(url\)/);
+});
