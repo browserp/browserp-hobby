@@ -3,12 +3,37 @@ import test from "node:test";
 import { createHmac } from "node:crypto";
 import { createBrowseRPServer, staffDemoAllowed } from "../dev-server.mjs";
 
-async function withServer(run, options) {
-  const server = createBrowseRPServer(options);
-  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
-  const address = server.address();
-  try { await run(`http://127.0.0.1:${address.port}`); }
-  finally { await new Promise((resolve) => server.close(resolve)); }
+const isolatedProviderEnvironment = [
+  "SUPABASE_URL",
+  "SUPABASE_PUBLISHABLE_KEY",
+  "SUPABASE_SECRET_KEY",
+  "APP_URL",
+  "VERCEL",
+  "VERCEL_ENV",
+  "NODE_ENV",
+  "BROWSERP_LOCAL_STAFF_DEMO"
+];
+
+async function withServer(run, options = {}) {
+  const changedKeys = new Set([...isolatedProviderEnvironment, ...Object.keys(options.environment || {})]);
+  const previousEnvironment = new Map([...changedKeys].map((key) => [key, process.env[key]]));
+  for (const key of isolatedProviderEnvironment) delete process.env[key];
+  for (const [key, value] of Object.entries(options.environment || {})) process.env[key] = String(value);
+
+  let server;
+  try {
+    server = createBrowseRPServer(options);
+    await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address();
+    await run(`http://127.0.0.1:${address.port}`);
+  }
+  finally {
+    if (server?.listening) await new Promise((resolve) => server.close(resolve));
+    for (const [key, value] of previousEnvironment) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
 }
 
 test("the synthetic staff demo capability is opt-in and loopback-only", () => {

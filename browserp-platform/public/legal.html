@@ -64,11 +64,11 @@
 
           <section id="cookies">
             <span class="eyebrow">Cookies</span>
-            <h2>Essential sign-in cookies only.</h2>
+            <h2>Essential operational cookies only.</h2>
             <p>BrowseRP does not currently use analytics cookies, advertising pixels or marketing cookies. It does not ask for a cookie choice when there are no optional cookies to accept or reject.</p>
-            <h3>What is set when you sign in</h3>
-            <ul><li><strong>brp_access</strong> keeps the authenticated session active for about one hour.</li><li><strong>brp_refresh</strong> renews that session for up to 30 days.</li><li><strong>brp_csrf</strong> protects signed-in account and staff actions from cross-site requests.</li><li><strong>brp_pkce, brp_auth_return, brp_auth_provider, brp_oauth_state and brp_oauth_nonce</strong> protect and complete sign-in. They expire after about 10 minutes or are removed when the sign-in attempt finishes.</li></ul>
-            <p>In production these cookies use the secure <strong>__Host-</strong> prefix and are HTTP-only. They provide authentication and prevent sign-in abuse; they are not used to follow people across other websites. If optional analytics or advertising is introduced later, the policy and consent controls must be updated before that technology is switched on.</p>
+            <h3>What the service may set</h3>
+            <ul><li><strong>brp_access</strong> keeps the authenticated session active for about one hour.</li><li><strong>brp_refresh</strong> renews that session for up to 30 days.</li><li><strong>brp_csrf</strong> protects signed-in account and staff actions from cross-site requests.</li><li><strong>brp_pkce, brp_auth_return, brp_auth_provider, brp_oauth_state and brp_oauth_nonce</strong> protect and complete sign-in. They expire after about 10 minutes or are removed when the sign-in attempt finishes.</li><li><strong>__cf_bm and cf_clearance</strong> may be set by Cloudflare when its bot and abuse protections need to distinguish legitimate requests or remember a completed security challenge. Their duration is controlled by the security service and they are not used by BrowseRP for advertising.</li></ul>
+            <p>In production the BrowseRP sign-in cookies use the secure <strong>__Host-</strong> prefix and are HTTP-only. These cookies provide authentication, service security and abuse prevention; they are not used to follow people across other websites. If optional analytics or advertising is introduced later, the policy and consent controls must be updated before that technology is switched on.</p>
           </section>
 
           <section id="standards">
