@@ -79,6 +79,8 @@ test("staff MFA is staged without weakening Discord-only authorization", () => {
   assert.match(migration, /staff_activate_mfa_requirement/);
   assert.match(router, /auth\/mfa\/enroll/);
   assert.match(router, /auth\/mfa\/verify/);
+  assert.match(router, /Initial owner authenticator verified; mandatory staff MFA enabled\./);
+  assert.match(router, /staff\.mfa\.enforcement_deferred/);
 });
 
 test("member profiles use a narrow update RPC and queue changed content for screening", () => {

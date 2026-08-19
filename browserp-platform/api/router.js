@@ -207,13 +207,31 @@ const routes = {
     const code = String(body.code || "").replace(/\s+/g, "");
     if (!/^\d{6}$/.test(code)) throw Object.assign(new Error("Enter the six-digit authenticator code."), { status: 400 });
     const verified = await verifyTotp(res, session.accessToken, factorId, code, session.csrfToken);
+    let mfaRequirementActivated = false;
+    try {
+      const securityStatus = await rpc("staff_security_status", {}, verified.access_token);
+      if (securityStatus?.isOwner === true && securityStatus?.staffMfaRequired !== true) {
+        await rpc("staff_activate_mfa_requirement", {
+          p_reason: "Initial owner authenticator verified; mandatory staff MFA enabled.",
+          p_request_id: requestId
+        }, verified.access_token);
+        mfaRequirementActivated = true;
+      }
+    } catch (error) {
+      console.warn(JSON.stringify({
+        level: "warning",
+        event: "staff.mfa.enforcement_deferred",
+        requestId,
+        code: error?.code || "UNKNOWN"
+      }));
+    }
     await recordActivitySafely(req, res, {
       userId: session.user.id,
       eventType: "auth.mfa_verified",
       provider: "discord",
       requestId
     });
-    return ok(res, { verified: true, aal: verified?.user ? "aal2" : "aal2" });
+    return ok(res, { verified: true, aal: "aal2", mfaRequirementActivated });
   }),
 
   "auth/logout": endpoint("POST", async (req, res) => {
