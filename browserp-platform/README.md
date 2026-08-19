@@ -4,7 +4,7 @@ BrowseRP is a cross-game roleplay server directory for FiveM, RedM, Roblox, Mine
 
 ## Release state
 
-- **Current release candidate:** v2.2.0 for `https://www.browserp.com/`
+- **Current production release:** v2.3.0 at `https://www.browserp.com/`
 - **Production source before this candidate:** v2.1.0 on GitHub `main`
 - **Application root:** `browserp-platform`
 - **Vercel output:** `public`
