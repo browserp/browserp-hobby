@@ -5,6 +5,39 @@
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const make = (tag, text, className = "") => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = String(text); return el; };
 
+  function preferredTheme() {
+    try {
+      const saved = localStorage.getItem("browserp-theme");
+      if (saved === "light" || saved === "dark") return saved;
+    } catch { /* Browsing storage may be disabled. */ }
+    return matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    $$('[data-staff-theme]').forEach((button) => {
+      button.textContent = theme === "light" ? "Dark mode" : "Light mode";
+      button.setAttribute("aria-label", `Use ${theme === "light" ? "dark" : "light"} mode`);
+    });
+  }
+
+  function themeButton() {
+    const button = make("button", undefined, "button-v3 button-secondary-v3 staff-theme-v3");
+    button.type = "button";
+    button.dataset.staffTheme = "";
+    const currentTheme = document.documentElement.dataset.theme || preferredTheme();
+    button.textContent = currentTheme === "light" ? "Dark mode" : "Light mode";
+    button.setAttribute("aria-label", `Use ${currentTheme === "light" ? "dark" : "light"} mode`);
+    button.addEventListener("click", () => {
+      const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+      try { localStorage.setItem("browserp-theme", next); } catch { /* The choice still applies to this page. */ }
+      applyTheme(next);
+    });
+    return button;
+  }
+
+  applyTheme(preferredTheme());
+
   function brand() {
     const link = make("a", undefined, "logo-v3"); link.href = "/"; link.setAttribute("aria-label", "BrowseRP home");
     const lockup = make("span", undefined, "logo-lockup-v3");
@@ -67,13 +100,13 @@
     const root = $("#staff-app-v3");
     if (!root) return;
     const card = make("section", undefined, "staff-login-card-v3");
-    card.append(brand(), make("span", "Restricted operations", "eyebrow-v3"), make("h1", "Staff Panel"), make("p", "Staff access requires an assigned Discord account. Once enabled by the owner, a six-digit authenticator code is required on every new staff session."));
+    card.append(themeButton(), brand(), make("span", "Restricted operations", "eyebrow-v3"), make("h1", "Staff Panel"), make("p", "Staff access requires an assigned Discord account. Once enabled by the owner, a six-digit authenticator code is required on every new staff session."));
     const login = make("a", "Continue with Discord", "button-v3 button-primary-v3"); login.href = "/api/auth/discord?returnTo=%2Fstaffpanel%2Foverview"; card.append(login, make("p", "The address is intentionally absent from public navigation. The API still authorises every request.", "access-note")); root.replaceChildren(card);
   }
 
   function showMfa() {
     const root = $("#staff-app-v3"); const factors = state.session?.mfa?.factors || []; const verified = factors.find((factor) => factor.status === "verified");
-    const card = make("section", undefined, "staff-login-card-v3"); card.append(make("span", "Second-factor verification", "eyebrow-v3"), make("h1", verified ? "Enter your authenticator code" : "Secure your staff account"), make("p", verified ? "Open Google Authenticator or another TOTP app and enter the current six-digit code." : "Staff accounts use Discord for identity and a separate authenticator app for access."));
+    const card = make("section", undefined, "staff-login-card-v3"); card.append(themeButton(), make("span", "Second-factor verification", "eyebrow-v3"), make("h1", verified ? "Enter your authenticator code" : "Secure your staff account"), make("p", verified ? "Open Google Authenticator or another TOTP app and enter the current six-digit code." : "Staff accounts use Discord for identity and a separate authenticator app for access."));
     if (!verified) { const enroll = make("button", "Set up authenticator", "button-v3 button-primary-v3"); enroll.type = "button"; enroll.addEventListener("click", enrollMfa); card.append(enroll); }
     else card.append(mfaVerifyForm(verified.id));
     root.replaceChildren(card);
@@ -272,6 +305,6 @@
 
   function wireForms(){ $("#permission-form-v3")?.addEventListener("submit",savePermission); $("#mfa-activate-form-v3")?.addEventListener("submit",async(event)=>{event.preventDefault();try{await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"activate_mfa",reason:new FormData(event.currentTarget).get("reason")})});location.reload();}catch(error){status(error.message,true);}}); }
   function mobile(){const button=$("#staff-menu-v3");button?.addEventListener("click",()=>document.body.classList.toggle("staff-menu-open"));}
-  async function init(){mobile();if(!await ensureStaff())return;try{const page=document.body.dataset.staffPage;if(page==="overview")overview(await api("/api/admin/overview"));if(page==="moderation")await moderation();if(page==="accounts")await accounts();if(page==="staff")await staffAccess();if(page==="profiles")await profileQueue();if(page==="content")await content();if(page==="security")await securityPage();wireForms();}catch(error){if(error.status===401||error.status===403){showLogin();}else status(error.message,true);}}
+  async function init(){mobile();const top=$(".staff-top-v3");if(top){top.append(themeButton());applyTheme(document.documentElement.dataset.theme||preferredTheme());}if(!await ensureStaff())return;try{const page=document.body.dataset.staffPage;if(page==="overview")overview(await api("/api/admin/overview"));if(page==="moderation")await moderation();if(page==="accounts")await accounts();if(page==="staff")await staffAccess();if(page==="profiles")await profileQueue();if(page==="content")await content();if(page==="security")await securityPage();wireForms();}catch(error){if(error.status===401||error.status===403){showLogin();}else status(error.message,true);}}
   init();
 })();

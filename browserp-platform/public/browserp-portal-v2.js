@@ -400,7 +400,7 @@
       const authState = new URLSearchParams(location.search).get("auth");
       await signInGate({
         title: authState ? "Sign-in was not completed" : (state.content["dashboard.heading"] || "Your server owner workspace"),
-        description: authState ? "Please try again with an available sign-in method." : (state.content["dashboard.intro"] || undefined)
+        description: authState ? "Please try again with an available sign-in method." : "Sign in to manage your listings, reviews and saved servers."
       });
       return;
     }
@@ -416,7 +416,7 @@
       const unread = Number(overview.unreadNotifications || 0);
       const content = make("div", "dashboard-view");
       const name = displayName(session, overview);
-      const heading = portalHead("My account", `Welcome back, ${name}`, state.content["dashboard.intro"] || "Manage listings, follow reviews and return to communities you saved.", name);
+      const heading = portalHead("My account", `Welcome back, ${name}`, "Manage your listings, review status, saved servers and security alerts.", name);
       heading.actions.append(link("/list-server", "button button-primary", "List a server"));
       const logout = button("button button-secondary", "Sign out");
       logout.addEventListener("click", signOut);

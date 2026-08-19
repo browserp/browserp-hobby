@@ -7,6 +7,10 @@
     filters: { query: "", platform: "all", region: "all", online: false, verified: false, beginner: false, sort: "recommended" }
   };
   const select = (selector, root = document) => root.querySelector(selector);
+  const SEARCH_SUGGESTIONS = Object.freeze([
+    "FiveM roleplay", "RedM roleplay", "Roblox roleplay", "Minecraft roleplay", "Forza cruising", "Garry's Mod roleplay",
+    "public servers", "allowlist servers", "beginner friendly", "serious roleplay", "custom clothing"
+  ]);
 
   async function api(path, options = {}) {
     const method = String(options.method || "GET").toUpperCase();
@@ -50,6 +54,36 @@
     return node;
   }
 
+  function serverSkeletonCard() {
+    const card = element("a", "server-card server-card-skeleton");
+    card.href = "/servers";
+    card.setAttribute("aria-hidden", "true");
+    card.tabIndex = -1;
+    card.append(
+      element("div", "server-card-top server-card-top-skeleton"),
+      element("h3", "server-title-skeleton"),
+      element("div", "server-meta-skeleton"),
+      element("p", "server-description-skeleton"),
+      element("div", "server-tags server-tags-skeleton"),
+      element("div", "server-card-bottom"),
+      element("span", "server-card-action-skeleton", "\u00a0")
+    );
+    return card;
+  }
+
+  function setLoadingState(list, count = 6) {
+    if (!list) return;
+    list.setAttribute("aria-busy", "true");
+    list.replaceChildren(...Array.from({ length: count }, (_, index) => {
+      const row = serverSkeletonCard();
+      row.style.setProperty("--card-reveal-delay", `${index * 35}ms`);
+      window.__browserpReveal?.register?.(row, index * 35, false);
+      if (!row.classList.contains("reveal-v3")) row.classList.add("reveal-v3");
+      row.classList.add("is-revealed");
+      return row;
+    }));
+  }
+
   function serverCard(server) {
     const slug = String(server.slug || "").trim();
     const platformId = String(server.platform_id || "other").toLowerCase();
@@ -57,9 +91,24 @@
     const card = element("a", `server-card platform-${platformId.replace(/[^a-z0-9-]/g, "")}`);
     card.href = `/server/${encodeURIComponent(slug)}`;
     card.setAttribute("aria-label", `View ${String(server.name || "server")}`);
+    const media = element("div", "server-card-media");
+    const initial = element("span", "server-initials", initials(server.name));
+    const logo = String(server.banner_url || server.logo_url || "").trim();
+    if (logo && /^\/|^https?:\/\/[^/]+/i.test(logo)) {
+      const image = new Image();
+      image.className = "server-card-media-image";
+      image.loading = "lazy";
+      image.src = logo;
+      image.alt = "";
+      media.append(image);
+    } else {
+      media.append(initial);
+    }
+    const imageFallback = /[a-z]/i.test(platformId) ? element("span", "server-card-media-fallback", platformId.charAt(0).toUpperCase()) : null;
+    if (imageFallback && !logo) media.append(imageFallback);
 
     const top = element("div", "server-card-top");
-    top.append(element("span", "server-initials", initials(server.name)));
+    top.append(media);
     const status = element("span", `status${server.online ? " online" : ""}`, server.online ? "Online now" : "Status unavailable");
     top.append(status);
     card.append(top);
@@ -78,13 +127,27 @@
     const playerText = server.online
       ? `${Number(server.players || 0).toLocaleString()}${server.capacity ? ` / ${Number(server.capacity).toLocaleString()}` : ""} players`
       : "Player count unavailable";
-    bottom.append(element("strong", "", playerText), element("span", "", "View listing →"));
+    bottom.append(element("strong", "", playerText), element("span", "server-card-action", "View listing"));
     card.append(bottom);
     return card;
   }
 
   function renderServers(list, servers) {
-    list.replaceChildren(...servers.map(serverCard));
+    if (!list) return;
+    list.replaceChildren();
+    if (!servers.length) {
+      list.setAttribute("aria-busy", "false");
+      return;
+    }
+    servers.forEach((server, index) => {
+      const item = serverCard(server);
+      window.__browserpReveal?.register?.(item, Math.min(index, 12) * 40, true);
+      if (!item.classList.contains("reveal-v3")) {
+        item.classList.add("reveal-v3");
+        item.style.setProperty("--card-reveal-delay", `${Math.min(index, 12) * 40}ms`);
+      }
+      list.append(item);
+    });
     list.setAttribute("aria-busy", "false");
   }
 
@@ -109,6 +172,42 @@
     }
   }
 
+  function renderSearchSuggestions(searchInput, query) {
+    const list = select(".search-suggestions-v3");
+    if (!list || !searchInput) return;
+    const term = String(query || "").trim().toLowerCase();
+    const matches = SEARCH_SUGGESTIONS.filter((value) => value.toLowerCase().includes(term)).slice(0, 6);
+    if (!term || !matches.length) {
+      list.classList.remove("search-suggestions-open");
+      list.hidden = true;
+      list.inert = true;
+      return;
+    }
+    list.hidden = false;
+    list.inert = false;
+    requestAnimationFrame(() => list.classList.add("search-suggestions-open"));
+    list.replaceChildren(
+      ...matches.map((item) => {
+        const button = element("button", "search-suggestion-v3", item);
+        button.type = "button";
+        button.setAttribute("role", "option");
+        button.addEventListener("click", () => {
+          searchInput.value = item;
+          state.filters.query = item;
+          list.classList.remove("search-suggestions-open");
+          list.hidden = true;
+          list.inert = true;
+          if (document.body.dataset.page === "home") {
+            location.assign(`/servers?q=${encodeURIComponent(item)}`);
+            return;
+          }
+          directoryResults();
+        });
+        return button;
+      })
+    );
+  }
+
   function home() {
     select("#home-search-form")?.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -117,6 +216,20 @@
       if (query) destination.searchParams.set("q", query.slice(0, 120));
       location.assign(`${destination.pathname}${destination.search}`);
     });
+    const homeSearch = select("#home-search");
+    if (homeSearch) {
+      const wrapper = homeSearch.closest("form") || homeSearch.parentElement;
+      const suggestions = document.createElement("div");
+      suggestions.className = "search-suggestions-v3";
+      suggestions.hidden = true;
+      wrapper.append(suggestions);
+      homeSearch.addEventListener("focus", () => renderSearchSuggestions(homeSearch, homeSearch.value));
+      homeSearch.addEventListener("input", () => renderSearchSuggestions(homeSearch, homeSearch.value));
+      homeSearch.addEventListener("blur", () => {
+        suggestions.classList.remove("search-suggestions-open");
+        setTimeout(() => { suggestions.hidden = true; suggestions.inert = true; }, 220);
+      });
+    }
     featured();
   }
 
@@ -160,8 +273,8 @@
   async function directoryResults() {
     const list = select("#server-list");
     const empty = select("#directory-empty");
+    setLoadingState(list, 5);
     list.hidden = false;
-    list.setAttribute("aria-busy", "true");
     empty.hidden = true;
 
     const params = new URLSearchParams({ sort: state.filters.sort, limit: "100" });
@@ -221,10 +334,31 @@
     await loadPlatforms(select("#platform-filter"), true);
     syncControls();
     let searchTimer;
-    select("#directory-search").addEventListener("input", (event) => {
+    const directorySearch = select("#directory-search");
+    const searchContainer = directorySearch?.closest(".field-v3");
+    if (searchContainer) {
+      const suggestionRoot = document.createElement("div");
+      suggestionRoot.className = "search-suggestions-v3";
+      suggestionRoot.id = "directory-search-suggestions";
+      suggestionRoot.hidden = true;
+      searchContainer.append(suggestionRoot);
+    }
+    directorySearch?.addEventListener("focus", () => renderSearchSuggestions(directorySearch, state.filters.query));
+    directorySearch?.addEventListener("input", (event) => {
       clearTimeout(searchTimer);
       state.filters.query = event.target.value.trim().slice(0, 120);
+      renderSearchSuggestions(directorySearch, state.filters.query);
       searchTimer = window.setTimeout(directoryResults, 220);
+    });
+    directorySearch?.addEventListener("blur", () => {
+      const suggestionRoot = select("#directory-search-suggestions");
+      if (suggestionRoot) {
+        setTimeout(() => {
+          suggestionRoot.classList.remove("search-suggestions-open");
+          suggestionRoot.hidden = true;
+          suggestionRoot.inert = true;
+        }, 220);
+      }
     });
     select("#platform-filter").addEventListener("change", (event) => { state.filters.platform = event.target.value; directoryResults(); });
     select("#region-filter").addEventListener("change", (event) => { state.filters.region = event.target.value; directoryResults(); });
@@ -271,6 +405,8 @@
     });
     mobileFilters.addEventListener?.("change", () => setFilterPanel(false, true));
     setFilterPanel(false, true);
+    filterPanel?.classList.add("reveal-v3");
+    filterPanel?.style.setProperty("--card-reveal-delay", "60ms");
     directoryResults();
   }
 

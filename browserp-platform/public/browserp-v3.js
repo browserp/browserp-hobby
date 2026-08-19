@@ -61,6 +61,83 @@
     toast.timer = setTimeout(() => target.classList.remove("show"), 3600);
   }
 
+  const reveal = (() => {
+    let observer = null;
+    const prefersReduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const pending = new Set();
+
+    function createObserver() {
+      if (observer || prefersReduced()) return;
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const node = entry.target;
+          node.classList.add("is-revealed");
+          observer.unobserve(node);
+        });
+      }, { threshold: 0.12, rootMargin: "0px 0px -12% 0px" });
+      pending.forEach((node) => observer.observe(node));
+    }
+
+    function register(node, delay = 0, allowScrollReveal = true) {
+      if (!(node instanceof Element)) return;
+      if (!node.classList.contains("reveal-v3")) node.classList.add("reveal-v3");
+      if (delay >= 0) node.style.setProperty("--card-reveal-delay", `${delay}ms`);
+      if (!allowScrollReveal) {
+        node.classList.add("is-revealed");
+        if (observer) observer.unobserve(node);
+        return;
+      }
+      if (prefersReduced()) {
+        node.classList.add("is-revealed");
+        return;
+      }
+      if (!observer) {
+        pending.add(node);
+        createObserver();
+      } else {
+        observer.observe(node);
+      }
+    }
+
+    function scan(root = document) {
+      const selectors = [
+        ".hero-v3",
+        ".section-v3",
+        ".section-head-v3",
+        ".detail-hero-v3",
+        ".detail-layout-with-ad-v3",
+        ".content-with-rail-v3",
+        ".side-ad-v3",
+        ".footer-v3",
+        ".footer-column-v3",
+        ".trust-grid-v3 article",
+        ".game-grid-v3 a",
+        ".blog-card-v3",
+        ".detail-grid-v3 > article",
+        ".detail-grid-v3 > aside",
+        ".game-strip-v3",
+        ".directory-toolbar-v3",
+        ".ad-top-v3"
+      ];
+      let index = 0;
+      selectors.forEach((selector) => {
+        $$(selector, root).forEach((item) => {
+          if (item.classList.contains("reveal-v3")) return;
+          item.classList.add("reveal-v3", "reveal-on-scroll");
+          register(item, Math.min(index++, 18) * 30);
+        });
+      });
+    }
+
+    return {
+      register,
+      scan
+    };
+  })();
+
+  window.__browserpReveal = reveal;
+
   function menu() {
     const button = $("[data-menu-v3]");
     const links = $("[data-nav-links-v3]");
@@ -104,8 +181,25 @@
       const settings = node("a", "", "Profile & settings"); settings.href = "/dashboard#account"; settings.setAttribute("role", "menuitem");
       const theme = node("button", "", ""); theme.type = "button"; theme.dataset.themeLabel = ""; theme.setAttribute("role", "menuitem");
       const logout = node("button", "account-danger-v3", "Sign out"); logout.type = "button"; logout.setAttribute("role", "menuitem");
-      function setOpen(open) { menu.hidden = !open; button.setAttribute("aria-expanded", String(open)); wrap.classList.toggle("open", open); }
-      button.addEventListener("click", () => setOpen(menu.hidden));
+      let menuCloseTimer;
+      function setOpen(open) {
+        clearTimeout(menuCloseTimer);
+        button.setAttribute("aria-expanded", String(open));
+        wrap.classList.toggle("open", open);
+        menu.dataset.open = String(open);
+        menu.inert = !open;
+        if (open) {
+          menu.hidden = false;
+          requestAnimationFrame(() => { menu.dataset.open = "true"; });
+          return;
+        }
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          menu.hidden = true;
+          return;
+        }
+        menuCloseTimer = window.setTimeout(() => { menu.hidden = true; }, 190);
+      }
+      button.addEventListener("click", () => setOpen(button.getAttribute("aria-expanded") !== "true"));
       theme.addEventListener("click", () => { const next = document.documentElement.dataset.theme === "light" ? "dark" : "light"; saveTheme(next); applyTheme(next); setOpen(false); });
       logout.addEventListener("click", async () => { try { await api("/api/auth/logout", { method: "POST", body: JSON.stringify({}) }); location.assign("/"); } catch (error) { toast(error.message, "error"); } });
       document.addEventListener("click", (event) => { if (!wrap.contains(event.target)) setOpen(false); });
@@ -433,6 +527,7 @@
     menu();
     footer();
     $$('[data-year-v3]').forEach((element) => { element.textContent = String(new Date().getFullYear()); });
+    reveal.scan();
     await session();
     adverts();
     blogIndex();
