@@ -4,15 +4,18 @@ import { categoriesFromServers, platforms as fallbackPlatforms, servers as fallb
 import { assertSameOrigin, cookieValue, parseCookies, publicJson, readBody, redirect, safeReturnPath } from "../lib/http.js";
 import { sanitizePlainText } from "../lib/moderation.js";
 import { rateLimit } from "../lib/rate-limit.js";
+import { recordAccountActivity, unsealAddress } from "../lib/security.js";
 import {
   authCapabilities,
   beginOAuth,
   csrfTokenForRequest,
+  enrollTotp,
   finishOAuth,
   getSession,
   rest,
   rpc,
-  signOut
+  signOut,
+  verifyTotp
 } from "../lib/supabase.js";
 
 const PUBLIC_OVERVIEW_FIELDS = ["servers", "online", "verified", "players"];
@@ -27,40 +30,6 @@ function publicOverviewFields(value) {
 
 function safeServerRead() {
   return supabaseConfig().privileged ? { useSecret: true } : {};
-}
-
-function contentMutation(body) {
-  const key = String(body.key || "").trim().toLowerCase();
-  const action = String(body.action || "").trim().toLowerCase();
-  const reason = sanitizePlainText(body.reason, 500);
-  const expectedVersion = Number(body.expectedVersion);
-  if (!/^[a-z][a-z0-9_.-]{2,79}$/.test(key)) {
-    throw Object.assign(new Error("Choose a valid content field."), { status: 400 });
-  }
-  if (!["save_draft", "publish", "rollback"].includes(action)) {
-    throw Object.assign(new Error("Choose a valid content action."), { status: 400 });
-  }
-  if (!Number.isSafeInteger(expectedVersion) || expectedVersion < 0) {
-    throw Object.assign(new Error("Reload the content editor before saving."), { status: 409 });
-  }
-  if (reason.length < 5) {
-    throw Object.assign(new Error("Add a short reason for this content change."), { status: 400 });
-  }
-
-  let value = body.value;
-  if (value !== undefined && typeof value !== "string" && typeof value !== "boolean") {
-    throw Object.assign(new Error("Content values must be plain text or a true/false setting."), { status: 400 });
-  }
-  if (typeof value === "string") {
-    value = value.trim();
-    if (!value || value.length > 4_000 || /[<>\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value)) {
-      throw Object.assign(new Error("Content must be plain text between 1 and 4,000 characters."), { status: 400 });
-    }
-  }
-  if (action === "save_draft" && value === undefined) {
-    throw Object.assign(new Error("Enter content before saving a draft."), { status: 400 });
-  }
-  return { key, action, reason, expectedVersion, value: value ?? null };
 }
 
 function staffAccessMutation(body) {
@@ -88,6 +57,39 @@ function staffAccessMutation(body) {
   }
 
   return { discordUserId, action, roleKey: roleKey || null, reason, expectedVersion };
+}
+
+function uuid(value, message = "Choose a valid record.") {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(normalized)) {
+    throw Object.assign(new Error(message), { status: 400 });
+  }
+  return normalized;
+}
+
+function reason(value, minimum = 10) {
+  const normalized = sanitizePlainText(value, 500);
+  if (normalized.length < minimum) {
+    throw Object.assign(new Error(`Add a reason of at least ${minimum} characters.`), { status: 400 });
+  }
+  return normalized;
+}
+
+function plainBlock(value, limit, label) {
+  const text = String(value || "").replace(/\r\n?/g, "\n").trim();
+  if (!text || text.length > limit || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(text)) {
+    throw Object.assign(new Error(`${label} is missing or too long.`), { status: 400 });
+  }
+  return text;
+}
+
+async function recordActivitySafely(req, res, details) {
+  try { await recordAccountActivity(req, res, details); }
+  catch (error) {
+    // Authentication must not fail because the audit store is momentarily
+    // unavailable. No IP, user agent, token or other evidence is logged here.
+    console.warn("Account activity recording unavailable", { code: error?.code || "ACTIVITY_UNAVAILABLE" });
+  }
 }
 
 function authFailure(req, res, provider, returnTo, state) {
@@ -128,9 +130,15 @@ const routes = {
   "auth/discord": providerRoute("discord"),
   "auth/google": providerRoute("google"),
 
-  "auth/callback": endpoint("GET", async (req, res) => {
+  "auth/callback": endpoint("GET", async (req, res, requestId) => {
     try {
-      const { returnTo } = await finishOAuth(req, res);
+      const { returnTo, provider, user } = await finishOAuth(req, res);
+      await recordActivitySafely(req, res, {
+        userId: user.id,
+        eventType: "auth.signed_in",
+        provider,
+        requestId
+      });
       return redirect(res, `${appUrl(req)}${returnTo}`);
     } catch {
       const returnTo = safeReturnPath(cookieValue(parseCookies(req), "brp_auth_return"), "/dashboard");
@@ -151,13 +159,71 @@ const routes = {
     return ok(res, {
       authenticated: true,
       provider: session.provider,
+      aal: session.aal,
+      mfa: {
+        enrolled: session.factors.some((factor) => factor?.status === "verified"),
+        factors: session.factors.map((factor) => ({
+          id: factor.id,
+          status: factor.status,
+          friendlyName: factor.friendly_name || "Authenticator app"
+        }))
+      },
       csrfToken: session.csrfToken,
       user: { id: session.user.id, email: session.user.email || null, profile }
     });
   }),
 
+  "auth/mfa/enroll": endpoint("POST", async (req, res, requestId) => {
+    assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    await rateLimit(req, "mfa-enroll", 5, 3600);
+    const allowed = await rpc("staff_mfa_enrollment_allowed", {}, session.accessToken);
+    if (allowed !== true) throw Object.assign(new Error("An active BrowseRP staff assignment is required."), { status: 403 });
+    const body = await readBody(req, 4 * 1024);
+    const friendlyName = sanitizePlainText(body.friendlyName || "BrowseRP staff", 50);
+    const factor = await enrollTotp(session.accessToken, friendlyName || "BrowseRP staff");
+    await recordActivitySafely(req, res, {
+      userId: session.user.id,
+      eventType: "auth.mfa_enrolled",
+      provider: "discord",
+      requestId
+    });
+    return ok(res, {
+      factor: {
+        id: factor?.id,
+        qrCode: factor?.totp?.qr_code,
+        secret: factor?.totp?.secret,
+        uri: factor?.totp?.uri
+      }
+    }, 201);
+  }),
+
+  "auth/mfa/verify": endpoint("POST", async (req, res, requestId) => {
+    assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    await rateLimit(req, "mfa-verify", 8, 600);
+    const body = await readBody(req, 4 * 1024);
+    const factorId = uuid(body.factorId, "Choose the authenticator factor again.");
+    const code = String(body.code || "").replace(/\s+/g, "");
+    if (!/^\d{6}$/.test(code)) throw Object.assign(new Error("Enter the six-digit authenticator code."), { status: 400 });
+    const verified = await verifyTotp(res, session.accessToken, factorId, code, session.csrfToken);
+    await recordActivitySafely(req, res, {
+      userId: session.user.id,
+      eventType: "auth.mfa_verified",
+      provider: "discord",
+      requestId
+    });
+    return ok(res, { verified: true, aal: verified?.user ? "aal2" : "aal2" });
+  }),
+
   "auth/logout": endpoint("POST", async (req, res) => {
     assertSameOrigin(req);
+    const session = await getSession(req, res);
+    if (session) await recordActivitySafely(req, res, {
+      userId: session.user.id,
+      eventType: "auth.signed_out",
+      provider: session.provider
+    });
     await signOut(req, res);
     return ok(res, { signedOut: true });
   }),
@@ -165,6 +231,35 @@ const routes = {
   "me/overview": endpoint("GET", async (req, res) => {
     const session = await getSession(req, res, { required: true });
     return ok(res, { overview: await rpc("member_dashboard_overview", {}, session.accessToken) });
+  }),
+
+  "me/profile": endpoint(["GET", "POST"], async (req, res) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true });
+    if (req.method === "GET") {
+      const profile = (await rest(
+        `profiles?select=display_name,bio,profile_visibility,avatar_url,avatar_review_status,bio_review_status&id=eq.${encodeURIComponent(session.user.id)}&limit=1`,
+        { useSecret: true }
+      ))?.[0] || null;
+      return ok(res, { profile });
+    }
+    await rateLimit(req, "profile-update", 12, 900);
+    const body = await readBody(req, 8 * 1024);
+    const displayName = sanitizePlainText(body.displayName, 48);
+    const bio = String(body.bio || "").replace(/\r\n?/g, "\n").trim();
+    const visibility = String(body.visibility || "public").trim().toLowerCase();
+    if (displayName.length < 2 || bio.length > 500 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(bio)
+      || !["public", "members", "private"].includes(visibility)) {
+      throw Object.assign(new Error("Check your display name, bio and visibility."), { status: 400 });
+    }
+    const profile = await rpc("member_update_profile", {
+      p_display_name: displayName, p_bio: bio, p_visibility: visibility
+    }, session.accessToken);
+    await recordActivitySafely(req, res, {
+      userId: session.user.id, eventType: "profile.updated", provider: session.provider,
+      metadata: { bioSubmitted: Boolean(bio) }
+    });
+    return ok(res, { profile });
   }),
 
   "me/favorites": endpoint(["GET", "POST"], async (req, res) => {
@@ -200,7 +295,9 @@ const routes = {
     const kind = sanitizePlainText(requestUrl.searchParams.get("kind"), 20);
     const itemId = sanitizePlainText(requestUrl.searchParams.get("id"), 80);
     if (!kind || !itemId) throw Object.assign(new Error("Choose a queue item."), { status: 400 });
-    const item = await rpc("staff_review_item", { p_kind: kind, p_item_id: itemId }, session.accessToken);
+    const item = kind === "comment"
+      ? await rpc("staff_comment_review_item", { p_queue_id: uuid(itemId, "Choose a valid comment review.") }, session.accessToken)
+      : await rpc("staff_review_item", { p_kind: kind, p_item_id: itemId }, session.accessToken);
     if (!item) throw Object.assign(new Error("Queue item was not found or is no longer visible."), { status: 404 });
     return ok(res, { item });
   }),
@@ -217,38 +314,20 @@ const routes = {
     if (!kind || !itemId || !action || reason.length < 5) {
       throw Object.assign(new Error("A queue item, action and reason of at least five characters are required."), { status: 400 });
     }
-    const result = await rpc("staff_resolve_queue_item", {
-      p_kind: kind,
-      p_item_id: itemId,
-      p_action: action,
-      p_reason: reason,
-      p_request_id: id
-    }, session.accessToken);
-    return ok(res, { result });
-  }),
-
-  "admin/content": endpoint(["GET", "POST"], async (req, res) => {
-    if (req.method === "POST") assertSameOrigin(req);
-    const session = await getSession(req, res, { required: true, provider: "discord" });
-    if (req.method === "GET") {
-      const entries = await rpc("staff_list_site_content", {}, session.accessToken);
-      return ok(res, { entries: Array.isArray(entries) ? entries : [] });
-    }
-    await rateLimit(req, "staff-content", 30, 300);
-    const body = contentMutation(await readBody(req, 12 * 1024));
-    let result;
-    try {
-      result = await rpc("staff_mutate_site_content", {
-        p_key: body.key,
-        p_value: body.value,
-        p_action: body.action,
-        p_reason: body.reason,
-        p_expected_version: body.expectedVersion
+    const result = kind === "comment"
+      ? await rpc("staff_resolve_comment_review", {
+        p_queue_id: uuid(itemId, "Choose a valid comment review."),
+        p_action: action,
+        p_reason: reason,
+        p_request_id: id
+      }, session.accessToken)
+      : await rpc("staff_resolve_queue_item", {
+        p_kind: kind,
+        p_item_id: itemId,
+        p_action: action,
+        p_reason: reason,
+        p_request_id: id
       }, session.accessToken);
-    } catch (error) {
-      if (error.code === "40001") error.status = 409;
-      throw error;
-    }
     return ok(res, { result });
   }),
 
@@ -277,6 +356,217 @@ const routes = {
       throw error;
     }
     return ok(res, { result });
+  }),
+
+  "admin/permissions": endpoint(["GET", "POST"], async (req, res, id) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") {
+      return ok(res, { control: await rpc("staff_permission_control", {}, session.accessToken) });
+    }
+    await rateLimit(req, "staff-permissions", 30, 300);
+    const body = await readBody(req, 8 * 1024);
+    const discordUserId = String(body.discordUserId || "").trim();
+    const permissionKey = String(body.permissionKey || "").trim().toLowerCase();
+    const allowed = body.allowed === null ? null : Boolean(body.allowed);
+    if (!/^[0-9]{17,20}$/.test(discordUserId) || !/^[a-z][a-z0-9_.-]{2,79}$/.test(permissionKey)) {
+      throw Object.assign(new Error("Choose a valid staff account and permission."), { status: 400 });
+    }
+    return ok(res, { result: await rpc("staff_mutate_permission", {
+      p_discord_user_id: discordUserId,
+      p_permission_key: permissionKey,
+      p_allowed: allowed,
+      p_reason: reason(body.reason, 5),
+      p_request_id: id
+    }, session.accessToken) });
+  }),
+
+  "admin/security": endpoint(["GET", "POST"], async (req, res, id) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") {
+      const [status, activity, revealRequests] = await Promise.all([
+        rpc("staff_security_status", {}, session.accessToken),
+        rpc("staff_account_activity", { p_limit: 150 }, session.accessToken),
+        rpc("staff_network_reveal_control", {}, session.accessToken)
+      ]);
+      return ok(res, {
+        status,
+        activity: Array.isArray(activity) ? activity : [],
+        revealRequests: Array.isArray(revealRequests) ? revealRequests : []
+      });
+    }
+    await rateLimit(req, "staff-security", 20, 300);
+    const body = await readBody(req, 8 * 1024);
+    const action = String(body.action || "").trim().toLowerCase();
+    let result;
+    if (action === "activate_mfa") {
+      result = await rpc("staff_activate_mfa_requirement", {
+        p_reason: reason(body.reason, 5), p_request_id: id
+      }, session.accessToken);
+    } else if (action === "revoke_sessions") {
+      result = await rpc("staff_revoke_account_sessions", {
+        p_user_id: uuid(body.userId, "Choose a valid account."),
+        p_reason: reason(body.reason), p_request_id: id
+      }, session.accessToken);
+    } else if (action === "request_network") {
+      const activityId = Number(body.activityId);
+      if (!Number.isSafeInteger(activityId) || activityId < 1) throw Object.assign(new Error("Choose a valid activity record."), { status: 400 });
+      result = await rpc("staff_request_network_reveal", {
+        p_activity_id: activityId, p_reason: reason(body.reason)
+      }, session.accessToken);
+    } else if (action === "decide_network") {
+      result = await rpc("staff_decide_network_reveal", {
+        p_request_id: uuid(body.requestId, "Choose a valid reveal request."),
+        p_approved: body.approved === true,
+        p_reason: reason(body.reason)
+      }, session.accessToken);
+    } else if (action === "reveal_network") {
+      const activityId = Number(body.activityId);
+      if (!Number.isSafeInteger(activityId) || activityId < 1) throw Object.assign(new Error("Choose a valid activity record."), { status: 400 });
+      const evidence = await rpc("staff_network_reveal_evidence", {
+        p_activity_id: activityId,
+        p_request_id: body.requestId ? uuid(body.requestId, "Choose a valid reveal request.") : null
+      }, session.accessToken);
+      result = { address: unsealAddress(evidence?.ciphertext), expiresInSeconds: 60 };
+    } else {
+      throw Object.assign(new Error("Choose a valid security action."), { status: 400 });
+    }
+    return ok(res, { result });
+  }),
+
+  "admin/profiles": endpoint(["GET", "POST"], async (req, res, id) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") {
+      const profiles = await rpc("staff_profile_review_queue", {}, session.accessToken);
+      return ok(res, { profiles: Array.isArray(profiles) ? profiles : [] });
+    }
+    await rateLimit(req, "staff-profile-review", 30, 300);
+    const body = await readBody(req, 8 * 1024);
+    const field = String(body.field || "").trim().toLowerCase();
+    const action = String(body.action || "").trim().toLowerCase();
+    if (!["avatar", "bio"].includes(field) || !["approve", "reject"].includes(action)) {
+      throw Object.assign(new Error("Choose a valid profile-review action."), { status: 400 });
+    }
+    return ok(res, { result: await rpc("staff_review_profile_content", {
+      p_user_id: uuid(body.userId, "Choose a valid account."),
+      p_field: field,
+      p_action: action,
+      p_reason: reason(body.reason, 5),
+      p_request_id: id
+    }, session.accessToken) });
+  }),
+
+  "admin/adverts": endpoint(["GET", "POST"], async (req, res, id) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") {
+      const adverts = await rpc("staff_advert_control", {}, session.accessToken);
+      return ok(res, { adverts: Array.isArray(adverts) ? adverts : [] });
+    }
+    await rateLimit(req, "staff-adverts", 30, 300);
+    const body = await readBody(req, 16 * 1024);
+    const action = String(body.action || "").trim().toLowerCase();
+    if (!["save", "activate", "pause", "archive"].includes(action)) throw Object.assign(new Error("Choose a valid advert action."), { status: 400 });
+    const placement = String(body.placement || "").trim().toLowerCase();
+    const version = Number(body.expectedVersion || 0);
+    if (!Number.isSafeInteger(version) || version < 0) throw Object.assign(new Error("Reload the advert before saving."), { status: 409 });
+    return ok(res, { result: await rpc("staff_mutate_advert", {
+      p_id: body.id ? uuid(body.id, "Choose a valid advert.") : null,
+      p_action: action,
+      p_name: sanitizePlainText(body.name, 100),
+      p_placement: placement,
+      p_headline: sanitizePlainText(body.headline, 100),
+      p_body: sanitizePlainText(body.body, 300),
+      p_cta_label: sanitizePlainText(body.ctaLabel, 40),
+      p_destination_url: String(body.destinationUrl || "").trim().slice(0, 500),
+      p_starts_at: body.startsAt || null,
+      p_ends_at: body.endsAt || null,
+      p_expected_version: version,
+      p_reason: reason(body.reason, 5),
+      p_request_id: id
+    }, session.accessToken) });
+  }),
+
+  "admin/blogs": endpoint(["GET", "POST"], async (req, res, id) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") {
+      const posts = await rpc("staff_blog_control", {}, session.accessToken);
+      return ok(res, { posts: Array.isArray(posts) ? posts : [] });
+    }
+    await rateLimit(req, "staff-blogs", 20, 300);
+    const body = await readBody(req, 32 * 1024);
+    const action = String(body.action || "").trim().toLowerCase();
+    if (!["save", "publish", "archive"].includes(action)) throw Object.assign(new Error("Choose a valid blog action."), { status: 400 });
+    const slug = String(body.slug || "").trim().toLowerCase();
+    return ok(res, { result: await rpc("staff_mutate_blog", {
+      p_id: body.id ? uuid(body.id, "Choose a valid blog post.") : null,
+      p_action: action,
+      p_title: sanitizePlainText(body.title, 140),
+      p_slug: slug,
+      p_excerpt: sanitizePlainText(body.excerpt, 400),
+      p_body: action === "archive" && !body.body ? "Archived post content remains unchanged." : plainBlock(body.body, 20_000, "Blog body"),
+      p_seo_title: sanitizePlainText(body.seoTitle, 160),
+      p_seo_description: sanitizePlainText(body.seoDescription, 300),
+      p_reason: reason(body.reason, 5),
+      p_request_id: id
+    }, session.accessToken) });
+  }),
+
+  "admin/bans": endpoint(["GET", "POST"], async (req, res, id) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") return ok(res, { control: await rpc("staff_ban_control", {}, session.accessToken) });
+    await rateLimit(req, "staff-bans", 15, 300);
+    const body = await readBody(req, 12 * 1024);
+    const action = String(body.action || "").trim().toLowerCase();
+    let result;
+    if (action === "apply") {
+      const activityId = Number(body.activityId);
+      if (!Number.isSafeInteger(activityId) || activityId < 1) throw Object.assign(new Error("Choose a valid account activity."), { status: 400 });
+      result = await rpc("staff_apply_security_ban", {
+        p_activity_id: activityId,
+        p_target_type: String(body.targetType || "").trim().toLowerCase(),
+        p_scope: String(body.scope || "platform").trim().toLowerCase(),
+        p_reason_code: sanitizePlainText(body.reasonCode, 80),
+        p_reason: reason(body.reason),
+        p_permanent: body.permanent !== false,
+        p_request_id: id
+      }, session.accessToken);
+    } else if (action === "decide_appeal") {
+      result = await rpc("staff_decide_security_appeal", {
+        p_appeal_id: uuid(body.appealId, "Choose a valid appeal."),
+        p_approved: body.approved === true,
+        p_reason: reason(body.reason),
+        p_request_id: id
+      }, session.accessToken);
+    } else if (action === "revoke") {
+      result = await rpc("staff_revoke_security_ban", {
+        p_ban_id: uuid(body.banId, "Choose a valid ban."),
+        p_reason: reason(body.reason),
+        p_request_id: id
+      }, session.accessToken);
+    } else throw Object.assign(new Error("Choose a valid ban action."), { status: 400 });
+    return ok(res, { result });
+  }),
+
+  "public/appeals": endpoint("POST", async (req, res) => {
+    assertSameOrigin(req);
+    await rateLimit(req, "ban-appeal", 3, 3600);
+    const body = await readBody(req, 8 * 1024);
+    const reference = String(body.reference || "").trim().toUpperCase();
+    const email = String(body.email || "").trim().toLowerCase();
+    const statement = plainBlock(body.statement, 3000, "Appeal statement");
+    if (!/^BRP-[A-Z0-9]{10}$/.test(reference) || email.length > 254) {
+      throw Object.assign(new Error("Enter the ban reference and contact email exactly as shown."), { status: 400 });
+    }
+    return ok(res, { appeal: await rpc("submit_security_ban_appeal_server", {
+      p_reference: reference,
+      p_contact_email: email,
+      p_statement: statement
+    }, undefined, { useSecret: true }) }, 201);
   }),
 
   platforms: endpoint("GET", async (_req, res) => {
@@ -323,6 +613,29 @@ const routes = {
       if (!developmentCatalogAllowed()) throw error;
       return publicJson(res, { content: {} }, 60);
     }
+  }),
+
+  "public/adverts": endpoint("GET", async (req, res) => {
+    const requestUrl = new URL(req.url || "/api/public/adverts", appUrl(req));
+    const placement = sanitizePlainText(requestUrl.searchParams.get("placement") || "top", 30);
+    if (!["top", "side", "directory", "server_detail"].includes(placement)) {
+      throw Object.assign(new Error("Choose a valid advert placement."), { status: 400 });
+    }
+    const adverts = await rpc("public_advertisements", { p_placement: placement });
+    return publicJson(res, { adverts: Array.isArray(adverts) ? adverts : [] }, 60);
+  }),
+
+  "public/blogs": endpoint("GET", async (req, res) => {
+    const requestUrl = new URL(req.url || "/api/public/blogs", appUrl(req));
+    const slug = sanitizePlainText(requestUrl.searchParams.get("slug"), 160).toLowerCase();
+    if (slug && !/^[a-z0-9-]{3,160}$/.test(slug)) throw Object.assign(new Error("Blog article not found."), { status: 404 });
+    if (slug) {
+      const post = await rpc("public_blog_post", { p_slug: slug });
+      if (!post) throw Object.assign(new Error("Blog article not found."), { status: 404 });
+      return publicJson(res, { post }, 120);
+    }
+    const posts = await rpc("public_blog_index", {});
+    return publicJson(res, { posts: Array.isArray(posts) ? posts : [] }, 120);
   })
 };
 

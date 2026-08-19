@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en-GB">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive,nosnippet"><title>Staff permissions — BrowseRP Staff</title><link rel="icon" href="/browserp-mark-v3.png"><link rel="stylesheet" href="/browserp-v3.css?v=2.1.1"><link rel="stylesheet" href="/staffpanel-v3.css?v=2.1.1"><script src="/staffpanel-v3.js?v=2.1.1" defer></script></head>
+<body class="staff-v3" data-staff-page="staff">
+  <div class="staff-mobile-bar-v3"><span class="logo-lockup-v3"><span class="logo-word-v3">Browse</span><img src="/browserp-mark-v3.png" alt="RP"></span><button class="button-v3 button-secondary-v3" id="staff-menu-v3">Menu</button></div>
+  <div class="staff-shell-v3" id="staff-app-v3">
+    <aside class="staff-sidebar-v3"><a class="logo-v3" href="/"><span class="logo-lockup-v3"><span class="logo-word-v3">Browse</span><img src="/browserp-mark-v3.png" alt="RP"></span></a><nav class="staff-nav-v3"><a href="/staffpanel/overview">Overview</a><a href="/staffpanel/moderation">Moderation & reports</a><a href="/staffpanel/profiles">Profile screening</a><a href="/staffpanel/accounts">Account activity</a><a href="/staffpanel/staff" aria-current="page">Staff & permissions</a><a href="/staffpanel/security">Bans & appeals</a><a href="/staffpanel/content">Adverts & blog</a></nav></aside>
+    <main class="staff-main-v3">
+      <header class="staff-top-v3"><div><span class="eyebrow-v3">Owner-only controls</span><h1>Staff & permissions</h1><p>Ranks provide safe defaults. The owner can allow or deny individual permissions for each non-owner staff account.</p></div></header>
+      <section class="staff-section-v3"><div class="staff-section-head-v3"><div><h2>Staff access</h2><p>The protected owner cannot be edited here.</p></div></div><div class="staff-table-wrap-v3"><table class="staff-table-v3"><thead><tr><th>Name</th><th>Discord ID</th><th>Rank</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead><tbody id="staff-members-rows"></tbody></table></div></section>
+      <section class="staff-section-v3"><div class="staff-section-head-v3"><div><h2>Individual permission overrides</h2><p>Use rank default unless this person needs a specific exception.</p></div></div><form class="staff-form-v3" id="permission-form-v3"><label class="field-v3"><span>Staff member</span><select id="permission-user" required></select></label><div class="permission-grid-v3" id="permission-grid-v3"></div><label class="field-v3"><span>Reason for change</span><textarea name="reason" minlength="5" maxlength="500" required></textarea></label><button class="button-v3 button-primary-v3" type="submit">Save permission overrides</button></form></section>
+      <p id="staff-status-v3" role="status"></p>
+    </main>
+  </div>
+</body>
+</html>

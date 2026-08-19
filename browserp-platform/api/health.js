@@ -19,7 +19,13 @@ export default endpoint("GET", async (_req, res) => {
     authenticationStatus = providers.discord ? "ready" : "unavailable";
   } catch { /* Keep provider and configuration detail out of this response. */ }
 
-  const securityStatus = env("PRIVACY_HASH_SECRET") ? "ready" : "unavailable";
+  const evidenceKey = env("NETWORK_EVIDENCE_KEY");
+  let evidenceReady = /^[0-9a-f]{64}$/i.test(evidenceKey);
+  if (!evidenceReady && evidenceKey) {
+    try { evidenceReady = Buffer.from(evidenceKey, "base64").length === 32; }
+    catch { evidenceReady = false; }
+  }
+  const securityStatus = env("PRIVACY_HASH_SECRET") && evidenceReady ? "ready" : "unavailable";
   const coreReady = backendStatus === "ready"
     && authenticationStatus === "ready"
     && securityStatus === "ready";

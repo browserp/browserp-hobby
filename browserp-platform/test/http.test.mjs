@@ -80,18 +80,18 @@ test("the synthetic staff demo route is absent from a production runtime", async
 test("public pages and fallback API load without external secrets", async () => withServer(async (origin) => {
   const home = await fetch(origin);
   assert.equal(home.status, 200);
-  assert.match(await home.text(), /Find a server that[\s\S]*feels right/);
-  for (const path of ["/servers", "/list-server", "/dashboard", "/staff", "/legal", "/server/northstar-roleplay"]) {
+  assert.match(await home.text(), /Find a roleplay server that[\s\S]*actually fits/);
+  for (const path of ["/servers", "/list-server", "/dashboard", "/staffpanel", "/legal", "/about", "/blog", "/appeal", "/advertise", "/coins", "/server/northstar-roleplay"]) {
     const response = await fetch(`${origin}${path}`);
     assert.equal(response.status, 200, path);
-    if (path === "/staff") {
+    if (path === "/staffpanel") {
       assert.match(response.headers.get("x-robots-tag") || "", /noindex, nofollow, noarchive/);
     }
   }
 
-  for (const path of ["/", "/servers", "/list-server", "/dashboard", "/legal", "/server/northstar-roleplay"]) {
+  for (const path of ["/", "/servers", "/list-server", "/dashboard", "/legal", "/about", "/blog", "/server/northstar-roleplay"]) {
     const response = await fetch(`${origin}${path}`);
-    assert.doesNotMatch(await response.text(), /href=["']\/staff["']/i, path);
+    assert.doesNotMatch(await response.text(), /href=["']\/staffpanel/i, path);
   }
 
   assert.equal((await fetch(`${origin}/developers`)).status, 404);

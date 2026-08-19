@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+  <title>Security, bans & appeals — BrowseRP Staff</title>
+  <link rel="icon" href="/browserp-mark-v3.png">
+  <link rel="stylesheet" href="/browserp-v3.css?v=2.1.1">
+  <link rel="stylesheet" href="/staffpanel-v3.css?v=2.1.1">
+  <script src="/staffpanel-v3.js?v=2.1.1" defer></script>
+</head>
+<body class="staff-v3" data-staff-page="security">
+  <div class="staff-mobile-bar-v3"><span class="logo-lockup-v3"><span class="logo-word-v3">Browse</span><img src="/browserp-mark-v3.png" alt="RP"></span><button class="button-v3 button-secondary-v3" id="staff-menu-v3">Menu</button></div>
+  <div class="staff-shell-v3" id="staff-app-v3">
+    <aside class="staff-sidebar-v3">
+      <a class="logo-v3" href="/"><span class="logo-lockup-v3"><span class="logo-word-v3">Browse</span><img src="/browserp-mark-v3.png" alt="RP"></span></a>
+      <nav class="staff-nav-v3"><a href="/staffpanel/overview">Overview</a><a href="/staffpanel/moderation">Moderation & reports</a><a href="/staffpanel/profiles">Profile screening</a><a href="/staffpanel/accounts">Account activity</a><a href="/staffpanel/staff">Staff & permissions</a><a href="/staffpanel/security" aria-current="page">Bans & appeals</a><a href="/staffpanel/content">Adverts & blog</a></nav>
+    </aside>
+    <main class="staff-main-v3">
+      <header class="staff-top-v3"><div><span class="eyebrow-v3">Owner-controlled security</span><h1>Security, bans & appeals</h1><p>Authenticator enforcement, account/device/network restrictions and evidence-based appeals.</p></div></header>
+      <div class="security-banner-v3" id="mfa-enforcement-v3">Loading staff MFA status…</div>
+      <form class="staff-form-v3 panel-v3" id="mfa-activate-form-v3" hidden inert>
+        <h2>Activate mandatory staff MFA</h2><p>This permanently requires AAL2 authenticator verification for every staff request. Verify your own authenticator first.</p>
+        <label class="field-v3"><span>Activation reason</span><input name="reason" minlength="5" maxlength="500" value="Require authenticator verification for all staff"></label>
+        <button class="button-v3 button-primary-v3" type="submit">Activate MFA requirement</button>
+      </form>
+      <section class="staff-section-v3"><div class="staff-section-head-v3"><div><h2>Protected IP requests</h2><p>Only owners can approve a request. Approved access expires after ten minutes and can be used once.</p></div></div><div class="staff-table-wrap-v3"><table class="staff-table-v3"><thead><tr><th>Requester</th><th>Masked network</th><th>Reason</th><th>Status</th><th>Requested</th><th>Decision</th></tr></thead><tbody id="network-request-rows"></tbody></table></div></section>
+      <section class="staff-section-v3"><div class="staff-section-head-v3"><div><h2>Active bans</h2><p>Account, first-party device token or network-prefix hashes. Raw IPs are not needed to enforce a ban.</p></div></div><div class="staff-table-wrap-v3"><table class="staff-table-v3"><thead><tr><th>Reference</th><th>Target</th><th>Scope</th><th>Reason</th><th>Created</th><th>Actions</th></tr></thead><tbody id="security-ban-rows"></tbody></table></div></section>
+      <section class="staff-section-v3"><div class="staff-section-head-v3"><div><h2>Open appeals</h2><p>Approving an appeal revokes the associated ban.</p></div></div><div class="staff-table-wrap-v3"><table class="staff-table-v3"><thead><tr><th>Reference</th><th>Statement</th><th>Submitted</th><th>Decision</th></tr></thead><tbody id="security-appeal-rows"></tbody></table></div></section>
+      <p id="staff-status-v3" role="status"></p>
+    </main>
+  </div>
+</body>
+</html>

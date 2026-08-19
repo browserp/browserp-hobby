@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /dashboard
+Disallow: /staffpanel
+Disallow: /appeal
+Disallow: /coins
 Disallow: /api/
 Sitemap: https://www.browserp.com/sitemap.xml

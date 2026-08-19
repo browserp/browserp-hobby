@@ -106,27 +106,21 @@ test("staff evidence ends as SECURITY INVOKER and accepts production's flat resp
   assert.match(portal, /item\?\.record \|\| item\?\.item \|\| item \|\| \{\}/);
 });
 
-test("the staff preview is synthetic, read-only and absent from production runtimes", () => {
-  const portal = readFileSync(join(root, "public", "portal.js"), "utf8");
-  const server = readFileSync(join(root, "dev-server.mjs"), "utf8");
-  const staff = readFileSync(join(root, "public", "staff.html"), "utf8");
-  const demoStart = portal.indexOf("function renderLocalStaffDemo");
-  const demoEnd = portal.indexOf("function closeReviewDialog");
-  const demoFlow = portal.slice(demoStart, demoEnd);
-  const initFlow = portal.slice(portal.indexOf("async function init()"));
+test("the staff panel is a separate MFA-aware multi-page workspace", () => {
+  const staff = readFileSync(join(root, "public", "staffpanel-v3.js"), "utf8");
+  const login = readFileSync(join(root, "public", "staffpanel.html"), "utf8");
+  const accounts = readFileSync(join(root, "public", "staffpanel-accounts.html"), "utf8");
+  const vercel = readFileSync(join(root, "vercel.json"), "utf8");
 
-  assert.ok(demoStart >= 0 && demoEnd > demoStart);
-  assert.doesNotMatch(demoFlow, /\/api\/(?:auth|admin)\//);
-  assert.doesNotMatch(demoFlow, /data-staff-action|data-review-action/);
-  assert.match(demoFlow, /LOCAL · SYNTHETIC · READ ONLY/);
-  assert.ok(initFlow.indexOf("await loadLocalStaffDemo()") < initFlow.indexOf("await loadAuth()"));
-  assert.match(server, /BROWSERP_LOCAL_STAFF_DEMO === "1"/);
-  assert.match(server, /environment\.NODE_ENV !== "production"/);
-  assert.match(server, /!environment\.VERCEL[\s\S]*!environment\.VERCEL_ENV/);
-  assert.match(server, /STAFF_DEMO_HOSTS\.has\(hostnameFromHostHeader\(hostHeader\)\)/);
-  assert.match(server, /STAFF_DEMO_CLIENTS\.has\(String\(remoteAddress/);
-  assert.match(staff, /href="#overview"/);
-  assert.doesNotMatch(staff, /data-staff-action|data-review-action/);
+  assert.match(staff, /\/api\/auth\/mfa\/enroll/);
+  assert.match(staff, /\/api\/auth\/mfa\/verify/);
+  assert.match(staff, /\/api\/admin\/permissions/);
+  assert.match(staff, /Request IP/);
+  assert.doesNotMatch(staff, /innerHTML/);
+  assert.match(login, /noindex,nofollow,noarchive,nosnippet/);
+  assert.match(accounts, /Full IP addresses are protected/);
+  assert.match(vercel, /"source": "\/staffpanel\/accounts"/);
+  assert.doesNotMatch(vercel, /"source": "\/staff"/);
 });
 
 test("critical security migration closes staff and fulfillment bypasses", () => {

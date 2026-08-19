@@ -301,6 +301,36 @@
     return section;
   }
 
+  function dashboardProfile(profile, refresh) {
+    const section = panel("account", "Profile & privacy", "Profile pictures from your OAuth account and bio changes are screened before they can appear publicly.");
+    const form = make("form", "profile-form-v2");
+    const nameField = make("label", "portal-field");
+    append(nameField, make("span", "", "Display name"));
+    const name = make("input"); name.name = "displayName"; name.minLength = 2; name.maxLength = 48; name.required = true; name.value = profile?.display_name || profile?.displayName || ""; nameField.append(name);
+    const bioField = make("label", "portal-field");
+    append(bioField, make("span", "", "Bio"));
+    const bio = make("textarea"); bio.name = "bio"; bio.maxLength = 500; bio.value = profile?.bio || ""; bioField.append(bio);
+    const visibilityField = make("label", "portal-field");
+    append(visibilityField, make("span", "", "Profile visibility"));
+    const visibility = make("select"); visibility.name = "visibility";
+    [["public", "Public"], ["members", "Signed-in members"], ["private", "Private"]].forEach(([value, text]) => {
+      const option = make("option", "", text); option.value = value; option.selected = value === (profile?.profile_visibility || profile?.visibility || "public"); visibility.append(option);
+    });
+    visibilityField.append(visibility);
+    const review = make("p", "portal-status", `Profile picture: ${profile?.avatar_review_status || profile?.avatarStatus || "not set"} · Bio: ${profile?.bio_review_status || profile?.bioStatus || "not set"}`);
+    const submit = button("button button-primary", "Save profile"); submit.type = "submit";
+    form.append(nameField, bioField, visibilityField, review, submit);
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault(); submit.disabled = true;
+      const data = Object.fromEntries(new FormData(form));
+      try {
+        await api("/api/me/profile", { method: "POST", body: JSON.stringify(data) });
+        toast("Profile saved and sent through content screening."); await refresh();
+      } catch (error) { toast(error.message, "error"); submit.disabled = false; }
+    });
+    section.append(form); return section;
+  }
+
   function dashboardFavorites(favorites, refresh) {
     const section = panel("saved", "Saved servers", "Keep communities here while you decide where to play.", link("/servers", "small-button", "Browse servers"));
     if (!favorites.length) {
@@ -373,8 +403,9 @@
     }
 
     try {
-      const payload = await api("/api/me/overview");
+      const [payload, profilePayload] = await Promise.all([api("/api/me/overview"), api("/api/me/profile")]);
       const overview = payload.overview || {};
+      const profile = profilePayload.profile || overview.profile || {};
       const servers = Array.isArray(overview.servers) ? overview.servers : [];
       const submissions = Array.isArray(overview.submissions) ? overview.submissions : [];
       const favorites = Array.isArray(overview.favoriteServers) ? overview.favoriteServers : [];
@@ -388,7 +419,7 @@
       logout.addEventListener("click", signOut);
       heading.actions.append(logout);
       content.append(heading.head);
-      content.append(portalNav([["#listings", "Listings"], ["#submissions", "Submissions"], ["#saved", "Saved"], ["#notifications", "Notifications"]]));
+      content.append(portalNav([["#listings", "Listings"], ["#submissions", "Submissions"], ["#saved", "Saved"], ["#notifications", "Notifications"], ["#account", "Account"]]));
 
       const metrics = make("section", "metric-grid-v2");
       metrics.setAttribute("aria-label", "Account summary");
@@ -405,7 +436,8 @@
         dashboardListings(servers),
         dashboardSubmissions(submissions),
         dashboardFavorites(favorites, refresh),
-        dashboardNotifications(notifications, unread, refresh)
+        dashboardNotifications(notifications, unread, refresh),
+        dashboardProfile(profile, refresh)
       );
       content.append(stack);
       setRoot(content);

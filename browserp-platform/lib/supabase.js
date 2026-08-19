@@ -186,6 +186,15 @@ export function currentIdentityProvider(user) {
   return OAUTH_PROVIDERS.has(provider) ? provider : null;
 }
 
+export function accessTokenClaims(accessToken) {
+  const part = String(accessToken || "").split(".")[1];
+  if (!part) return {};
+  try {
+    const parsed = JSON.parse(Buffer.from(part, "base64url").toString("utf8"));
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch { return {}; }
+}
+
 export async function getSession(req, res, { required = false, provider } = {}) {
   const cookies = parseCookies(req);
   let csrfToken = ensureCsrfToken(req, res);
@@ -214,7 +223,39 @@ export async function getSession(req, res, { required = false, provider } = {}) 
   if (provider && identityProvider !== provider) {
     throw Object.assign(new Error(`${provider === "discord" ? "Discord" : "The required provider"} sign-in is required for this workspace.`), { status: 403 });
   }
-  return { user, accessToken, provider: identityProvider, csrfToken };
+  const claims = accessTokenClaims(accessToken);
+  const factors = Array.isArray(user.factors) ? user.factors.filter((factor) => factor?.factor_type === "totp") : [];
+  if (supabaseConfig().privileged) {
+    try {
+      const { securityFingerprintContext } = await import("./security.js");
+      const security = securityFingerprintContext(req, res);
+      const ban = await rpc("check_security_ban_server", {
+        p_user_id: user.id,
+        p_network_hash: security.networkHash,
+        p_device_hash: security.deviceHash
+      }, undefined, { useSecret: true });
+      if (ban?.reference) {
+        clearSession(res);
+        throw Object.assign(new Error(`This account is restricted. Appeal reference: ${ban.reference}`), {
+          status: 403,
+          code: "ACCOUNT_RESTRICTED",
+          reference: ban.reference
+        });
+      }
+    } catch (error) {
+      // Allows the application code to be deployed safely before the additive
+      // migration. Once the function exists, failures are intentionally closed.
+      if (error?.code !== "PGRST202" && !String(error?.message || "").includes("check_security_ban_server")) throw error;
+    }
+  }
+  return {
+    user,
+    accessToken,
+    provider: identityProvider,
+    csrfToken,
+    aal: claims.aal || "aal1",
+    factors
+  };
 }
 
 export function csrfTokenForRequest(req, res) {
@@ -295,7 +336,36 @@ export async function finishOAuth(req, res) {
     throw Object.assign(new Error("The sign-in provider did not match the request."), { status: 403 });
   }
   setSession(res, data);
-  return { returnTo, provider };
+  return { returnTo, provider, user: data.user, accessToken: data.access_token };
+}
+
+export async function enrollTotp(accessToken, friendlyName = "BrowseRP staff") {
+  const { data } = await supabaseRequest("auth/v1/factors", {
+    method: "POST",
+    accessToken,
+    body: { factor_type: "totp", friendly_name: friendlyName }
+  });
+  return data;
+}
+
+export async function verifyTotp(res, accessToken, factorId, code, csrfToken) {
+  const challenge = await supabaseRequest(`auth/v1/factors/${encodeURIComponent(factorId)}/challenge`, {
+    method: "POST",
+    accessToken,
+    body: {}
+  });
+  const challengeId = challenge.data?.id;
+  if (!challengeId) throw Object.assign(new Error("Authenticator challenge could not be started."), { status: 502 });
+  const verified = await supabaseRequest(`auth/v1/factors/${encodeURIComponent(factorId)}/verify`, {
+    method: "POST",
+    accessToken,
+    body: { challenge_id: challengeId, code }
+  });
+  if (!verified.data?.access_token || !verified.data?.refresh_token) {
+    throw Object.assign(new Error("Authenticator verification did not return a session."), { status: 502 });
+  }
+  setSession(res, verified.data, { csrfToken });
+  return verified.data;
 }
 
 export async function signOut(req, res) {

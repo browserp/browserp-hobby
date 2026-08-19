@@ -1,0 +1,72 @@
+body.staff-v3 { background: #08090c; }
+.staff-login-v3 { min-height: calc(100vh - 72px); display: grid; place-items: center; padding: 48px 20px; }
+.staff-login-card-v3 { width: min(100%, 520px); border: 1px solid #303743; background: #11141a; padding: 34px; }
+.staff-login-card-v3 .logo-v3 { display: block; margin-bottom: 32px; }
+.staff-login-card-v3 h1 { margin: 0 0 12px; font-size: 36px; letter-spacing: -.03em; }
+.staff-login-card-v3 p { color: #bdc4cf; }
+.staff-shell-v3 { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0,1fr); }
+.staff-sidebar-v3 { position: sticky; top: 0; height: 100vh; padding: 24px 18px; border-right: 1px solid #252b35; background: #0b0d11; overflow-y: auto; }
+.staff-sidebar-v3 .logo-v3 { display: block; margin: 0 8px 30px; }
+.staff-nav-v3 { display: grid; gap: 3px; }
+.staff-nav-v3 a { min-height: 43px; display: flex; align-items: center; gap: 10px; padding: 9px 11px; color: #aeb6c4; border-left: 3px solid transparent; font-size: 14px; font-weight: 650; }
+.staff-nav-v3 a:hover, .staff-nav-v3 a[aria-current="page"] { color: #fff; background: #151922; border-color: #d2519a; }
+.staff-nav-group-v3 { margin: 22px 10px 8px; color: #6f7887; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.staff-main-v3 { min-width: 0; padding: 34px clamp(22px,4vw,54px) 70px; }
+.staff-top-v3 { display: flex; justify-content: space-between; gap: 22px; align-items: start; padding-bottom: 28px; border-bottom: 1px solid #252b35; }
+.staff-top-v3 h1 { margin: 0; font-size: clamp(34px,4vw,50px); letter-spacing: -.035em; }
+.staff-top-v3 p { margin: 8px 0 0; color: #aeb6c4; }
+.staff-grid-v3 { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; margin-top: 24px; }
+.staff-stat-v3 { border: 1px solid #2a313c; background: #11151b; padding: 20px; }
+.staff-stat-v3 strong { display: block; font-size: 30px; }
+.staff-stat-v3 span { color: #929baa; font-size: 13px; }
+.staff-section-v3 { margin-top: 28px; border: 1px solid #2a313c; background: #11151b; }
+.staff-section-head-v3 { display: flex; justify-content: space-between; gap: 18px; padding: 20px 22px; border-bottom: 1px solid #2a313c; }
+.staff-section-head-v3 h2 { margin: 0; font-size: 21px; }
+.staff-section-head-v3 p { margin: 4px 0 0; color: #929baa; }
+.staff-table-wrap-v3 { overflow-x: auto; }
+.staff-table-v3 { width: 100%; border-collapse: collapse; min-width: 720px; }
+.staff-table-v3 th, .staff-table-v3 td { padding: 13px 16px; border-bottom: 1px solid #202630; text-align: left; vertical-align: top; font-size: 14px; }
+.staff-table-v3 th { color: #8e97a6; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.staff-table-v3 td { color: #cad0da; }
+.masked-v3 { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8fddee; }
+.staff-form-v3 { display: grid; gap: 14px; padding: 22px; }
+.staff-form-grid-v3 { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.permission-grid-v3 { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; padding: 18px 22px; }
+.permission-item-v3 { display: flex; justify-content: space-between; gap: 14px; border: 1px solid #29313c; padding: 12px; }
+.permission-item-v3 span { font-size: 13px; color: #aeb6c4; }
+.security-banner-v3 { margin-top: 22px; padding: 18px; border: 1px solid #705c2e; background: #1b170f; color: #f2cf8c; }
+.security-banner-v3.good { border-color: #2d6551; background: #0e1a16; color: #83dfba; }
+.staff-mobile-bar-v3 { display: none; }
+.qr-v3 { width: 220px; height: 220px; padding: 10px; background: #fff; margin: 18px 0; }
+.secret-v3 { display: block; padding: 10px; background: #090b0e; border: 1px solid #303743; overflow-wrap: anywhere; font-family: ui-monospace,monospace; }
+.staff-row-actions-v3 { display: flex; flex-wrap: wrap; gap: 7px; min-width: 170px; }
+.staff-row-actions-v3 .button-v3 { min-height: 36px; padding: 7px 10px; font-size: 12px; }
+.staff-state-v3 { display: inline-flex; align-items: center; min-height: 32px; padding: 5px 9px; border: 1px solid #303743; color: #aeb6c4; font-size: 12px; }
+.profile-evidence-v3 { display: flex; align-items: center; gap: 10px; }
+.profile-evidence-v3 img { width: 52px; height: 52px; object-fit: cover; border: 1px solid #343d49; background: #090b0e; }
+.staff-dialog-v3 { width: min(92vw, 650px); max-height: 88vh; padding: 0; border: 1px solid #3a4351; background: #101319; color: #f5f7fb; box-shadow: 0 28px 90px rgba(0,0,0,.6); }
+.staff-dialog-v3::backdrop { background: rgba(0,0,0,.78); backdrop-filter: blur(3px); }
+.staff-dialog-card-v3 { display: grid; gap: 15px; padding: 26px; max-height: 88vh; overflow: auto; }
+.staff-dialog-card-v3 h2 { margin: 0; font-size: 26px; }
+.staff-dialog-copy-v3 { margin: 0; white-space: pre-line; color: #b8c0cc; overflow-wrap: anywhere; }
+.staff-dialog-actions-v3 { display: flex; justify-content: flex-end; gap: 10px; padding-top: 8px; }
+.staff-danger-v3 { border-color: #8b3948; background: #682534; color: #fff; }
+.staff-danger-v3:hover { background: #7b2c3d; }
+.staff-form-status-v3 { min-height: 20px; }
+
+@media (max-width: 1000px) {
+  .staff-grid-v3 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .permission-grid-v3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .staff-shell-v3 { display: block; padding-top: 60px; }
+  .staff-mobile-bar-v3 { position: fixed; inset: 0 0 auto; z-index: 90; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid #252b35; background: #0b0d11; }
+.staff-mobile-bar-v3 .logo-lockup-v3 { min-width: 140px; height: 40px; }
+.staff-mobile-bar-v3 .logo-lockup-v3 img { width: 45px; height: 45px; }
+  .staff-sidebar-v3 { position: fixed; inset: 60px 0 0; z-index: 89; width: 100%; height: auto; transform: translateX(-105%); transition: transform .2s ease; }
+  body.staff-menu-open .staff-sidebar-v3 { transform: none; }
+  .staff-main-v3 { padding: 28px 16px 60px; }
+  .staff-grid-v3, .staff-form-grid-v3 { grid-template-columns: 1fr; }
+  .staff-top-v3 { display: block; }
+  .staff-top-v3 .button-v3 { margin-top: 14px; }
+}

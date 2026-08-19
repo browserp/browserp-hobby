@@ -11,13 +11,19 @@ const apiRoutes = new Map([
   ["GET /api/platforms", ["api/router.js", "platforms"]],
   ["GET /api/categories", ["api/router.js", "categories"]],
   ["GET /api/servers", "api/servers.js"],
+  ["POST /api/servers", "api/servers.js"],
   ["GET /api/public/overview", ["api/router.js", "public/overview"]],
   ["GET /api/public/content", ["api/router.js", "public/content"]],
+  ["GET /api/public/adverts", ["api/router.js", "public/adverts"]],
+  ["GET /api/public/blogs", ["api/router.js", "public/blogs"]],
+  ["POST /api/public/appeals", ["api/router.js", "public/appeals"]],
   ["GET /api/auth/providers", ["api/router.js", "auth/providers"]],
   ["GET /api/auth/discord", ["api/router.js", "auth/discord"]],
   ["GET /api/auth/google", ["api/router.js", "auth/google"]],
   ["GET /api/auth/callback", ["api/router.js", "auth/callback"]],
   ["GET /api/auth/session", ["api/router.js", "auth/session"]],
+  ["POST /api/auth/mfa/enroll", ["api/router.js", "auth/mfa/enroll"]],
+  ["POST /api/auth/mfa/verify", ["api/router.js", "auth/mfa/verify"]],
   ["POST /api/auth/logout", ["api/router.js", "auth/logout"]],
   ["GET /api/boosts/balance", "api/boosts/balance.js"],
   ["POST /api/boosts", "api/boosts.js"],
@@ -36,8 +42,18 @@ const apiRoutes = new Map([
   ["POST /api/admin/staff", ["api/router.js", "admin/staff"]],
   ["GET /api/admin/item", ["api/router.js", "admin/item"]],
   ["POST /api/admin/action", ["api/router.js", "admin/action"]],
-  ["GET /api/admin/content", ["api/router.js", "admin/content"]],
-  ["POST /api/admin/content", ["api/router.js", "admin/content"]],
+  ["GET /api/admin/permissions", ["api/router.js", "admin/permissions"]],
+  ["POST /api/admin/permissions", ["api/router.js", "admin/permissions"]],
+  ["GET /api/admin/security", ["api/router.js", "admin/security"]],
+  ["POST /api/admin/security", ["api/router.js", "admin/security"]],
+  ["GET /api/admin/profiles", ["api/router.js", "admin/profiles"]],
+  ["POST /api/admin/profiles", ["api/router.js", "admin/profiles"]],
+  ["GET /api/admin/adverts", ["api/router.js", "admin/adverts"]],
+  ["POST /api/admin/adverts", ["api/router.js", "admin/adverts"]],
+  ["GET /api/admin/blogs", ["api/router.js", "admin/blogs"]],
+  ["POST /api/admin/blogs", ["api/router.js", "admin/blogs"]],
+  ["GET /api/admin/bans", ["api/router.js", "admin/bans"]],
+  ["POST /api/admin/bans", ["api/router.js", "admin/bans"]],
   ["GET /api/resources", "api/resources.js"],
   ["GET /api/developers", "api/developers.js"]
 ]);
@@ -90,8 +106,16 @@ function staticRoute(pathname) {
   if (pathname === "/servers") return "servers.html";
   if (pathname === "/list-server") return "list-server.html";
   if (pathname === "/dashboard") return "dashboard.html";
-  if (pathname === "/staff") return "staff.html";
   if (pathname === "/legal") return "legal.html";
+  if (pathname === "/about") return "about.html";
+  if (pathname === "/blog") return "blog.html";
+  if (/^\/blog\/[a-z0-9-]+$/i.test(pathname)) return "blog-post.html";
+  if (pathname === "/appeal") return "appeal.html";
+  if (pathname === "/advertise") return "advertise.html";
+  if (pathname === "/coins") return "coins.html";
+  if (pathname === "/staffpanel") return "staffpanel.html";
+  const staffPage = pathname.match(/^\/staffpanel\/(overview|moderation|profiles|accounts|staff|security|content)$/i);
+  if (staffPage) return `staffpanel-${staffPage[1].toLowerCase()}.html`;
   if (/^\/server\/[a-z0-9-]+$/i.test(pathname)) return "server.html";
   return pathname.replace(/^\//, "");
 }
@@ -225,7 +249,10 @@ export function createBrowseRPServer({ environment = process.env } = {}) {
   return createServer(async (req, res) => {
     securityHeaders(res);
     const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
-    if (url.pathname === "/staff") res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+    if (url.pathname === "/staffpanel" || url.pathname.startsWith("/staffpanel/")) {
+      res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet");
+      res.setHeader("Cache-Control", "private, no-store, max-age=0");
+    }
     if (url.pathname === "/__dev/staff-demo") {
       res.setHeader("Cache-Control", "no-store");
       res.setHeader("Content-Type", "application/json; charset=utf-8");

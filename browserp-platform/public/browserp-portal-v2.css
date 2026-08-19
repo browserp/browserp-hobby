@@ -456,6 +456,8 @@
 }
 .portal-field textarea { min-height: 132px; resize: vertical; line-height: 1.55; }
 .portal-field small { color: var(--quiet); font-size: 14px; font-weight: 550; }
+.profile-form-v2 { max-width: 760px; display: grid; gap: 18px; }
+.profile-form-v2 .button { width: fit-content; }
 .dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 9px; margin-top: 22px; }
 
 .content-grid { display: grid; gap: 16px; }
@@ -524,3 +526,6 @@
 @media (prefers-reduced-motion: reduce) {
   .portal-loading-mark { animation: none; border-top-color: var(--line-strong); }
 }
+.logo-lockup-v3 { display:inline-flex; align-items:center; gap:2px; min-width:166px; height:48px; }
+.logo-lockup-v3 img { width:55px; height:55px; object-fit:contain; }
+.logo-word-v3 { font-size:27px; line-height:1; font-weight:800; letter-spacing:-.045em; background:linear-gradient(100deg,#e34d9e,#e999c4 48%,#6fd9f0); color:transparent; background-clip:text; -webkit-background-clip:text; }

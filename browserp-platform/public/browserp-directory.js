@@ -171,14 +171,21 @@
       renderServers(list, servers);
       list.hidden = servers.length === 0;
       empty.hidden = servers.length !== 0;
-      select("#result-count").textContent = String(servers.length);
+      const filtersActive = Boolean(state.filters.query || state.filters.region !== "all" || state.filters.online || state.filters.verified || state.filters.beginner);
+      select("#result-count").textContent = `${servers.length} ${servers.length === 1 ? "server" : "servers"}`;
+      if (!servers.length) {
+        select("h3", empty).textContent = filtersActive ? "No servers match those filters." : "No servers are live yet.";
+        select("p", empty).textContent = filtersActive
+          ? "Clear a filter or try a broader search."
+          : "Run a FiveM community? Submit it for review and be one of the first listings.";
+      }
       syncUrl();
     } catch (error) {
       list.replaceChildren();
       list.hidden = true;
       list.setAttribute("aria-busy", "false");
       empty.hidden = false;
-      select("#result-count").textContent = "0";
+      select("#result-count").textContent = "0 servers";
       select("h3", empty).textContent = "The directory could not be loaded.";
       select("p", empty).textContent = "Please try again shortly.";
       toast(error.message, "error");
@@ -253,12 +260,45 @@
     status.className = `form-status${tone ? ` ${tone}` : ""}`;
   }
 
+  const LISTING_TAGS = Object.freeze([
+    ["economy", "Economy"], ["whitelisted", "Whitelisted"], ["public-access", "Public access"],
+    ["serious-roleplay", "Serious RP"], ["semi-serious", "Semi-serious RP"],
+    ["beginner-friendly", "Beginner friendly"], ["custom-clothing", "Custom clothing"],
+    ["custom-cars", "Custom vehicles"], ["custom-jobs", "Custom jobs"],
+    ["player-businesses", "Player businesses"], ["housing", "Housing"], ["police", "Police"],
+    ["ems", "EMS"], ["gangs", "Gangs"], ["civilian-jobs", "Civilian jobs"],
+    ["controller-friendly", "Controller friendly"], ["streamer-friendly", "Streamer friendly"]
+  ]);
+
+  function setupTagPicker(form) {
+    const picker = select(".tag-picker-v3", form);
+    if (!picker) return;
+    picker.replaceChildren(...LISTING_TAGS.map(([value, labelText]) => {
+      const label = element("label", "check-v3");
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.name = "tags";
+      input.value = value;
+      label.append(input, document.createTextNode(` ${labelText}`));
+      return label;
+    }));
+    const updateLimit = () => {
+      const selected = picker.querySelectorAll('input[name="tags"]:checked').length;
+      picker.querySelectorAll('input[name="tags"]:not(:checked)').forEach((input) => {
+        input.disabled = selected >= 8;
+      });
+    };
+    picker.addEventListener("change", updateLimit);
+    updateLimit();
+  }
+
   async function listing() {
     const gate = select("#listing-auth-gate");
     const form = select("#listing-form");
     const accountNotice = select("#listing-account-notice");
     const providerNote = select("#provider-note");
     let submissionAttemptKey = crypto.randomUUID();
+    setupTagPicker(form);
 
     try {
       state.session = await api("/api/auth/session");
@@ -300,7 +340,9 @@
       event.preventDefault();
       if (!state.session.authenticated || !form.reportValidity()) return;
       const submit = select("#submit-listing");
-      const data = Object.fromEntries(new FormData(form));
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      const tags = formData.getAll("tags").slice(0, 8);
       submit.disabled = true;
       submit.textContent = "Submitting…";
       setFormStatus("Sending your listing for review…");
@@ -316,6 +358,9 @@
             framework: data.framework,
             description: data.description,
             communityUrl: data.communityUrl,
+            cfxJoinUrl: data.cfxJoinUrl,
+            accessType: data.accessType,
+            tags,
             agreement: data.agreement === "on"
           })
         });

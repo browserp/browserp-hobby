@@ -125,6 +125,20 @@ function acceptedAgreement(body) {
 }
 
 function submissionInput(body) {
+  const tags = Array.isArray(body.tags)
+    ? [...new Set(body.tags.map((tag) => sanitizePlainText(tag, 40).toLowerCase()).filter(Boolean))]
+    : [];
+  if (tags.length > 8 || tags.some((tag) => !/^[a-z0-9-]{2,40}$/.test(tag))) {
+    throw Object.assign(new Error("Choose up to eight valid server tags."), { status: 400 });
+  }
+  const accessType = sanitizePlainText(body.accessType || "public", 20).toLowerCase();
+  if (!["public", "allowlisted", "application"].includes(accessType)) {
+    throw Object.assign(new Error("Choose a valid server access type."), { status: 400 });
+  }
+  const cfxJoinUrl = canonicalCommunityUrl(body.cfxJoinUrl);
+  if (cfxJoinUrl && !/^https:\/\/cfx\.re\/join\/[A-Za-z0-9]{3,32}\/?$/.test(cfxJoinUrl)) {
+    throw Object.assign(new Error("Use a direct cfx.re/join link."), { status: 400 });
+  }
   const input = {
     name: sanitizePlainText(body.name, 80),
     platform: sanitizePlainText(body.platform, 40),
@@ -132,7 +146,10 @@ function submissionInput(body) {
     language: sanitizePlainText(body.language, 60),
     framework: sanitizePlainText(body.framework, 80),
     description: sanitizePlainText(body.description, 1_500),
-    communityUrl: canonicalCommunityUrl(body.communityUrl)
+    communityUrl: canonicalCommunityUrl(body.communityUrl),
+    accessType,
+    tags,
+    cfxJoinUrl
   };
   if (!input.name || !input.platform || !input.region || !input.language || input.description.length < 40) {
     throw Object.assign(new Error("A name, platform, region, language and fuller description are required."), { status: 400 });
@@ -151,7 +168,7 @@ export default endpoint(["GET", "POST"], async (req, res, requestId) => {
   if (req.method === "GET") {
     await rateLimit(req, "owner-submissions-read", 30, 60);
     const submissions = await rest(
-      `server_submissions?select=id,name,platform_id,region,language,framework,description,community_url,status,review_note,terms_version,standards_version,created_at,updated_at&submitted_by=eq.${encodeURIComponent(session.user.id)}&order=created_at.desc&limit=50`,
+      `server_submissions?select=id,name,platform_id,region,language,framework,description,community_url,tags,access_type,cfx_join_url,status,review_note,terms_version,standards_version,created_at,updated_at&submitted_by=eq.${encodeURIComponent(session.user.id)}&order=created_at.desc&limit=50`,
       { useSecret: true }
     );
     return ok(res, { submissions: Array.isArray(submissions) ? submissions : [] });
@@ -175,5 +192,18 @@ export default endpoint(["GET", "POST"], async (req, res, requestId) => {
     undefined,
     { useSecret: true }
   );
-  return ok(res, { submission }, 202);
+  const metadataFingerprint = createHash("sha256").update(JSON.stringify({
+    tags: input.tags,
+    accessType: input.accessType,
+    cfxJoinUrl: input.cfxJoinUrl
+  })).digest("hex");
+  const metadata = await rpc("attach_server_submission_metadata_server", {
+    p_user_id: session.user.id,
+    p_submission_id: submission.id,
+    p_tags: input.tags,
+    p_access_type: input.accessType,
+    p_cfx_join_url: input.cfxJoinUrl,
+    p_metadata_fingerprint: metadataFingerprint
+  }, undefined, { useSecret: true });
+  return ok(res, { submission: { ...submission, ...metadata } }, 202);
 });
