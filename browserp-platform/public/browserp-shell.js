@@ -10,18 +10,16 @@
   const nav = menu?.querySelector(".nav-links");
   if (nav) {
     const links = [
-      ["Browse", "/servers"],
-      ["All Games", "/servers#games"],
-      ["FiveM", "/servers?platform=fivem"],
-      ["Roblox", "/servers?platform=roblox"],
-      ["Minecraft", "/servers?platform=minecraft"],
-      ["Guides", "/blog"]
+      ["Discover", "/servers"],
+      ["Games", "/games"],
+      ["Guides", "/blog"],
+      ["About", "/about"]
     ];
     nav.replaceChildren(...links.map(([label, href]) => {
       const link = document.createElement("a");
       link.href = href;
       link.textContent = label;
-      if (location.pathname === href || (label === "Browse" && location.pathname === "/servers")) link.setAttribute("aria-current", "page");
+      if (location.pathname === href || (href === "/games" && location.pathname.startsWith("/games"))) link.setAttribute("aria-current", "page");
       return link;
     }));
   }
@@ -31,12 +29,13 @@
     clearTimeout(closeTimer);
 
     if (!mobile.matches) {
+      const active = Boolean(open);
       menu.hidden = false;
-      menu.inert = false;
-      menu.dataset.open = "true";
-      menu.setAttribute("aria-hidden", "false");
-      button.setAttribute("aria-expanded", "false");
-      button.setAttribute("aria-label", "Open menu");
+      menu.inert = !active;
+      menu.dataset.open = String(active);
+      menu.setAttribute("aria-hidden", String(!active));
+      button.setAttribute("aria-expanded", String(active));
+      button.setAttribute("aria-label", active ? "Hide navigation" : "Show navigation");
       document.body.classList.remove("menu-open");
       return;
     }
@@ -64,15 +63,15 @@
   button?.addEventListener("click", () => {
     setMenu(button.getAttribute("aria-expanded") !== "true");
   });
-  menu?.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => setMenu(false)));
+  menu?.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => { if (mobile.matches) setMenu(false); }));
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && button?.getAttribute("aria-expanded") === "true") {
       setMenu(false);
       button.focus();
     }
   });
-  mobile.addEventListener?.("change", () => setMenu(false, true));
-  setMenu(false, true);
+  mobile.addEventListener?.("change", () => setMenu(!mobile.matches, true));
+  setMenu(!mobile.matches, true);
 
   function updateHeader() {
     header?.classList.toggle("is-scrolled", window.scrollY > 8);

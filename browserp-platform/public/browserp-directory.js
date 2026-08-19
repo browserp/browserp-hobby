@@ -15,6 +15,24 @@
     ["Tag", "custom vehicles"], ["Tag", "player businesses"], ["Tag", "beginner friendly"], ["Access", "public servers"],
     ["Region", "United Kingdom"], ["Region", "United States"], ["Region", "Europe"], ["Region", "Australia"]
   ]);
+  const INITIAL_SEARCH_SUGGESTIONS = Object.freeze([0, 2, 8, 9, 12, 19, 20].map((index) => SEARCH_SUGGESTIONS[index]));
+  const SHOWCASE_SERVER = Object.freeze({
+    slug: "san-andreas-county-roleplay-showcase",
+    showcase_url: "/server/san-andreas-county-roleplay-showcase",
+    name: "San Andreas County Roleplay",
+    platform_id: "fivem",
+    platform_name: "FiveM",
+    region: "United States",
+    framework: "vMenu",
+    language: "English",
+    verified: true,
+    beginner_friendly: true,
+    online: false,
+    logo_url: "/assets/san-andreas-county-rp-mark-v4.svg",
+    description: "A complete BrowseRP showcase for a public-safety focused county community, with departments, civilian careers and structured roleplay.",
+    tags: ["Public safety", "Civilian life", "Custom vehicles"],
+    showcase: true
+  });
 
   async function api(path, options = {}) {
     const method = String(options.method || "GET").toUpperCase();
@@ -93,7 +111,7 @@
     const platformId = String(server.platform_id || "other").toLowerCase();
     const platformName = server.platform_name || server.platform_short || "Roleplay";
     const card = element("a", `server-card platform-${platformId.replace(/[^a-z0-9-]/g, "")}`);
-    card.href = `/server/${encodeURIComponent(slug)}`;
+    card.href = server.showcase_url || `/server/${encodeURIComponent(slug)}`;
     card.setAttribute("aria-label", `View ${String(server.name || "server")}`);
     const media = element("div", "server-card-media");
     const initial = element("span", "server-initials", initials(server.name));
@@ -113,7 +131,7 @@
 
     const top = element("div", "server-card-top");
     top.append(media);
-    const status = element("span", `status${server.online ? " online" : ""}`, server.online ? "Online now" : "Status unavailable");
+    const status = element("span", `status${server.online ? " online" : ""}${server.showcase ? " showcase" : ""}`, server.showcase ? "BrowseRP showcase" : server.online ? "Online now" : "Status unavailable");
     top.append(status);
     card.append(top);
 
@@ -130,7 +148,7 @@
     const bottom = element("div", "server-card-bottom");
     const playerText = server.online
       ? `${Number(server.players || 0).toLocaleString()}${server.capacity ? ` / ${Number(server.capacity).toLocaleString()}` : ""} players`
-      : "Player count unavailable";
+      : server.showcase ? "Complete demo listing" : "Player count unavailable";
     bottom.append(element("strong", "", playerText), element("span", "server-card-action", "View listing"));
     card.append(bottom);
     return card;
@@ -161,7 +179,7 @@
     if (!list || !empty) return;
     try {
       const payload = await api("/api/servers?sort=recommended&limit=4");
-      const servers = Array.isArray(payload.servers) ? payload.servers : [];
+      const servers = [SHOWCASE_SERVER, ...(Array.isArray(payload.servers) ? payload.servers : [])];
       renderServers(list, servers);
       list.hidden = servers.length === 0;
       empty.hidden = servers.length !== 0;
@@ -181,8 +199,10 @@
     const list = listId ? document.getElementById(listId) : null;
     if (!list || !searchInput) return;
     const term = String(query || "").trim().toLowerCase();
-    const matches = SEARCH_SUGGESTIONS.filter(([, value]) => value.toLowerCase().includes(term)).slice(0, 7);
-    if (!term || !matches.length) {
+    const matches = term
+      ? SEARCH_SUGGESTIONS.filter(([, value]) => value.toLowerCase().includes(term)).slice(0, 7)
+      : INITIAL_SEARCH_SUGGESTIONS;
+    if (!matches.length) {
       list.classList.remove("search-suggestions-open");
       list.hidden = true;
       list.inert = true;
@@ -295,6 +315,12 @@
     select("#online-filter").checked = state.filters.online;
     select("#verified-filter").checked = state.filters.verified;
     select("#beginner-filter").checked = state.filters.beginner;
+    document.querySelectorAll(".game-strip-v3 [data-game]").forEach((link) => {
+      const selected = link.dataset.game === state.filters.platform;
+      link.classList.toggle("is-selected", selected);
+      if (selected) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
+    });
   }
 
   function syncUrl() {
@@ -307,6 +333,16 @@
     if (state.filters.verified) params.set("verified", "true");
     if (state.filters.beginner) params.set("beginner", "true");
     history.replaceState(null, "", `${location.pathname}${params.size ? `?${params}` : ""}`);
+  }
+
+  function showcaseMatchesFilters() {
+    if (state.filters.online) return false;
+    if (state.filters.platform !== "all" && state.filters.platform !== SHOWCASE_SERVER.platform_id) return false;
+    if (state.filters.region !== "all" && state.filters.region !== SHOWCASE_SERVER.region) return false;
+    const query = state.filters.query.trim().toLowerCase();
+    if (!query) return true;
+    return [SHOWCASE_SERVER.name, SHOWCASE_SERVER.platform_name, SHOWCASE_SERVER.framework, SHOWCASE_SERVER.region, ...SHOWCASE_SERVER.tags]
+      .some((value) => String(value).toLowerCase().includes(query));
   }
 
   async function directoryResults() {
@@ -326,7 +362,10 @@
 
     try {
       const payload = await api(`/api/servers?${params}`);
-      const servers = Array.isArray(payload.servers) ? payload.servers : [];
+      const servers = [
+        ...(showcaseMatchesFilters() ? [SHOWCASE_SERVER] : []),
+        ...(Array.isArray(payload.servers) ? payload.servers : [])
+      ];
       renderServers(list, servers);
       list.hidden = servers.length === 0;
       empty.hidden = servers.length !== 0;

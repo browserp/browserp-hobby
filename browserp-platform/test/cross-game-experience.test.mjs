@@ -65,7 +65,7 @@ test("signed-in navigation uses a permission-backed avatar menu and dark-only th
   assert.doesNotMatch(css, /:root\[data-theme="light"\]/);
   assert.match(css, /account-popover-v3/);
   assert.match(portalShell, /\["Guides", "\/blog"\]/);
-  assert.match(portalShell, /\["All Games", "\/servers#games"\]/);
+  assert.match(portalShell, /\["Games", "\/games"\]/);
 });
 
 test("search suggestions cover games, frameworks, tags, access and regions", () => {

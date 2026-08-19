@@ -23,6 +23,16 @@
     return element;
   }
 
+  function providerButton(href, className, label, provider) {
+    const element = link(href, `${className} provider-button-v4 provider-${provider}-v4`, "");
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.classList.add("provider-icon-v4"); icon.setAttribute("aria-hidden", "true");
+    const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+    use.setAttribute("href", `/assets/provider-icons-v4.svg#provider-${provider}`); icon.append(use);
+    element.append(icon, make("span", "", label));
+    return element;
+  }
+
   function button(className, text) {
     const element = make("button", className, text);
     element.type = "button";
@@ -195,8 +205,8 @@
       providers = (await api("/api/auth/providers")).providers || providers;
     } catch { /* A clear unavailable state is shown below if no provider works. */ }
     const returnTo = staffOnly ? "/staff" : "/dashboard";
-    if (providers.discord) actions.append(link(`/api/auth/discord?returnTo=${encodeURIComponent(returnTo)}`, "button button-primary", "Continue with Discord"));
-    if (!staffOnly && providers.google) actions.append(link(`/api/auth/google?returnTo=${encodeURIComponent(returnTo)}`, "button button-secondary", "Continue with Google"));
+    if (providers.discord) actions.append(providerButton(`/api/auth/discord?returnTo=${encodeURIComponent(returnTo)}`, "button button-primary", "Continue with Discord", "discord"));
+    if (!staffOnly && providers.google) actions.append(providerButton(`/api/auth/google?returnTo=${encodeURIComponent(returnTo)}`, "button button-secondary", "Continue with Google", "google"));
     if (actions.childElementCount === 0) actions.append(make("p", "portal-status error", "Sign-in is temporarily unavailable. Please try again later."));
     gate.append(actions);
     gate.append(make("small", "access-note", staffOnly ? "Access is checked again on every staff request." : "We only use account information needed to run your BrowseRP profile."));

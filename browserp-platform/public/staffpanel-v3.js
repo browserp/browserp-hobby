@@ -82,7 +82,10 @@
     if (!root) return;
     const card = make("section", undefined, "staff-login-card-v3");
     card.append(themeButton(), brand(), make("span", "Restricted operations", "eyebrow-v3"), make("h1", "Staff Panel"), make("p", "Continue with the Discord account assigned to your BrowseRP staff rank."));
-    const login = make("a", "Continue with Discord", "button-v3 button-primary-v3"); login.href = "/api/auth/discord?returnTo=%2Fstaffpanel%2Foverview"; card.append(login, make("p", "The address is intentionally absent from public navigation. The API still authorises every request.", "access-note")); root.replaceChildren(card);
+    const login = make("a", undefined, "button-v3 button-primary-v3 provider-button-v4 provider-discord-v4"); login.href = "/api/auth/discord?returnTo=%2Fstaffpanel%2Foverview";
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg"); icon.classList.add("provider-icon-v4"); icon.setAttribute("aria-hidden", "true");
+    const use = document.createElementNS("http://www.w3.org/2000/svg", "use"); use.setAttribute("href", "/assets/provider-icons-v4.svg#provider-discord"); icon.append(use); login.append(icon, make("span", "Continue with Discord"));
+    card.append(login, make("p", "The address is intentionally absent from public navigation. The API still authorises every request.", "access-note")); root.replaceChildren(card);
   }
 
   function showDenied() {

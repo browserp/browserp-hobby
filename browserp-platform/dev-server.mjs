@@ -108,6 +108,7 @@ function staticRoute(pathname) {
   if (pathname === "/dashboard") return "dashboard.html";
   if (pathname === "/legal") return "legal.html";
   if (pathname === "/about") return "about.html";
+  if (pathname === "/games" || /^\/games\/[a-z0-9-]+$/i.test(pathname)) return "game.html";
   if (pathname === "/blog") return "blog.html";
   if (/^\/blog\/[a-z0-9-]+$/i.test(pathname)) return "blog-post.html";
   if (pathname === "/appeal") return "appeal.html";
@@ -116,6 +117,7 @@ function staticRoute(pathname) {
   if (pathname === "/staffpanel") return "staffpanel.html";
   const staffPage = pathname.match(/^\/staffpanel\/(overview|moderation|profiles|accounts|staff|security|content)$/i);
   if (staffPage) return `staffpanel-${staffPage[1].toLowerCase()}.html`;
+  if (pathname === "/server/san-andreas-county-roleplay-showcase") return "example-server.html";
   if (/^\/server\/[a-z0-9-]+$/i.test(pathname)) return "server.html";
   return pathname.replace(/^\//, "");
 }

@@ -135,34 +135,37 @@
     const links = $("[data-nav-links-v3]");
     const actions = $("[data-nav-actions-v3]");
     if (!button || !links || !actions) return;
+    const header = button.closest(".header-v3");
+    const nav = button.closest(".nav-v3");
     const navItems = [
-      ["Browse", "/servers"], ["All Games", "/servers#games"], ["FiveM", "/servers?platform=fivem"],
-      ["Roblox", "/servers?platform=roblox"], ["Minecraft", "/servers?platform=minecraft"], ["Guides", "/blog"]
+      ["Discover", "/servers"], ["Games", "/games"], ["Guides", "/blog"], ["About", "/about"]
     ];
     links.replaceChildren(...navItems.map(([label, href]) => {
       const link = node("a", `nav-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-v3`, label);
       link.href = href;
-      if ((location.pathname === "/servers" && href === "/servers") || location.pathname === href) link.setAttribute("aria-current", "page");
+      if ((href === "/servers" && location.pathname === "/servers") || (href === "/games" && location.pathname.startsWith("/games")) || location.pathname === href) link.setAttribute("aria-current", "page");
       return link;
     }));
     const mobile = matchMedia("(max-width: 760px)");
-    function set(open) {
-      const active = mobile.matches && open;
-      document.body.classList.toggle("menu-open", active);
+    function set(expanded) {
+      const active = Boolean(expanded);
+      document.body.classList.toggle("menu-open", mobile.matches && active);
+      header?.classList.toggle("nav-collapsed-v3", !active);
+      if (nav) nav.dataset.expanded = String(active);
       button.setAttribute("aria-expanded", String(active));
-      button.setAttribute("aria-label", active ? "Close menu" : "Open menu");
-      links.inert = mobile.matches && !active;
-      actions.inert = mobile.matches && !active;
-      links.setAttribute("aria-hidden", String(mobile.matches && !active));
-      actions.setAttribute("aria-hidden", String(mobile.matches && !active));
+      button.setAttribute("aria-label", active ? (mobile.matches ? "Close menu" : "Hide navigation") : (mobile.matches ? "Open menu" : "Show navigation"));
+      links.inert = !active;
+      actions.inert = !active;
+      links.setAttribute("aria-hidden", String(!active));
+      actions.setAttribute("aria-hidden", String(!active));
     }
     button.addEventListener("click", () => set(button.getAttribute("aria-expanded") !== "true"));
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && button.getAttribute("aria-expanded") === "true") { set(false); button.focus(); }
     });
-    mobile.addEventListener?.("change", () => set(false));
-    $$('a', links).forEach((link) => link.addEventListener("click", () => set(false)));
-    set(false);
+    mobile.addEventListener?.("change", () => set(!mobile.matches));
+    $$("a", links).forEach((link) => link.addEventListener("click", () => { if (mobile.matches) set(false); }));
+    set(!mobile.matches);
   }
 
   async function session() {
