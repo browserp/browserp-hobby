@@ -1,8 +1,8 @@
-# BrowseRP v2.0.0 candidate record
+# BrowseRP v2.0.0 production record
 
 Prepared: 19 August 2026
 
-Status: **candidate — not production until the verified preview is promoted**
+Status: **production**
 
 ## Baseline
 
@@ -16,6 +16,7 @@ The authoritative transfer message records v1.3.0 as healthy on `browserp.com`, 
 - keeps staff at a direct, unlinked and `noindex` route with real Discord permission checks;
 - provides functional public directory, server-detail, authenticated listing submission and member dashboard paths;
 - adds versioned, allowlisted staff management for safe website text/boolean settings without exposing raw HTML editing;
+- lets the protected business owner add Discord staff, set non-owner ranks, suspend, reactivate and revoke access from the private staff centre;
 - adds replay-safe listing submission provenance and tighter direct-write/RLS boundaries;
 - adds active privileged health checks and build-SHA reporting;
 - hardens OAuth state/nonce/PKCE, cookie, CSRF, JSON/body-size, origin, URL and upstream-timeout boundaries;
@@ -28,6 +29,8 @@ The authoritative transfer message records v1.3.0 as healthy on `browserp.com`, 
 ## Database artifact
 
 `20260819164347_v2_application_boundaries.sql` was applied exactly once to production as provider migration `20260819164347`. It is additive to the recorded v1.3 schema and supplies the v2 submission and website-content RPCs.
+
+`20260819174759_discord_staff_role_allowlist.sql` was applied exactly once as provider migration `20260819174759`. It requires every active staff membership to match one enabled Discord-only mapping and exposes owner-only, version-checked and audited rank management. The business Discord is the sole enabled protected owner; all other mappings and memberships are inactive until the owner assigns them manually.
 
 ## Mandatory release evidence
 
@@ -51,9 +54,9 @@ Do not record a step as passed from code inspection alone when it requires provi
 
 The integrated candidate passed the repository verifier with bundled Node.js `v24.19.0` on 19 August 2026:
 
-- 35 JavaScript syntax checks;
+- 38 JavaScript syntax checks;
 - exactly 12 Vercel Functions;
-- 26 of 26 Node tests;
+- 38 of 38 Node tests;
 - `git diff --check` with no whitespace errors.
 
 This is local evidence only. It does not replace preview, provider, database or production checks.

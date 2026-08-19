@@ -339,6 +339,75 @@
 .permission-note { margin: 0 0 22px; padding: 15px 17px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); font-size: 14px; }
 .audit-reason { max-width: 680px; }
 
+.staff-add-card {
+  margin-bottom: 30px;
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 100% 0%, rgb(142 217 232 / .055), transparent 20rem),
+    var(--surface-2);
+}
+.staff-add-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 22px; margin-bottom: 20px; }
+.staff-add-heading h3 { margin: 0; font-size: 23px; }
+.staff-add-heading p { max-width: 620px; margin: 0; font-size: 14px; text-align: right; }
+.staff-add-grid {
+  display: grid;
+  grid-template-columns: minmax(190px, .95fr) minmax(170px, .72fr) minmax(240px, 1.2fr) auto;
+  align-items: end;
+  gap: 13px;
+}
+.staff-add-action { display: flex; align-items: flex-end; }
+.staff-add-action .button { width: 100%; min-height: 50px; white-space: nowrap; }
+.staff-mutation-status { grid-column: 1 / -1; margin-bottom: 0; }
+
+.staff-roster-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; margin: 0 0 12px; }
+.staff-roster-head h3 { margin: 0; font-size: 23px; }
+.staff-roster-head span { color: var(--quiet); font-size: 14px; font-weight: 650; }
+.staff-member-list { margin: 0; padding: 0; border-top: 1px solid var(--line); list-style: none; }
+.staff-member-row {
+  display: grid;
+  grid-template-columns: minmax(250px, .8fr) minmax(0, 1.45fr);
+  align-items: center;
+  gap: clamp(22px, 4vw, 42px);
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+.staff-member-identity { min-width: 0; display: flex; align-items: flex-start; gap: 14px; }
+.staff-member-avatar {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  background: var(--surface-2);
+  color: var(--accent-strong);
+  font-size: 14px;
+  font-weight: 800;
+}
+.staff-member-avatar img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.staff-member-copy { min-width: 0; }
+.staff-member-copy strong { display: block; font-size: 17px; overflow-wrap: anywhere; }
+.staff-member-copy small { display: block; margin-top: 3px; color: var(--quiet); font-size: 13px; font-weight: 550; overflow-wrap: anywhere; }
+.staff-member-copy p { margin: 8px 0 0; font-size: 13px; }
+.staff-protected-note { color: var(--cyan); }
+.staff-member-controls {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(145px, .72fr) minmax(210px, 1fr);
+  align-items: end;
+  gap: 12px;
+}
+.staff-compact-field { font-size: 13px; }
+.staff-compact-field input,
+.staff-compact-field select { min-height: 46px; padding: 10px 12px; }
+.staff-member-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.staff-member-actions .small-button { min-width: 108px; }
+.staff-member-controls .staff-mutation-status { margin-top: -2px; }
+
 .portal-dialog {
   width: min(760px, calc(100% - 28px));
   max-height: calc(100vh - 30px);
@@ -409,6 +478,9 @@
   .server-hero-v2 { grid-template-columns: auto minmax(0, 1fr); }
   .server-hero-actions { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .server-detail-layout { grid-template-columns: 1fr; }
+  .staff-add-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .staff-add-action .button { width: auto; }
+  .staff-member-row { grid-template-columns: 1fr; gap: 18px; }
 }
 
 @media (max-width: 760px) {
@@ -433,6 +505,14 @@
   .evidence-list dd { padding-top: 2px; }
   .content-editor-head { display: grid; }
   .content-actions .small-button { flex: 1 1 135px; }
+  .staff-add-heading { display: grid; gap: 8px; }
+  .staff-add-heading p { text-align: left; }
+  .staff-add-grid,
+  .staff-member-controls { grid-template-columns: 1fr; }
+  .staff-add-action .button { width: 100%; }
+  .staff-member-actions { grid-column: auto; justify-content: flex-start; }
+  .staff-member-actions .small-button { flex: 1 1 130px; }
+  .staff-member-controls .staff-mutation-status { grid-column: auto; }
 }
 
 @media (max-width: 480px) {

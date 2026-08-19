@@ -52,7 +52,11 @@ test("repository migrations reproduce the applied production history", () => {
     "20260819112534_staff_review_details.sql",
     "20260819113549_staff_review_invoker.sql",
     "20260819114235_server_submission_boundary.sql",
-    "20260819151759_release_hardening.sql"
+    "20260819143942_critical_security_boundaries.sql",
+    "20260819143947_public_server_join_links.sql",
+    "20260819151759_release_hardening.sql",
+    "20260819164347_v2_application_boundaries.sql",
+    "20260819174759_discord_staff_role_allowlist.sql"
   ];
 
   for (const name of productionHistory) assert.ok(names.includes(name), name);

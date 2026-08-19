@@ -43,9 +43,12 @@ Production already records the v1.3 migration line through:
 - `20260819143947_public_server_join_links.sql`
 - `20260819151759_release_hardening.sql`
 
-Do not edit, rename or replay any recorded migration. Production recorded the reviewed additive v2 migration as `20260819164347_v2_application_boundaries.sql`. It tightens direct-write/RLS boundaries, adds replay-safe submission provenance, and adds a private, versioned website-content store with narrow public/staff RPCs.
+Do not edit, rename or replay any recorded migration. Production records both reviewed additive v2 migrations:
 
-Apply that exact SQL once through the production Supabase migration interface only after review. Record the provider-returned migration version. Confirm the migration succeeds before promoting code that calls `create_server_submission_server_v2`, `public_site_content`, `staff_list_site_content` or `staff_mutate_site_content`.
+- `20260819164347_v2_application_boundaries.sql` tightens direct-write/RLS boundaries, adds replay-safe submission provenance, and adds the versioned website-content RPCs.
+- `20260819174759_discord_staff_role_allowlist.sql` binds every staff rank to an enabled Discord-only mapping and adds protected-owner rank management with optimistic locking and immutable audit entries.
+
+The sole enabled owner mapping is operational provider data and must never be hardcoded in source. All other staff access is assigned manually by that owner from the private staff centre.
 
 ## Cloudflare cutover
 

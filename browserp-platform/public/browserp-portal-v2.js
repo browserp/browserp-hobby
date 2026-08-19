@@ -142,6 +142,11 @@
       triaged: "Triaged",
       resolved: "Resolved",
       dismissed: "Dismissed",
+      active: "Active",
+      suspended: "Suspended",
+      pending: "Pending Discord sign-in",
+      protected: "Protected owner",
+      revoked: "Revoked",
       high: "High",
       critical: "Critical",
       medium: "Medium",
@@ -152,9 +157,9 @@
 
   function statusTone(value) {
     const normalized = String(value || "").toLowerCase();
-    if (["published", "approved", "resolved"].includes(normalized)) return "success";
+    if (["published", "approved", "resolved", "active"].includes(normalized)) return "success";
     if (["pending_review", "changes_requested", "open", "claimed", "triaged", "medium"].includes(normalized)) return "warning";
-    if (["rejected", "critical", "high"].includes(normalized)) return "danger";
+    if (["rejected", "critical", "high", "suspended", "revoked"].includes(normalized)) return "danger";
     return "info";
   }
 
@@ -831,6 +836,323 @@
     return section;
   }
 
+  function hasOwnerStaffAccess(overview) {
+    const roleKey = String(overview?.role?.key ?? overview?.roleKey ?? overview?.role_key ?? "").trim().toLowerCase();
+    return roleKey === "owner" || overview?.isOwner === true || overview?.is_owner === true;
+  }
+
+  function staffRoles(payload) {
+    return (Array.isArray(payload?.staff?.roles) ? payload.staff.roles : [])
+      .map((role) => ({
+        key: String(role?.key || "").trim().toLowerCase(),
+        name: String(role?.name || humanKey(role?.key || "Staff")),
+        description: String(role?.description || "")
+      }))
+      .filter((role) => role.key && role.key !== "owner");
+  }
+
+  function staffMembers(payload) {
+    return (Array.isArray(payload?.staff?.members) ? payload.staff.members : []).map((member) => ({
+      discordUserId: String(member?.discordUserId || ""),
+      displayName: member?.displayName ? String(member.displayName) : "",
+      avatarUrl: member?.avatarUrl ? String(member.avatarUrl) : "",
+      roleKey: String(member?.roleKey || "").trim().toLowerCase(),
+      status: String(member?.status || "active").trim().toLowerCase(),
+      enabled: member?.enabled !== false,
+      pending: member?.pending === true,
+      protected: member?.protected === true,
+      version: member?.version === null || member?.version === undefined ? Number.NaN : Number(member.version)
+    }));
+  }
+
+  function staffRoleName(roleKey, roles) {
+    return roles.find((role) => role.key === roleKey)?.name || humanKey(roleKey || "Staff");
+  }
+
+  function staffMemberStatus(member) {
+    if (member.protected || member.roleKey === "owner") return "protected";
+    if (member.pending) return "pending";
+    if (!member.enabled || member.status === "revoked") return "revoked";
+    if (member.status === "suspended") return "suspended";
+    return member.status || "active";
+  }
+
+  function staffAvatar(member) {
+    const avatar = make("span", "staff-member-avatar", initials(member.displayName || member.discordUserId));
+    const avatarUrl = safeHttpsUrl(member.avatarUrl);
+    if (!avatarUrl) return avatar;
+    try {
+      if (new URL(avatarUrl).hostname !== "cdn.discordapp.com") return avatar;
+    } catch {
+      return avatar;
+    }
+    const image = make("img");
+    image.src = avatarUrl;
+    image.alt = "";
+    image.loading = "lazy";
+    image.referrerPolicy = "no-referrer";
+    avatar.replaceChildren(image);
+    return avatar;
+  }
+
+  function roleSelect(roles, selectedKey, id) {
+    const select = make("select");
+    select.id = id;
+    select.name = "roleKey";
+    select.required = true;
+    roles.forEach((role) => {
+      const option = make("option", "", role.name);
+      option.value = role.key;
+      option.selected = role.key === selectedKey;
+      select.append(option);
+    });
+    return select;
+  }
+
+  function mutationStatus() {
+    const status = make("p", "portal-status staff-mutation-status");
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    return status;
+  }
+
+  function staffConflictMessage(error) {
+    return error.status === 409
+      ? "This staff record changed elsewhere. Refresh the staff centre before trying again."
+      : error.message;
+  }
+
+  function staffAddForm(roles, refresh) {
+    const form = make("form", "staff-add-card");
+    form.setAttribute("aria-label", "Add a staff member");
+    const heading = make("div", "staff-add-heading");
+    append(heading, make("h3", "", "Add staff access"), make("p", "", "Assign a non-owner rank to a Discord account. The owner rank cannot be granted here."));
+    form.append(heading);
+
+    const fields = make("div", "staff-add-grid");
+    const discordLabel = make("label", "portal-field");
+    const discordInput = make("input");
+    discordInput.id = "staff-discord-user-id";
+    discordInput.name = "discordUserId";
+    discordInput.type = "text";
+    discordInput.inputMode = "numeric";
+    discordInput.autocomplete = "off";
+    discordInput.spellcheck = false;
+    discordInput.minLength = 17;
+    discordInput.maxLength = 20;
+    discordInput.pattern = "[0-9]{17,20}";
+    discordInput.required = true;
+    discordInput.placeholder = "Discord user ID";
+    discordInput.title = "Enter a Discord user ID containing 17 to 20 digits.";
+    append(discordLabel, make("span", "", "Discord user ID"), discordInput, make("small", "", "Use the numeric ID, not a username."));
+
+    const roleLabel = make("label", "portal-field");
+    const select = roleSelect(roles, roles[0]?.key || "", "staff-new-role");
+    append(roleLabel, make("span", "", "Starting rank"), select, make("small", "", "You can change this later."));
+
+    const reasonLabel = make("label", "portal-field");
+    const reason = make("input");
+    reason.id = "staff-add-reason";
+    reason.name = "reason";
+    reason.type = "text";
+    reason.minLength = 5;
+    reason.maxLength = 500;
+    reason.required = true;
+    reason.placeholder = "Why does this person need access?";
+    append(reasonLabel, make("span", "", "Reason"), reason, make("small", "", "Saved to the audit log."));
+
+    const submit = make("button", "button button-primary", "Add staff member");
+    submit.type = "submit";
+    submit.disabled = roles.length === 0;
+    const action = make("div", "staff-add-action");
+    action.append(submit);
+    append(fields, discordLabel, roleLabel, reasonLabel, action);
+    form.append(fields);
+    if (!roles.length) form.append(make("p", "permission-note", "No assignable non-owner roles are currently available."));
+    const status = mutationStatus();
+    form.append(status);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const discordUserId = discordInput.value.trim();
+      const roleKey = select.value;
+      const reasonText = reason.value.trim();
+      if (!/^[0-9]{17,20}$/.test(discordUserId)) {
+        status.textContent = "Enter a Discord user ID containing 17 to 20 digits.";
+        status.className = "portal-status staff-mutation-status error";
+        discordInput.focus();
+        return;
+      }
+      if (!roles.some((role) => role.key === roleKey) || roleKey === "owner") {
+        status.textContent = "Choose an available non-owner rank.";
+        status.className = "portal-status staff-mutation-status error";
+        return;
+      }
+      if (reasonText.length < 5) {
+        status.textContent = "Give a reason of at least five characters.";
+        status.className = "portal-status staff-mutation-status error";
+        reason.focus();
+        return;
+      }
+      submit.disabled = true;
+      status.textContent = "Adding staff access…";
+      status.className = "portal-status staff-mutation-status";
+      try {
+        await api("/api/admin/staff", {
+          method: "POST",
+          body: JSON.stringify({
+            discordUserId,
+            action: "assign",
+            roleKey,
+            reason: reasonText,
+            expectedVersion: 0
+          })
+        });
+        status.textContent = "Staff access added.";
+        status.className = "portal-status staff-mutation-status success";
+        toast("Staff access added.");
+        await refresh();
+      } catch (error) {
+        status.textContent = staffConflictMessage(error);
+        status.className = "portal-status staff-mutation-status error";
+        submit.disabled = roles.length === 0;
+      }
+    });
+    return form;
+  }
+
+  function staffMemberRow(member, roles, refresh) {
+    const row = make("li", "staff-member-row");
+    const protectedOwner = member.protected || member.roleKey === "owner";
+    const versionValid = Number.isSafeInteger(member.version) && member.version >= 0;
+    const locked = protectedOwner || !versionValid;
+    const memberName = member.displayName || "Discord member";
+
+    const identity = make("div", "staff-member-identity");
+    identity.append(staffAvatar(member));
+    const identityCopy = make("div", "staff-member-copy");
+    append(identityCopy,
+      make("strong", "", memberName),
+      make("small", "", `Discord ${member.discordUserId || "ID unavailable"} · ${staffRoleName(member.roleKey, roles)}`),
+      statusChip(staffMemberStatus(member))
+    );
+    if (member.pending) identityCopy.append(make("p", "", "Access is ready and will attach when this Discord account signs in."));
+    if (protectedOwner) identityCopy.append(make("p", "staff-protected-note", "The business owner account is protected and cannot be changed here."));
+    if (!protectedOwner && !versionValid) identityCopy.append(make("p", "staff-protected-note", "Refresh this page before changing this record."));
+    append(identity, identityCopy);
+    row.append(identity);
+
+    const form = make("form", "staff-member-controls");
+    form.setAttribute("aria-label", `Manage ${memberName}`);
+    const idSuffix = member.discordUserId.replace(/[^0-9]/g, "") || "member";
+    const roleLabel = make("label", "portal-field staff-compact-field");
+    const availableRoles = protectedOwner ? [{ key: "owner", name: "Owner" }] : roles;
+    const select = roleSelect(availableRoles, member.roleKey, `staff-role-${idSuffix}`);
+    select.disabled = locked || roles.length === 0;
+    append(roleLabel, make("span", "", "Rank"), select);
+
+    const reasonLabel = make("label", "portal-field staff-compact-field staff-reason-field");
+    const reason = make("input");
+    reason.id = `staff-reason-${idSuffix}`;
+    reason.name = "reason";
+    reason.type = "text";
+    reason.minLength = 5;
+    reason.maxLength = 500;
+    reason.required = !locked;
+    reason.disabled = locked;
+    reason.placeholder = "Reason for this change";
+    append(reasonLabel, make("span", "", "Audit reason"), reason);
+
+    const actions = make("div", "staff-member-actions");
+    const changeRole = make("button", "small-button", "Save rank");
+    changeRole.type = "submit";
+    changeRole.dataset.staffRankAction = "change_role";
+    const enabled = member.enabled && member.status !== "suspended";
+    const stateButton = make("button", `small-button ${enabled ? "small-button-danger" : "small-button-success"}`, enabled ? "Suspend" : "Reactivate");
+    stateButton.type = "submit";
+    stateButton.dataset.staffRankAction = enabled ? "suspend" : "reactivate";
+    const revoke = make("button", "small-button small-button-danger", "Revoke access");
+    revoke.type = "submit";
+    revoke.dataset.staffRankAction = "revoke";
+    [changeRole, ...(member.pending ? [] : [stateButton]), revoke].forEach((actionButton) => {
+      actionButton.disabled = locked;
+      actions.append(actionButton);
+    });
+    const status = mutationStatus();
+    append(form, roleLabel, reasonLabel, actions, status);
+    row.append(form);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const action = event.submitter?.dataset.staffRankAction;
+      if (!action || locked || !form.reportValidity()) return;
+      const reasonText = reason.value.trim();
+      if (reasonText.length < 5) {
+        status.textContent = "Give a reason of at least five characters.";
+        status.className = "portal-status staff-mutation-status error";
+        reason.focus();
+        return;
+      }
+      if (action === "change_role" && (!roles.some((role) => role.key === select.value) || select.value === "owner")) {
+        status.textContent = "Choose an available non-owner rank.";
+        status.className = "portal-status staff-mutation-status error";
+        return;
+      }
+      if (action === "revoke" && !window.confirm(`Revoke all staff access for ${memberName}?`)) return;
+      const buttons = [...form.querySelectorAll("[data-staff-rank-action]")];
+      buttons.forEach((actionButton) => { actionButton.disabled = true; });
+      status.textContent = action === "change_role" ? "Saving rank…" : action === "reactivate" ? "Reactivating access…" : action === "suspend" ? "Suspending access…" : "Revoking access…";
+      status.className = "portal-status staff-mutation-status";
+      const request = {
+        discordUserId: member.discordUserId,
+        action,
+        reason: reasonText,
+        expectedVersion: member.version
+      };
+      if (action === "change_role") request.roleKey = select.value;
+      try {
+        await api("/api/admin/staff", { method: "POST", body: JSON.stringify(request) });
+        status.textContent = "Staff access updated.";
+        status.className = "portal-status staff-mutation-status success";
+        toast("Staff access updated.");
+        await refresh();
+      } catch (error) {
+        status.textContent = staffConflictMessage(error);
+        status.className = "portal-status staff-mutation-status error";
+        buttons.forEach((actionButton) => { actionButton.disabled = false; });
+      }
+    });
+    return row;
+  }
+
+  function staffManagementSection(payload, loadError, refresh) {
+    const section = panel("team", "Staff access", "Add people, change their rank, pause access or remove it without editing the website.");
+    section.append(make("p", "permission-note", "Owner-only control. Every change requires a reason, uses the latest record version and is written to the staff audit trail."));
+    if (loadError) {
+      section.append(emptyState("Staff access could not be loaded", loadError.message));
+      return section;
+    }
+    const roles = staffRoles(payload);
+    const members = staffMembers(payload);
+    section.append(staffAddForm(roles, refresh));
+
+    const rosterHead = make("div", "staff-roster-head");
+    append(rosterHead, make("h3", "", "Current staff"), make("span", "", `${members.length} ${members.length === 1 ? "account" : "accounts"}`));
+    section.append(rosterHead);
+    if (!members.length) {
+      section.append(emptyState("No staff accounts yet", "Add a Discord user above to grant their first rank."));
+      return section;
+    }
+    const list = make("ul", "staff-member-list");
+    members
+      .slice()
+      .sort((left, right) => Number(right.protected) - Number(left.protected) || (left.displayName || left.discordUserId).localeCompare(right.displayName || right.discordUserId))
+      .forEach((member) => list.append(staffMemberRow(member, roles, refresh)));
+    section.append(list);
+    return section;
+  }
+
   function staffAuditSection(items) {
     const section = panel("audit", "Audit log", "Reasons and outcomes for recent staff decisions.");
     if (!items.length) {
@@ -860,11 +1182,21 @@
       const overview = payload.overview || {};
       state.staffOverview = overview;
       const permissions = new Set(Array.isArray(overview.permissions) ? overview.permissions : []);
+      const ownerStaffAccess = hasOwnerStaffAccess(overview);
       let contentPayload = null;
       try {
         contentPayload = await api("/api/admin/content");
       } catch (error) {
         if (error.status !== 401 && error.status !== 403 && error.status !== 404) throw error;
+      }
+      let staffPayload = null;
+      let staffLoadError = null;
+      if (ownerStaffAccess) {
+        try {
+          staffPayload = await api("/api/admin/staff");
+        } catch (error) {
+          staffLoadError = error;
+        }
       }
 
       const content = make("div", "staff-view");
@@ -880,6 +1212,7 @@
       content.append(intro);
 
       const sections = [];
+      if (ownerStaffAccess) sections.push(staffManagementSection(staffPayload, staffLoadError, async () => staffPage(state.session)));
       if (permissions.has("servers.review")) sections.push(staffQueueSection({
         id: "listings", title: "Listing reviews", description: "Check the submitted details before approving, requesting changes or rejecting.",
         items: Array.isArray(overview.listingQueue) ? overview.listingQueue : [], empty: "No listings need review", kind: "listing", permissions, symbol: "L",

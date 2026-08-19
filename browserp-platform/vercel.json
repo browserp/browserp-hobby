@@ -71,6 +71,10 @@
       "destination": "/api/router?_route=admin/overview"
     },
     {
+      "source": "/api/admin/staff",
+      "destination": "/api/router?_route=admin/staff"
+    },
+    {
       "source": "/api/admin/item",
       "destination": "/api/router?_route=admin/item"
     },

@@ -12,6 +12,7 @@ const apiRoutes = new Map([
   ["GET /api/categories", ["api/router.js", "categories"]],
   ["GET /api/servers", "api/servers.js"],
   ["GET /api/public/overview", ["api/router.js", "public/overview"]],
+  ["GET /api/public/content", ["api/router.js", "public/content"]],
   ["GET /api/auth/providers", ["api/router.js", "auth/providers"]],
   ["GET /api/auth/discord", ["api/router.js", "auth/discord"]],
   ["GET /api/auth/google", ["api/router.js", "auth/google"]],
@@ -20,6 +21,7 @@ const apiRoutes = new Map([
   ["POST /api/auth/logout", ["api/router.js", "auth/logout"]],
   ["GET /api/boosts/balance", "api/boosts/balance.js"],
   ["POST /api/boosts", "api/boosts.js"],
+  ["GET /api/submissions", "api/submissions.js"],
   ["POST /api/submissions", "api/submissions.js"],
   ["POST /api/tools/joaat", "api/tools/joaat.js"],
   ["POST /api/tools/name-generator", "api/tools/name-generator.js"],
@@ -30,8 +32,12 @@ const apiRoutes = new Map([
   ["POST /api/me/favorites", ["api/router.js", "me/favorites"]],
   ["POST /api/me/notifications/read", ["api/router.js", "me/notifications/read"]],
   ["GET /api/admin/overview", ["api/router.js", "admin/overview"]],
+  ["GET /api/admin/staff", ["api/router.js", "admin/staff"]],
+  ["POST /api/admin/staff", ["api/router.js", "admin/staff"]],
   ["GET /api/admin/item", ["api/router.js", "admin/item"]],
   ["POST /api/admin/action", ["api/router.js", "admin/action"]],
+  ["GET /api/admin/content", ["api/router.js", "admin/content"]],
+  ["POST /api/admin/content", ["api/router.js", "admin/content"]],
   ["GET /api/resources", "api/resources.js"],
   ["GET /api/developers", "api/developers.js"]
 ]);

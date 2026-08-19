@@ -63,6 +63,33 @@ function contentMutation(body) {
   return { key, action, reason, expectedVersion, value: value ?? null };
 }
 
+function staffAccessMutation(body) {
+  const discordUserId = String(body.discordUserId || "").trim();
+  const action = String(body.action || "").trim().toLowerCase();
+  const roleKey = String(body.roleKey || "").trim().toLowerCase();
+  const reason = sanitizePlainText(body.reason, 500);
+  const expectedVersion = Number(body.expectedVersion);
+  const assignableRoles = new Set(["administrator", "senior_moderator", "moderator", "support"]);
+
+  if (!/^[0-9]{17,20}$/.test(discordUserId)) {
+    throw Object.assign(new Error("Enter a valid Discord user ID."), { status: 400 });
+  }
+  if (!["assign", "change_role", "suspend", "reactivate", "revoke"].includes(action)) {
+    throw Object.assign(new Error("Choose a valid staff access action."), { status: 400 });
+  }
+  if (["assign", "change_role"].includes(action) && !assignableRoles.has(roleKey)) {
+    throw Object.assign(new Error("Choose an assignable staff rank."), { status: 400 });
+  }
+  if (!Number.isSafeInteger(expectedVersion) || expectedVersion < 0) {
+    throw Object.assign(new Error("Staff access changed. Reload before trying again."), { status: 409 });
+  }
+  if (reason.length < 5) {
+    throw Object.assign(new Error("Add a reason of at least five characters."), { status: 400 });
+  }
+
+  return { discordUserId, action, roleKey: roleKey || null, reason, expectedVersion };
+}
+
 function authFailure(req, res, provider, returnTo, state) {
   const destination = new URL(returnTo, appUrl(req));
   destination.searchParams.set("auth", state || `${provider}-not-configured`);
@@ -220,6 +247,33 @@ const routes = {
       }, session.accessToken);
     } catch (error) {
       if (error.code === "40001") error.status = 409;
+      throw error;
+    }
+    return ok(res, { result });
+  }),
+
+  "admin/staff": endpoint(["GET", "POST"], async (req, res, id) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") {
+      const staff = await rpc("staff_list_access", {}, session.accessToken);
+      return ok(res, { staff: staff && typeof staff === "object" ? staff : { members: [], roles: [] } });
+    }
+
+    await rateLimit(req, "staff-access", 20, 300);
+    const body = staffAccessMutation(await readBody(req, 12 * 1024));
+    let result;
+    try {
+      result = await rpc("staff_mutate_access", {
+        p_discord_user_id: body.discordUserId,
+        p_action: body.action,
+        p_role_key: body.roleKey,
+        p_reason: body.reason,
+        p_expected_version: body.expectedVersion,
+        p_request_id: id
+      }, session.accessToken);
+    } catch (error) {
+      if (error.code === "40001" || error.code === "23505") error.status = 409;
       throw error;
     }
     return ok(res, { result });
