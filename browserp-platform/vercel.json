@@ -176,31 +176,31 @@
     },
     {
       "source": "/staffpanel/overview",
-      "destination": "/staffpanel-overview.html"
+      "destination": "/staffpanel-overview"
     },
     {
       "source": "/staffpanel/moderation",
-      "destination": "/staffpanel-moderation.html"
+      "destination": "/staffpanel-moderation"
     },
     {
       "source": "/staffpanel/profiles",
-      "destination": "/staffpanel-profiles.html"
+      "destination": "/staffpanel-profiles"
     },
     {
       "source": "/staffpanel/accounts",
-      "destination": "/staffpanel-accounts.html"
+      "destination": "/staffpanel-accounts"
     },
     {
       "source": "/staffpanel/staff",
-      "destination": "/staffpanel-staff.html"
+      "destination": "/staffpanel-staff"
     },
     {
       "source": "/staffpanel/security",
-      "destination": "/staffpanel-security.html"
+      "destination": "/staffpanel-security"
     },
     {
       "source": "/staffpanel/content",
-      "destination": "/staffpanel-content.html"
+      "destination": "/staffpanel-content"
     },
     {
       "source": "/server/:slug",

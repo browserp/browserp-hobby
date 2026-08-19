@@ -111,6 +111,7 @@ test("the staff panel is a separate MFA-aware multi-page workspace", () => {
   const login = readFileSync(join(root, "public", "staffpanel.html"), "utf8");
   const accounts = readFileSync(join(root, "public", "staffpanel-accounts.html"), "utf8");
   const vercel = readFileSync(join(root, "vercel.json"), "utf8");
+  const vercelConfig = JSON.parse(vercel);
 
   assert.match(staff, /\/api\/auth\/mfa\/enroll/);
   assert.match(staff, /\/api\/auth\/mfa\/verify/);
@@ -120,6 +121,13 @@ test("the staff panel is a separate MFA-aware multi-page workspace", () => {
   assert.match(login, /noindex,nofollow,noarchive,nosnippet/);
   assert.match(accounts, /Full IP addresses are protected/);
   assert.match(vercel, /"source": "\/staffpanel\/accounts"/);
+  for (const page of ["overview", "moderation", "profiles", "accounts", "staff", "security", "content"]) {
+    assert.equal(
+      vercelConfig.rewrites.find((route) => route.source === `/staffpanel/${page}`)?.destination,
+      `/staffpanel-${page}`,
+      `clean URL rewrite for ${page}`
+    );
+  }
   assert.doesNotMatch(vercel, /"source": "\/staff"/);
 });
 
