@@ -212,12 +212,20 @@ const routes = {
     } catch { /* Auth identity remains usable while profile provisioning catches up. */ }
     let staffAccess = false;
     try { staffAccess = await rpc("staff_mfa_enrollment_allowed", {}, session.accessToken) === true; } catch { /* Staff entry remains hidden if the permission check is unavailable. */ }
+    let staffMfaRequired = true;
+    if (staffAccess) {
+      try {
+        const securityStatus = await rpc("staff_security_status", {}, session.accessToken);
+        staffMfaRequired = securityStatus?.staffMfaRequired !== false;
+      } catch { /* Fail closed if the staff MFA policy cannot be read. */ }
+    }
     return ok(res, {
       authenticated: true,
       staffAccess,
       provider: session.provider,
       aal: session.aal,
       mfa: {
+        required: staffAccess ? staffMfaRequired : null,
         enrolled: session.factors.some((factor) => factor?.status === "verified"),
         factors: session.factors.map((factor) => ({
           id: factor.id,

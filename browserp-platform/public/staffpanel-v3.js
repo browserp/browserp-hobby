@@ -81,8 +81,18 @@
     const root = $("#staff-app-v3");
     if (!root) return;
     const card = make("section", undefined, "staff-login-card-v3");
-    card.append(themeButton(), brand(), make("span", "Restricted operations", "eyebrow-v3"), make("h1", "Staff Panel"), make("p", "Staff access requires an assigned Discord account. Once enabled by the owner, a six-digit authenticator code is required on every new staff session."));
+    card.append(themeButton(), brand(), make("span", "Restricted operations", "eyebrow-v3"), make("h1", "Staff Panel"), make("p", "Continue with the Discord account assigned to your BrowseRP staff rank."));
     const login = make("a", "Continue with Discord", "button-v3 button-primary-v3"); login.href = "/api/auth/discord?returnTo=%2Fstaffpanel%2Foverview"; card.append(login, make("p", "The address is intentionally absent from public navigation. The API still authorises every request.", "access-note")); root.replaceChildren(card);
+  }
+
+  function showDenied() {
+    const root = $("#staff-app-v3");
+    if (!root) return;
+    const card = make("section", undefined, "staff-login-card-v3");
+    card.append(themeButton(), brand(), make("span", "Access not assigned", "eyebrow-v3"), make("h1", "Staff access required"), make("p", "This Discord account does not have an active BrowseRP staff rank."));
+    card.append(make("a", "Return to BrowseRP", "button-v3 button-secondary-v3"));
+    card.lastChild.href = "/";
+    root.replaceChildren(card);
   }
 
   function showMfa() {
@@ -133,8 +143,9 @@
   async function ensureStaff() {
     await loadSession();
     if (!state.session.authenticated || state.session.provider !== "discord") { showLogin(); return false; }
+    if (!state.session.staffAccess) { showDenied(); return false; }
     const verifiedFactor = state.session.mfa?.factors?.some((factor) => factor.status === "verified");
-    if (!verifiedFactor || state.session.aal !== "aal2") { showMfa(); return false; }
+    if (state.session.mfa?.required !== false && (!verifiedFactor || state.session.aal !== "aal2")) { showMfa(); return false; }
     if (document.body.dataset.staffPage === "login") { location.replace("/staffpanel/overview"); return false; }
     return true;
   }
