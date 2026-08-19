@@ -11,11 +11,11 @@
   if (nav) {
     const links = [
       ["Browse", "/servers"],
-      ["All Games", "/servers"],
+      ["All Games", "/servers#games"],
       ["FiveM", "/servers?platform=fivem"],
       ["Roblox", "/servers?platform=roblox"],
       ["Minecraft", "/servers?platform=minecraft"],
-      ["Guides", "/guides"]
+      ["Guides", "/blog"]
     ];
     nav.replaceChildren(...links.map(([label, href]) => {
       const link = document.createElement("a");
