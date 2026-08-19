@@ -157,10 +157,10 @@ test("critical security migration closes staff and fulfillment bypasses", () => 
 
 test("production routes and legacy APIs match the deployed schema", () => {
   const vercel = JSON.parse(readFileSync(join(root, "vercel.json"), "utf8"));
-  const serverRoute = vercel.rewrites.find((rewrite) => rewrite.destination === "/server?slug=$slug");
+  const serverRoute = vercel.rewrites.find((rewrite) => rewrite.source === "/server/:slug");
   const resources = readFileSync(join(root, "api", "resources.js"), "utf8");
 
-  assert.equal(serverRoute?.source, "^/server/(?<slug>[a-z0-9-]{2,70})$");
+  assert.equal(serverRoute?.destination, "/server?slug=:slug");
   assert.match(resources, /resource_directory\?select=\*&order=published_at\.desc/);
   assert.doesNotMatch(resources, /featured\.desc|created_at\.desc/);
 });
