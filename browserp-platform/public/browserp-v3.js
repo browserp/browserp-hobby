@@ -371,8 +371,8 @@
     if (!root || $(".footer-grid-v3", root)) return;
     const grid = node("div", "shell-v3 footer-grid-v3");
     const brand = node("div", "footer-brand-v3");
-    const lockup = node("span", "logo-lockup-v3"); const mark = new Image(); mark.src = "/browserp-mark-v3.png"; mark.alt = "RP";
-    lockup.append(node("span", "logo-word-v3", "Browse"), mark); brand.append(lockup, node("p", "", "A clearer way to discover roleplay communities across games and simulators."));
+    const lockup = node("span", "logo-lockup-v3"); const mark = new Image(); mark.src = "/assets/browserp-logo-v5.png"; mark.alt = "BrowseRP"; mark.className = "logo-full-v5";
+    lockup.append(mark); brand.append(lockup, node("p", "", "A clearer way to discover roleplay communities across games and simulators."));
     grid.append(brand);
     const groups = [
       ["Discover", [["Browse servers","/servers"],["UK servers","/servers?region=United%20Kingdom"],["US servers","/servers?region=United%20States"],["Guides & blog","/blog"]]],

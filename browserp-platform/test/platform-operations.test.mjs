@@ -117,9 +117,23 @@ test("the public product is multi-page and hides the operations route", () => {
   for (const file of files) assert.match(readFileSync(join(root, "public", file), "utf8"), /<!doctype html>/i, file);
   assert.doesNotMatch(index, /href=["']\/staffpanel/i);
   assert.match(index, /logo-lockup-v3/);
+  assert.match(index, /\/assets\/browserp-logo-v5\.png/);
   assert.match(index, /browserp-mark-v3\.png/);
   assert.doesNotMatch(index, /data-ad-placement="top"/);
   assert.match(index, /data-ad-placement="side"/);
+});
+
+test("the supplied BrowseRP lockup is a genuine transparent PNG used across the site", () => {
+  const logo = readFileSync(join(root, "public", "assets", "browserp-logo-v5.png"));
+  assert.equal(logo.subarray(1, 4).toString("ascii"), "PNG");
+  assert.equal(logo[25], 6, "PNG colour type must be RGBA");
+  for (const file of ["index.html", "servers.html", "dashboard.html", "staffpanel-overview.html"]) {
+    const html = readFileSync(join(root, "public", file), "utf8");
+    assert.match(html, /<img class="logo-full-v5" src="\/assets\/browserp-logo-v5\.png" alt="BrowseRP">/, file);
+    assert.doesNotMatch(html, /logo-word-v3/, file);
+  }
+  assert.match(readFileSync(join(root, "public", "browserp-v3.js"), "utf8"), /\/assets\/browserp-logo-v5\.png/);
+  assert.match(readFileSync(join(root, "public", "staffpanel-v3.js"), "utf8"), /\/assets\/browserp-logo-v5\.png/);
 });
 
 test("listing tags are canonical, unique and limited in the browser", () => {

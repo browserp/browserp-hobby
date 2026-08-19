@@ -22,8 +22,8 @@
   function brand() {
     const link = make("a", undefined, "logo-v3"); link.href = "/"; link.setAttribute("aria-label", "BrowseRP home");
     const lockup = make("span", undefined, "logo-lockup-v3");
-    const image = new Image(); image.src = "/browserp-mark-v3.png"; image.alt = "RP";
-    lockup.append(make("span", "Browse", "logo-word-v3"), image); link.append(lockup); return link;
+    const image = new Image(); image.src = "/assets/browserp-logo-v5.png"; image.alt = "BrowseRP"; image.className = "logo-full-v5";
+    lockup.append(image); link.append(lockup); return link;
   }
 
   function decision({ title, description = "", fields = [], submitLabel = "Confirm", danger = false }) {

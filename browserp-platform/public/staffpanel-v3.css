@@ -64,7 +64,7 @@ body.staff-v3 { background: #08090c; }
   .staff-shell-v3 { display: block; padding-top: 60px; }
   .staff-mobile-bar-v3 { position: fixed; inset: 0 0 auto; z-index: 90; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid #252b35; background: #0b0d11; }
 .staff-mobile-bar-v3 .logo-lockup-v3 { min-width: 140px; height: 40px; }
-.staff-mobile-bar-v3 .logo-lockup-v3 img { width: 45px; height: 45px; }
+.staff-mobile-bar-v3 .logo-lockup-v3 .logo-full-v5 { width: 150px; height: auto; max-height: 40px; }
   .staff-sidebar-v3 { position: fixed; inset: 60px 0 0; z-index: 89; width: 100%; height: auto; transform: translateX(-105%); transition: transform .2s ease; }
   body.staff-menu-open .staff-sidebar-v3 { transform: none; }
   .staff-main-v3 { padding: 28px 16px 60px; }
