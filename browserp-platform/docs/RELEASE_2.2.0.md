@@ -20,6 +20,7 @@ Status: **candidate pending exact preview and production verification**
 
 - `20260819212500_multiplatform_advert_carousels.sql`
 - `20260819214000_profile_retention_security.sql`
+- `20260819220700_cross_game_house_advert.sql`
 
 Both migrations are additive and must be applied exactly once. The retention job excludes active staff, financial records and unresolved uploaded media.
 
