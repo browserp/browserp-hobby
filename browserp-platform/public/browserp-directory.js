@@ -177,7 +177,8 @@
   }
 
   function renderSearchSuggestions(searchInput, query) {
-    const list = select(".search-suggestions-v3");
+    const listId = searchInput?.getAttribute("aria-controls");
+    const list = listId ? document.getElementById(listId) : null;
     if (!list || !searchInput) return;
     const term = String(query || "").trim().toLowerCase();
     const matches = SEARCH_SUGGESTIONS.filter(([, value]) => value.toLowerCase().includes(term)).slice(0, 7);
@@ -198,17 +199,16 @@
         button.type = "button";
         button.setAttribute("role", "option");
         button.append(element("span", "search-suggestion-kind-v3", kind), element("strong", "", item));
+        button.addEventListener("pointerdown", (event) => event.preventDefault());
         button.addEventListener("click", () => {
           searchInput.value = item;
           state.filters.query = item;
           list.classList.remove("search-suggestions-open");
           list.hidden = true;
           list.inert = true;
-          if (document.body.dataset.page === "home") {
-            location.assign(`/servers?q=${encodeURIComponent(item)}`);
-            return;
-          }
-          directoryResults();
+          searchInput.setAttribute("aria-expanded", "false");
+          searchInput.focus();
+          if (document.body.dataset.page !== "home") directoryResults();
         });
         return button;
       })

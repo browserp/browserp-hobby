@@ -393,9 +393,14 @@ main { animation: page-enter-v3 .42s cubic-bezier(.22,.75,.26,1) both; }
 .game-showcase-v3 { padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(145deg,var(--panel-2),var(--panel)); box-shadow: 0 34px 90px rgba(0,0,0,.36); }
 .game-showcase-v3 > span { display: block; padding: 3px 4px 14px; color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .game-grid-v3 { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
-.game-grid-v3 a { min-height: 108px; display: grid; grid-template-columns: 42px 1fr; grid-template-rows: auto auto; column-gap: 12px; align-content: center; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); transition: transform .18s ease,border-color .18s ease,background .18s ease; }
-.game-grid-v3 a:hover { transform: translateY(-2px); border-color: var(--line-strong); background: var(--panel-2); }
-.game-grid-v3 b { grid-row: 1 / 3; align-self: center; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 9px; background: linear-gradient(135deg,rgba(236,79,166,.23),rgba(155,108,255,.2)); color: var(--text); }
+.game-grid-v3 a { min-height: 108px; display: grid; grid-template-columns: 64px 1fr; grid-template-rows: auto auto; column-gap: 13px; align-content: center; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); transition: transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease; }
+.game-grid-v3 a:hover { transform: translateY(-3px); border-color: var(--line-strong); background: var(--panel-2); box-shadow: 0 12px 28px rgba(0,0,0,.24); }
+.game-art-v3 { grid-row: 1 / 3; align-self: center; display: grid; place-items: center; width: 64px; height: 64px; overflow: hidden; border: 1px solid rgba(255,255,255,.12); border-radius: 9px; background: linear-gradient(135deg,rgba(236,79,166,.23),rgba(155,108,255,.2)) center/cover no-repeat; color: var(--text); font-size: 27px; font-weight: 700; box-shadow: inset 0 0 0 1px rgba(255,255,255,.04); }
+.game-art-fivem-v3 { background-image: linear-gradient(180deg,transparent 42%,rgba(5,5,9,.18)),url('/assets/games/fivem-roleplay.webp'); }
+.game-art-redm-v3 { background-image: linear-gradient(180deg,transparent 42%,rgba(5,5,9,.18)),url('/assets/games/redm-roleplay.webp'); }
+.game-art-roblox-v3 { background-image: linear-gradient(180deg,transparent 42%,rgba(5,5,9,.18)),url('/assets/games/roblox-roleplay.webp'); }
+.game-art-minecraft-v3 { background-image: linear-gradient(180deg,transparent 42%,rgba(5,5,9,.18)),url('/assets/games/minecraft-roleplay.webp'); }
+.game-art-forza-v3 { background-image: linear-gradient(180deg,transparent 42%,rgba(5,5,9,.18)),url('/assets/games/forza-roleplay.webp'); }
 .game-grid-v3 strong { align-self: end; font-size: 15px; }
 .game-grid-v3 small { color: #8f99aa; font-size: 12px; }
 .section-rail-v3 { background: var(--bg-soft); }

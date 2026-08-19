@@ -1,6 +1,6 @@
 {
   "name": "browserp-platform",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "private": true,
   "description": "BrowseRP cross-game roleplay server directory and owner listing platform.",
   "type": "module",

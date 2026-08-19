@@ -74,6 +74,19 @@ test("search suggestions cover games, frameworks, tags, access and regions", () 
   for (const value of ["QBCore", "ESX", "Whitelisted", "Custom clothing", "United Kingdom"]) assert.match(directory, new RegExp(value));
   assert.match(directory, /ArrowDown/);
   assert.match(directory, /role", "listbox"/);
+  assert.match(directory, /searchInput\.value = item/);
+  assert.match(directory, /searchInput\.focus\(\)/);
+  assert.doesNotMatch(directory, /location\.assign\(`\/servers\?q=\$\{encodeURIComponent\(item\)\}`\)/);
+});
+
+test("homepage game cards use local original artwork instead of letter tiles", () => {
+  const home = read("public/index.html");
+  const css = read("public/browserp-v3.css");
+  for (const game of ["fivem", "redm", "roblox", "minecraft", "forza"]) {
+    assert.match(home, new RegExp(`game-art-${game}-v3`));
+    assert.match(css, new RegExp(`/assets/games/${game}-roleplay\\.webp`));
+  }
+  assert.doesNotMatch(home, /<b>(5M|RM|RB|MC|FZ)<\/b>/);
 });
 
 test("profile picture previews remain compatible with the strict image CSP", () => {
