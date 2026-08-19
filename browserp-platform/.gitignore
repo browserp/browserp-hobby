@@ -1,0 +1,23 @@
+# Dependencies and test output
+node_modules/
+coverage/
+*.log
+
+# Local provider/runtime state
+.vercel/
+.supabase/
+supabase/.temp/
+.pnpm-store/
+.npmrc
+
+# Secrets and local overrides
+.env
+.env.*
+!.env.example
+*.local
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

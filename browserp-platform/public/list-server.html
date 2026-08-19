@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#090a0e">
+    <meta name="description" content="Submit a FiveM roleplay server to BrowseRP for review.">
+    <meta name="robots" content="noindex,follow">
+    <link rel="canonical" href="/list-server">
+    <link rel="stylesheet" href="/site.css?v=1.4.3">
+    <title>List your FiveM server — BrowseRP</title>
+    <script src="/site.js?v=1.4.0" defer></script>
+    <script src="/app.js?v=1.4.0" defer></script>
+  </head>
+  <body data-page="list-server">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="site-header" data-site-header>
+      <nav class="site-shell site-nav" aria-label="Main navigation">
+        <a class="site-brand" href="/" aria-label="BrowseRP home"><span class="brand-icon" aria-hidden="true">B</span><span>Browse<span class="brand-rp">RP</span></span></a>
+        <button class="site-menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="site-menu" aria-label="Open menu"><span></span><span></span><span></span></button>
+        <div class="site-menu" id="site-menu" data-site-menu>
+          <div class="site-links"><a href="/">Home</a><a href="/servers">Browse servers</a><a href="/list-server" aria-current="page">List your server</a></div>
+          <div class="site-actions"><a class="site-button site-button-secondary" href="/dashboard" data-account-link>My account</a></div>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section class="page-intro">
+        <div class="site-shell">
+          <span class="hero-label">For FiveM owners</span>
+          <h1>List your server.</h1>
+          <p>Give players a clear reason to join. We review every submission before it appears in the directory.</p>
+        </div>
+      </section>
+
+      <div class="site-shell listing-layout">
+        <aside class="listing-copy">
+          <span class="section-label">What happens next</span>
+          <h2>A useful listing, not an advert wall.</h2>
+          <p>Tell people what your server is actually like. Clear information makes it easier for the right players to find you.</p>
+          <div class="listing-points">
+            <div class="listing-point"><span>1</span><div><strong>You submit the details</strong><small>Server name, region, framework, description and a community link.</small></div></div>
+            <div class="listing-point"><span>2</span><div><strong>We review the listing</strong><small>We check that it is relevant, readable and safe to publish.</small></div></div>
+            <div class="listing-point"><span>3</span><div><strong>You manage it from your account</strong><small>Review updates and your published servers appear in the owner dashboard.</small></div></div>
+          </div>
+        </aside>
+
+        <section class="listing-panel" aria-labelledby="listing-form-title">
+          <h2 id="listing-form-title">FiveM server details</h2>
+          <p>Use normal language. Players want to know what they can do and what kind of roleplay to expect.</p>
+          <div class="form-notice" id="auth-notice">Checking your account…</div>
+          <form class="listing-form" id="listing-form">
+            <input type="hidden" name="platform" value="fivem">
+            <label class="form-field">Server name<input name="name" maxlength="80" required placeholder="Example: Northstar Roleplay"></label>
+            <div class="field-grid">
+              <label class="form-field">Region<select name="region" required><option value="">Choose a region</option><option>Europe</option><option>North America</option><option>Oceania</option><option>Global</option></select></label>
+              <label class="form-field">Primary language<input name="language" maxlength="60" required value="English"></label>
+            </div>
+            <label class="form-field">Framework <span class="optional">Optional</span><input name="framework" maxlength="80" placeholder="QBox, QBCore, ESX or custom"></label>
+            <label class="form-field">About your server<textarea name="description" minlength="40" maxlength="1500" required placeholder="Explain the roleplay style, setting, jobs, economy and what a new player should expect."></textarea><small>40–1,500 characters. Avoid slogans and repeated keywords.</small></label>
+            <label class="form-field">Community link<input name="communityUrl" type="url" pattern="https://.*" maxlength="300" required placeholder="https://discord.gg/yourserver"><small>Use an HTTPS Discord invite or official community website.</small></label>
+            <label class="inline-check"><input name="agreement" type="checkbox" required><span>I confirm that I am authorised to list this server and that the information follows the community rules.</span></label>
+            <button class="site-button site-button-primary site-button-full" id="submit-listing" type="submit">Submit for review</button>
+            <p class="form-status" id="listing-status" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-shell footer-main">
+        <div class="footer-brand"><a class="site-brand" href="/"><span class="brand-icon" aria-hidden="true">B</span><span>Browse<span class="brand-rp">RP</span></span></a><p>A focused place to find and list FiveM roleplay communities.</p></div>
+        <div class="footer-column"><h2>BrowseRP</h2><a href="/servers">Browse servers</a><a href="/dashboard">My account</a></div>
+        <div class="footer-column"><h2>Information</h2><a href="/legal#privacy">Privacy</a><a href="/legal#cookies">Cookies</a><a href="/legal#terms">Terms</a><a href="/legal#standards">Community rules</a></div>
+      </div>
+      <div class="site-shell footer-bottom"><span>© <span data-current-year>2026</span> BrowseRP. An LCAPUK project.</span><span>Not affiliated with Rockstar Games, Cfx.re or Discord.</span></div>
+    </footer>
+
+    <dialog class="site-dialog" id="sign-in-dialog">
+      <div class="dialog-inner">
+        <button class="dialog-close" type="button" data-close-dialog aria-label="Close sign-in">×</button>
+        <h2>Sign in to submit</h2>
+        <p>We use your account to show review updates and let you manage approved listings.</p>
+        <div class="provider-list" id="auth-provider-list">
+          <a class="site-button site-button-primary site-button-full" data-auth-provider="discord" href="/api/auth/discord?returnTo=/list-server" hidden>Continue with Discord</a>
+          <a class="site-button site-button-secondary site-button-full" data-auth-provider="google" href="/api/auth/google?returnTo=/list-server" hidden>Continue with Google</a>
+        </div>
+      </div>
+    </dialog>
+    <div class="site-toast" id="site-toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

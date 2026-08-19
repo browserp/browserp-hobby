@@ -1,4 +1,40 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Manage BrowseRP communities, submissions, favourites, notifications and promotion credits."><title>Owner dashboard — BrowseRP</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/pages.css"><script src="/portal.js" defer></script></head>
-<body class="page-body" data-page="dashboard"><a class="skip-link" href="#page-content">Skip to content</a><header class="page-header"><nav class="shell page-nav" aria-label="Primary"><a class="brand" href="/"><span class="brand-mark"><span>B</span></span><span>Browse<span>RP</span></span></a><div class="page-nav-links"><a href="/">Discover</a><a href="/developers">Developers</a><a href="/resources">Resources</a><a href="/staff">Staff</a></div><a class="button button-secondary page-auth" id="page-auth" href="/api/auth/discord?returnTo=/dashboard">Sign in</a></nav></header>
-<div class="shell portal-shell"><aside class="portal-side" aria-label="Dashboard"><small>WORKSPACE</small><a class="active" href="/dashboard"><i>⌂</i>Overview</a><a href="/#discover"><i>◇</i>Servers</a><a href="/#promote"><i>✦</i>Promotions</a><a href="/#tools"><i>{ }</i>Tools</a><a href="/legal"><i>?</i>Help & policies</a></aside><main class="portal-main" id="page-content"><div class="loading-block" aria-label="Loading dashboard"></div></main></div>
-<footer class="page-footer"><div class="shell page-footer-inner"><span>© 2026 BrowseRP</span><div class="page-footer-links"><a href="/legal#privacy">Privacy</a><a href="/legal#terms">Terms</a><a href="/legal#standards">Standards</a></div></div></footer></body></html>
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="description" content="Manage your BrowseRP server listings and account.">
+    <title>My account — BrowseRP</title>
+    <link rel="stylesheet" href="/styles.css?v=1.3.0">
+    <link rel="stylesheet" href="/pages.css?v=1.3.0">
+    <link rel="stylesheet" href="/theme.css?v=1.3.0">
+    <link rel="stylesheet" href="/site.css?v=1.4.3">
+    <script src="/site.js?v=1.4.0" defer></script>
+    <script src="/portal.js?v=1.4.0" defer></script>
+  </head>
+  <body class="page-body" data-page="dashboard">
+    <a class="skip-link" href="#page-content">Skip to content</a>
+    <header class="site-header" data-site-header>
+      <nav class="site-shell site-nav" aria-label="Main navigation">
+        <a class="site-brand" href="/" aria-label="BrowseRP home"><span class="brand-icon" aria-hidden="true">B</span><span>Browse<span class="brand-rp">RP</span></span></a>
+        <button class="site-menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="site-menu" aria-label="Open menu"><span></span><span></span><span></span></button>
+        <div class="site-menu" id="site-menu" data-site-menu>
+          <div class="site-links"><a href="/">Home</a><a href="/servers">Browse servers</a><a href="/list-server">List your server</a></div>
+          <div class="site-actions"><a class="site-button site-button-secondary" id="page-auth" href="/api/auth/discord?returnTo=/dashboard">Sign in</a></div>
+        </div>
+      </nav>
+    </header>
+    <div class="shell portal-shell">
+      <aside class="portal-side" aria-label="Account navigation">
+        <small>MY ACCOUNT</small>
+        <a class="active" href="/dashboard"><i>⌂</i>Overview</a>
+        <a href="/servers"><i>◇</i>Browse servers</a>
+        <a href="/list-server"><i>＋</i>List a server</a>
+        <a href="/legal"><i>?</i>Help and policies</a>
+      </aside>
+      <main class="portal-main" id="page-content"><div class="loading-block" aria-label="Loading account"></div></main>
+    </div>
+    <footer class="site-footer"><div class="site-shell footer-bottom"><span>© <span data-current-year>2026</span> BrowseRP. An LCAPUK project.</span><span><a href="/legal#privacy">Privacy</a> · <a href="/legal#terms">Terms</a></span></div></footer>
+  </body>
+</html>

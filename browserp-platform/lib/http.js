@@ -1,5 +1,5 @@
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
-import { env } from "./config.js";
+import { appUrl, env, isProductionRuntime } from "./config.js";
 
 export function requestId(req) {
   return String(req.headers?.["x-vercel-id"] || req.headers?.["x-request-id"] || randomUUID()).slice(0, 160);
@@ -53,8 +53,6 @@ export async function readBody(req, maxBytes = 64 * 1024) {
 }
 
 export async function readRawBody(req, maxBytes = 512 * 1024) {
-  if (Buffer.isBuffer(req.body)) return req.body;
-  if (typeof req.body === "string") return Buffer.from(req.body);
   const chunks = [];
   let size = 0;
   for await (const chunk of req) {
@@ -90,11 +88,12 @@ export function setCookies(res, values) {
 }
 
 export function clientSignal(req) {
-  const forwarded = String(req.headers?.["x-forwarded-for"] || "").split(",")[0].trim();
-  const raw = forwarded || String(req.socket?.remoteAddress || "unknown");
+  const vercelForwarded = String(req.headers?.["x-vercel-forwarded-for"] || "").split(",")[0].trim();
+  const standardForwarded = String(req.headers?.["x-forwarded-for"] || "").split(",")[0].trim();
+  const realIp = String(req.headers?.["x-real-ip"] || "").trim();
+  const raw = vercelForwarded || (process.env.VERCEL === "1" ? standardForwarded : realIp) || String(req.socket?.remoteAddress || "unknown");
   const configuredSecret = env("PRIVACY_HASH_SECRET");
-  const production = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
-  if (!configuredSecret && production) {
+  if (!configuredSecret && isProductionRuntime()) {
     throw Object.assign(new Error("Server privacy hashing is not configured."), {
       status: 503,
       code: "PRIVACY_HASH_NOT_CONFIGURED"
@@ -102,6 +101,18 @@ export function clientSignal(req) {
   }
   const secret = configuredSecret || "browserp-development-only";
   return createHmac("sha256", secret).update(raw).digest("hex");
+}
+
+export function assertSameOrigin(req) {
+  const expected = new URL(appUrl(req)).origin;
+  const requestOrigin = String(req.headers?.origin || "");
+  if (requestOrigin && requestOrigin !== expected) {
+    throw Object.assign(new Error("Cross-origin account actions are not allowed."), { status: 403 });
+  }
+  const fetchSite = String(req.headers?.["sec-fetch-site"] || "").toLowerCase();
+  if (fetchSite && !["same-origin", "same-site", "none"].includes(fetchSite)) {
+    throw Object.assign(new Error("Cross-origin account actions are not allowed."), { status: 403 });
+  }
 }
 
 export function safeReturnPath(value, fallback = "/dashboard") {

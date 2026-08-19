@@ -25,7 +25,7 @@ export function categoriesFromServers(items = servers) {
 }
 
 export const promotionPacks = Object.freeze({
-  starter: { key: "starter", name: "Starter spotlight", credits: 5, maxQuantity: 4 },
-  growth: { key: "growth", name: "Growth spotlight", credits: 15, maxQuantity: 3 },
-  launch: { key: "launch", name: "Launch spotlight", credits: 40, maxQuantity: 2 }
+  starter: { key: "starter", name: "Starter spotlight", credits: 5, maxQuantity: 4, currency: "gbp", unitAmount: 500 },
+  growth: { key: "growth", name: "Growth spotlight", credits: 15, maxQuantity: 3, currency: "gbp", unitAmount: 1200 },
+  launch: { key: "launch", name: "Launch spotlight", credits: 40, maxQuantity: 2, currency: "gbp", unitAmount: 2500 }
 });

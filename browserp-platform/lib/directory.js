@@ -20,6 +20,8 @@ export function normalizeServer(server) {
 
 export function filterServers(items, filters = {}) {
   let results = items.map(normalizeServer);
+  const slug = String(filters.slug || "").trim().toLocaleLowerCase();
+  if (slug) results = results.filter((server) => String(server.slug || "").toLocaleLowerCase() === slug);
   const query = String(filters.query || "").trim().toLocaleLowerCase();
   if (query) {
     results = results.filter((server) => [

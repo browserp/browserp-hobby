@@ -1,8 +1,8 @@
 {
   "name": "browserp-platform",
-  "version": "1.1.0",
+  "version": "1.3.0",
   "private": true,
-  "description": "BrowseRP clean-slate roleplay discovery platform for Vercel, Supabase and Stripe.",
+  "description": "BrowseRP FiveM roleplay server directory and owner listing platform.",
   "type": "module",
   "scripts": {
     "dev": "node dev-server.mjs",

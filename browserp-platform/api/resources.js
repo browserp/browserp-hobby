@@ -1,18 +1,19 @@
 import { endpoint } from "../lib/api.js";
+import { developmentCatalogAllowed } from "../lib/config.js";
 import { publicJson } from "../lib/http.js";
 import { rest } from "../lib/supabase.js";
 
 const fallback = [
-  { id: "demo-resource-1", title: "Community launch checklist", slug: "community-launch-checklist", summary: "A practical, safety-first checklist for opening a roleplay community.", resource_type: "guide", platform_name: "All platforms", downloads: 0 },
-  { id: "demo-resource-2", title: "Accessible rules template", slug: "accessible-rules-template", summary: "A clear starting structure for community expectations and appeals.", resource_type: "template", platform_name: "All platforms", downloads: 0 }
+  { id: "demo-resource-1", title: "Server launch checklist", summary: "A structured pre-launch review for roleplay communities.", type: "guide", platform_name: "All platforms", version: "1.0", tags: ["Operations", "Safety"] },
+  { id: "demo-resource-2", title: "Accessible rules template", summary: "A plain-language community rules structure with escalation guidance.", type: "template", platform_name: "All platforms", version: "1.0", tags: ["Moderation", "Accessibility"] }
 ];
 
 export default endpoint("GET", async (_req, res) => {
   try {
-    const resources = await rest("resource_directory?select=*&order=published_at.desc&limit=50");
-    return publicJson(res, { resources }, 60);
+    const resources = await rest("resource_directory?select=*&order=featured.desc,created_at.desc&limit=50");
+    return publicJson(res, { resources: Array.isArray(resources) ? resources : [] }, 60);
   } catch (error) {
-    if (error.code !== "BACKEND_NOT_CONFIGURED" && error.status !== 404) console.warn("Resource fallback:", error.message);
+    if (!developmentCatalogAllowed()) throw error;
     return publicJson(res, { resources: fallback }, 60);
   }
 });
