@@ -83,6 +83,10 @@
       "destination": "/api/router?_route=me/profile"
     },
     {
+      "source": "/api/me/avatar",
+      "destination": "/api/router?_route=me/avatar"
+    },
+    {
       "source": "/api/me/favorites",
       "destination": "/api/router?_route=me/favorites"
     },
@@ -133,6 +137,10 @@
     {
       "source": "/dashboard",
       "destination": "/dashboard.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/profile.html"
     },
     {
       "source": "/servers",
@@ -236,6 +244,19 @@
     },
     {
       "source": "/dashboard",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/profile",
       "headers": [
         {
           "key": "X-Robots-Tag",

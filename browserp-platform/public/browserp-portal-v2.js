@@ -301,18 +301,82 @@
     return section;
   }
 
+  function profilePictureUploader(profile, refresh) {
+    const shell = make("div", "profile-picture-editor-v3");
+    const preview = make("div", "profile-picture-preview-v3");
+    const currentUrl = profile?.avatar_url || profile?.avatarUrl || "";
+    if (/^https:\/\//i.test(currentUrl)) {
+      const current = new Image(); current.src = currentUrl; current.alt = "Current profile picture"; current.referrerPolicy = "no-referrer"; preview.append(current);
+    } else preview.append(make("span", "", initials(profile?.display_name || profile?.displayName || "RP")));
+    const choose = button("button button-secondary", "Upload profile picture");
+    const input = make("input"); input.type = "file"; input.accept = "image/png,image/jpeg,image/webp"; input.hidden = true;
+    const help = make("small", "portal-help", "PNG, JPEG or WebP, up to 5 MB. Images are cropped to 512 × 512 and screened before public display.");
+    shell.append(preview, choose, input, help);
+    choose.addEventListener("click", () => input.click());
+    input.addEventListener("change", async () => {
+      const file = input.files?.[0]; input.value = "";
+      if (!file) return;
+      if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024) {
+        toast("Choose a PNG, JPEG or WebP image under 5 MB.", "error"); return;
+      }
+      const url = URL.createObjectURL(file);
+      const image = new Image(); image.src = url;
+      try { await image.decode(); } catch { URL.revokeObjectURL(url); toast("That image could not be read.", "error"); return; }
+      if (image.naturalWidth < 128 || image.naturalHeight < 128 || image.naturalWidth > 6000 || image.naturalHeight > 6000) {
+        URL.revokeObjectURL(url); toast("Choose an image between 128 and 6000 pixels.", "error"); return;
+      }
+      const dialog = make("dialog", "portal-dialog avatar-crop-dialog-v3");
+      const form = make("form", "dialog-form"); form.method = "dialog";
+      const head = make("div", "dialog-head"); head.append(make("div", "", undefined), button("icon-button", "×"));
+      head.firstChild.append(make("span", "portal-kicker", "Profile picture"), make("h2", "", "Crop your image"));
+      const close = head.lastChild; close.setAttribute("aria-label", "Close profile picture cropper"); close.addEventListener("click", () => dialog.close());
+      const viewport = make("div", "avatar-crop-viewport-v3");
+      const cropImage = new Image(); cropImage.src = url; cropImage.alt = "Profile picture crop preview"; cropImage.draggable = false; viewport.append(cropImage, make("div", "avatar-crop-ring-v3"));
+      const zoomField = make("label", "portal-field avatar-zoom-v3"); zoomField.append(make("span", "", "Zoom"));
+      const zoom = make("input"); zoom.type = "range"; zoom.min = "1"; zoom.max = "3"; zoom.step = "0.01"; zoom.value = "1"; zoomField.append(zoom);
+      const actions = make("div", "avatar-crop-actions-v3");
+      const reset = button("button button-secondary", "Reset"); const save = button("button button-primary", "Save cropped picture");
+      actions.append(reset, save); form.append(head, viewport, zoomField, actions); dialog.append(form); document.body.append(dialog);
+      let offsetX = 0; let offsetY = 0; let dragging = false; let startX = 0; let startY = 0;
+      const viewportSize = 320;
+      const scaleState = () => {
+        const base = Math.max(viewportSize / image.naturalWidth, viewportSize / image.naturalHeight);
+        const scale = base * Number(zoom.value);
+        return { scale, width: image.naturalWidth * scale, height: image.naturalHeight * scale };
+      };
+      const clampOffsets = () => { const size=scaleState();offsetX=Math.max(-(size.width-viewportSize)/2,Math.min((size.width-viewportSize)/2,offsetX));offsetY=Math.max(-(size.height-viewportSize)/2,Math.min((size.height-viewportSize)/2,offsetY)); };
+      const render = () => { clampOffsets();const size=scaleState();cropImage.style.width=`${size.width}px`;cropImage.style.height=`${size.height}px`;cropImage.style.left=`${(viewportSize-size.width)/2+offsetX}px`;cropImage.style.top=`${(viewportSize-size.height)/2+offsetY}px`; };
+      zoom.addEventListener("input", render);
+      reset.addEventListener("click", () => { zoom.value="1";offsetX=0;offsetY=0;render(); });
+      viewport.addEventListener("pointerdown", (event) => { dragging=true;startX=event.clientX-offsetX;startY=event.clientY-offsetY;viewport.setPointerCapture(event.pointerId); });
+      viewport.addEventListener("pointermove", (event) => { if(!dragging)return;offsetX=event.clientX-startX;offsetY=event.clientY-startY;render(); });
+      viewport.addEventListener("pointerup", () => { dragging=false; });
+      viewport.addEventListener("pointercancel", () => { dragging=false; });
+      save.addEventListener("click", async () => {
+        save.disabled=true;save.textContent="Uploading…";
+        const canvas=document.createElement("canvas");canvas.width=512;canvas.height=512;const context=canvas.getContext("2d",{alpha:false});
+        context.fillStyle="#0b0910";context.fillRect(0,0,512,512);
+        const size=scaleState();const factor=512/viewportSize;context.drawImage(image,((viewportSize-size.width)/2+offsetX)*factor,((viewportSize-size.height)/2+offsetY)*factor,size.width*factor,size.height*factor);
+        try { await api("/api/me/avatar",{method:"POST",body:JSON.stringify({imageData:canvas.toDataURL("image/png")})});dialog.close();toast("Profile picture uploaded for staff screening.");await refresh(); }
+        catch(error){toast(error.message,"error");save.disabled=false;save.textContent="Save cropped picture";}
+      });
+      dialog.addEventListener("close",()=>{URL.revokeObjectURL(url);dialog.remove();},{once:true});
+      dialog.showModal(); render();
+    });
+    return shell;
+  }
+
   function dashboardProfile(profile, refresh) {
     const section = panel("account", "Profile & privacy", "Profile pictures from your OAuth account and bio changes are screened before they can appear publicly.");
     const form = make("form", "profile-form-v2");
     const nameField = make("label", "portal-field");
     append(nameField, make("span", "", "Display name"));
-    const name = make("input"); name.name = "displayName"; name.minLength = 2; name.maxLength = 48; name.required = true; name.value = profile?.display_name || profile?.displayName || ""; nameField.append(name);
+    const name = make("input"); name.name = "displayName"; name.minLength = 2; name.maxLength = 48; name.required = true; name.readOnly = true; name.value = profile?.display_name || profile?.displayName || ""; nameField.append(name, make("small", "portal-help", "Your BrowseRP identity stays synchronised with your authenticated Discord or Google account."));
     const bioField = make("label", "portal-field");
     append(bioField, make("span", "", "Bio"));
     const bio = make("textarea"); bio.name = "bio"; bio.maxLength = 500; bio.value = profile?.bio || ""; bioField.append(bio);
-    const avatarField = make("label", "portal-field");
-    append(avatarField, make("span", "", "Profile picture URL"));
-    const avatar = make("input"); avatar.name = "avatarUrl"; avatar.type = "url"; avatar.maxLength = 500; avatar.placeholder = "Discord, Google or reviewed BrowseRP profile image"; avatar.value = profile?.avatar_url || profile?.avatarUrl || ""; avatarField.append(avatar, make("small", "portal-help", "New pictures are hidden until staff screening is complete."));
+    const avatarField = make("div", "portal-field");
+    append(avatarField, make("span", "", "Profile picture"), profilePictureUploader(profile, refresh));
     const visibilityField = make("label", "portal-field");
     append(visibilityField, make("span", "", "Profile visibility"));
     const visibility = make("select"); visibility.name = "visibility";
@@ -322,7 +386,7 @@
     visibilityField.append(visibility);
     const review = make("p", "portal-status", `Profile picture: ${profile?.avatar_review_status || profile?.avatarStatus || "not set"} · Bio: ${profile?.bio_review_status || profile?.bioStatus || "not set"}`);
     const submit = button("button button-primary", "Save profile"); submit.type = "submit";
-    form.append(nameField, avatarField, bioField, visibilityField, review, submit);
+    form.append(avatarField, nameField, bioField, visibilityField, review, submit);
     form.addEventListener("submit", async (event) => {
       event.preventDefault(); submit.disabled = true;
       const data = Object.fromEntries(new FormData(form));
@@ -357,6 +421,20 @@
       });
       list.append(listItem(server.name || "Roleplay server", `Saved ${dateLabel(server.created_at)}`, [view, remove]));
     });
+    section.append(list);
+    return section;
+  }
+
+  function dashboardRecent() {
+    const section = panel("recent", "Recently viewed", "Continue exploring communities you opened on this device.");
+    let recent = [];
+    try { recent = JSON.parse(localStorage.getItem("browserp-recent-servers") || "[]"); } catch { recent = []; }
+    if (!Array.isArray(recent) || !recent.length) {
+      section.append(emptyState("Nothing viewed yet", "Server pages you visit will appear here for quick access.", link("/servers", "button button-secondary", "Browse servers")));
+      return section;
+    }
+    const list = make("ul", "portal-list");
+    recent.slice(0, 8).forEach((server) => list.append(listItem(server.name || server.slug, server.platform || "Roleplay community", [link(`/server/${encodeURIComponent(server.slug || "")}`, "small-button", "View")])));
     section.append(list);
     return section;
   }
@@ -422,7 +500,7 @@
       logout.addEventListener("click", signOut);
       heading.actions.append(logout);
       content.append(heading.head);
-      content.append(portalNav([["#listings", "Listings"], ["#submissions", "Submissions"], ["#saved", "Saved"], ["#notifications", "Notifications"], ["#account", "Account"]]));
+      content.append(portalNav([["#listings", "Listings"], ["#submissions", "Reviews"], ["#saved", "Favourites"], ["#recent", "Recent"], ["#notifications", "Notifications"], ["#account", "Profile"]]));
 
       const metrics = make("section", "metric-grid-v2");
       metrics.setAttribute("aria-label", "Account summary");
@@ -439,6 +517,7 @@
         dashboardListings(servers),
         dashboardSubmissions(submissions),
         dashboardFavorites(favorites, refresh),
+        dashboardRecent(),
         dashboardNotifications(notifications, unread, refresh),
         dashboardProfile(profile, refresh)
       );
@@ -451,6 +530,29 @@
         return;
       }
       setRoot(emptyState("Your account could not be loaded", error.message, link("/dashboard", "button button-primary", "Try again")));
+    }
+  }
+
+  async function profilePage(session) {
+    if (!session?.authenticated) {
+      await signInGate({ title: "Your BrowseRP profile", description: "Sign in to manage your community identity, profile picture and bio." });
+      return;
+    }
+    try {
+      const [profilePayload, overviewPayload] = await Promise.all([api("/api/me/profile"), api("/api/me/overview")]);
+      const profile = profilePayload.profile || overviewPayload.overview?.profile || {};
+      const content = make("div", "dashboard-view profile-page-v3");
+      const name = profile.display_name || profile.displayName || "BrowseRP member";
+      const heading = portalHead("Community profile", name, "Your gaming identity across BrowseRP comments, reviews and owned communities.", name);
+      heading.actions.append(link("/dashboard", "button button-secondary", "My dashboard"), link("/servers", "button button-primary", "Browse servers"));
+      content.append(heading.head);
+      const stack = make("div", "portal-stack");
+      const refresh = async () => profilePage(state.session);
+      stack.append(dashboardProfile(profile, refresh), dashboardRecent());
+      content.append(stack);
+      setRoot(content);
+    } catch (error) {
+      setRoot(emptyState("Your profile could not be loaded", error.message, link("/profile", "button button-primary", "Try again")));
     }
   }
 
@@ -1309,6 +1411,7 @@
     wireReviewDialog();
     const [session] = await Promise.all([loadSession(), loadPublishedContent()]);
     if (page === "dashboard") await dashboardPage(session);
+    if (page === "profile") await profilePage(session);
     if (page === "server") await serverPage(session);
     if (page === "staff") await staffPage(session);
   }

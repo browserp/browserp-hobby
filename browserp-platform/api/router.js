@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from "node:crypto";
 import { endpoint, ok } from "../lib/api.js";
 import { appUrl, developmentCatalogAllowed, supabaseConfig } from "../lib/config.js";
 import { categoriesFromServers, platforms as fallbackPlatforms, servers as fallbackServers } from "../lib/catalog.js";
@@ -15,6 +16,7 @@ import {
   rest,
   rpc,
   signOut,
+  uploadStorageObject,
   verifyTotp
 } from "../lib/supabase.js";
 
@@ -93,22 +95,46 @@ function qrCodeDataUri(value) {
   return null;
 }
 
-function reviewedAvatarUrl(value) {
-  const raw = String(value || "").trim();
-  if (!raw) return null;
-  if (raw.length > 500) throw Object.assign(new Error("The profile picture address is too long."), { status: 400 });
-  try {
-    const url = new URL(raw);
-    const allowed = url.protocol === "https:" && (
-      (url.hostname === "cdn.discordapp.com" && url.pathname.startsWith("/avatars/"))
-      || (url.hostname === "lh3.googleusercontent.com")
-      || (url.hostname === "kywabzfgjoqiznnxygbq.supabase.co" && url.pathname.startsWith("/storage/v1/object/public/profile-media/"))
-    );
-    if (!allowed || url.username || url.password || url.port || url.hash) throw new Error("unsafe");
-    return url.toString();
-  } catch {
-    throw Object.assign(new Error("Use your Discord/Google picture or a reviewed BrowseRP profile-media address."), { status: 400 });
+function profilePictureBytes(value) {
+  const source = String(value || "");
+  const match = /^data:image\/png;base64,([A-Za-z0-9+/]+={0,2})$/.exec(source);
+  if (!match || source.length > 1_450_000) throw Object.assign(new Error("Choose a cropped PNG profile picture under 1 MB."), { status: 400 });
+  const bytes = Buffer.from(match[1], "base64");
+  const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+  if (bytes.length < 70 || bytes.length > 1_048_576 || !bytes.subarray(0, 8).equals(signature)) {
+    throw Object.assign(new Error("The uploaded profile picture is not a valid PNG image."), { status: 400 });
   }
+  let offset = 8;
+  let sawHeader = false;
+  let sawImageData = false;
+  let sawEnd = false;
+  const allowedChunks = new Set(["IHDR", "IDAT", "IEND", "sRGB", "gAMA", "cHRM", "pHYs"]);
+  while (offset + 12 <= bytes.length) {
+    const length = bytes.readUInt32BE(offset);
+    const type = bytes.toString("ascii", offset + 4, offset + 8);
+    const end = offset + 12 + length;
+    if (!allowedChunks.has(type) || length > 1_048_576 || end > bytes.length) {
+      throw Object.assign(new Error("The profile picture contains unsupported image data."), { status: 400 });
+    }
+    if (!sawHeader) {
+      if (type !== "IHDR" || length !== 13) throw Object.assign(new Error("The profile picture header is invalid."), { status: 400 });
+      const width = bytes.readUInt32BE(offset + 8);
+      const height = bytes.readUInt32BE(offset + 12);
+      if (width !== 512 || height !== 512 || bytes[offset + 16] !== 8 || ![2, 6].includes(bytes[offset + 17])) {
+        throw Object.assign(new Error("Crop the profile picture to the required 512 × 512 size."), { status: 400 });
+      }
+      sawHeader = true;
+    }
+    if (type === "IDAT") sawImageData = true;
+    if (type === "IEND") {
+      if (length !== 0 || end !== bytes.length) throw Object.assign(new Error("The profile picture has invalid trailing data."), { status: 400 });
+      sawEnd = true;
+      break;
+    }
+    offset = end;
+  }
+  if (!sawHeader || !sawImageData || !sawEnd) throw Object.assign(new Error("The uploaded profile picture is incomplete."), { status: 400 });
+  return bytes;
 }
 
 async function recordActivitySafely(req, res, details) {
@@ -184,8 +210,11 @@ const routes = {
     try {
       profile = (await rest(`profiles?select=id,username,display_name,avatar_url,avatar_review_status,bio,bio_review_status,joined_at,profile_visibility&id=eq.${encodeURIComponent(session.user.id)}&limit=1`, { useSecret: true }))?.[0] || null;
     } catch { /* Auth identity remains usable while profile provisioning catches up. */ }
+    let staffAccess = false;
+    try { staffAccess = await rpc("staff_mfa_enrollment_allowed", {}, session.accessToken) === true; } catch { /* Staff entry remains hidden if the permission check is unavailable. */ }
     return ok(res, {
       authenticated: true,
+      staffAccess,
       provider: session.provider,
       aal: session.aal,
       mfa: {
@@ -291,22 +320,68 @@ const routes = {
     }
     await rateLimit(req, "profile-update", 12, 900);
     const body = await readBody(req, 8 * 1024);
-    const displayName = sanitizePlainText(body.displayName, 48);
+    const identityName = session.user?.user_metadata?.global_name
+      || session.user?.user_metadata?.full_name
+      || session.user?.user_metadata?.name
+      || session.user?.user_metadata?.user_name
+      || session.user?.user_metadata?.preferred_username
+      || body.displayName;
+    const displayName = sanitizePlainText(identityName, 48);
     const bio = String(body.bio || "").replace(/\r\n?/g, "\n").trim();
     const visibility = String(body.visibility || "public").trim().toLowerCase();
-    const avatarUrl = reviewedAvatarUrl(body.avatarUrl);
     if (displayName.length < 2 || bio.length > 500 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(bio)
       || !["public", "members", "private"].includes(visibility)) {
       throw Object.assign(new Error("Check your display name, bio and visibility."), { status: 400 });
     }
     const profile = await rpc("member_update_profile", {
-      p_display_name: displayName, p_bio: bio, p_visibility: visibility, p_avatar_url: avatarUrl
+      p_display_name: displayName, p_bio: bio, p_visibility: visibility
     }, session.accessToken);
     await recordActivitySafely(req, res, {
       userId: session.user.id, eventType: "profile.updated", provider: session.provider,
-      metadata: { bioSubmitted: Boolean(bio), avatarSubmitted: Boolean(avatarUrl) }
+      metadata: { bioSubmitted: Boolean(bio), identityNameSynchronized: true }
     });
     return ok(res, { profile });
+  }),
+
+  "me/avatar": endpoint("POST", async (req, res, requestId) => {
+    assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true });
+    await rateLimit(req, "profile-avatar", 6, 3600);
+    const body = await readBody(req, 1_500_000);
+    const bytes = profilePictureBytes(body.imageData);
+    const objectPath = `${session.user.id}/${Date.now()}-${randomBytes(12).toString("hex")}.png`;
+    const sha256 = createHash("sha256").update(bytes).digest("hex");
+    await uploadStorageObject("profile-media", objectPath, bytes, "image/png");
+    const asset = (await rest("uploaded_assets", {
+      method: "POST",
+      body: {
+        owner_id: session.user.id,
+        bucket: "profile-media",
+        object_path: objectPath,
+        media_type: "avatar",
+        mime_type: "image/png",
+        byte_size: bytes.length,
+        sha256,
+        moderation_status: "quarantined",
+        moderation_result: { source: "member-crop", requestId }
+      },
+      useSecret: true,
+      headers: { Prefer: "return=representation" }
+    }))?.[0];
+    if (!asset?.id) throw Object.assign(new Error("The profile picture could not be registered for review."), { status: 502 });
+    const avatarUrl = `${supabaseConfig().url}/storage/v1/object/public/profile-media/${objectPath}`;
+    const profile = await rpc("member_set_profile_avatar", {
+      p_avatar_url: avatarUrl,
+      p_asset_id: asset.id
+    }, session.accessToken);
+    await recordActivitySafely(req, res, {
+      userId: session.user.id,
+      eventType: "profile.avatar_uploaded",
+      provider: session.provider,
+      requestId,
+      metadata: { assetId: asset.id, byteSize: bytes.length, sha256 }
+    });
+    return ok(res, { profile, avatarUrl }, 201);
   }),
 
   "me/favorites": endpoint(["GET", "POST"], async (req, res) => {

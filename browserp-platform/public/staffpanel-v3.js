@@ -6,34 +6,15 @@
   const make = (tag, text, className = "") => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = String(text); return el; };
 
   function preferredTheme() {
-    try {
-      const saved = localStorage.getItem("browserp-theme");
-      if (saved === "light" || saved === "dark") return saved;
-    } catch { /* Browsing storage may be disabled. */ }
-    return matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    return "dark";
   }
 
-  function applyTheme(theme) {
-    document.documentElement.dataset.theme = theme;
-    $$('[data-staff-theme]').forEach((button) => {
-      button.textContent = theme === "light" ? "Dark mode" : "Light mode";
-      button.setAttribute("aria-label", `Use ${theme === "light" ? "dark" : "light"} mode`);
-    });
+  function applyTheme() {
+    document.documentElement.dataset.theme = "dark";
   }
 
   function themeButton() {
-    const button = make("button", undefined, "button-v3 button-secondary-v3 staff-theme-v3");
-    button.type = "button";
-    button.dataset.staffTheme = "";
-    const currentTheme = document.documentElement.dataset.theme || preferredTheme();
-    button.textContent = currentTheme === "light" ? "Dark mode" : "Light mode";
-    button.setAttribute("aria-label", `Use ${currentTheme === "light" ? "dark" : "light"} mode`);
-    button.addEventListener("click", () => {
-      const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
-      try { localStorage.setItem("browserp-theme", next); } catch { /* The choice still applies to this page. */ }
-      applyTheme(next);
-    });
-    return button;
+    return make("span", "Dark workspace", "staff-theme-v3");
   }
 
   applyTheme(preferredTheme());

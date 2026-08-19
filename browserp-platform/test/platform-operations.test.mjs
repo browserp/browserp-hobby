@@ -115,7 +115,8 @@ test("the public product is multi-page and hides the operations route", () => {
   assert.doesNotMatch(index, /href=["']\/staffpanel/i);
   assert.match(index, /logo-lockup-v3/);
   assert.match(index, /browserp-mark-v3\.png/);
-  assert.match(index, /data-ad-placement="top"/);
+  assert.doesNotMatch(index, /data-ad-placement="top"/);
+  assert.match(index, /data-ad-placement="side"/);
 });
 
 test("listing tags are canonical, unique and limited in the browser", () => {

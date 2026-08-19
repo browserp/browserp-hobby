@@ -7,6 +7,25 @@
   const mobile = window.matchMedia("(max-width: 760px)");
   let closeTimer;
 
+  const nav = menu?.querySelector(".nav-links");
+  if (nav) {
+    const links = [
+      ["Browse", "/servers"],
+      ["All Games", "/servers"],
+      ["FiveM", "/servers?platform=fivem"],
+      ["Roblox", "/servers?platform=roblox"],
+      ["Minecraft", "/servers?platform=minecraft"],
+      ["Guides", "/guides"]
+    ];
+    nav.replaceChildren(...links.map(([label, href]) => {
+      const link = document.createElement("a");
+      link.href = href;
+      link.textContent = label;
+      if (location.pathname === href || (label === "Browse" && location.pathname === "/servers")) link.setAttribute("aria-current", "page");
+      return link;
+    }));
+  }
+
   function setMenu(open, immediate = false) {
     if (!button || !menu) return;
     clearTimeout(closeTimer);

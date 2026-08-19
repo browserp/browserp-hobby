@@ -13,19 +13,12 @@
   }
 
   function preferredTheme() {
-    let saved = "";
-    try { saved = localStorage.getItem("browserp-theme") || ""; } catch { /* Use the operating-system preference when storage is unavailable. */ }
-    return ["light", "dark"].includes(saved) ? saved : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
-  }
-
-  function saveTheme(theme) {
-    try { localStorage.setItem("browserp-theme", theme); } catch { /* Theme still applies for this page view. */ }
+    return "dark";
   }
 
   function applyTheme(theme) {
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.style.colorScheme = theme;
-    $$('[data-theme-label]').forEach((label) => { label.textContent = theme === "light" ? "Use dark mode" : "Use light mode"; });
+    document.documentElement.dataset.theme = "dark";
+    document.documentElement.style.colorScheme = "dark";
   }
 
   function initials(value) {
@@ -117,8 +110,7 @@
         ".detail-grid-v3 > article",
         ".detail-grid-v3 > aside",
         ".game-strip-v3",
-        ".directory-toolbar-v3",
-        ".ad-top-v3"
+        ".directory-toolbar-v3"
       ];
       let index = 0;
       selectors.forEach((selector) => {
@@ -143,6 +135,16 @@
     const links = $("[data-nav-links-v3]");
     const actions = $("[data-nav-actions-v3]");
     if (!button || !links || !actions) return;
+    const navItems = [
+      ["Browse", "/servers"], ["All Games", "/servers#games"], ["FiveM", "/servers?platform=fivem"],
+      ["Roblox", "/servers?platform=roblox"], ["Minecraft", "/servers?platform=minecraft"], ["Guides", "/blog"]
+    ];
+    links.replaceChildren(...navItems.map(([label, href]) => {
+      const link = node("a", `nav-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-v3`, label);
+      link.href = href;
+      if ((location.pathname === "/servers" && href === "/servers") || location.pathname === href) link.setAttribute("aria-current", "page");
+      return link;
+    }));
     const mobile = matchMedia("(max-width: 760px)");
     function set(open) {
       const active = mobile.matches && open;
@@ -177,9 +179,13 @@
       if (avatarApproved) { avatar.className = "account-avatar-v3"; avatar.src = profile.avatar_url; avatar.alt = ""; avatar.referrerPolicy = "no-referrer"; }
       button.append(avatar, node("span", "account-name-v3", name), node("span", "account-chevron-v3", "⌄"));
       const menu = node("div", "account-popover-v3"); menu.hidden = true; menu.setAttribute("role", "menu");
-      const dashboard = node("a", "", "Dashboard"); dashboard.href = "/dashboard"; dashboard.setAttribute("role", "menuitem");
-      const settings = node("a", "", "Profile & settings"); settings.href = "/dashboard#account"; settings.setAttribute("role", "menuitem");
-      const theme = node("button", "", ""); theme.type = "button"; theme.dataset.themeLabel = ""; theme.setAttribute("role", "menuitem");
+      const menuItems = [
+        ["Profile", "/profile"], ["My servers", "/dashboard#listings"], ["Favourite servers", "/dashboard#saved"],
+        ["Recently viewed", "/dashboard#recent"], ["Reviews", "/dashboard#submissions"], ["Settings", "/dashboard#account"]
+      ].map(([label, href]) => { const item=node("a","",label);item.href=href;item.setAttribute("role","menuitem");return item; });
+      if (state.session.staffAccess === true) {
+        const staff = node("a", "account-staff-v3", "Staff Panel"); staff.href = "/staffpanel"; staff.setAttribute("role", "menuitem"); menuItems.push(staff);
+      }
       const logout = node("button", "account-danger-v3", "Sign out"); logout.type = "button"; logout.setAttribute("role", "menuitem");
       let menuCloseTimer;
       function setOpen(open) {
@@ -200,11 +206,10 @@
         menuCloseTimer = window.setTimeout(() => { menu.hidden = true; }, 190);
       }
       button.addEventListener("click", () => setOpen(button.getAttribute("aria-expanded") !== "true"));
-      theme.addEventListener("click", () => { const next = document.documentElement.dataset.theme === "light" ? "dark" : "light"; saveTheme(next); applyTheme(next); setOpen(false); });
       logout.addEventListener("click", async () => { try { await api("/api/auth/logout", { method: "POST", body: JSON.stringify({}) }); location.assign("/"); } catch (error) { toast(error.message, "error"); } });
       document.addEventListener("click", (event) => { if (!wrap.contains(event.target)) setOpen(false); });
       wrap.addEventListener("keydown", (event) => { if (event.key === "Escape") { setOpen(false); button.focus(); } });
-      menu.append(dashboard, settings, theme, logout); wrap.append(button, menu); link.replaceWith(wrap); applyTheme(document.documentElement.dataset.theme || preferredTheme());
+      menu.append(...menuItems, logout); wrap.append(button, menu); link.replaceWith(wrap); applyTheme(preferredTheme());
     });
     return state.session;
   }
@@ -437,6 +442,11 @@
       const payload = await api(`/api/servers?slug=${encodeURIComponent(slug)}`);
       const server = payload.servers?.[0];
       if (!server) throw Object.assign(new Error("Server not found"), { status: 404 });
+      try {
+        const recent = JSON.parse(localStorage.getItem("browserp-recent-servers") || "[]");
+        const next = [{ slug: server.slug, name: server.name, platform: server.platform_name || server.platform_short || "Roleplay" }, ...recent.filter((item) => item?.slug !== server.slug)].slice(0, 8);
+        localStorage.setItem("browserp-recent-servers", JSON.stringify(next));
+      } catch { /* Recently viewed is a device-local convenience only. */ }
       const engagement = payload.engagement || {};
       const platform = server.platform_name || server.platform_id || "Roleplay";
       $("#server-name-v3").textContent = server.name;

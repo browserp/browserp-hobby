@@ -179,22 +179,3 @@ body.staff-v3 { background: var(--bg); color: var(--text); }
   padding: 7px 12px;
   font-size: 12px;
 }
-
-:root[data-theme="light"] .staff-login-v3,
-:root[data-theme="light"] .staff-mobile-bar-v3,
-:root[data-theme="light"] .staff-sidebar-v3 {
-  background: var(--bg-soft);
-}
-:root[data-theme="light"] .staff-mobile-bar-v3 { border-color: var(--line); }
-:root[data-theme="light"] .staff-table-v3 th,
-:root[data-theme="light"] .staff-table-v3 td {
-  border-color: var(--line);
-}
-:root[data-theme="light"] .security-banner-v3 {
-  background: #fff7ea;
-  color: #6f4f16;
-}
-:root[data-theme="light"] .security-banner-v3.good {
-  background: #f0fff8;
-  color: #1b6b4c;
-}

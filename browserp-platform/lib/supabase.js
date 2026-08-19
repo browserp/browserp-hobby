@@ -390,3 +390,34 @@ export async function rpc(name, body, accessToken, options = {}) {
 export async function rest(path, options = {}) {
   return (await supabaseRequest(`rest/v1/${path}`, options)).data;
 }
+
+export async function uploadStorageObject(bucket, objectPath, bytes, contentType) {
+  const config = supabaseConfig();
+  if (!config.url || !config.secretKey) {
+    throw Object.assign(new Error("The server-only media boundary is not configured."), {
+      status: 503,
+      code: "SERVER_BOUNDARY_NOT_CONFIGURED"
+    });
+  }
+  const headers = {
+    apikey: config.secretKey,
+    "Content-Type": contentType,
+    "Cache-Control": "3600",
+    "x-upsert": "false"
+  };
+  if (looksLikeJwt(config.secretKey)) headers.Authorization = `Bearer ${config.secretKey}`;
+  const response = await fetch(`${config.url}/storage/v1/object/${encodeURIComponent(bucket)}/${objectPath.split("/").map(encodeURIComponent).join("/")}`, {
+    method: "POST",
+    headers,
+    body: bytes,
+    signal: AbortSignal.timeout(timeoutMs())
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw Object.assign(new Error(payload?.message || payload?.error || "The profile picture could not be stored."), {
+      status: response.status,
+      code: payload?.statusCode || "STORAGE_UPLOAD_FAILED"
+    });
+  }
+  return payload;
+}

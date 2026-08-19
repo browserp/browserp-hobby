@@ -8,8 +8,12 @@
   };
   const select = (selector, root = document) => root.querySelector(selector);
   const SEARCH_SUGGESTIONS = Object.freeze([
-    "FiveM roleplay", "RedM roleplay", "Roblox roleplay", "Minecraft roleplay", "Forza cruising", "Garry's Mod roleplay",
-    "public servers", "allowlist servers", "beginner friendly", "serious roleplay", "custom clothing"
+    ["Game", "FiveM roleplay"], ["Game", "RedM roleplay"], ["Game", "Roblox roleplay"], ["Game", "Minecraft roleplay"],
+    ["Game", "Forza cruising"], ["Game", "Garry's Mod roleplay"], ["Game", "DayZ roleplay"], ["Game", "Euro Truck Simulator roleplay"],
+    ["Framework", "QBCore"], ["Framework", "ESX"], ["Framework", "vMenu"], ["Framework", "Fantasy SMP"],
+    ["Tag", "serious roleplay"], ["Tag", "economy"], ["Tag", "whitelisted"], ["Tag", "custom clothing"],
+    ["Tag", "custom vehicles"], ["Tag", "player businesses"], ["Tag", "beginner friendly"], ["Access", "public servers"],
+    ["Region", "United Kingdom"], ["Region", "United States"], ["Region", "Europe"], ["Region", "Australia"]
   ]);
 
   async function api(path, options = {}) {
@@ -176,21 +180,24 @@
     const list = select(".search-suggestions-v3");
     if (!list || !searchInput) return;
     const term = String(query || "").trim().toLowerCase();
-    const matches = SEARCH_SUGGESTIONS.filter((value) => value.toLowerCase().includes(term)).slice(0, 6);
+    const matches = SEARCH_SUGGESTIONS.filter(([, value]) => value.toLowerCase().includes(term)).slice(0, 7);
     if (!term || !matches.length) {
       list.classList.remove("search-suggestions-open");
       list.hidden = true;
       list.inert = true;
+      searchInput.setAttribute("aria-expanded", "false");
       return;
     }
     list.hidden = false;
     list.inert = false;
+    searchInput.setAttribute("aria-expanded", "true");
     requestAnimationFrame(() => list.classList.add("search-suggestions-open"));
     list.replaceChildren(
-      ...matches.map((item) => {
-        const button = element("button", "search-suggestion-v3", item);
+      ...matches.map(([kind, item]) => {
+        const button = element("button", "search-suggestion-v3");
         button.type = "button";
         button.setAttribute("role", "option");
+        button.append(element("span", "search-suggestion-kind-v3", kind), element("strong", "", item));
         button.addEventListener("click", () => {
           searchInput.value = item;
           state.filters.query = item;
@@ -208,6 +215,35 @@
     );
   }
 
+  function bindSuggestionKeyboard(input, list) {
+    if (!input || !list) return;
+    input.setAttribute("role", "combobox");
+    input.setAttribute("aria-autocomplete", "list");
+    input.setAttribute("aria-expanded", "false");
+    list.setAttribute("role", "listbox");
+    input.addEventListener("keydown", (event) => {
+      const options = [...list.querySelectorAll('[role="option"]')];
+      if (!options.length || list.hidden) return;
+      let index = options.indexOf(document.activeElement);
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        index = event.key === "ArrowDown" ? Math.min(index + 1, options.length - 1) : (index <= 0 ? options.length - 1 : index - 1);
+        options[index].focus();
+      } else if (event.key === "Escape") {
+        list.classList.remove("search-suggestions-open"); list.hidden = true; list.inert = true; input.setAttribute("aria-expanded", "false");
+      }
+    });
+    list.addEventListener("keydown", (event) => {
+      const options = [...list.querySelectorAll('[role="option"]')];
+      const index = options.indexOf(document.activeElement);
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        const next = event.key === "ArrowDown" ? (index + 1) % options.length : (index - 1 + options.length) % options.length;
+        options[next].focus();
+      } else if (event.key === "Escape") { event.preventDefault(); input.focus(); list.classList.remove("search-suggestions-open"); list.hidden = true; list.inert = true; input.setAttribute("aria-expanded", "false"); }
+    });
+  }
+
   function home() {
     select("#home-search-form")?.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -221,8 +257,11 @@
       const wrapper = homeSearch.closest("form") || homeSearch.parentElement;
       const suggestions = document.createElement("div");
       suggestions.className = "search-suggestions-v3";
+      suggestions.id = "home-search-suggestions";
       suggestions.hidden = true;
       wrapper.append(suggestions);
+      homeSearch.setAttribute("aria-controls", suggestions.id);
+      bindSuggestionKeyboard(homeSearch, suggestions);
       homeSearch.addEventListener("focus", () => renderSearchSuggestions(homeSearch, homeSearch.value));
       homeSearch.addEventListener("input", () => renderSearchSuggestions(homeSearch, homeSearch.value));
       homeSearch.addEventListener("blur", () => {
@@ -342,6 +381,8 @@
       suggestionRoot.id = "directory-search-suggestions";
       suggestionRoot.hidden = true;
       searchContainer.append(suggestionRoot);
+      directorySearch.setAttribute("aria-controls", suggestionRoot.id);
+      bindSuggestionKeyboard(directorySearch, suggestionRoot);
     }
     directorySearch?.addEventListener("focus", () => renderSearchSuggestions(directorySearch, state.filters.query));
     directorySearch?.addEventListener("input", (event) => {
@@ -459,10 +500,34 @@
     await loadPlatforms(platformSelect, false);
     const cfxField = select('[data-cfx-field]', form);
     const frameworkInput = select('[name="framework"]', form);
+    const FRAMEWORK_SUGGESTIONS = Object.freeze({
+      fivem: ["QBCore", "ESX", "vMenu", "Custom framework", "No framework"],
+      redm: ["VORP", "RedEM:RP", "RSG Core", "Custom framework"],
+      roblox: ["Brookhaven", "Emergency Response: Liberty County", "Custom Roblox world"],
+      minecraft: ["Vanilla roleplay", "Paper", "Fabric", "Forge", "Fantasy SMP", "Towny"],
+      forza: ["Forza Horizon 5", "Forza Motorsport", "Cruising", "Car meet roleplay"]
+    });
+    if (frameworkInput) {
+      const suggestionRoot = element("div", "search-suggestions-v3 listing-suggestions-v3");
+      suggestionRoot.id = "framework-suggestions-v3"; suggestionRoot.hidden = true; frameworkInput.parentElement.append(suggestionRoot);
+      frameworkInput.setAttribute("aria-controls", suggestionRoot.id); bindSuggestionKeyboard(frameworkInput, suggestionRoot);
+      const updateFrameworkSuggestions = () => {
+        const term = frameworkInput.value.trim().toLowerCase();
+        const options = (FRAMEWORK_SUGGESTIONS[platformSelect?.value] || ["Custom roleplay framework", "No framework"])
+          .filter((item) => !term || item.toLowerCase().includes(term)).slice(0, 6);
+        if (!options.length) { suggestionRoot.classList.remove("search-suggestions-open"); suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.setAttribute("aria-expanded","false");return; }
+        suggestionRoot.replaceChildren(...options.map((item) => { const option=element("button","search-suggestion-v3");option.type="button";option.setAttribute("role","option");option.append(element("span","search-suggestion-kind-v3","Framework"),element("strong","",item));option.addEventListener("click",()=>{frameworkInput.value=item;suggestionRoot.classList.remove("search-suggestions-open");suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.focus();});return option; }));
+        suggestionRoot.hidden=false;suggestionRoot.inert=false;frameworkInput.setAttribute("aria-expanded","true");requestAnimationFrame(()=>suggestionRoot.classList.add("search-suggestions-open"));
+      };
+      frameworkInput.addEventListener("focus", updateFrameworkSuggestions);
+      frameworkInput.addEventListener("input", updateFrameworkSuggestions);
+      frameworkInput.addEventListener("blur",()=>setTimeout(()=>{suggestionRoot.classList.remove("search-suggestions-open");suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.setAttribute("aria-expanded","false");},220));
+    }
     function updatePlatformFields() {
       const cfxPlatform = ["fivem", "redm"].includes(platformSelect?.value);
       if (cfxField) { cfxField.hidden = !cfxPlatform; cfxField.inert = !cfxPlatform; }
       if (frameworkInput) frameworkInput.placeholder = cfxPlatform ? "e.g. QBCore, ESX or custom" : "e.g. roleplay framework, modpack or game mode";
+      if (document.activeElement === frameworkInput) frameworkInput.dispatchEvent(new Event("input"));
     }
     platformSelect?.addEventListener("change", updatePlatformFields);
     updatePlatformFields();
