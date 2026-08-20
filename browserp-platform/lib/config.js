@@ -1,4 +1,4 @@
-export const RELEASE_VERSION = "2.4.1";
+export const RELEASE_VERSION = "2.4.2";
 // These identifiers are part of the currently deployed submission RPC
 // contract. A reviewed policy revision will move them in a dedicated migration.
 export const CURRENT_TERMS_VERSION = "2026-08-19";

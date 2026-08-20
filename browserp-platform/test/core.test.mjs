@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createHmac } from "node:crypto";
 import { filterServers } from "../lib/directory.js";
-import { assessContent, sanitizePlainText } from "../lib/moderation.js";
+import { assessContent, assessDisplayName, sanitizePlainText } from "../lib/moderation.js";
 import { calculateDiscoveryScore } from "../lib/ranking.js";
 import {
   checkoutMetadataSignature,
@@ -45,6 +45,14 @@ test("content moderation blocks credential theft patterns", () => {
   assert.equal(result.confidence, "blocked");
   assert.equal(result.action, "reject");
   assert.equal(sanitizePlainText("<b>Hello</b>\u0000", 50), "bHello/b");
+});
+
+test("profile display names reject explicit wording, links and staff impersonation", () => {
+  assert.equal(assessDisplayName("County Roleplay").allowed, true);
+  assert.equal(assessDisplayName("BrowseRP Admin").allowed, false);
+  assert.equal(assessDisplayName("discord.gg/example").allowed, false);
+  assert.equal(assessDisplayName("f4gg0t").allowed, false);
+  assert.equal(assessDisplayName("Essex Roleplay").allowed, true);
 });
 
 test("Stripe webhook verification checks timestamp and HMAC", () => {

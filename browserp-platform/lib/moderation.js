@@ -14,6 +14,39 @@ const unsafeLinkSignals = [
   /(?:password|token|recovery)[^\n]{0,24}(?:send|share|paste)/i
 ];
 
+const blockedProfileNameWords = new Set([
+  "fuck", "fucker", "fucking", "shit", "cunt", "bitch",
+  "porn", "porno", "nude", "nudes", "rape", "rapist",
+  "pedo", "paedo", "pedophile", "paedophile",
+  "nigger", "nigga", "faggot"
+]);
+
+function leetNormalise(value) {
+  return value.toLocaleLowerCase("en-GB")
+    .replaceAll("0", "o").replaceAll("1", "i").replaceAll("3", "e")
+    .replaceAll("4", "a").replaceAll("5", "s").replaceAll("7", "t")
+    .replaceAll("@", "a").replaceAll("$", "s").replaceAll("!", "i");
+}
+
+export function assessDisplayName(value) {
+  const name = sanitizePlainText(value, 48);
+  if (name.length < 2 || !/[\p{L}\p{N}]/u.test(name)) {
+    return { allowed: false, value: name, reason: "Use between 2 and 48 letters or numbers." };
+  }
+
+  const lowered = leetNormalise(name);
+  const words = lowered.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  const compact = lowered.replace(/[^a-z0-9]+/g, "");
+  const externalContact = /(?:https?:\/\/|www\.|discord\.(?:gg|com\/invite)|@\s*(?:everyone|here))/i.test(name);
+  const highRiskEvasion = /(nigger|nigga|faggot|pedophile|paedophile)/.test(compact);
+  const impersonation = /browserp(?:admin|staff|owner|support|official)|(?:admin|staff|owner|support|official)browserp|discord(?:admin|staff|support|moderator|official)/.test(compact);
+
+  if (externalContact || highRiskEvasion || impersonation || words.some((word) => blockedProfileNameWords.has(word))) {
+    return { allowed: false, value: name, reason: "That display name contains unsafe, explicit or impersonating wording." };
+  }
+  return { allowed: true, value: name, reason: null };
+}
+
 export function assessContent(fields) {
   const text = Object.values(fields).map(normalize).join("\n");
   const reasons = [];

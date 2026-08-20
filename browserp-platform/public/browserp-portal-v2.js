@@ -320,7 +320,7 @@
     } else preview.append(make("span", "", initials(profile?.display_name || profile?.displayName || "RP")));
     const choose = button("button button-secondary", "Upload profile picture");
     const input = make("input"); input.type = "file"; input.accept = "image/png,image/jpeg,image/webp"; input.hidden = true;
-    const help = make("small", "portal-help", "PNG, JPEG or WebP, up to 5 MB. Images are cropped to 512 × 512 and screened before public display.");
+    const help = make("small", "portal-help", "PNG, JPEG or WebP, up to 5 MB. Images are cropped to 512 × 512, validated and published immediately.");
     shell.append(preview, choose, input, help);
     choose.addEventListener("click", () => input.click());
     input.addEventListener("change", async () => {
@@ -381,7 +381,7 @@
         const canvas=document.createElement("canvas");canvas.width=512;canvas.height=512;const context=canvas.getContext("2d",{alpha:false});
         context.fillStyle="#0b0910";context.fillRect(0,0,512,512);
         const size=scaleState();const factor=512/viewportSize;context.drawImage(image,((viewportSize-size.width)/2+offsetX)*factor,((viewportSize-size.height)/2+offsetY)*factor,size.width*factor,size.height*factor);
-        try { await api("/api/me/avatar",{method:"POST",body:JSON.stringify({imageData:canvas.toDataURL("image/png")})});dialog.close();toast("Profile picture uploaded for staff screening.");await refresh(); }
+        try { await api("/api/me/avatar",{method:"POST",body:JSON.stringify({imageData:canvas.toDataURL("image/png")})});dialog.close();toast("Profile picture updated and is now live.");await refresh(); }
         catch(error){toast(error.message,"error");save.disabled=false;save.textContent="Save cropped picture";}
       });
       dialog.addEventListener("close",()=>dialog.remove(),{once:true});
@@ -391,11 +391,11 @@
   }
 
   function dashboardProfile(profile, refresh) {
-    const section = panel("account", "Profile & privacy", "Profile pictures from your OAuth account and bio changes are screened before they can appear publicly.");
+    const section = panel("account", "Profile & privacy", "Validated profile pictures appear immediately. Bio changes remain screened before public display.");
     const form = make("form", "profile-form-v2");
     const nameField = make("label", "portal-field");
     append(nameField, make("span", "", "Display name"));
-    const name = make("input"); name.name = "displayName"; name.minLength = 2; name.maxLength = 48; name.required = true; name.readOnly = true; name.value = profile?.display_name || profile?.displayName || ""; nameField.append(name, make("small", "portal-help", "Your BrowseRP identity stays synchronised with your authenticated Discord or Google account."));
+    const name = make("input"); name.name = "displayName"; name.minLength = 2; name.maxLength = 48; name.required = true; name.readOnly = true; name.value = profile?.display_name || profile?.displayName || ""; nameField.append(name, make("small", "portal-help", "Your name stays synchronised with Discord or Google and is checked for explicit, unsafe or impersonating wording."));
     const bioField = make("label", "portal-field");
     append(bioField, make("span", "", "Bio"));
     const bio = make("textarea"); bio.name = "bio"; bio.maxLength = 500; bio.value = profile?.bio || ""; bioField.append(bio);
@@ -408,7 +408,8 @@
       const option = make("option", "", text); option.value = value; option.selected = value === (profile?.profile_visibility || profile?.visibility || "public"); visibility.append(option);
     });
     visibilityField.append(visibility);
-    const review = make("p", "portal-status", `Profile picture: ${profile?.avatar_review_status || profile?.avatarStatus || "not set"} · Bio: ${profile?.bio_review_status || profile?.bioStatus || "not set"}`);
+    const avatarState = (profile?.avatar_url || profile?.avatarUrl) ? "live" : "not set";
+    const review = make("p", "portal-status", `Profile picture: ${avatarState} · Bio: ${profile?.bio_review_status || profile?.bioStatus || "not set"}`);
     const submit = button("button button-primary", "Save profile"); submit.type = "submit";
     form.append(avatarField, nameField, bioField, visibilityField, review, submit);
     form.addEventListener("submit", async (event) => {
@@ -416,7 +417,7 @@
       const data = Object.fromEntries(new FormData(form));
       try {
         await api("/api/me/profile", { method: "POST", body: JSON.stringify(data) });
-        toast("Profile saved and sent through content screening."); await refresh();
+        toast("Profile saved. Bio changes may still require review."); await refresh();
       } catch (error) { toast(error.message, "error"); submit.disabled = false; }
     });
     section.append(form); return section;

@@ -3,7 +3,7 @@ import { endpoint, ok } from "../lib/api.js";
 import { appUrl, developmentCatalogAllowed, supabaseConfig } from "../lib/config.js";
 import { categoriesFromServers, platforms as fallbackPlatforms, servers as fallbackServers } from "../lib/catalog.js";
 import { assertSameOrigin, cookieValue, parseCookies, publicJson, readBody, redirect, safeReturnPath } from "../lib/http.js";
-import { sanitizePlainText } from "../lib/moderation.js";
+import { assessDisplayName, sanitizePlainText } from "../lib/moderation.js";
 import { rateLimit } from "../lib/rate-limit.js";
 import { recordAccountActivity, unsealAddress } from "../lib/security.js";
 import {
@@ -334,10 +334,14 @@ const routes = {
       || session.user?.user_metadata?.user_name
       || session.user?.user_metadata?.preferred_username
       || body.displayName;
-    const displayName = sanitizePlainText(identityName, 48);
+    const nameAssessment = assessDisplayName(identityName);
+    const displayName = nameAssessment.value;
     const bio = String(body.bio || "").replace(/\r\n?/g, "\n").trim();
     const visibility = String(body.visibility || "public").trim().toLowerCase();
-    if (displayName.length < 2 || bio.length > 500 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(bio)
+    if (!nameAssessment.allowed) {
+      throw Object.assign(new Error(`${nameAssessment.reason} Change it on Discord or Google, then try again.`), { status: 422 });
+    }
+    if (bio.length > 500 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(bio)
       || !["public", "members", "private"].includes(visibility)) {
       throw Object.assign(new Error("Check your display name, bio and visibility."), { status: 400 });
     }
@@ -370,13 +374,13 @@ const routes = {
         mime_type: "image/png",
         byte_size: bytes.length,
         sha256,
-        moderation_status: "quarantined",
-        moderation_result: { source: "member-crop", requestId }
+        moderation_status: "approved",
+        moderation_result: { source: "member-crop", requestId, publication: "immediate", safety: "validated-raster" }
       },
       useSecret: true,
       headers: { Prefer: "return=representation" }
     }))?.[0];
-    if (!asset?.id) throw Object.assign(new Error("The profile picture could not be registered for review."), { status: 502 });
+    if (!asset?.id) throw Object.assign(new Error("The profile picture could not be registered."), { status: 502 });
     const avatarUrl = `${supabaseConfig().url}/storage/v1/object/public/profile-media/${objectPath}`;
     const profile = await rpc("member_set_profile_avatar", {
       p_avatar_url: avatarUrl,
@@ -384,10 +388,10 @@ const routes = {
     }, session.accessToken);
     await recordActivitySafely(req, res, {
       userId: session.user.id,
-      eventType: "profile.avatar_uploaded",
+      eventType: "profile.media_submitted",
       provider: session.provider,
       requestId,
-      metadata: { assetId: asset.id, byteSize: bytes.length, sha256 }
+      metadata: { assetId: asset.id, byteSize: bytes.length, sha256, publication: "immediate" }
     });
     return ok(res, { profile, avatarUrl }, 201);
   }),
@@ -586,7 +590,7 @@ const routes = {
     const body = await readBody(req, 8 * 1024);
     const field = String(body.field || "").trim().toLowerCase();
     const action = String(body.action || "").trim().toLowerCase();
-    if (!["avatar", "bio"].includes(field) || !["approve", "reject"].includes(action)) {
+    if (field !== "bio" || !["approve", "reject"].includes(action)) {
       throw Object.assign(new Error("Choose a valid profile-review action."), { status: 400 });
     }
     return ok(res, { result: await rpc("staff_review_profile_content", {
