@@ -7,18 +7,12 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const read = (file) => readFileSync(join(root, file), "utf8");
 
-test("navigation can collapse without leaving hidden controls interactive", () => {
-  const shell = read("public/browserp-v3.js");
-  const portalShell = read("public/browserp-shell.js");
-  const css = read("public/browserp-v3.css");
-  assert.match(shell, /nav\.dataset\.expanded = String\(active\)/);
-  assert.match(shell, /links\.inert = !active/);
-  assert.match(shell, /actions\.inert = !active/);
-  assert.match(shell, /Hide navigation/);
-  assert.match(portalShell, /menu\.inert = !active/);
-  assert.match(portalShell, /Hide navigation/);
-  assert.match(css, /\.nav-v3\[data-expanded="false"\]/);
-  assert.match(css, /browserp-brand-pulse-v4/);
+test("public navigation has scoped motion and respects reduced motion", () => {
+  const css = read("public/navigation.css");
+  assert.match(css, /navigation-arrive-v6/);
+  assert.match(css, /navigation-dialog-v6::backdrop/);
+  assert.match(css, /100dvh/);
+  assert.match(css, /overscroll-behavior: contain/);
   assert.match(css, /prefers-reduced-motion/);
 });
 
@@ -26,7 +20,7 @@ test("all supported games have dedicated pages, local marks and selected states"
   const page = read("public/game.html");
   const games = read("public/browserp-games.js");
   const marks = read("public/assets/game-marks-v4.svg");
-  const directory = read("public/browserp-directory.js");
+  const directory = read("public/smart-search.js");
   const routes = read("vercel.json");
   for (const id of ["fivem", "redm", "roblox", "minecraft", "forza", "gmod", "arma", "vrchat", "dayz", "project-zomboid", "ets2", "assetto-corsa", "beamng"]) {
     assert.match(games, new RegExp(`id: "${id}"`));
@@ -38,12 +32,11 @@ test("all supported games have dedicated pages, local marks and selected states"
   assert.match(directory, /classList\.toggle\("is-selected", selected\)/);
 });
 
-test("search opens useful initial suggestions and selections fill the field", () => {
-  const directory = read("public/browserp-directory.js");
-  assert.match(directory, /INITIAL_SEARCH_SUGGESTIONS/);
-  assert.match(directory, /: INITIAL_SEARCH_SUGGESTIONS/);
-  assert.match(directory, /searchInput\.value = item/);
-  assert.match(directory, /addEventListener\("focus", \(\) => renderSearchSuggestions/);
+test("search supports typed choices with keyboard navigation", () => {
+  const search = read("public/smart-search.js");
+  assert.match(search, /aria-activedescendant/);
+  assert.match(search, /addEventListener\("focus", render\)/);
+  assert.match(search, /choose\(choice\)/);
 });
 
 test("the county showcase is honest, fully routed and uses an original local logo", () => {

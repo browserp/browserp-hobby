@@ -25,7 +25,7 @@ function directoryHarness(search = "") {
     requestAnimationFrame: (callback) => callback(),
     fetch: async () => ({ ok: true, json: async () => ({ platforms }) })
   };
-  vm.runInNewContext(source.replace('  if (page === "home") home();', '  window.testDirectory = { loadPlatforms, readFilters, renderSearchSuggestions, state };\n  if (page === "home") home();'), context);
+  vm.runInNewContext(source.replace('  if (page === "home") home();', '  window.testDirectory = { loadPlatforms, state };\n  if (page === "home") home();'), context);
   return { ...context.window.testDirectory, Element, nodes, platforms };
 }
 
@@ -41,30 +41,11 @@ test("Discover exposes the four launch games in its strip and dropdown while pre
   assert.deepEqual(listingSelect.children.map((option) => option.value), platforms.map((platform) => platform.id));
 });
 
-test("old upcoming-game Discover URLs fall back to All games and preserve other filters", () => {
+test("old upcoming-game URLs normalize to All games and preserve other filters", async () => {
+  await import("../public/discovery-model.js");
   for (const platform of [...launchIds, "forza", "dayz", "unknown"]) {
-    const { readFilters, state } = directoryHarness(`?platform=${platform}&q=county&region=Europe&verified=true`);
-    readFilters();
-    assert.equal(state.filters.platform, launchIds.includes(platform) ? platform : "all");
-    assert.equal(state.filters.query, "county");
-    assert.equal(state.filters.region, "Europe");
-    assert.equal(state.filters.verified, true);
-  }
-});
-
-test("Discover suggestions omit upcoming games and keep useful initial categories", () => {
-  const { renderSearchSuggestions, Element, nodes } = directoryHarness();
-  const input = new Element();
-  input.setAttribute("aria-controls", "suggestions");
-  const list = new Element();
-  nodes.set("suggestions", list);
-  renderSearchSuggestions(input, "");
-  assert.deepEqual(list.children.map((item) => item.children[1].textContent), ["FiveM roleplay", "Roblox roleplay", "QBCore", "ESX", "serious roleplay", "United Kingdom", "United States"]);
-  renderSearchSuggestions(input, "roleplay");
-  assert.deepEqual(list.children.map((item) => item.dataset.platform).filter(Boolean), launchIds);
-  for (const query of ["Forza", "Garry", "DayZ", "Euro Truck", "ARMA", "VRChat", "Zomboid", "Assetto", "BeamNG"]) {
-    renderSearchSuggestions(input, query);
-    assert.equal(list.hidden, true, `${query} must not be offered`);
-    assert.equal(input.getAttribute("aria-expanded"), "false");
+    const state = globalThis.BrowseRPDiscovery.normalize({ platform, q: "county", region: "Europe", verified: "true" });
+    assert.equal(state.platform, launchIds.includes(platform) ? platform : "all");
+    assert.equal(state.query, "county"); assert.equal(state.region, "Europe"); assert.equal(state.verified, true);
   }
 });

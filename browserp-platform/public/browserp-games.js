@@ -59,16 +59,6 @@
     return link;
   }
 
-  async function loadGameServers(game) {
-    const list = $("#game-server-list-v4"); const empty = $("#game-server-empty-v4");
-    try {
-      const response = await fetch(`/api/servers?platform=${encodeURIComponent(game.id)}&sort=recommended&limit=8`, { headers: { Accept: "application/json" }, credentials: "same-origin" });
-      if (!response.ok) throw new Error("Directory unavailable");
-      const payload = await response.json(); const servers = [...(game.id === "fivem" ? [FIVEM_SHOWCASE] : []), ...(Array.isArray(payload.servers) ? payload.servers : [])];
-      list.replaceChildren(...servers.map(serverCard)); list.hidden = servers.length === 0; empty.hidden = servers.length !== 0; list.setAttribute("aria-busy", "false");
-    } catch { list.replaceChildren(); list.hidden = true; list.setAttribute("aria-busy", "false"); empty.hidden = false; }
-  }
-
   function render() {
     const requested = location.pathname.split("/").filter(Boolean)[1] || new URLSearchParams(location.search).get("game") || "";
     const game = GAMES.find((item) => item.id === requested);
@@ -108,7 +98,7 @@
     $("#game-results-title-v4").textContent = `${game.name} servers`;
     $("#game-results-lead-v4").textContent = `Reviewed ${game.line.toLowerCase()} listings appear below.`;
     $("#game-directory-link-v4").href = `/servers?platform=${encodeURIComponent(game.id)}`;
-    loadGameServers(game);
+    window.BrowseRPSearch.mount({ root: $("#game-discovery-controls"), list: $("#game-server-list-v4"), empty: $("#game-server-empty-v4"), count: $("#game-result-count"), fixedGame: game.id, render: (list, servers) => list.replaceChildren(...servers.map(serverCard)) });
   }
 
   render();

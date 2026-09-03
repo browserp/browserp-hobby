@@ -15,7 +15,7 @@ test("the public directory is cross-game and the side advert is a visual carouse
   const shell = read("public/browserp-v3.js");
   const css = read("public/browserp-v3.css");
   for (const game of ["FiveM", "RedM", "Roblox", "Minecraft"]) assert.match(home, new RegExp(game));
-  assert.match(servers, /id="platform-filter"/);
+  assert.match(servers, /id="discovery-controls"/);
   assert.match(listing, /name="platform"/);
   assert.doesNotMatch(directory, /platform:\s*"fivem"/);
   assert.match(shell, /side-ad-stage-v3/);
@@ -56,7 +56,7 @@ test("authenticator QR markup is normalised and setup secrets are not displayed 
 
 test("signed-in navigation uses a permission-backed avatar menu and dark-only theme", () => {
   const shell = read("public/browserp-v3.js");
-  const portalShell = read("public/browserp-shell.js");
+  const navigation = read("public/navigation.js");
   const css = read("public/browserp-v3.css");
   assert.match(shell, /account-trigger-v3/);
   assert.match(shell, /\["Profile", "\/profile"\]/);
@@ -64,19 +64,17 @@ test("signed-in navigation uses a permission-backed avatar menu and dark-only th
   assert.doesNotMatch(shell, /browserp-theme/);
   assert.doesNotMatch(css, /:root\[data-theme="light"\]/);
   assert.match(css, /account-popover-v3/);
-  assert.match(portalShell, /\["Blog", "\/blog"\]/);
-  assert.match(portalShell, /\["Games", "\/games"\]/);
+  assert.match(navigation, /\["Blog", "\/blog",/);
+  assert.match(navigation, /\["Games", "\/games",/);
 });
 
-test("search suggestions cover games, frameworks, tags, access and regions", () => {
-  const directory = read("public/browserp-directory.js");
-  for (const type of ["Game", "Framework", "Tag", "Access", "Region"]) assert.match(directory, new RegExp(`\\["${type}",`));
-  for (const value of ["QBCore", "ESX", "Whitelisted", "Custom clothing", "United Kingdom"]) assert.match(directory, new RegExp(value));
-  assert.match(directory, /ArrowDown/);
-  assert.match(directory, /role", "listbox"/);
-  assert.match(directory, /searchInput\.value = item/);
-  assert.match(directory, /searchInput\.focus\(\)/);
-  assert.doesNotMatch(directory, /location\.assign\(`\/servers\?q=\$\{encodeURIComponent\(item\)\}`\)/);
+test("public search uses shared contextual choices and clear wording", () => {
+  const search = read("public/smart-search.js");
+  const model = read("public/discovery-model.js");
+  assert.match(search, /facets\[key\]/);
+  assert.match(search, /choice.key, choice.value/);
+  assert.doesNotMatch(model, /"Framework"|"Tag"/);
+  for (const page of ["index", "servers", "game"]) assert.match(read(`public/${page}.html`), /smart-search.js/);
 });
 
 test("homepage game cards use local original artwork instead of letter tiles", () => {
