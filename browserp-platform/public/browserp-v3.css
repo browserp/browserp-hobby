@@ -85,8 +85,38 @@ img { display: block; max-width: 100%; }
 .button-v3 { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid transparent; padding: 10px 17px; border-radius: 7px; font-weight: 700; cursor: pointer; transition: border-color .18s ease, background .18s ease, transform .18s ease, box-shadow .18s ease; }
 .button-v3:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgb(0 0 0 / .24); }
 .button-v3:active { transform: translateY(1px) scale(.985); }
-.button-primary-v3 { color: #fff; background: linear-gradient(105deg, #cf2f88, var(--pink) 48%, #7a4de8); box-shadow: 0 9px 24px rgb(207 47 136 / .18); }
-.button-primary-v3:hover { background: linear-gradient(105deg, #df3e98, var(--pink-strong) 48%, #8b5cf6); }
+/* Keep one gradient through every state, including the older portal buttons. */
+:is(.button-primary-v3, .button-primary, .small-button-primary),
+:is(.button-primary-v3, .button-primary, .small-button-primary):hover {
+  color: #fff;
+  background: linear-gradient(105deg, #b92178, #c92c84 25%, #7140cc 50%, #c92c84 75%, #b92178);
+  background-size: 220% 100%;
+  background-position: 0% 50%;
+  box-shadow: 0 9px 24px rgb(207 47 136 / .18);
+  transition: border-color .2s ease, transform .2s ease, box-shadow .25s ease, filter .25s ease;
+}
+:is(.button-primary-v3, .button-primary, .small-button-primary):focus-visible:not(:disabled):not([aria-disabled="true"]) {
+  filter: brightness(1.06);
+  box-shadow: 0 8px 28px rgb(236 79 166 / .32), 0 0 18px rgb(155 108 255 / .22);
+}
+@media (hover: hover) and (pointer: fine) {
+  :is(.button-primary-v3, .button-primary, .small-button-primary):hover:not(:disabled):not([aria-disabled="true"]) {
+    filter: brightness(1.06);
+    box-shadow: 0 8px 28px rgb(236 79 166 / .32), 0 0 18px rgb(155 108 255 / .22);
+    animation: primary-gradient-v3 2.4s ease-in-out infinite alternate;
+  }
+}
+:is(.button-primary-v3, .button-primary, .small-button-primary):is(:disabled, [aria-disabled="true"]) {
+  animation: none;
+  transition: none;
+  filter: none;
+  transform: none;
+  cursor: not-allowed;
+}
+@keyframes primary-gradient-v3 {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
 .button-secondary-v3 { color: var(--text); background: var(--panel); border-color: var(--line); }
 .button-quiet-v3 { color: var(--copy); background: transparent; border-color: var(--line); }
 .eyebrow-v3 { display: block; margin-bottom: 12px; color: var(--pink-strong); font-size: 13px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
@@ -360,6 +390,7 @@ img { display: block; max-width: 100%; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  :is(.button-primary-v3, .button-primary, .small-button-primary) { animation: none !important; transform: none !important; }
 }
 
 body { overflow-x: hidden; }
