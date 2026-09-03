@@ -225,11 +225,11 @@
         button.addEventListener("click", () => {
           searchInput.value = item;
           state.filters.query = item;
+          searchInput.focus();
           list.classList.remove("search-suggestions-open");
           list.hidden = true;
           list.inert = true;
           searchInput.setAttribute("aria-expanded", "false");
-          searchInput.focus();
           if (document.body.dataset.page !== "home") directoryResults();
         });
         return button;
@@ -243,6 +243,17 @@
     input.setAttribute("aria-autocomplete", "list");
     input.setAttribute("aria-expanded", "false");
     list.setAttribute("role", "listbox");
+    const closeOnLeave = () => {
+      setTimeout(() => {
+        if (document.activeElement === input || list.contains(document.activeElement)) return;
+        list.classList.remove("search-suggestions-open");
+        list.hidden = true;
+        list.inert = true;
+        input.setAttribute("aria-expanded", "false");
+      }, 0);
+    };
+    input.addEventListener("blur", closeOnLeave);
+    list.addEventListener("focusout", closeOnLeave);
     input.addEventListener("keydown", (event) => {
       const options = [...list.querySelectorAll('[role="option"]')];
       if (!options.length || list.hidden) return;
@@ -286,10 +297,6 @@
       bindSuggestionKeyboard(homeSearch, suggestions);
       homeSearch.addEventListener("focus", () => renderSearchSuggestions(homeSearch, homeSearch.value));
       homeSearch.addEventListener("input", () => renderSearchSuggestions(homeSearch, homeSearch.value));
-      homeSearch.addEventListener("blur", () => {
-        suggestions.classList.remove("search-suggestions-open");
-        setTimeout(() => { suggestions.hidden = true; suggestions.inert = true; }, 220);
-      });
     }
     featured();
   }
@@ -433,16 +440,6 @@
       renderSearchSuggestions(directorySearch, state.filters.query);
       searchTimer = window.setTimeout(directoryResults, 220);
     });
-    directorySearch?.addEventListener("blur", () => {
-      const suggestionRoot = select("#directory-search-suggestions");
-      if (suggestionRoot) {
-        setTimeout(() => {
-          suggestionRoot.classList.remove("search-suggestions-open");
-          suggestionRoot.hidden = true;
-          suggestionRoot.inert = true;
-        }, 220);
-      }
-    });
     select("#platform-filter").addEventListener("change", (event) => { state.filters.platform = event.target.value; directoryResults(); });
     select("#region-filter").addEventListener("change", (event) => { state.filters.region = event.target.value; directoryResults(); });
     select("#sort-filter").addEventListener("change", (event) => { state.filters.sort = event.target.value; directoryResults(); });
@@ -558,12 +555,11 @@
         const options = (FRAMEWORK_SUGGESTIONS[platformSelect?.value] || ["Custom roleplay framework", "No framework"])
           .filter((item) => !term || item.toLowerCase().includes(term)).slice(0, 6);
         if (!options.length) { suggestionRoot.classList.remove("search-suggestions-open"); suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.setAttribute("aria-expanded","false");return; }
-        suggestionRoot.replaceChildren(...options.map((item) => { const option=element("button","search-suggestion-v3");option.type="button";option.setAttribute("role","option");option.append(element("span","search-suggestion-kind-v3","Framework"),element("strong","",item));option.addEventListener("click",()=>{frameworkInput.value=item;suggestionRoot.classList.remove("search-suggestions-open");suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.focus();});return option; }));
+        suggestionRoot.replaceChildren(...options.map((item) => { const option=element("button","search-suggestion-v3");option.type="button";option.setAttribute("role","option");option.append(element("span","search-suggestion-kind-v3","Framework"),element("strong","",item));option.addEventListener("click",()=>{frameworkInput.value=item;frameworkInput.focus();suggestionRoot.classList.remove("search-suggestions-open");suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.setAttribute("aria-expanded","false");});return option; }));
         suggestionRoot.hidden=false;suggestionRoot.inert=false;frameworkInput.setAttribute("aria-expanded","true");requestAnimationFrame(()=>suggestionRoot.classList.add("search-suggestions-open"));
       };
       frameworkInput.addEventListener("focus", updateFrameworkSuggestions);
       frameworkInput.addEventListener("input", updateFrameworkSuggestions);
-      frameworkInput.addEventListener("blur",()=>setTimeout(()=>{suggestionRoot.classList.remove("search-suggestions-open");suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.setAttribute("aria-expanded","false");},220));
     }
     function updatePlatformFields() {
       const cfxPlatform = ["fivem", "redm"].includes(platformSelect?.value);

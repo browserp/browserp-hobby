@@ -62,3 +62,26 @@ test("theme helper loads before consumers and showcase facts have the same order
   const labels = [...read("public/example-server.html").matchAll(/<dt>(.*?)<\/dt>/g)].map((match) => match[1]);
   assert.deepEqual(labels, ["Platform", "Region", "Language", "Framework", "Access", "Player status"]);
 });
+
+test("suggestions stay open for keyboard focus and close only after focus leaves the widget", () => {
+  const source = read("public/browserp-directory.js");
+  const start = source.indexOf("  function bindSuggestionKeyboard(");
+  const end = source.indexOf("  function home()", start);
+  const callbacks = [];
+  const input = { handlers: {}, attributes: {}, setAttribute(key, value) { this.attributes[key] = value; }, addEventListener(event, handler) { this.handlers[event] = handler; } };
+  const option = {};
+  const list = { ...input, handlers: {}, attributes: {}, hidden: false, inert: false, contains: (node) => node === option, classList: { remove() {} } };
+  const document = { activeElement: input };
+  const scope = { document, setTimeout: (fn) => callbacks.push(fn), input, list };
+  vm.runInNewContext(`${source.slice(start, end)}\nbindSuggestionKeyboard(input, list);`, scope);
+  input.handlers.blur();
+  document.activeElement = option;
+  callbacks.shift()();
+  assert.equal(list.hidden, false);
+  list.handlers.focusout();
+  document.activeElement = {};
+  callbacks.shift()();
+  assert.equal(list.hidden, true);
+  assert.equal(list.inert, true);
+  assert.equal(input.attributes['aria-expanded'], 'false');
+});
