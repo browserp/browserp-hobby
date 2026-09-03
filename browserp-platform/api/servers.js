@@ -1,6 +1,7 @@
 import { endpoint, ok } from "../lib/api.js";
 import { servers as fallbackServers } from "../lib/catalog.js";
 import { developmentCatalogAllowed } from "../lib/config.js";
+import { discoverServers } from "../lib/discovery.js";
 import { filterServers } from "../lib/directory.js";
 import { assertSameOrigin, publicJson, readBody } from "../lib/http.js";
 import { assessContent, sanitizePlainText } from "../lib/moderation.js";
@@ -38,6 +39,7 @@ export default endpoint(["GET", "POST"], async (req, res) => {
     }, session.accessToken);
     return ok(res, { result }, 201);
   }
+  if (filters.discover === "true" && !slug) return publicJson(res, await discoverServers(filters), 20);
   let servers;
   try {
     servers = await rpc("search_server_directory", {

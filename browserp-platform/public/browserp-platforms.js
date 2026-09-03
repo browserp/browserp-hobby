@@ -34,10 +34,12 @@
   }
   // Preserve this public metadata order: platform, region, language, framework, access.
   function entries(server, engagement = {}) {
+    const access = engagement.accessType || server.access_type;
+    const accessLabel = ({ public: "Open to everyone", allowlisted: "Approval required", application: "Application required" })[access] || access;
     return [
-      ["Platform", server.platform_name || names[idFor(server)] || server.platform_short || "Roleplay"],
-      ["Region", server.region], ["Language", server.language], ["Framework", server.framework],
-      ["Access", engagement.accessType || server.access_type]
+      ["Game", server.platform_name || names[idFor(server)] || server.platform_short || "Roleplay"],
+      ["Region", server.region], ["Language", server.language], ["Server setup", server.framework],
+      ["Access", accessLabel]
     ];
   }
   function metadata(server, engagement = {}) {

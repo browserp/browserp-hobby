@@ -31,7 +31,7 @@ test("rendered info cards and compact metadata retain platform region language f
   const server = { platform_id: "redm", platform_name: "RedM", region: "Europe", language: "French", framework: "VORP", online: false };
   const engagement = { accessType: "Whitelist" };
   const facts = platforms.facts(server, engagement);
-  assert.deepEqual(Array.from(facts.children, (card) => text(card.children[0])), ["Platform", "Region", "Language", "Framework", "Access", "Player status"]);
+  assert.deepEqual(Array.from(facts.children, (card) => text(card.children[0])), ["Game", "Region", "Language", "Server setup", "Access", "Player status"]);
   assert.deepEqual(Array.from(facts.children, (card) => text(card.children[1])), ["RedM", "Europe", "French", "VORP", "Whitelist", "Status unavailable"]);
   assert.deepEqual(Array.from(platforms.metadata(server, engagement).children, text), ["RedM", "Europe", "French", "VORP", "Whitelist"]);
   assert.equal(text(platforms.facts({ platform_id: "minecraft" }).children[2].children[1]), "Not specified");
@@ -60,7 +60,7 @@ test("theme helper loads before consumers and showcase facts have the same order
     assert.ok(html.indexOf("browserp-platforms.js") < html.indexOf("browserp-v3.js"), `${page} loads helper first`);
   }
   const labels = [...read("public/example-server.html").matchAll(/<dt>(.*?)<\/dt>/g)].map((match) => match[1]);
-  assert.deepEqual(labels, ["Platform", "Region", "Language", "Framework", "Access", "Player status"]);
+  assert.deepEqual(labels, ["Game", "Region", "Language", "Server setup", "Access", "Player status"]);
 });
 
 test("suggestions stay open for keyboard focus and close only after focus leaves the widget", () => {

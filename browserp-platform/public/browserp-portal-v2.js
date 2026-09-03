@@ -695,7 +695,7 @@
         serverFact("Status", server.online ? "Online now" : "Unavailable"),
         serverFact("Region", server.region || "Not listed"),
         serverFact("Language", server.language || "Not listed"),
-        serverFact("Framework", server.framework || "Not listed"),
+        serverFact("Server setup", server.framework || "Not listed"),
         serverFact("Beginner friendly", server.beginner_friendly ? "Yes" : "Not marked"),
         serverFact("Listing owner", server.verified ? "Owner verified" : "Not verified")
       );

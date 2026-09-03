@@ -26,7 +26,7 @@ test("all supported games have dedicated pages, local marks and selected states"
   const page = read("public/game.html");
   const games = read("public/browserp-games.js");
   const marks = read("public/assets/game-marks-v4.svg");
-  const directory = read("public/browserp-directory.js");
+  const directory = read("public/smart-search.js");
   const routes = read("vercel.json");
   for (const id of ["fivem", "redm", "roblox", "minecraft", "forza", "gmod", "arma", "vrchat", "dayz", "project-zomboid", "ets2", "assetto-corsa", "beamng"]) {
     assert.match(games, new RegExp(`id: "${id}"`));
@@ -38,12 +38,11 @@ test("all supported games have dedicated pages, local marks and selected states"
   assert.match(directory, /classList\.toggle\("is-selected", selected\)/);
 });
 
-test("search opens useful initial suggestions and selections fill the field", () => {
-  const directory = read("public/browserp-directory.js");
-  assert.match(directory, /INITIAL_SEARCH_SUGGESTIONS/);
-  assert.match(directory, /: INITIAL_SEARCH_SUGGESTIONS/);
-  assert.match(directory, /searchInput\.value = item/);
-  assert.match(directory, /addEventListener\("focus", \(\) => renderSearchSuggestions/);
+test("search supports typed choices with keyboard navigation", () => {
+  const search = read("public/smart-search.js");
+  assert.match(search, /aria-activedescendant/);
+  assert.match(search, /addEventListener\("focus", render\)/);
+  assert.match(search, /choose\(choice\)/);
 });
 
 test("the county showcase is honest, fully routed and uses an original local logo", () => {
