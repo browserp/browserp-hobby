@@ -591,6 +591,7 @@ main { animation: page-enter-v3 .42s cubic-bezier(.22,.75,.26,1) both; }
 .game-page-hero-grid-v4 { display: grid; grid-template-columns: 150px minmax(0,760px); gap: 34px; align-items: center; }
 .game-page-mark-v4 { width: 140px; height: 140px; display: grid; place-items: center; border: 1px solid var(--line-strong); border-radius: 26px; background: linear-gradient(145deg,rgba(236,79,166,.16),rgba(155,108,255,.12) 60%,rgba(104,218,250,.08)); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.08),0 28px 70px rgba(0,0,0,.32); }
 .game-page-symbol-v4 { width: 82px; height: 82px; filter: drop-shadow(0 0 18px rgba(236,79,166,.25)); }
+.game-page-all-logo-v5 { width: 100%; height: 100%; object-fit: contain; }
 .game-page-hero-v4 h1 { margin: 0; max-width: 780px; font-size: clamp(42px,6vw,68px); line-height: 1.03; letter-spacing: -.045em; }
 .game-page-hero-v4 p { max-width: 720px; color: var(--copy); font-size: 18px; }
 .game-browser-section-v4 { padding-top: 38px; }
