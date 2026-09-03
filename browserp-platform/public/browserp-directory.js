@@ -8,12 +8,15 @@
   };
   const select = (selector, root = document) => root.querySelector(selector);
   const SEARCH_SUGGESTIONS = Object.freeze([
-    ["Game", "FiveM roleplay"], ["Game", "RedM roleplay"], ["Game", "Roblox roleplay"], ["Game", "Minecraft roleplay"],
-    ["Game", "Forza cruising"], ["Game", "Garry's Mod roleplay"], ["Game", "DayZ roleplay"], ["Game", "Euro Truck Simulator roleplay"],
+    ["Game", "FiveM roleplay", "fivem"], ["Game", "RedM roleplay", "redm"], ["Game", "Roblox roleplay", "roblox"], ["Game", "Minecraft roleplay", "minecraft"],
+    ["Game", "Forza cruising", "forza"], ["Game", "Garry's Mod roleplay", "gmod"], ["Game", "DayZ roleplay", "dayz"], ["Game", "Euro Truck Simulator roleplay", "ets2"],
     ["Framework", "QBCore"], ["Framework", "ESX"], ["Framework", "vMenu"], ["Framework", "Fantasy SMP"],
     ["Tag", "serious roleplay"], ["Tag", "economy"], ["Tag", "whitelisted"], ["Tag", "custom clothing"],
     ["Tag", "custom vehicles"], ["Tag", "player businesses"], ["Tag", "beginner friendly"], ["Access", "public servers"],
-    ["Region", "United Kingdom"], ["Region", "United States"], ["Region", "Europe"], ["Region", "Australia"]
+    ["Region", "United Kingdom"], ["Region", "United States"], ["Region", "Europe"], ["Region", "Australia"],
+    ["Game", "ARMA roleplay", "arma"], ["Game", "VRChat roleplay", "vrchat"],
+    ["Game", "Project Zomboid roleplay", "project-zomboid"], ["Game", "Assetto Corsa roleplay", "assetto-corsa"],
+    ["Game", "BeamNG.drive roleplay", "beamng"]
   ]);
   const INITIAL_SEARCH_SUGGESTIONS = Object.freeze([0, 2, 8, 9, 12, 19, 20].map((index) => SEARCH_SUGGESTIONS[index]));
   const SHOWCASE_SERVER = Object.freeze({
@@ -109,8 +112,8 @@
   function serverCard(server) {
     const slug = String(server.slug || "").trim();
     const platformId = String(server.platform_id || "other").toLowerCase();
-    const platformName = server.platform_name || server.platform_short || "Roleplay";
-    const card = element("a", `server-card platform-${platformId.replace(/[^a-z0-9-]/g, "")}`);
+    const card = element("a", "server-card");
+    window.BrowseRPPlatforms.theme(card, window.BrowseRPPlatforms.idFor(server));
     card.href = server.showcase_url || `/server/${encodeURIComponent(slug)}`;
     card.setAttribute("aria-label", `View ${String(server.name || "server")}`);
     const media = element("div", "server-card-media");
@@ -136,9 +139,7 @@
     card.append(top);
 
     card.append(element("h3", "", server.name || "Roleplay server"));
-    const details = [platformName, server.region, server.framework, server.language].filter(Boolean);
-    if (server.verified) details.push("Owner verified");
-    card.append(element("div", "server-meta", details.join(" · ") || "Roleplay community"));
+    card.append(window.BrowseRPPlatforms.metadata(server));
     card.append(element("p", "server-description", server.description || "Open the listing to learn more about this community."));
 
     const tags = element("div", "server-tags");
@@ -214,9 +215,10 @@
     searchInput.setAttribute("aria-expanded", "true");
     requestAnimationFrame(() => list.classList.add("search-suggestions-open"));
     list.replaceChildren(
-      ...matches.map(([kind, item]) => {
+      ...matches.map(([kind, item, platform]) => {
         const button = element("button", "search-suggestion-v3");
         button.type = "button";
+        if (platform) window.BrowseRPPlatforms.theme(button, platform);
         button.setAttribute("role", "option");
         button.append(element("span", "search-suggestion-kind-v3", kind), element("strong", "", item));
         button.addEventListener("pointerdown", (event) => event.preventDefault());
@@ -310,6 +312,7 @@
     const sort = select("#sort-filter");
     search.value = state.filters.query;
     platform.value = [...platform.options].some((option) => option.value === state.filters.platform) ? state.filters.platform : "all";
+    window.BrowseRPPlatforms.theme(platform, platform.value);
     region.value = [...region.options].some((option) => option.value === state.filters.region) ? state.filters.region : "all";
     sort.value = [...sort.options].some((option) => option.value === state.filters.sort) ? state.filters.sort : "recommended";
     select("#online-filter").checked = state.filters.online;
