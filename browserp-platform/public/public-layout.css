@@ -1,0 +1,105 @@
+/* Loaded only by public pages. Staff layouts keep their own spacing. */
+body select:not([multiple]):not([size]),
+body select[size="1"]:not([multiple]) {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m5 7.5 5 5 5-5' stroke='%23d7ceda' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 20px 20px;
+  padding-inline: 14px 44px;
+  min-width: 0;
+  text-overflow: ellipsis;
+}
+.field-v3,.portal-field { min-width: 0; }
+.field-v3 select,.field-v3 textarea,.field-v3 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) { border-radius: 10px; }
+.smart-home-filters { grid-template-columns: repeat(2,minmax(0,1fr)); max-width: 700px; }
+.smart-home-filters select { width: 100%; }
+.smart-primary-filters:has(> .field-v3[hidden]) { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.smart-primary-filters:has(> .field-v3[hidden]) > .field-v3:last-child { grid-column: auto; }
+.smart-checks { gap: 12px 20px; margin-top: 0; }
+.check-v3 input { flex: 0 0 18px; }
+
+/* Keep the logo, status and title together, then give the description room. */
+.server-card:not(.server-card-skeleton) {
+  grid-template-columns: 96px minmax(0,1fr) minmax(130px,160px);
+  grid-template-areas: "media status summary" "media title summary" "media meta summary" "media description summary" "media tags summary";
+  gap: 8px 20px;
+  align-items: start;
+  padding: 22px;
+}
+.server-card:not(.server-card-skeleton) .server-card-top { display: contents; }
+.server-card:not(.server-card-skeleton):not(:has(> .server-tags:not(:empty))) { grid-template-areas: "media status summary" "media title summary" "media meta summary" "media description summary"; }
+.server-card:not(.server-card-skeleton) .server-card-media { grid-area: media; width: 96px; height: 96px; }
+.server-card:not(.server-card-skeleton) .status { grid-area: status; justify-self: start; font-size: 12px; line-height: 1.5; }
+.server-card .status.showcase { padding: 3px 8px; border: 1px solid rgb(236 79 166 / .25); border-radius: 6px; font-size: 11px; }
+.server-card:not(.server-card-skeleton) > h3 { grid-area: title; align-self: start; line-height: 1.3; overflow-wrap: anywhere; }
+.server-card:not(.server-card-skeleton) > .server-meta { grid-area: meta; }
+.server-card:not(.server-card-skeleton) > .server-description { grid-area: description; margin: 0; }
+.server-card:not(.server-card-skeleton) > .server-tags { grid-area: tags; }
+.server-card:not(.server-card-skeleton) > .server-card-bottom { grid-area: summary; align-self: center; gap: 10px; text-align: right; font-size: 14px; }
+.server-card:not(.server-card-skeleton) > * { min-width: 0; }
+.server-card:not(.server-card-skeleton) .server-tags:empty { display: none; }
+
+/* Public form panels use the same inset and corner treatment as content cards. */
+.panel-v3,.empty-v3,.detail-banner-v3 { border-radius: 14px; }
+:is(#report-form-v3,#comment-form-v3,#appeal-form-v3) { display: grid; gap: 18px; }
+:is(#report-form-v3,#comment-form-v3,#appeal-form-v3) > :is(h2,h3,p) { margin: 0; }
+:is(#report-form-v3,#comment-form-v3,#appeal-form-v3) > .button-v3 { justify-self: start; }
+:is(#report-form-v3,#comment-form-v3,#appeal-form-v3) > [role="status"]:empty { display: none; }
+.listing-form-v3 fieldset { min-inline-size: 0; margin: 0; padding: 18px; border: 1px solid var(--line); border-radius: 12px; }
+.listing-form-v3 legend { padding-inline: 6px; color: var(--copy); font-size: 14px; font-weight: 700; }
+.listing-form-v3 .field-help-v3 { margin: 0 0 14px; }
+.listing-form-v3 .check-v3:has([name="agreement"]) { align-items: flex-start; }
+.listing-form-v3 input[name="agreement"] { margin-top: 3px; }
+.detail-logo-v3 { flex: none; display: grid; place-items: center; border-radius: 14px; font-weight: 800; }
+.detail-title-v3 h1 { overflow-wrap: anywhere; }
+.detail-grid-v3 > aside { display: grid; align-content: start; gap: 20px; }
+.detail-grid-v3 > aside > .server-facts-v3 { margin-bottom: 0; }
+.policy-nav-v3 a { display: inline-flex; align-items: center; min-height: 42px; border-radius: 8px; }
+.toast { max-width: min(360px,calc(100vw - 36px)); overflow-wrap: anywhere; }
+.game-grid-v3 a { grid-template-columns: 64px minmax(0,1fr); }
+.game-grid-v3 strong,.game-grid-v3 small { min-width: 0; overflow-wrap: anywhere; }
+.footer-grid-v3 > * { min-width: 0; }
+.footer-column-v3 a { min-height: 36px; padding-block: 6px; }
+
+@media (max-width: 1080px) {
+  .hero-grid-v3 { grid-template-columns: minmax(0,1fr); gap: 36px; }
+  .hero-copy-v3 { max-width: 760px; }
+  .game-showcase-v3 { max-width: 760px; width: 100%; }
+}
+@media (max-width: 980px) {
+  .footer-grid-v3 { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 28px 24px; }
+}
+@media (max-width: 760px) {
+  .server-card:not(.server-card-skeleton) {
+    grid-template-columns: 64px minmax(0,1fr);
+    grid-template-areas: "media status" "media title" "meta meta" "description description" "tags tags" "summary summary";
+    gap: 12px 14px;
+    padding: 18px;
+  }
+  .server-card:not(.server-card-skeleton) .server-card-media { width: 64px; height: 64px; }
+  .server-card:not(.server-card-skeleton):not(:has(> .server-tags:not(:empty))) { grid-template-areas: "media status" "media title" "meta meta" "description description" "summary summary"; }
+  .server-card:not(.server-card-skeleton) > h3 { font-size: 20px; }
+  .server-card:not(.server-card-skeleton) > .server-card-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-top: 2px; padding-top: 14px; text-align: left; }
+  .server-card-bottom .server-card-action { flex: none; }
+  .result-bar-v3 { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin-block: 16px; }
+  .detail-title-v3 { align-items: flex-start; flex-direction: column; }
+  .panel-v3 { padding: 22px 18px; }
+  .listing-form-v3 fieldset { padding: 14px; }
+}
+@media (max-width: 420px) {
+  .smart-home-filters,.smart-primary-filters:has(> .field-v3[hidden]) { grid-template-columns: minmax(0,1fr); }
+  .tag-picker-v3 { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 359px) {
+  .footer-grid-v3 { grid-template-columns: minmax(0,1fr); }
+}
+@media (forced-colors: active) {
+  body select:not([multiple]):not([size]),body select[size="1"]:not([multiple]) {
+    -webkit-appearance: auto;
+    appearance: auto;
+    background-image: none;
+    padding-inline-end: 14px;
+  }
+}
