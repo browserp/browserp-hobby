@@ -12,7 +12,7 @@
     const links = [
       ["Discover", "/servers"],
       ["Games", "/games"],
-      ["Guides", "/blog"],
+      ["Blog", "/blog"],
       ["About", "/about"]
     ];
     nav.replaceChildren(...links.map(([label, href]) => {

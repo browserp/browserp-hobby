@@ -15,6 +15,18 @@
   },
   "rewrites": [
     {
+      "source": "/api/admin/roles",
+      "destination": "/api/router?_route=admin/roles"
+    },
+    {
+      "source": "/api/admin/announcements",
+      "destination": "/api/router?_route=admin/announcements"
+    },
+    {
+      "source": "/api/public/announcements",
+      "destination": "/api/router?_route=public/announcements"
+    },
+    {
       "source": "/api/platforms",
       "destination": "/api/router?_route=platforms"
     },
