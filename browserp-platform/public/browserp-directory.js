@@ -7,18 +7,18 @@
     filters: { query: "", platform: "all", region: "all", online: false, verified: false, beginner: false, sort: "recommended" }
   };
   const select = (selector, root = document) => root.querySelector(selector);
+  const DISCOVER_GAME_IDS = Object.freeze(["fivem", "redm", "roblox", "minecraft"]);
   const SEARCH_SUGGESTIONS = Object.freeze([
     ["Game", "FiveM roleplay", "fivem"], ["Game", "RedM roleplay", "redm"], ["Game", "Roblox roleplay", "roblox"], ["Game", "Minecraft roleplay", "minecraft"],
-    ["Game", "Forza cruising", "forza"], ["Game", "Garry's Mod roleplay", "gmod"], ["Game", "DayZ roleplay", "dayz"], ["Game", "Euro Truck Simulator roleplay", "ets2"],
     ["Framework", "QBCore"], ["Framework", "ESX"], ["Framework", "vMenu"], ["Framework", "Fantasy SMP"],
     ["Tag", "serious roleplay"], ["Tag", "economy"], ["Tag", "whitelisted"], ["Tag", "custom clothing"],
     ["Tag", "custom vehicles"], ["Tag", "player businesses"], ["Tag", "beginner friendly"], ["Access", "public servers"],
-    ["Region", "United Kingdom"], ["Region", "United States"], ["Region", "Europe"], ["Region", "Australia"],
-    ["Game", "ARMA roleplay", "arma"], ["Game", "VRChat roleplay", "vrchat"],
-    ["Game", "Project Zomboid roleplay", "project-zomboid"], ["Game", "Assetto Corsa roleplay", "assetto-corsa"],
-    ["Game", "BeamNG.drive roleplay", "beamng"]
+    ["Region", "United Kingdom"], ["Region", "United States"], ["Region", "Europe"], ["Region", "Australia"]
   ]);
-  const INITIAL_SEARCH_SUGGESTIONS = Object.freeze([0, 2, 8, 9, 12, 19, 20].map((index) => SEARCH_SUGGESTIONS[index]));
+  const INITIAL_SEARCH_SUGGESTIONS = Object.freeze(
+    ["FiveM roleplay", "Roblox roleplay", "QBCore", "ESX", "serious roleplay", "United Kingdom", "United States"]
+      .map((value) => SEARCH_SUGGESTIONS.find(([, label]) => label === value))
+  );
   const SHOWCASE_SERVER = Object.freeze({
     slug: "san-andreas-county-roleplay-showcase",
     showcase_url: "/server/san-andreas-county-roleplay-showcase",
@@ -304,7 +304,8 @@
   function readFilters() {
     const params = new URLSearchParams(location.search);
     state.filters.query = (params.get("q") || "").slice(0, 120);
-    state.filters.platform = (params.get("platform") || "all").slice(0, 40);
+    const platform = params.get("platform");
+    state.filters.platform = DISCOVER_GAME_IDS.includes(platform) ? platform : "all";
     state.filters.region = (params.get("region") || "all").slice(0, 60);
     state.filters.sort = (params.get("sort") || "recommended").slice(0, 30);
     state.filters.online = params.get("online") === "true";
@@ -406,20 +407,23 @@
     directoryResults();
   }
 
-  async function loadPlatforms(target, includeAll = false) {
+  async function loadPlatforms(target, includeAll = false, discoverOnly = false) {
     if (!target) return [];
     try {
       const { platforms = [] } = await api("/api/platforms");
       const first = includeAll ? [Object.assign(document.createElement("option"), { value: "all", textContent: "All games" })] : [];
-      const options = platforms.map((platform) => Object.assign(document.createElement("option"), { value: platform.id, textContent: platform.name }));
+      const choices = discoverOnly
+        ? DISCOVER_GAME_IDS.map((id) => platforms.find((platform) => platform.id === id)).filter(Boolean)
+        : platforms;
+      const options = choices.map((platform) => Object.assign(document.createElement("option"), { value: platform.id, textContent: platform.name }));
       target.replaceChildren(...first, ...options);
-      return platforms;
+      return choices;
     } catch { return []; }
   }
 
   async function directory() {
     readFilters();
-    await loadPlatforms(select("#platform-filter"), true);
+    await loadPlatforms(select("#platform-filter"), true, true);
     syncControls();
     let searchTimer;
     const directorySearch = select("#directory-search");
