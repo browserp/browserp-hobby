@@ -130,76 +130,46 @@
 
   window.__browserpReveal = reveal;
 
-  function menu() {
-    const button = $("[data-menu-v3]");
-    const links = $("[data-nav-links-v3]");
-    const actions = $("[data-nav-actions-v3]");
-    if (!button || !links || !actions) return;
-    const header = button.closest(".header-v3");
-    const nav = button.closest(".nav-v3");
-    const navItems = [
-      ["Discover", "/servers"], ["Games", "/games"], ["Blog", "/blog"], ["About", "/about"]
-    ];
-    links.replaceChildren(...navItems.map(([label, href]) => {
-      const link = node("a", `nav-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-v3`, label);
-      link.href = href;
-      if ((href === "/servers" && location.pathname === "/servers") || (href === "/games" && location.pathname.startsWith("/games")) || location.pathname === href) link.setAttribute("aria-current", "page");
-      return link;
-    }));
-    const mobile = matchMedia("(max-width: 760px)");
-    function set(expanded) {
-      const active = Boolean(expanded);
-      document.body.classList.toggle("menu-open", mobile.matches && active);
-      header?.classList.toggle("nav-collapsed-v3", !active);
-      if (nav) nav.dataset.expanded = String(active);
-      button.setAttribute("aria-expanded", String(active));
-      button.setAttribute("aria-label", active ? (mobile.matches ? "Close menu" : "Hide navigation") : (mobile.matches ? "Open menu" : "Show navigation"));
-      links.inert = !active;
-      actions.inert = !active;
-      links.setAttribute("aria-hidden", String(!active));
-      actions.setAttribute("aria-hidden", String(!active));
-    }
-    button.addEventListener("click", () => set(button.getAttribute("aria-expanded") !== "true"));
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && button.getAttribute("aria-expanded") === "true") { set(false); button.focus(); }
-    });
-    mobile.addEventListener?.("change", () => set(!mobile.matches));
-    $$("a", links).forEach((link) => link.addEventListener("click", () => { if (mobile.matches) set(false); }));
-    set(!mobile.matches);
-  }
-
   async function session() {
     try { state.session = await api("/api/auth/session"); }
     catch { state.session = { authenticated: false, csrfToken: "" }; }
-    $$('[data-account-v3], [data-account-link]').forEach((link) => {
+    $$('[data-account-v3], [data-account-link]').forEach((link, index) => {
       if (!state.session.authenticated) { link.textContent = "Sign in"; link.href = "/dashboard"; return; }
       const profile = state.session.user?.profile || {};
       const name = profile.display_name || profile.username || "BrowseRP member";
       const avatarApproved = profile.avatar_review_status === "approved" && /^https:\/\//i.test(profile.avatar_url || "");
       const wrap = node("div", "account-menu-v3");
-      const button = node("button", "account-trigger-v3"); button.type = "button"; button.setAttribute("aria-haspopup", "menu"); button.setAttribute("aria-expanded", "false"); button.setAttribute("aria-label", `Open account menu for ${name}`);
+      const button = node("button", "account-trigger-v3"); button.type = "button"; button.setAttribute("aria-expanded", "false"); button.setAttribute("aria-label", `Open account menu for ${name}`);
       const avatar = avatarApproved ? new Image() : node("span", "account-initials-v3", initials(name));
-      if (avatarApproved) { avatar.className = "account-avatar-v3"; avatar.src = profile.avatar_url; avatar.alt = ""; avatar.referrerPolicy = "no-referrer"; }
+      if (avatarApproved) {
+        avatar.className = "account-avatar-v3";
+        avatar.alt = "";
+        avatar.referrerPolicy = "no-referrer";
+        avatar.addEventListener("error", () => avatar.replaceWith(node("span", "account-initials-v3", initials(name))), { once: true });
+        avatar.src = profile.avatar_url;
+      }
       button.append(avatar, node("span", "account-name-v3", name), node("span", "account-chevron-v3", "⌄"));
-      const menu = node("div", "account-popover-v3"); menu.hidden = true; menu.setAttribute("role", "menu");
+      const menu = node("nav", "account-popover-v3"); menu.hidden = true; menu.inert = true; menu.id = `account-navigation-${index}`; menu.setAttribute("aria-label", "Your account"); button.setAttribute("aria-controls", menu.id);
       const menuItems = [
         ["Profile", "/profile"], ["My servers", "/dashboard#listings"], ["Favourite servers", "/dashboard#saved"],
         ["Recently viewed", "/dashboard#recent"], ["Reviews", "/dashboard#submissions"], ["Settings", "/dashboard#account"]
-      ].map(([label, href]) => { const item=node("a","",label);item.href=href;item.setAttribute("role","menuitem");return item; });
+      ].map(([label, href]) => { const item=node("a","",label);item.href=href;return item; });
       if (state.session.staffAccess === true) {
-        const staff = node("a", "account-staff-v3", "Staff Panel"); staff.href = "/staffpanel"; staff.setAttribute("role", "menuitem"); menuItems.push(staff);
+        const staff = node("a", "account-staff-v3", "Staff Panel"); staff.href = "/staffpanel"; menuItems.push(staff);
       }
-      const logout = node("button", "account-danger-v3", "Sign out"); logout.type = "button"; logout.setAttribute("role", "menuitem");
+      const logout = node("button", "account-danger-v3", "Sign out"); logout.type = "button";
       let menuCloseTimer;
+      let menuOpeningFrame;
       function setOpen(open) {
         clearTimeout(menuCloseTimer);
+        cancelAnimationFrame(menuOpeningFrame);
         button.setAttribute("aria-expanded", String(open));
         wrap.classList.toggle("open", open);
-        menu.dataset.open = String(open);
+        menu.dataset.open = "false";
         menu.inert = !open;
         if (open) {
           menu.hidden = false;
-          requestAnimationFrame(() => { menu.dataset.open = "true"; });
+          menuOpeningFrame = requestAnimationFrame(() => { menu.dataset.open = "true"; });
           return;
         }
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -211,7 +181,13 @@
       button.addEventListener("click", () => setOpen(button.getAttribute("aria-expanded") !== "true"));
       logout.addEventListener("click", async () => { try { await api("/api/auth/logout", { method: "POST", body: JSON.stringify({}) }); location.assign("/"); } catch (error) { toast(error.message, "error"); } });
       document.addEventListener("click", (event) => { if (!wrap.contains(event.target)) setOpen(false); });
-      wrap.addEventListener("keydown", (event) => { if (event.key === "Escape") { setOpen(false); button.focus(); } });
+      wrap.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && button.getAttribute("aria-expanded") === "true") {
+          event.preventDefault(); event.stopPropagation(); setOpen(false); button.focus();
+        }
+      });
+      wrap.addEventListener("focusout", (event) => { if (!wrap.contains(event.relatedTarget)) setOpen(false); });
+      document.addEventListener("navigation:close", () => setOpen(false));
       menu.append(...menuItems, logout); wrap.append(button, menu); link.replaceWith(wrap); applyTheme(preferredTheme());
     });
     return state.session;
@@ -539,7 +515,6 @@
 
   async function init() {
     applyTheme(preferredTheme());
-    menu();
     footer();
     $$('[data-year-v3]').forEach((element) => { element.textContent = String(new Date().getFullYear()); });
     reveal.scan();

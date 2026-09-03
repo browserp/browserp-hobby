@@ -7,18 +7,12 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const read = (file) => readFileSync(join(root, file), "utf8");
 
-test("navigation can collapse without leaving hidden controls interactive", () => {
-  const shell = read("public/browserp-v3.js");
-  const portalShell = read("public/browserp-shell.js");
-  const css = read("public/browserp-v3.css");
-  assert.match(shell, /nav\.dataset\.expanded = String\(active\)/);
-  assert.match(shell, /links\.inert = !active/);
-  assert.match(shell, /actions\.inert = !active/);
-  assert.match(shell, /Hide navigation/);
-  assert.match(portalShell, /menu\.inert = !active/);
-  assert.match(portalShell, /Hide navigation/);
-  assert.match(css, /\.nav-v3\[data-expanded="false"\]/);
-  assert.match(css, /browserp-brand-pulse-v4/);
+test("public navigation has scoped motion and respects reduced motion", () => {
+  const css = read("public/navigation.css");
+  assert.match(css, /navigation-arrive-v6/);
+  assert.match(css, /navigation-dialog-v6::backdrop/);
+  assert.match(css, /100dvh/);
+  assert.match(css, /overscroll-behavior: contain/);
   assert.match(css, /prefers-reduced-motion/);
 });
 
