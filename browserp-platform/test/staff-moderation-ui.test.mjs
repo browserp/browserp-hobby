@@ -73,6 +73,17 @@ test("moderation does not request records before authorized init and hides unava
   assert.equal(app.button("Edit server"), undefined);
   assert.ok(!app.document.querySelector("#moderation-tabs").children.some((item) => item.href === "#members" || item.href === "#security"));
   assert.match(text(app.root), /French.*QBCore/); controller.destroy();
+  const members = [
+    { id: "member-1", displayName: "Member without a bio", bioStatus: "not_set", activeBans: 0, staffStatus: null },
+    { id: "member-2", displayName: "Active staff member", bioStatus: "not_set", activeBans: 0, staffStatus: "active" },
+    { id: "member-3", displayName: "Restricted staff member", bioStatus: "approved", activeBans: 1, staffStatus: "active" },
+    { id: "member-4", displayName: "Explicit account status", bioStatus: "not_set", activeBans: 0, staffStatus: "active", status: "suspended" }
+  ];
+  const memberApp = harness(async (url) => url.includes("view=summary") ? { summary: summary() } : { workspace: workspace(members, { kind: "members" }) }, "#members");
+  const memberController = await memberApp.init();
+  assert.deepEqual(memberApp.nodes(".moderation-state").map((badge) => badge.dataset.state), ["active", "staff", "banned", "suspended"]);
+  assert.ok(memberApp.nodes(".moderation-state").every((badge) => badge.textContent !== "not set"));
+  memberController.destroy();
 });
 
 test("newer private searches win when responses arrive out of order", async () => {

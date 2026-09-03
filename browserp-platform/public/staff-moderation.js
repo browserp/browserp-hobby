@@ -144,7 +144,7 @@
       copy.append(make("h3", title));
       const meta = kind === "servers" || kind === "queue" ? [record.platform, record.region, record.language, record.framework, record.access].filter(Boolean).map(human).join(" · ") : [record.displayName !== title ? record.displayName : "", record.username ? `@${record.username}` : "", record.reporterName ? `Reported by ${record.reporterName}` : "", record.provider, date(record.createdAt || record.joinedAt)].filter(Boolean).join(" · ");
       copy.append(make("p", meta, "moderation-record-meta")); head.append(copy);
-      const recordStatus = record.deletedAt ? "deleted" : record.status || record.severity || (record.bioStatus ? record.bioStatus : "");
+      const recordStatus = record.deletedAt ? "deleted" : record.status || (kind === "members" ? Number(record.activeBans) > 0 ? "banned" : record.staffStatus === "active" ? "staff" : "active" : record.severity || record.bioStatus || "");
       if (recordStatus) { const badge = make("span", human(recordStatus), "moderation-state"); badge.dataset.state = recordStatus; head.append(badge); } card.append(head);
       const body = record.details || record.description || record.statement || record.reason || record.bio;
       if (body) card.append(make("p", typeof body === "string" ? body.slice(0, 320) + (body.length > 320 ? "…" : "") : JSON.stringify(body), "moderation-record-copy"));
