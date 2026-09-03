@@ -407,14 +407,19 @@
   async function revokeBan(ban){const input=await decision({title:`Revoke ban ${ban.reference}`,description:"This restores access for this ban target and records the reason.",fields:[{name:"reason",label:"Revocation reason",type:"textarea",minlength:10,maxlength:500}],submitLabel:"Revoke ban"});if(!input)return;try{await api("/api/admin/bans",{method:"POST",body:JSON.stringify({action:"revoke",banId:ban.id,reason:input.reason})});location.reload();}catch(error){status(error.message,true);}}
 
   function wireForms(){ $("#permission-form-v3")?.addEventListener("submit",savePermission); $("#mfa-activate-form-v3")?.addEventListener("submit",async(event)=>{event.preventDefault();try{await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"activate_mfa",reason:new FormData(event.currentTarget).get("reason")})});location.reload();}catch(error){status(error.message,true);}}); }
-  function mobile(){const button=$("#staff-menu-v3");button?.addEventListener("click",()=>document.body.classList.toggle("staff-menu-open"));}
+  function mobile(){
+    const button=$("#staff-menu-v3"); const sidebar=$(".staff-sidebar-v3");
+    if(!button||!sidebar)return;
+    sidebar.id="staff-sidebar-v3"; button.setAttribute("aria-controls",sidebar.id); button.setAttribute("aria-expanded","false"); button.setAttribute("aria-label","Open staff navigation");
+    button.addEventListener("click",()=>{const open=document.body.classList.toggle("staff-menu-open");button.setAttribute("aria-expanded",String(open));button.setAttribute("aria-label",open?"Close staff navigation":"Open staff navigation");});
+  }
   async function init(){
     const legacy = { profiles: "profiles", accounts: "activity", staff: "staff", security: "bans" };
     const pageKey = document.body.dataset.staffPage;
     if (legacy[pageKey]) { location.replace(`/staffpanel/moderation#${legacy[pageKey]}`); return; }
     if (pageKey === "content") { location.replace("/staffpanel/overview#overview-adverts"); return; }
     if (pageKey === "overview" && location.hash === "#overview-roles") { location.replace("/staffpanel/moderation#staff"); return; }
-    mobile();const top=$(".staff-top-v3");if(top){top.append(themeButton());applyTheme(document.documentElement.dataset.theme||preferredTheme());}if(!await ensureStaff())return;try{const page=document.body.dataset.staffPage;if(page==="overview") {
+    mobile();const top=$(".staff-top-v3");if(top){top.append(themeButton());applyTheme(document.documentElement.dataset.theme||preferredTheme());}if(!await ensureStaff())return;window.BrowseRPStaffScrapers?.init();try{const page=document.body.dataset.staffPage;if(page==="overview") {
       let toolsMounted = false;
       await window.BrowseRPStaffOverview.init({ api, onAuthFailure: showLogin, onLoad: async (website) => {
         if (toolsMounted) return;
