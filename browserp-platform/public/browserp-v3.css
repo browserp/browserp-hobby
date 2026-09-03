@@ -140,7 +140,7 @@ img { display: block; max-width: 100%; }
 .hero-mark-v3 img { position: relative; width: min(100%, 350px); margin-inline: auto; }
 .search-v3,
 .field-search-v3 { position: relative; }
-.search-v3 { display: grid; grid-template-columns: 1fr auto; max-width: 700px; margin-top: 32px; border: 1px solid var(--line); background: var(--panel); padding: 6px; transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease; }
+.search-v3 { display: grid; grid-template-columns: 1fr auto; max-width: 700px; margin-top: 32px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 6px; transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease; }
 .search-v3 input { min-width: 0; height: 48px; border: 0; background: transparent; padding: 0 14px; color: var(--text); font-size: 16px; outline: 0; }
 .search-v3 input::placeholder { color: #798291; }
 .search-v3:focus-within { border-color: color-mix(in srgb, var(--pink) 64%, var(--line)); box-shadow: 0 10px 28px rgb(236 79 166 / .14); }
