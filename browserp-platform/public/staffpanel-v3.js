@@ -5,6 +5,112 @@
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const make = (tag, text, className = "") => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = String(text); return el; };
 
+  async function permissionOverrides() {
+    const form = $("#permission-form-v3");
+    if (!form) return;
+    const [{ staff }, { control }] = await Promise.all([api("/api/admin/staff"), api("/api/admin/permissions")]);
+    const people = (staff?.members || []).filter((person) => person.roleKey !== "owner" && person.userId);
+    const permissions = (control?.permissions || []).filter((permission) => permission.delegatable);
+    const overrides = control?.overrides || [];
+    const select = $("#permission-user", form); const grid = $("#permission-grid-v3", form);
+    const feedback = make("p", "", "staff-state-v3"); feedback.setAttribute("role", "status"); form.append(feedback);
+    select.replaceChildren(...people.map((person) => { const option = make("option", `${person.displayName || person.discordUserId} · ${person.roleName || person.roleKey}`); option.value = person.discordUserId; return option; }));
+    let baseline = new Map();
+    const render = () => {
+      const person = people.find((item) => item.discordUserId === select.value);
+      baseline = new Map();
+      grid.replaceChildren(...permissions.map((permission) => {
+        const label = make("label", undefined, "permission-item-v3"); const choice = document.createElement("select"); choice.dataset.permission = permission.key;
+        for (const [value, text] of [["", "Use role default"], ["true", "Allow"], ["false", "Deny"]]) { const option = make("option", text); option.value = value; choice.append(option); }
+        const existing = overrides.find((item) => item.userId === person?.userId && item.permissionKey === permission.key);
+        choice.value = existing ? String(existing.allowed) : ""; baseline.set(permission.key, choice.value);
+        label.append(make("span", permission.description), choice); return label;
+      }));
+    };
+    select.addEventListener("change", render); render();
+    if (!people.length) { feedback.textContent = "Assign a staff role to a signed-in member to set individual permissions."; form.querySelectorAll("button,input,textarea,select").forEach((item) => { item.disabled = true; }); return; }
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const changes = $$('[data-permission]', form).filter((choice) => baseline.get(choice.dataset.permission) !== choice.value).map((choice) => [choice.dataset.permission, choice.value]);
+      if (!changes.length) { feedback.textContent = "No permission changes to save."; return; }
+      const reason = new FormData(form).get("reason"); const discordUserId = select.value;
+      const inputs = $$('button,input,textarea,select', form); inputs.forEach((item) => { item.disabled = true; });
+      feedback.textContent = "Saving permission changes…";
+      try {
+        for (const [permissionKey, value] of changes) {
+          await api("/api/admin/permissions", { method: "POST", body: JSON.stringify({ discordUserId, permissionKey, allowed: value === "" ? null : value === "true", reason }) });
+          baseline.set(permissionKey, value);
+          const user = people.find((item) => item.discordUserId === discordUserId);
+          const index = overrides.findIndex((item) => item.userId === user?.userId && item.permissionKey === permissionKey);
+          if (index >= 0) overrides.splice(index, 1);
+          if (value !== "") overrides.push({ userId: user?.userId, permissionKey, allowed: value === "true" });
+        }
+        feedback.textContent = "Permission changes saved.";
+      } catch (error) { feedback.textContent = `${error.message} Any completed changes are saved; retry to finish the remaining changes.`; }
+      finally { inputs.forEach((item) => { item.disabled = false; }); }
+    });
+  }
+
+  async function securityControls(mount, permissions = {}) {
+    const keys = new Set(permissions.keys || []);
+    mount.replaceChildren();
+    const tasks = [];
+    const section = (title) => { const details = make("details", undefined, "staff-section-v3"); details.append(make("summary", title)); const body = make("div", undefined, "staff-security-controls-body"); details.append(body); mount.append(details); return body; };
+    const failure = (body, error) => body.append(make("p", error.message || "This section could not be loaded.", "staff-state-v3"));
+    if (permissions.isOwner || permissions.manageStaff) {
+      const body = section("Staff sign-in protection");
+      tasks.push((async () => {
+        try {
+          const { policy } = await api("/api/admin/security?view=policy");
+          const banner = make("div", undefined, "security-banner-v3"); banner.id = "mfa-enforcement-v3";
+          banner.append(make("strong", policy.staffMfaRequired ? "Staff two-factor verification is required." : "Staff two-factor verification is currently optional.")); body.append(banner);
+          if (policy.staffMfaRequired || !permissions.isOwner) return;
+          if (state.session.aal === "aal2") {
+            const activate = make("button", "Require two-factor verification", "button-v3 button-primary-v3"); activate.type = "button";
+            activate.addEventListener("click", async () => {
+              const input = await decision({ title: "Require two-factor verification for staff?", description: "All staff will need their authenticator when accessing the panel.", fields: [{ name: "reason", label: "Reason", type: "textarea", minlength: 5, maxlength: 500 }], submitLabel: "Require verification" });
+              if (!input) return;
+              try { await api("/api/admin/security", { method: "POST", body: JSON.stringify({ action: "activate_mfa", reason: input.reason }) }); location.reload(); } catch (error) { failure(body, error); }
+            }); body.append(activate);
+          } else {
+            body.append(make("p", "Verify your own authenticator before making two-factor verification mandatory for staff."));
+            const setup = make("button", state.session.mfa?.enrolled ? "Verify authenticator" : "Set up authenticator", "button-v3 button-secondary-v3"); setup.type = "button";
+            setup.addEventListener("click", () => state.session.mfa?.enrolled ? showMfa() : setupAuthenticatorHere()); body.append(setup);
+          }
+        } catch (error) { failure(body, error); }
+      })());
+    }
+    if (permissions.isOwner || keys.has("security.network.request") || keys.has("security.network.approve")) {
+      const body = section("Protected IP requests");
+      tasks.push((async () => {
+        try {
+          const { revealRequests = [] } = await api("/api/admin/security?view=requests");
+          if (!revealRequests.length) body.append(make("p", "No protected IP requests."));
+          for (const request of revealRequests) {
+            const card = make("article", undefined, "staff-section-v3");
+            card.append(make("h3", request.requesterName || "Staff member"), make("p", `${request.maskedNetwork || "Network unavailable"} · ${request.status} · ${date(request.createdAt)}`), make("p", request.reason));
+            if (permissions.isOwner && request.status === "pending") {
+              for (const [approved, text] of [[true, "Approve one-time view"], [false, "Deny request"]]) { const button = make("button", text, "button-v3 button-secondary-v3"); button.type = "button"; button.addEventListener("click", () => decideNetwork(request.requestId, approved)); card.append(button); }
+            }
+            if (request.requestedByMe && request.status === "approved") { const button = make("button", "View approved IP", "button-v3 button-secondary-v3"); button.type = "button"; button.addEventListener("click", async () => { button.disabled = true; await viewNetwork(request.activityId, request.requestId); }); card.append(button); }
+            body.append(card);
+          }
+        } catch (error) { failure(body, error); }
+      })());
+    }
+    if (permissions.readSecurity) {
+      const body = section("Account retention history");
+      tasks.push((async () => {
+        try {
+          const { retention = [] } = await api("/api/admin/security?view=retention");
+          if (!retention?.length) body.append(make("p", "No accounts awaiting retention review."));
+          for (const record of retention || []) { const card = make("article", undefined, "staff-section-v3"); card.append(make("h3", record.displayName || "Former member"), make("p", `${record.status} · Last active ${date(record.lastActiveAt)} · Review due ${date(record.dueAt)}`)); if (record.blockReason) card.append(make("p", record.blockReason)); body.append(card); }
+        } catch (error) { failure(body, error); }
+      })());
+    }
+    await Promise.allSettled(tasks);
+  }
+
   function preferredTheme() {
     return "dark";
   }
@@ -26,7 +132,7 @@
     lockup.append(image); link.append(lockup); return link;
   }
 
-  function decision({ title, description = "", fields = [], submitLabel = "Confirm", danger = false }) {
+  function decision({ title, description = "", fields = [], submitLabel = "Confirm", danger = false, expiresInSeconds = 0 }) {
     return new Promise((resolve) => {
       const dialog = make("dialog", undefined, "staff-dialog-v3");
       const form = make("form", undefined, "staff-dialog-card-v3"); form.method = "dialog";
@@ -50,12 +156,13 @@
       const cancel = make("button", "Cancel", "button-v3 button-secondary-v3"); cancel.type = "button";
       const submit = make("button", submitLabel, danger ? "button-v3 staff-danger-v3" : "button-v3 button-primary-v3"); submit.type = "submit";
       actions.append(cancel, submit); form.append(actions); dialog.append(form); document.body.append(dialog);
-      let settled = false;
-      const finish = (value) => { if (settled) return; settled = true; dialog.close(); dialog.remove(); resolve(value); };
+      let settled = false; let expiry;
+      const finish = (value) => { if (settled) return; settled = true; if (expiry) clearTimeout(expiry); dialog.close(); dialog.remove(); resolve(value); };
       cancel.addEventListener("click", () => finish(null));
       dialog.addEventListener("cancel", (event) => { event.preventDefault(); finish(null); });
       form.addEventListener("submit", (event) => { event.preventDefault(); finish(Object.fromEntries(new FormData(form))); });
       dialog.showModal(); $("input,select,textarea", form)?.focus();
+      if (expiresInSeconds > 0) expiry = setTimeout(() => finish(null), expiresInSeconds * 1000);
     });
   }
 
@@ -183,11 +290,11 @@
     if (!input) return; try { await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"request_network",activityId,reason:input.reason})}); status("Reveal request sent to the owner."); } catch(error){status(error.message,true);}
   }
   async function viewNetwork(activityId, requestId) {
-    try { const { result } = await api("/api/admin/security", { method: "POST", body: JSON.stringify({ action: "reveal_network", activityId, requestId }) }); await decision({ title: "Protected IP evidence", description: `IP address: ${result.address}\n\nThis value is intentionally not retained in the panel and this view is audited.`, fields: [], submitLabel: "Close" }); } catch (error) { status(error.message, true); }
+    try { const { result } = await api("/api/admin/security", { method: "POST", body: JSON.stringify({ action: "reveal_network", activityId, requestId }) }); await decision({ title: "Protected IP evidence", description: `IP address: ${result.address}\n\nThis audited view closes after 60 seconds.`, fields: [], submitLabel: "Close", expiresInSeconds: 60 }); } catch (error) { status(error.message, true); }
   }
   async function applyBan(item) {
-    const input = await decision({ title: "Apply a permanent platform ban", description: "Choose the signal to restrict. Account bans are most precise; device and masked-network bans can affect shared devices or households.", fields: [
-      { name: "targetType", label: "Ban target", type: "select", options: [{value:"account",label:"Account"},{value:"device",label:"First-party device"},{value:"network_prefix",label:"Masked network prefix"}] },
+    const input = await decision({ title: "Apply a permanent platform ban", description: "Choose the restriction for this activity. An IP ban matches the exact address and can affect a shared connection. A device ban uses this browser’s device token.", fields: [
+      { name: "targetType", label: "Ban target", type: "select", options: [{value:"account",label:"Account"},{value:"device",label:"Browser / device token"},{value:"network_prefix",label:"IP address"}] },
       { name: "reasonCode", label: "Public reason code", value: "platform-abuse", minlength: 3, maxlength: 80 },
       { name: "reason", label: "Internal decision reason", type: "textarea", minlength: 10, maxlength: 500 }
     ], submitLabel: "Apply permanent ban", danger: true });
@@ -251,7 +358,8 @@
 
   async function openReview(record) {
     const baseKind = record.kind.toLowerCase();
-    const kind = baseKind === "moderation" && record.target_type === "server_comment" ? "comment" : baseKind;
+    const normalKind = baseKind === "queue" ? "moderation" : baseKind;
+    const kind = normalKind === "moderation" && (record.target_type || record.targetType) === "server_comment" ? "comment" : normalKind;
     try {
       const { item } = await api(`/api/admin/item?kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(record.id)}`);
       const actionMap = {
@@ -300,16 +408,22 @@
 
   function wireForms(){ $("#permission-form-v3")?.addEventListener("submit",savePermission); $("#mfa-activate-form-v3")?.addEventListener("submit",async(event)=>{event.preventDefault();try{await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"activate_mfa",reason:new FormData(event.currentTarget).get("reason")})});location.reload();}catch(error){status(error.message,true);}}); }
   function mobile(){const button=$("#staff-menu-v3");button?.addEventListener("click",()=>document.body.classList.toggle("staff-menu-open"));}
-  async function init(){mobile();const top=$(".staff-top-v3");if(top){top.append(themeButton());applyTheme(document.documentElement.dataset.theme||preferredTheme());}if(!await ensureStaff())return;try{const page=document.body.dataset.staffPage;if(page==="overview") {
+  async function init(){
+    const legacy = { profiles: "profiles", accounts: "activity", staff: "staff", security: "bans" };
+    const pageKey = document.body.dataset.staffPage;
+    if (legacy[pageKey]) { location.replace(`/staffpanel/moderation#${legacy[pageKey]}`); return; }
+    if (pageKey === "content") { location.replace("/staffpanel/overview#overview-adverts"); return; }
+    if (pageKey === "overview" && location.hash === "#overview-roles") { location.replace("/staffpanel/moderation#staff"); return; }
+    mobile();const top=$(".staff-top-v3");if(top){top.append(themeButton());applyTheme(document.documentElement.dataset.theme||preferredTheme());}if(!await ensureStaff())return;try{const page=document.body.dataset.staffPage;if(page==="overview") {
       let toolsMounted = false;
       await window.BrowseRPStaffOverview.init({ api, onAuthFailure: showLogin, onLoad: async (website) => {
         if (toolsMounted) return;
         toolsMounted = true;
         await Promise.allSettled([
-          window.BrowseRPStaffRoles.init({ api, permissions: website.permissions }),
+          window.BrowseRPStaffAdverts.init({ api, permissions: website.permissions }),
           window.BrowseRPStaffPublishing.init({ api, permissions: website.permissions })
         ]);
       }});
-    }if(page==="moderation")await moderation();if(page==="accounts")await accounts();if(page==="staff")await staffAccess();if(page==="profiles")await profileQueue();if(page==="content")await content();if(page==="security")await securityPage();wireForms();}catch(error){if(error.status===401||error.status===403){showLogin();}else status(error.message,true);}}
+    }if(page==="moderation")await window.BrowseRPStaffModeration.init({api,onAuthFailure:showLogin,actions:{openReview,applyBan,viewNetwork,networkRequest,revokeSessions,reviewProfile,decideNetwork,resolveSecurityFlag,decideAppeal,revokeBan,permissionOverrides,securityControls}});if(page==="accounts")await accounts();if(page==="staff")await staffAccess();if(page==="profiles")await profileQueue();if(page==="content")await content();if(page==="security")await securityPage();if(page!=="moderation")wireForms();}catch(error){if(error.status===401||error.status===403){showLogin();}else status(error.message,true);}}
   init();
 })();

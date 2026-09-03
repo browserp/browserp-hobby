@@ -6,6 +6,7 @@ import { assertSameOrigin, cookieValue, parseCookies, publicJson, readBody, redi
 import { assessDisplayName, sanitizePlainText } from "../lib/moderation.js";
 import { rateLimit } from "../lib/rate-limit.js";
 import { recordAccountActivity, unsealAddress } from "../lib/security.js";
+import { moderationMutation, moderationQuery } from "../lib/staff-moderation.js";
 import {
   authCapabilities,
   beginOAuth,
@@ -455,6 +456,29 @@ const routes = {
     return ok(res, { overview });
   }),
 
+  "admin/moderation": endpoint(["GET", "POST"], async (req, res, id) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") {
+      const query = moderationQuery(new URL(req.url, appUrl(req)).searchParams);
+      if (query.kind === "summary") return ok(res, { summary: await rpc("staff_moderation_summary", {}, session.accessToken) });
+      return ok(res, { workspace: await rpc("staff_moderation_records", {
+        p_kind: query.kind, p_filters: query.filters, p_cursor: query.cursor, p_limit: query.limit
+      }, session.accessToken) });
+    }
+    await rateLimit(req, "staff-moderation", 30, 300);
+    const body = moderationMutation(await readBody(req, 96 * 1024));
+    try {
+      return ok(res, { result: await rpc("staff_moderation_mutate", {
+        p_kind: body.kind, p_id: body.id, p_action: body.action, p_data: body.data,
+        p_expected_version: body.expectedVersion, p_reason: body.reason, p_request_id: id
+      }, session.accessToken) });
+    } catch (error) {
+      if (error.code === "40001" || error.code === "23505") error.status = 409;
+      throw error;
+    }
+  }),
+
   "admin/item": endpoint("GET", async (req, res) => {
     const session = await getSession(req, res, { required: true, provider: "discord" });
     const requestUrl = new URL(req.url || "/api/admin/item", appUrl(req));
@@ -597,6 +621,13 @@ const routes = {
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true, provider: "discord" });
     if (req.method === "GET") {
+      const view = new URL(req.url, appUrl(req)).searchParams.get("view");
+      const sections = { status: ["staff_security_status", "status"], requests: ["staff_network_reveal_control", "revealRequests"], retention: ["staff_account_retention", "retention"], flags: ["staff_security_flag_control", "flags"], policy: ["staff_mfa_policy", "policy"] };
+      if (view) {
+        if (!Object.hasOwn(sections, view)) throw Object.assign(new Error("Choose a valid security section."), { status: 400 });
+        const [method, key] = sections[view];
+        return ok(res, { [key]: await rpc(method, {}, session.accessToken) });
+      }
       const [status, activity, revealRequests, flags, retention] = await Promise.all([
         rpc("staff_security_status", {}, session.accessToken),
         rpc("staff_account_activity", { p_limit: 150 }, session.accessToken),

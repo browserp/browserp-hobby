@@ -9,11 +9,11 @@
   <link rel="stylesheet" href="/browserp-v3.css?v=2.4.1">
   <link rel="stylesheet" href="/staffpanel-v3.css?v=2.2.0">
   <link rel="stylesheet" href="/staff-overview.css?v=1">
-  <link rel="stylesheet" href="/staff-roles.css?v=1">
+  <link rel="stylesheet" href="/staff-adverts.css?v=1">
   <link rel="stylesheet" href="/staff-publishing.css?v=1">
   <script src="/publishing-content.js?v=1" defer></script>
   <script src="/staff-overview.js?v=1" defer></script>
-  <script src="/staff-roles.js?v=1" defer></script>
+  <script src="/staff-adverts.js?v=1" defer></script>
   <script src="/staff-publishing.js?v=1" defer></script>
   <script src="/staffpanel-v3.js?v=2.5.0" defer></script>
 </head>
@@ -26,16 +26,8 @@
     <aside class="staff-sidebar-v3">
       <a class="logo-v3" href="/"><span class="logo-lockup-v3"><img class="logo-full-v5" src="/assets/browserp-logo-v5.png" alt="BrowseRP"></span></a>
       <nav class="staff-nav-v3" aria-label="Staff navigation">
-        <div class="staff-nav-group-v3">Operations</div>
         <a href="/staffpanel/overview" aria-current="page">Overview</a>
-        <a href="/staffpanel/moderation">Moderation &amp; reports</a>
-        <a href="/staffpanel/profiles">Profile screening</a>
-        <div class="staff-nav-group-v3">People &amp; security</div>
-        <a href="/staffpanel/accounts">Account activity</a>
-        <a href="/staffpanel/staff">Staff &amp; permissions</a>
-        <a href="/staffpanel/security">Bans &amp; appeals</a>
-        <div class="staff-nav-group-v3">Publishing</div>
-        <a href="/staffpanel/content">Adverts &amp; blog</a>
+        <a href="/staffpanel/moderation">Moderation</a>
         <a href="/">Public site</a>
       </nav>
     </aside>
@@ -45,12 +37,12 @@
         <a class="button-v3 button-secondary-v3" href="/">View website <span aria-hidden="true">↗</span></a>
       </header>
       <nav class="overview-actions" aria-label="Website management">
-        <a class="overview-action" href="/staffpanel/moderation"><span class="overview-action-icon" aria-hidden="true">✓</span><strong>Moderation &amp; reports</strong><span>Review listings and reports</span><span class="overview-action-count" data-overview-queue="pendingSubmissions"></span></a>
-        <a class="overview-action" href="/staffpanel/profiles"><span class="overview-action-icon" aria-hidden="true">◎</span><strong>Profile screening</strong><span>Review community profiles</span></a>
-        <a class="overview-action" href="/staffpanel/accounts"><span class="overview-action-icon" aria-hidden="true">↗</span><strong>Account activity</strong><span>Check account and sign-in activity</span></a>
-        <a class="overview-action" href="#overview-roles"><span class="overview-action-icon" aria-hidden="true">♧</span><strong>Staff &amp; roles</strong><span>Create roles and assign your team</span></a>
-        <a class="overview-action" href="/staffpanel/security"><span class="overview-action-icon" aria-hidden="true">◇</span><strong>Bans &amp; appeals</strong><span>Manage security and appeals</span></a>
-        <a class="overview-action" href="/staffpanel/content"><span class="overview-action-icon" aria-hidden="true">▧</span><strong>Adverts</strong><span>Manage website placements</span></a>
+        <a class="overview-action" href="/staffpanel/moderation"><span class="overview-action-icon" aria-hidden="true">✓</span><strong>Moderation</strong><span>Open your moderation workspace</span><span class="overview-action-count" data-overview-queue="pendingSubmissions"></span></a>
+        <a class="overview-action" href="/staffpanel/moderation#reports"><span class="overview-action-icon" aria-hidden="true">◇</span><strong>Reports</strong><span>Review reports and open cases</span><span class="overview-action-count" data-overview-queue="openReports"></span></a>
+        <a class="overview-action" href="/staffpanel/moderation#members"><span class="overview-action-icon" aria-hidden="true">◎</span><strong>Members</strong><span>Manage accounts and profiles</span></a>
+        <a class="overview-action" href="/staffpanel/moderation#servers"><span class="overview-action-icon" aria-hidden="true">◈</span><strong>Servers</strong><span>Manage listings and ownership</span></a>
+        <a class="overview-action" href="/staffpanel/moderation#staff"><span class="overview-action-icon" aria-hidden="true">♧</span><strong>Staff &amp; roles</strong><span>Manage your moderation team</span></a>
+        <a class="overview-action" href="#overview-adverts"><span class="overview-action-icon" aria-hidden="true">▧</span><strong>Adverts</strong><span>Create and manage website placements</span></a>
         <a class="overview-action" href="#overview-publishing"><span class="overview-action-icon" aria-hidden="true">✎</span><strong>Blog posts</strong><span>Write and publish community news</span></a>
         <a class="overview-action" href="#overview-announcements"><span class="overview-action-icon" aria-hidden="true">◉</span><strong>Announcements</strong><span>Share an update across the website</span></a>
       </nav>
@@ -72,7 +64,7 @@
         </figure>
         <details class="overview-data-table"><summary>View exact user counts</summary><div class="overview-data-scroll"><table><caption>Current registered accounts by signup date, in UTC</caption><thead><tr><th scope="col">Date</th><th scope="col">New users</th><th scope="col">Total users</th></tr></thead><tbody id="overview-user-data"></tbody></table></div></details>
       </section>
-      <section id="overview-roles" class="overview-module" aria-label="Staff roles"><div class="overview-section-heading"><div><span class="eyebrow-v3">Your team</span><h2>Staff &amp; roles</h2><p>Loading role management…</p></div><a class="button-v3 button-secondary-v3" href="/staffpanel/staff">Staff &amp; permissions</a></div></section>
+      <section id="overview-adverts" class="overview-module" aria-label="Advertisements"><div class="overview-section-heading"><div><span class="eyebrow-v3">Website placements</span><h2>Advertisements</h2><p>Loading advertisements…</p></div></div></section>
       <section id="overview-publishing" class="overview-module" aria-label="Blog publishing"><div class="overview-section-heading"><div><span class="eyebrow-v3">Community updates</span><h2>Blog posts</h2><p>Loading publishing tools…</p></div><a class="button-v3 button-secondary-v3" href="/blog">View blog</a></div></section>
       <p id="staff-status-v3" role="status"></p>
     </main>
