@@ -34,13 +34,12 @@ function safeServerRead() {
   return supabaseConfig().privileged ? { useSecret: true } : {};
 }
 
-function staffAccessMutation(body) {
+export function staffAccessMutation(body) {
   const discordUserId = String(body.discordUserId || "").trim();
   const action = String(body.action || "").trim().toLowerCase();
   const roleKey = String(body.roleKey || "").trim().toLowerCase();
   const reason = sanitizePlainText(body.reason, 500);
   const expectedVersion = Number(body.expectedVersion);
-  const assignableRoles = new Set(["administrator", "senior_moderator", "moderator", "support"]);
 
   if (!/^[0-9]{17,20}$/.test(discordUserId)) {
     throw Object.assign(new Error("Enter a valid Discord user ID."), { status: 400 });
@@ -48,7 +47,7 @@ function staffAccessMutation(body) {
   if (!["assign", "change_role", "suspend", "reactivate", "revoke"].includes(action)) {
     throw Object.assign(new Error("Choose a valid staff access action."), { status: 400 });
   }
-  if (["assign", "change_role"].includes(action) && !assignableRoles.has(roleKey)) {
+  if (["assign", "change_role"].includes(action) && (roleKey === "owner" || !/^[a-z0-9_]{2,40}$/.test(roleKey))) {
     throw Object.assign(new Error("Choose an assignable staff rank."), { status: 400 });
   }
   if (!Number.isSafeInteger(expectedVersion) || expectedVersion < 0) {
@@ -59,6 +58,32 @@ function staffAccessMutation(body) {
   }
 
   return { discordUserId, action, roleKey: roleKey || null, reason, expectedVersion };
+}
+
+export function customRoleMutation(body) {
+  const key = String(body.key || "").trim().toLowerCase();
+  const name = sanitizePlainText(body.name, 60);
+  const description = sanitizePlainText(body.description, 300);
+  const expectedVersion = Number(body.expectedVersion);
+  if ((key && !/^custom_[a-z0-9_]{1,33}$/.test(key)) || name.length < 2 || description.length < 5) {
+    throw Object.assign(new Error("Check the custom role name and description."), { status: 400 });
+  }
+  if (!Number.isSafeInteger(expectedVersion) || expectedVersion < 0) {
+    throw Object.assign(new Error("Reload roles before saving."), { status: 409 });
+  }
+  const blocked = new Set(["staff.manage", "staff.permissions.manage", "security.network.approve"]);
+  if (!Array.isArray(body.permissions) || body.permissions.length > 80 || body.permissions.some((key) => typeof key !== "string" || !/^[a-z][a-z0-9_.]{2,79}$/.test(key) || blocked.has(key))) {
+    throw Object.assign(new Error("Choose valid assignable permissions."), { status: 400 });
+  }
+  return { key: key || null, name, description, permissions: [...new Set(body.permissions)], expectedVersion, reason: reason(body.reason, 5) };
+}
+
+function optionalTimestamp(value) {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value !== "string" || value.length > 40 || !Number.isFinite(Date.parse(value))) {
+    throw Object.assign(new Error("Choose a valid date and time."), { status: 400 });
+  }
+  return new Date(value).toISOString();
 }
 
 function uuid(value, message = "Choose a valid record.") {
@@ -215,7 +240,7 @@ const routes = {
     let staffMfaRequired = true;
     if (staffAccess) {
       try {
-        const securityStatus = await rpc("staff_security_status", {}, session.accessToken);
+        const securityStatus = await rpc("staff_mfa_policy", {}, session.accessToken);
         staffMfaRequired = securityStatus?.staffMfaRequired !== false;
       } catch { /* Fail closed if the staff MFA policy cannot be read. */ }
     }
@@ -420,7 +445,14 @@ const routes = {
 
   "admin/overview": endpoint("GET", async (req, res) => {
     const session = await getSession(req, res, { required: true, provider: "discord" });
-    return ok(res, { overview: await rpc("staff_dashboard_overview", {}, session.accessToken) });
+    const range = new URL(req.url, appUrl(req)).searchParams.get("range");
+    if (range && !["30d", "90d", "180d", "1y", "max"].includes(range)) {
+      throw Object.assign(new Error("Choose a valid time frame."), { status: 400 });
+    }
+    const overview = range
+      ? { website: await rpc("staff_website_overview", { p_range: range }, session.accessToken) }
+      : await rpc("staff_dashboard_overview", {}, session.accessToken);
+    return ok(res, { overview });
   }),
 
   "admin/item": endpoint("GET", async (req, res) => {
@@ -490,6 +522,52 @@ const routes = {
       throw error;
     }
     return ok(res, { result });
+  }),
+
+  "admin/roles": endpoint(["GET", "POST"], async (req, res, id) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") return ok(res, { control: await rpc("staff_role_control", {}, session.accessToken) });
+    await rateLimit(req, "staff-roles", 20, 300);
+    const body = customRoleMutation(await readBody(req, 16 * 1024));
+    try {
+      return ok(res, { result: await rpc("staff_mutate_role", {
+        p_key: body.key, p_name: body.name, p_description: body.description,
+        p_permissions: body.permissions, p_expected_version: body.expectedVersion,
+        p_reason: body.reason, p_request_id: id
+      }, session.accessToken) });
+    } catch (error) {
+      if (error.code === "40001" || error.code === "23505") error.status = 409;
+      throw error;
+    }
+  }),
+
+  "admin/announcements": endpoint(["GET", "POST"], async (req, res, id) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") return ok(res, { announcements: await rpc("staff_announcement_control", {}, session.accessToken) });
+    await rateLimit(req, "staff-announcements", 20, 300);
+    const body = await readBody(req, 12 * 1024);
+    const action = String(body.action || "").trim().toLowerCase();
+    const level = String(body.level || "info").trim().toLowerCase();
+    const expectedVersion = body.id ? Number(body.expectedVersion) : null;
+    if (!["save", "publish", "archive"].includes(action) || !["info", "success", "warning"].includes(level)) {
+      throw Object.assign(new Error("Choose a valid announcement action and style."), { status: 400 });
+    }
+    if (body.id && (!Number.isSafeInteger(expectedVersion) || expectedVersion < 1)) {
+      throw Object.assign(new Error("Reload announcements before saving."), { status: 409 });
+    }
+    try {
+      return ok(res, { result: await rpc("staff_mutate_announcement", {
+        p_id: body.id ? uuid(body.id) : null, p_action: action,
+        p_title: sanitizePlainText(body.title, 120), p_body: action === "archive" ? "" : plainBlock(body.body, 1000, "Announcement message"),
+        p_level: level, p_starts_at: optionalTimestamp(body.startsAt), p_ends_at: optionalTimestamp(body.endsAt),
+        p_expected_version: expectedVersion, p_reason: reason(body.reason, 5), p_request_id: id
+      }, session.accessToken) });
+    } catch (error) {
+      if (error.code === "40001") error.status = 409;
+      throw error;
+    }
   }),
 
   "admin/permissions": endpoint(["GET", "POST"], async (req, res, id) => {
@@ -642,7 +720,7 @@ const routes = {
       return ok(res, { posts: Array.isArray(posts) ? posts : [] });
     }
     await rateLimit(req, "staff-blogs", 20, 300);
-    const body = await readBody(req, 32 * 1024);
+    const body = await readBody(req, 96 * 1024);
     const action = String(body.action || "").trim().toLowerCase();
     if (!["save", "publish", "archive"].includes(action)) throw Object.assign(new Error("Choose a valid blog action."), { status: 400 });
     const slug = String(body.slug || "").trim().toLowerCase();
@@ -768,6 +846,11 @@ const routes = {
     }
     const adverts = await rpc("public_advertisements", { p_placement: placement });
     return publicJson(res, { adverts: Array.isArray(adverts) ? adverts : [] }, 60);
+  }),
+
+  "public/announcements": endpoint("GET", async (_req, res) => {
+    try { return ok(res, { announcements: await rpc("public_active_announcements", {}) }); }
+    catch (error) { if (!developmentCatalogAllowed()) throw error; return ok(res, { announcements: [] }); }
   }),
 
   "public/blogs": endpoint("GET", async (req, res) => {

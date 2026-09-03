@@ -300,6 +300,16 @@
 
   function wireForms(){ $("#permission-form-v3")?.addEventListener("submit",savePermission); $("#mfa-activate-form-v3")?.addEventListener("submit",async(event)=>{event.preventDefault();try{await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"activate_mfa",reason:new FormData(event.currentTarget).get("reason")})});location.reload();}catch(error){status(error.message,true);}}); }
   function mobile(){const button=$("#staff-menu-v3");button?.addEventListener("click",()=>document.body.classList.toggle("staff-menu-open"));}
-  async function init(){mobile();const top=$(".staff-top-v3");if(top){top.append(themeButton());applyTheme(document.documentElement.dataset.theme||preferredTheme());}if(!await ensureStaff())return;try{const page=document.body.dataset.staffPage;if(page==="overview")overview(await api("/api/admin/overview"));if(page==="moderation")await moderation();if(page==="accounts")await accounts();if(page==="staff")await staffAccess();if(page==="profiles")await profileQueue();if(page==="content")await content();if(page==="security")await securityPage();wireForms();}catch(error){if(error.status===401||error.status===403){showLogin();}else status(error.message,true);}}
+  async function init(){mobile();const top=$(".staff-top-v3");if(top){top.append(themeButton());applyTheme(document.documentElement.dataset.theme||preferredTheme());}if(!await ensureStaff())return;try{const page=document.body.dataset.staffPage;if(page==="overview") {
+      let toolsMounted = false;
+      await window.BrowseRPStaffOverview.init({ api, onAuthFailure: showLogin, onLoad: async (website) => {
+        if (toolsMounted) return;
+        toolsMounted = true;
+        await Promise.allSettled([
+          window.BrowseRPStaffRoles.init({ api, permissions: website.permissions }),
+          window.BrowseRPStaffPublishing.init({ api, permissions: website.permissions })
+        ]);
+      }});
+    }if(page==="moderation")await moderation();if(page==="accounts")await accounts();if(page==="staff")await staffAccess();if(page==="profiles")await profileQueue();if(page==="content")await content();if(page==="security")await securityPage();wireForms();}catch(error){if(error.status===401||error.status===403){showLogin();}else status(error.message,true);}}
   init();
 })();

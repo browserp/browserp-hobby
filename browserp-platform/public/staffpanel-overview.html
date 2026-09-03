@@ -1,1 +1,81 @@
-<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive,nosnippet"><title>Overview — BrowseRP Staff</title><link rel="icon" href="/browserp-mark-v3.png"><link rel="stylesheet" href="/browserp-v3.css?v=2.4.1"><link rel="stylesheet" href="/staffpanel-v3.css?v=2.2.0"><script src="/staffpanel-v3.js?v=2.4.2" defer></script></head><body class="staff-v3" data-staff-page="overview"><div class="staff-mobile-bar-v3"><span class="logo-lockup-v3"><img class="logo-full-v5" src="/assets/browserp-logo-v5.png" alt="BrowseRP"></span><button class="button-v3 button-secondary-v3" id="staff-menu-v3">Menu</button></div><div class="staff-shell-v3" id="staff-app-v3"><aside class="staff-sidebar-v3"><a class="logo-v3" href="/"><span class="logo-lockup-v3"><img class="logo-full-v5" src="/assets/browserp-logo-v5.png" alt="BrowseRP"></span></a><nav class="staff-nav-v3"><div class="staff-nav-group-v3">Operations</div><a href="/staffpanel/overview" aria-current="page">Overview</a><a href="/staffpanel/moderation">Moderation & reports</a><a href="/staffpanel/profiles">Profile screening</a><div class="staff-nav-group-v3">People & security</div><a href="/staffpanel/accounts">Account activity</a><a href="/staffpanel/staff">Staff & permissions</a><a href="/staffpanel/security">Bans & appeals</a><div class="staff-nav-group-v3">Publishing</div><a href="/staffpanel/content">Adverts & blog</a><a href="/">Public site</a></nav></aside><main class="staff-main-v3"><header class="staff-top-v3"><div><span class="eyebrow-v3">BrowseRP operations</span><h1>Overview</h1><p>Review what needs attention without exposing private evidence.</p></div><a class="button-v3 button-secondary-v3" href="/dashboard">My account</a></header><div class="staff-grid-v3" id="staff-metrics-v3"></div><section class="security-banner-v3"><strong>Staff security</strong><p>Discord identifies the assigned staff account. Authenticator setup and AAL2 enforcement are managed from Security.</p></section><p id="staff-status-v3" role="status"></p></main></div></body></html>
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+  <title>Website overview — BrowseRP Staff</title>
+  <link rel="icon" href="/browserp-mark-v3.png">
+  <link rel="stylesheet" href="/browserp-v3.css?v=2.4.1">
+  <link rel="stylesheet" href="/staffpanel-v3.css?v=2.2.0">
+  <link rel="stylesheet" href="/staff-overview.css?v=1">
+  <link rel="stylesheet" href="/staff-roles.css?v=1">
+  <link rel="stylesheet" href="/staff-publishing.css?v=1">
+  <script src="/publishing-content.js?v=1" defer></script>
+  <script src="/staff-overview.js?v=1" defer></script>
+  <script src="/staff-roles.js?v=1" defer></script>
+  <script src="/staff-publishing.js?v=1" defer></script>
+  <script src="/staffpanel-v3.js?v=2.5.0" defer></script>
+</head>
+<body class="staff-v3" data-staff-page="overview">
+  <div class="staff-mobile-bar-v3">
+    <span class="logo-lockup-v3"><img class="logo-full-v5" src="/assets/browserp-logo-v5.png" alt="BrowseRP"></span>
+    <button class="button-v3 button-secondary-v3" id="staff-menu-v3" aria-label="Open staff navigation">Menu</button>
+  </div>
+  <div class="staff-shell-v3" id="staff-app-v3">
+    <aside class="staff-sidebar-v3">
+      <a class="logo-v3" href="/"><span class="logo-lockup-v3"><img class="logo-full-v5" src="/assets/browserp-logo-v5.png" alt="BrowseRP"></span></a>
+      <nav class="staff-nav-v3" aria-label="Staff navigation">
+        <div class="staff-nav-group-v3">Operations</div>
+        <a href="/staffpanel/overview" aria-current="page">Overview</a>
+        <a href="/staffpanel/moderation">Moderation &amp; reports</a>
+        <a href="/staffpanel/profiles">Profile screening</a>
+        <div class="staff-nav-group-v3">People &amp; security</div>
+        <a href="/staffpanel/accounts">Account activity</a>
+        <a href="/staffpanel/staff">Staff &amp; permissions</a>
+        <a href="/staffpanel/security">Bans &amp; appeals</a>
+        <div class="staff-nav-group-v3">Publishing</div>
+        <a href="/staffpanel/content">Adverts &amp; blog</a>
+        <a href="/">Public site</a>
+      </nav>
+    </aside>
+    <main class="staff-main-v3 overview-main" id="website-overview">
+      <header class="staff-top-v3">
+        <div><span class="eyebrow-v3">BrowseRP staff workspace</span><h1>Website overview</h1><p>Your community, publishing and day-to-day operations in one place.</p></div>
+        <a class="button-v3 button-secondary-v3" href="/">View website <span aria-hidden="true">↗</span></a>
+      </header>
+      <nav class="overview-actions" aria-label="Website management">
+        <a class="overview-action" href="/staffpanel/moderation"><span class="overview-action-icon" aria-hidden="true">✓</span><strong>Moderation &amp; reports</strong><span>Review listings and reports</span><span class="overview-action-count" data-overview-queue="pendingSubmissions"></span></a>
+        <a class="overview-action" href="/staffpanel/profiles"><span class="overview-action-icon" aria-hidden="true">◎</span><strong>Profile screening</strong><span>Review community profiles</span></a>
+        <a class="overview-action" href="/staffpanel/accounts"><span class="overview-action-icon" aria-hidden="true">↗</span><strong>Account activity</strong><span>Check account and sign-in activity</span></a>
+        <a class="overview-action" href="#overview-roles"><span class="overview-action-icon" aria-hidden="true">♧</span><strong>Staff &amp; roles</strong><span>Create roles and assign your team</span></a>
+        <a class="overview-action" href="/staffpanel/security"><span class="overview-action-icon" aria-hidden="true">◇</span><strong>Bans &amp; appeals</strong><span>Manage security and appeals</span></a>
+        <a class="overview-action" href="/staffpanel/content"><span class="overview-action-icon" aria-hidden="true">▧</span><strong>Adverts</strong><span>Manage website placements</span></a>
+        <a class="overview-action" href="#overview-publishing"><span class="overview-action-icon" aria-hidden="true">✎</span><strong>Blog posts</strong><span>Write and publish community news</span></a>
+        <a class="overview-action" href="#overview-announcements"><span class="overview-action-icon" aria-hidden="true">◉</span><strong>Announcements</strong><span>Share an update across the website</span></a>
+      </nav>
+      <div class="overview-livebar"><p class="overview-live-state" id="overview-live-status" role="status">Loading website data…</p><button class="button-v3 button-quiet-v3" id="overview-refresh" type="button">Refresh now</button></div>
+      <section class="overview-metrics" id="staff-metrics-v3" aria-label="Website totals" aria-busy="true">
+        <article class="overview-metric"><span>Registered users</span><strong data-overview-metric="totalUsers">—</strong><small>Current accounts</small></article>
+        <article class="overview-metric"><span>Published servers</span><strong data-overview-metric="publishedServers">—</strong><small>Live in the directory</small></article>
+        <article class="overview-metric"><span>Published blog posts</span><strong data-overview-metric="publishedBlogs">—</strong><small>Live on the blog</small></article>
+        <article class="overview-metric"><span>Active staff</span><strong data-overview-metric="activeStaff">—</strong><small>Your staff team</small></article>
+      </section>
+      <section class="overview-users" aria-labelledby="overview-users-title">
+        <div class="overview-section-heading"><div><span class="eyebrow-v3">Community growth</span><h2 id="overview-users-title">Registered users</h2><p>Current accounts by signup date · UTC</p></div>
+          <details class="overview-range" id="overview-range"><summary>Time frame <strong id="overview-range-label">30 days</strong><span aria-hidden="true">⌄</span></summary><div class="overview-range-options" role="group" aria-label="User chart time frame"><button type="button" data-overview-range="30d" aria-pressed="true">30 days</button><button type="button" data-overview-range="90d" aria-pressed="false">90 days</button><button type="button" data-overview-range="180d" aria-pressed="false">180 days</button><button type="button" data-overview-range="1y" aria-pressed="false">1 year</button><button type="button" data-overview-range="max" aria-pressed="false">Max</button></div></details>
+        </div>
+        <div class="overview-chart-summary"><div><strong id="overview-users-total">—</strong><span>registered users</span></div><p id="overview-users-new">Loading signup history…</p></div>
+        <figure class="overview-chart-figure" aria-busy="true" id="overview-chart-figure">
+          <div id="overview-chart" class="overview-chart"><p class="overview-chart-empty">Loading registered users…</p></div>
+          <figcaption id="overview-chart-caption">Hover or tap the chart to see a date and count. With the chart focused, use the left and right arrow keys.</figcaption>
+        </figure>
+        <details class="overview-data-table"><summary>View exact user counts</summary><div class="overview-data-scroll"><table><caption>Current registered accounts by signup date, in UTC</caption><thead><tr><th scope="col">Date</th><th scope="col">New users</th><th scope="col">Total users</th></tr></thead><tbody id="overview-user-data"></tbody></table></div></details>
+      </section>
+      <section id="overview-roles" class="overview-module" aria-label="Staff roles"><div class="overview-section-heading"><div><span class="eyebrow-v3">Your team</span><h2>Staff &amp; roles</h2><p>Loading role management…</p></div><a class="button-v3 button-secondary-v3" href="/staffpanel/staff">Staff &amp; permissions</a></div></section>
+      <section id="overview-publishing" class="overview-module" aria-label="Blog publishing"><div class="overview-section-heading"><div><span class="eyebrow-v3">Community updates</span><h2>Blog posts</h2><p>Loading publishing tools…</p></div><a class="button-v3 button-secondary-v3" href="/blog">View blog</a></div></section>
+      <p id="staff-status-v3" role="status"></p>
+    </main>
+  </div>
+</body>
+</html>

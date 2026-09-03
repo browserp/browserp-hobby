@@ -138,7 +138,7 @@
     const header = button.closest(".header-v3");
     const nav = button.closest(".nav-v3");
     const navItems = [
-      ["Discover", "/servers"], ["Games", "/games"], ["Guides", "/blog"], ["About", "/about"]
+      ["Discover", "/servers"], ["Games", "/games"], ["Blog", "/blog"], ["About", "/about"]
     ];
     links.replaceChildren(...navItems.map(([label, href]) => {
       const link = node("a", `nav-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-v3`, label);
@@ -545,8 +545,15 @@
     reveal.scan();
     await session();
     adverts();
-    blogIndex();
-    blogPost();
+    if (!document.body.hasAttribute("data-blog-page")) {
+      blogIndex();
+      blogPost();
+    }
+    const announcementStyles = document.createElement("link");
+    announcementStyles.rel = "stylesheet";
+    announcementStyles.href = "/site-announcements.css?v=1";
+    document.head.append(announcementStyles);
+    import("/site-announcements.js?v=1").catch(() => {});
     await serverDetail();
     interactionForms();
     appeal();

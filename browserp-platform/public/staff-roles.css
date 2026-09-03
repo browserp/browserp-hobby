@@ -1,0 +1,18 @@
+#overview-roles { padding: 24px; }
+#overview-roles > h2 { margin-top: 0; }
+.overview-role-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; margin: 22px 0; }
+.overview-role-panel { min-width: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-2); padding: 18px; }
+.overview-role-panel summary { cursor: pointer; font-weight: 750; min-height: 28px; }
+.overview-role-panel .staff-form-v3 { display: grid; gap: 16px; margin-top: 18px; }
+.overview-role-permissions { min-width: 0; display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.overview-role-permission { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+.overview-role-permission input { flex: none; width: 18px; height: 18px; margin-top: 3px; accent-color: var(--pink); }
+.overview-role-list { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+.overview-role-card { padding: 18px; border: 1px solid var(--line); border-radius: 12px; min-width: 0; overflow-wrap: anywhere; }
+.overview-role-card h3 { margin: 0 0 6px; font-size: 17px; }
+.overview-role-card p { font-size: 14px; color: var(--copy); }
+.overview-role-card .button-v3 { margin-top: 14px; }
+.overview-role-card .staff-state-v3 { display: block; }
+#overview-roles .is-error { color: #ff8192; }
+@media (max-width: 1100px) { .overview-role-list { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 760px) { .overview-role-grid,.overview-role-list { grid-template-columns: minmax(0,1fr); } }
