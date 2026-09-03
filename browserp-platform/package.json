@@ -13,5 +13,9 @@
   },
   "engines": {
     "node": "24.x"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "jsdom": "30.0.1"
   }
 }
