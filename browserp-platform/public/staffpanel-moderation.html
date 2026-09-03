@@ -1,14 +1,20 @@
 <!doctype html>
 <html lang="en-GB">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive,nosnippet"><title>Moderation & reports — BrowseRP Staff</title><link rel="icon" href="/browserp-mark-v3.png"><link rel="stylesheet" href="/browserp-v3.css?v=2.4.1"><link rel="stylesheet" href="/staffpanel-v3.css?v=2.2.0"><script src="/staffpanel-v3.js?v=2.4.2" defer></script></head>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+  <title>Moderation — BrowseRP Staff</title>
+  <link rel="icon" href="/browserp-mark-v3.png"><link rel="stylesheet" href="/browserp-v3.css?v=2.4.1"><link rel="stylesheet" href="/staffpanel-v3.css?v=2.2.0"><link rel="stylesheet" href="/staff-roles.css?v=1"><link rel="stylesheet" href="/staff-moderation.css?v=1">
+  <script src="/staff-roles.js?v=1" defer></script><script src="/staff-moderation-filter.js?v=1" defer></script><script src="/staff-moderation.js?v=1" defer></script><script src="/staffpanel-v3.js?v=2.6.0" defer></script>
+</head>
 <body class="staff-v3" data-staff-page="moderation">
   <div class="staff-mobile-bar-v3"><span class="logo-lockup-v3"><img class="logo-full-v5" src="/assets/browserp-logo-v5.png" alt="BrowseRP"></span><button class="button-v3 button-secondary-v3" id="staff-menu-v3">Menu</button></div>
   <div class="staff-shell-v3" id="staff-app-v3">
-    <aside class="staff-sidebar-v3"><a class="logo-v3" href="/"><span class="logo-lockup-v3"><img class="logo-full-v5" src="/assets/browserp-logo-v5.png" alt="BrowseRP"></span></a><nav class="staff-nav-v3"><a href="/staffpanel/overview">Overview</a><a href="/staffpanel/moderation" aria-current="page">Moderation & reports</a><a href="/staffpanel/profiles">Profile screening</a><a href="/staffpanel/accounts">Account activity</a><a href="/staffpanel/staff">Staff & permissions</a><a href="/staffpanel/security">Bans & appeals</a><a href="/staffpanel/content">Adverts & blog</a></nav></aside>
-    <main class="staff-main-v3">
-      <header class="staff-top-v3"><div><span class="eyebrow-v3">Evidence-based decisions</span><h1>Moderation & reports</h1><p>Listing submissions, member reports and moderation cases visible to your assigned permissions.</p></div></header>
-      <div class="staff-grid-v3" id="staff-metrics-v3"></div>
-      <section class="staff-section-v3"><div class="staff-section-head-v3"><div><h2>Review queue</h2><p>Open an item to view evidence and record a reasoned decision.</p></div></div><div class="staff-table-wrap-v3"><table class="staff-table-v3"><thead><tr><th>Queue</th><th>Item</th><th>Status</th><th>Created</th><th>Review</th></tr></thead><tbody id="moderation-rows"></tbody></table></div></section>
+    <aside class="staff-sidebar-v3"><a class="logo-v3" href="/"><span class="logo-lockup-v3"><img class="logo-full-v5" src="/assets/browserp-logo-v5.png" alt="BrowseRP"></span></a><nav class="staff-nav-v3" aria-label="Staff navigation"><a href="/staffpanel/overview">Overview</a><a href="/staffpanel/moderation" aria-current="page">Moderation</a><a href="/">View website ↗</a></nav></aside>
+    <main class="staff-main-v3 moderation-main" id="moderation-workspace">
+      <header class="staff-top-v3"><div><span class="eyebrow-v3">Community operations</span><h1>Moderation</h1><p>Manage members, servers, reports and website security in one workspace.</p></div></header>
+      <nav class="moderation-tabs" id="moderation-tabs" aria-label="Moderation sections"></nav>
+      <div class="moderation-livebar"><p id="moderation-live-status" role="status">Loading your workspace…</p><button id="moderation-refresh" class="button-v3 button-quiet-v3" type="button">Refresh</button></div>
+      <div id="moderation-content" aria-busy="true"></div>
       <p id="staff-status-v3" role="status"></p>
     </main>
   </div>

@@ -1,0 +1,54 @@
+.staff-adverts { padding: 24px; }
+.adverts-heading, .adverts-item { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.adverts-heading { margin-bottom: 20px; }
+.adverts-heading .eyebrow-v3 { display: block; margin-bottom: 8px; font-size: 10px; }
+.adverts-heading > button { flex-shrink: 0; }
+.adverts-heading h2 { margin: 0; }
+.adverts-copy { color: var(--copy); font-size: 13px; line-height: 1.65; margin: 8px 0 0; }
+.adverts-help { display: block; color: var(--muted); font-size: 12px; line-height: 1.65; font-weight: 400; margin-top: 5px; }
+.adverts-status { margin: 15px 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.adverts-status[data-error="true"] { color: #ffadbd; }
+.adverts-list { display: grid; gap: 10px; max-height: 480px; overflow: auto; }
+.adverts-item { padding: 15px; border: 1px solid var(--line); border-radius: 11px; background: var(--bg-soft); gap: 15px; }
+.adverts-thumbnail { width: 86px; height: 70px; flex: 0 0 86px; object-fit: cover; border-radius: 7px; border: 1px solid var(--line); }
+.adverts-item-copy { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+.adverts-item-copy > strong, .adverts-item-copy > span { display: block; }
+.adverts-item-copy > span { color: var(--copy); font-size: 13px; margin-top: 3px; }
+.adverts-item-actions, .adverts-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+.adverts-item-actions { flex-shrink: 0; }
+.adverts-state { border: 1px solid var(--line); border-radius: 99px; padding: 4px 9px; color: var(--copy); font-size: 12px; text-transform: capitalize; }
+.adverts-state[data-state="active"] { color: #a3e8c8; background: #12372e; border-color: #28634e; }
+.adverts-state[data-state="draft"] { color: #d4c0ff; background: #2c2344; border-color: #584779; }
+.adverts-form { margin-top: 26px; padding-top: 24px; border-top: 1px solid var(--line); }
+.adverts-form h3 { margin: 0 0 20px; font-size: 22px; }
+.adverts-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
+.adverts-wide { grid-column: 1 / -1; }
+.adverts-fields textarea { resize: vertical; min-height: 85px; }
+.adverts-notice { margin: 0 0 22px; padding: 13px 15px; color: #edc8ee; background: #2a1b32; border-left: 3px solid #bd8dce; font-size: 13px; }
+.adverts-preview { margin: 22px 0; border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
+.adverts-preview summary { padding: 14px 16px; color: var(--text); background: var(--panel-2); font-size: 14px; font-weight: 650; cursor: pointer; }
+.adverts-preview-card { max-width: 720px; margin: 22px auto; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--bg-soft); }
+.adverts-preview-card > img { width: 100%; max-height: 240px; object-fit: cover; }
+.adverts-preview-card[data-placement="side"] { max-width: 340px; }
+.adverts-preview-card[data-placement="side"] > img { max-height: 320px; }
+.adverts-preview-copy { padding: 24px; overflow-wrap: anywhere; }
+.adverts-label { font-size: 9px; font-weight: 700; letter-spacing: .16em; color: var(--muted); }
+.adverts-preview-copy h4 { margin: 12px 0; font-size: 25px; line-height: 1.25; letter-spacing: -.025em; }
+.adverts-preview-copy p { font-size: 14px; color: var(--copy); }
+.adverts-preview-cta { display: inline-flex; padding: 9px 14px; border-radius: 7px; color: #fff; font-size: 13px; font-weight: 650; background: linear-gradient(105deg,#ad286f,#7642be); }
+.adverts-preview > .adverts-help { margin: 0 20px 18px; }
+.adverts-preview > .adverts-help:empty { display: none; }
+.staff-adverts :disabled { cursor: wait; opacity: .6; }
+.adverts-dialog { max-width: min(520px,calc(100vw - 28px)); }
+.adverts-dialog p { color: var(--copy); }
+@media (max-width: 700px) {
+  .staff-adverts { padding: 18px; }
+  .adverts-heading { flex-direction: column; align-items: stretch; gap: 15px; }
+  .adverts-fields { grid-template-columns: 1fr; }
+  .adverts-item { flex-wrap: wrap; gap: 12px; }
+  .adverts-thumbnail { width: 64px; height: 60px; flex-basis: 64px; }
+  .adverts-item-actions { width: 100%; justify-content: flex-end; }
+  .adverts-actions > button { flex: 1 1 140px; }
+  .adverts-preview-card { margin: 15px; }
+  .adverts-preview-copy { padding: 19px; }
+}
