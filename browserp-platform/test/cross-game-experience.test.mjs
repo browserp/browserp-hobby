@@ -56,7 +56,7 @@ test("authenticator QR markup is normalised and setup secrets are not displayed 
 
 test("signed-in navigation uses a permission-backed avatar menu and dark-only theme", () => {
   const shell = read("public/browserp-v3.js");
-  const portalShell = read("public/browserp-shell.js");
+  const navigation = read("public/navigation.js");
   const css = read("public/browserp-v3.css");
   assert.match(shell, /account-trigger-v3/);
   assert.match(shell, /\["Profile", "\/profile"\]/);
@@ -64,8 +64,8 @@ test("signed-in navigation uses a permission-backed avatar menu and dark-only th
   assert.doesNotMatch(shell, /browserp-theme/);
   assert.doesNotMatch(css, /:root\[data-theme="light"\]/);
   assert.match(css, /account-popover-v3/);
-  assert.match(portalShell, /\["Blog", "\/blog"\]/);
-  assert.match(portalShell, /\["Games", "\/games"\]/);
+  assert.match(navigation, /\["Blog", "\/blog",/);
+  assert.match(navigation, /\["Games", "\/games",/);
 });
 
 test("public search uses shared contextual choices and clear wording", () => {
