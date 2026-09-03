@@ -455,7 +455,9 @@
       $("#server-name-v3").textContent = server.name;
       $("#server-description-v3").textContent = server.description;
       $("#server-platform-v3").textContent = `${platform} roleplay listing`;
-      $("#server-meta-v3").textContent = [platform, server.region, server.language, server.framework, engagement.accessType].filter(Boolean).join(" · ");
+      window.BrowseRPPlatforms.theme(root, window.BrowseRPPlatforms.idFor(server));
+      $("#server-meta-v3").replaceChildren(window.BrowseRPPlatforms.metadata(server, engagement));
+      $("#server-info-v5").replaceChildren(window.BrowseRPPlatforms.facts(server, engagement));
       $("#server-votes-v3").textContent = `${Number(engagement.voteCount || 0).toLocaleString()} votes`;
       $("#server-status-v3").textContent = server.online ? `${server.players || 0} / ${server.capacity || "?"} online` : "Status unavailable";
       $("#server-initials-v3").textContent = String(server.name || "RP").split(/\s+/).slice(0,2).map((part) => part[0]).join("").toUpperCase();

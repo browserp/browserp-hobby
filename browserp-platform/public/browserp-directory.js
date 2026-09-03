@@ -8,12 +8,15 @@
   };
   const select = (selector, root = document) => root.querySelector(selector);
   const SEARCH_SUGGESTIONS = Object.freeze([
-    ["Game", "FiveM roleplay"], ["Game", "RedM roleplay"], ["Game", "Roblox roleplay"], ["Game", "Minecraft roleplay"],
-    ["Game", "Forza cruising"], ["Game", "Garry's Mod roleplay"], ["Game", "DayZ roleplay"], ["Game", "Euro Truck Simulator roleplay"],
+    ["Game", "FiveM roleplay", "fivem"], ["Game", "RedM roleplay", "redm"], ["Game", "Roblox roleplay", "roblox"], ["Game", "Minecraft roleplay", "minecraft"],
+    ["Game", "Forza cruising", "forza"], ["Game", "Garry's Mod roleplay", "gmod"], ["Game", "DayZ roleplay", "dayz"], ["Game", "Euro Truck Simulator roleplay", "ets2"],
     ["Framework", "QBCore"], ["Framework", "ESX"], ["Framework", "vMenu"], ["Framework", "Fantasy SMP"],
     ["Tag", "serious roleplay"], ["Tag", "economy"], ["Tag", "whitelisted"], ["Tag", "custom clothing"],
     ["Tag", "custom vehicles"], ["Tag", "player businesses"], ["Tag", "beginner friendly"], ["Access", "public servers"],
-    ["Region", "United Kingdom"], ["Region", "United States"], ["Region", "Europe"], ["Region", "Australia"]
+    ["Region", "United Kingdom"], ["Region", "United States"], ["Region", "Europe"], ["Region", "Australia"],
+    ["Game", "ARMA roleplay", "arma"], ["Game", "VRChat roleplay", "vrchat"],
+    ["Game", "Project Zomboid roleplay", "project-zomboid"], ["Game", "Assetto Corsa roleplay", "assetto-corsa"],
+    ["Game", "BeamNG.drive roleplay", "beamng"]
   ]);
   const INITIAL_SEARCH_SUGGESTIONS = Object.freeze([0, 2, 8, 9, 12, 19, 20].map((index) => SEARCH_SUGGESTIONS[index]));
   const SHOWCASE_SERVER = Object.freeze({
@@ -109,8 +112,8 @@
   function serverCard(server) {
     const slug = String(server.slug || "").trim();
     const platformId = String(server.platform_id || "other").toLowerCase();
-    const platformName = server.platform_name || server.platform_short || "Roleplay";
-    const card = element("a", `server-card platform-${platformId.replace(/[^a-z0-9-]/g, "")}`);
+    const card = element("a", "server-card");
+    window.BrowseRPPlatforms.theme(card, window.BrowseRPPlatforms.idFor(server));
     card.href = server.showcase_url || `/server/${encodeURIComponent(slug)}`;
     card.setAttribute("aria-label", `View ${String(server.name || "server")}`);
     const media = element("div", "server-card-media");
@@ -136,9 +139,7 @@
     card.append(top);
 
     card.append(element("h3", "", server.name || "Roleplay server"));
-    const details = [platformName, server.region, server.framework, server.language].filter(Boolean);
-    if (server.verified) details.push("Owner verified");
-    card.append(element("div", "server-meta", details.join(" · ") || "Roleplay community"));
+    card.append(window.BrowseRPPlatforms.metadata(server));
     card.append(element("p", "server-description", server.description || "Open the listing to learn more about this community."));
 
     const tags = element("div", "server-tags");
@@ -214,20 +215,21 @@
     searchInput.setAttribute("aria-expanded", "true");
     requestAnimationFrame(() => list.classList.add("search-suggestions-open"));
     list.replaceChildren(
-      ...matches.map(([kind, item]) => {
+      ...matches.map(([kind, item, platform]) => {
         const button = element("button", "search-suggestion-v3");
         button.type = "button";
+        if (platform) window.BrowseRPPlatforms.theme(button, platform);
         button.setAttribute("role", "option");
         button.append(element("span", "search-suggestion-kind-v3", kind), element("strong", "", item));
         button.addEventListener("pointerdown", (event) => event.preventDefault());
         button.addEventListener("click", () => {
           searchInput.value = item;
           state.filters.query = item;
+          searchInput.focus();
           list.classList.remove("search-suggestions-open");
           list.hidden = true;
           list.inert = true;
           searchInput.setAttribute("aria-expanded", "false");
-          searchInput.focus();
           if (document.body.dataset.page !== "home") directoryResults();
         });
         return button;
@@ -241,6 +243,17 @@
     input.setAttribute("aria-autocomplete", "list");
     input.setAttribute("aria-expanded", "false");
     list.setAttribute("role", "listbox");
+    const closeOnLeave = () => {
+      setTimeout(() => {
+        if (document.activeElement === input || list.contains(document.activeElement)) return;
+        list.classList.remove("search-suggestions-open");
+        list.hidden = true;
+        list.inert = true;
+        input.setAttribute("aria-expanded", "false");
+      }, 0);
+    };
+    input.addEventListener("blur", closeOnLeave);
+    list.addEventListener("focusout", closeOnLeave);
     input.addEventListener("keydown", (event) => {
       const options = [...list.querySelectorAll('[role="option"]')];
       if (!options.length || list.hidden) return;
@@ -284,10 +297,6 @@
       bindSuggestionKeyboard(homeSearch, suggestions);
       homeSearch.addEventListener("focus", () => renderSearchSuggestions(homeSearch, homeSearch.value));
       homeSearch.addEventListener("input", () => renderSearchSuggestions(homeSearch, homeSearch.value));
-      homeSearch.addEventListener("blur", () => {
-        suggestions.classList.remove("search-suggestions-open");
-        setTimeout(() => { suggestions.hidden = true; suggestions.inert = true; }, 220);
-      });
     }
     featured();
   }
@@ -310,6 +319,7 @@
     const sort = select("#sort-filter");
     search.value = state.filters.query;
     platform.value = [...platform.options].some((option) => option.value === state.filters.platform) ? state.filters.platform : "all";
+    window.BrowseRPPlatforms.theme(platform, platform.value);
     region.value = [...region.options].some((option) => option.value === state.filters.region) ? state.filters.region : "all";
     sort.value = [...sort.options].some((option) => option.value === state.filters.sort) ? state.filters.sort : "recommended";
     select("#online-filter").checked = state.filters.online;
@@ -430,16 +440,6 @@
       renderSearchSuggestions(directorySearch, state.filters.query);
       searchTimer = window.setTimeout(directoryResults, 220);
     });
-    directorySearch?.addEventListener("blur", () => {
-      const suggestionRoot = select("#directory-search-suggestions");
-      if (suggestionRoot) {
-        setTimeout(() => {
-          suggestionRoot.classList.remove("search-suggestions-open");
-          suggestionRoot.hidden = true;
-          suggestionRoot.inert = true;
-        }, 220);
-      }
-    });
     select("#platform-filter").addEventListener("change", (event) => { state.filters.platform = event.target.value; directoryResults(); });
     select("#region-filter").addEventListener("change", (event) => { state.filters.region = event.target.value; directoryResults(); });
     select("#sort-filter").addEventListener("change", (event) => { state.filters.sort = event.target.value; directoryResults(); });
@@ -555,12 +555,11 @@
         const options = (FRAMEWORK_SUGGESTIONS[platformSelect?.value] || ["Custom roleplay framework", "No framework"])
           .filter((item) => !term || item.toLowerCase().includes(term)).slice(0, 6);
         if (!options.length) { suggestionRoot.classList.remove("search-suggestions-open"); suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.setAttribute("aria-expanded","false");return; }
-        suggestionRoot.replaceChildren(...options.map((item) => { const option=element("button","search-suggestion-v3");option.type="button";option.setAttribute("role","option");option.append(element("span","search-suggestion-kind-v3","Framework"),element("strong","",item));option.addEventListener("click",()=>{frameworkInput.value=item;suggestionRoot.classList.remove("search-suggestions-open");suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.focus();});return option; }));
+        suggestionRoot.replaceChildren(...options.map((item) => { const option=element("button","search-suggestion-v3");option.type="button";option.setAttribute("role","option");option.append(element("span","search-suggestion-kind-v3","Framework"),element("strong","",item));option.addEventListener("click",()=>{frameworkInput.value=item;frameworkInput.focus();suggestionRoot.classList.remove("search-suggestions-open");suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.setAttribute("aria-expanded","false");});return option; }));
         suggestionRoot.hidden=false;suggestionRoot.inert=false;frameworkInput.setAttribute("aria-expanded","true");requestAnimationFrame(()=>suggestionRoot.classList.add("search-suggestions-open"));
       };
       frameworkInput.addEventListener("focus", updateFrameworkSuggestions);
       frameworkInput.addEventListener("input", updateFrameworkSuggestions);
-      frameworkInput.addEventListener("blur",()=>setTimeout(()=>{suggestionRoot.classList.remove("search-suggestions-open");suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.setAttribute("aria-expanded","false");},220));
     }
     function updatePlatformFields() {
       const cfxPlatform = ["fivem", "redm"].includes(platformSelect?.value);
