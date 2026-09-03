@@ -77,7 +77,12 @@
     $("#game-upcoming-grid-v5").append(...UPCOMING_GAMES.map((item) => gameCard(item, true)));
     if (!game) {
       nav.hidden = true;
-      $("#game-page-mark-v4").append(icon("other", "game-page-symbol-v4"));
+      const allGamesLogo = node("img", "game-page-all-logo-v5");
+      allGamesLogo.src = "/assets/games/all-games-logo.png";
+      allGamesLogo.alt = "";
+      allGamesLogo.width = 140;
+      allGamesLogo.height = 140;
+      $("#game-page-mark-v4").append(allGamesLogo);
       $("#game-hub-grid-v4").append(...AVAILABLE_GAMES.map((item) => gameCard(item)));
       return;
     }
