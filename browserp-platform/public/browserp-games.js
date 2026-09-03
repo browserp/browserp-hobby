@@ -16,17 +16,32 @@
     { id: "assetto-corsa", name: "Assetto Corsa", line: "Track and street communities", description: "Discover automotive groups for organised drives, meets, race events and realistic car culture." },
     { id: "beamng", name: "BeamNG.drive", line: "Driving simulation roleplay", description: "Explore vehicle communities built around realistic driving, transport, emergency and open-world scenarios." }
   ]);
+  const AVAILABLE_GAME_IDS = new Set(["fivem", "redm", "roblox", "minecraft"]);
+  const AVAILABLE_GAMES = GAMES.filter((game) => AVAILABLE_GAME_IDS.has(game.id));
+  const UPCOMING_GAMES = GAMES.filter((game) => !AVAILABLE_GAME_IDS.has(game.id));
   const FIVEM_SHOWCASE = Object.freeze({ slug: "san-andreas-county-roleplay-showcase", showcase_url: "/server/san-andreas-county-roleplay-showcase", name: "San Andreas County Roleplay", platform_id: "fivem", platform_name: "FiveM", language: "English", region: "United States", framework: "vMenu", description: "A complete BrowseRP showcase for a public-safety focused county community.", logo_url: "/assets/san-andreas-county-rp-mark-v4.svg", showcase: true });
 
   const $ = (selector) => document.querySelector(selector);
   const node = (tag, className, text) => { const item = document.createElement(tag); if (className) item.className = className; if (text !== undefined) item.textContent = text; return item; };
   const icon = (id, className = "game-mark-v4") => { const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.classList.add(className); svg.setAttribute("aria-hidden", "true"); const use = document.createElementNS("http://www.w3.org/2000/svg", "use"); use.setAttribute("href", `/assets/game-marks-v4.svg#mark-${id}`); svg.append(use); return svg; };
 
-  function gameCard(game) {
-    const link = node("a", "game-hub-card-v4"); link.href = `/games/${game.id}`; window.BrowseRPPlatforms.theme(link, game.id);
-    const mark = node("span", "game-hub-mark-v4"); mark.append(icon(game.id));
+  function gameMark(id, className) {
+    if (!AVAILABLE_GAME_IDS.has(id)) return icon(id, className);
+    const image = node("img", `game-artwork-v5 ${className}`);
+    image.src = `/assets/games/${id}-roleplay.webp`;
+    image.alt = "";
+    image.width = 160;
+    image.height = 160;
+    return image;
+  }
+
+  function gameCard(game, comingSoon = false) {
+    const link = node(comingSoon ? "article" : "a", `game-hub-card-v4${comingSoon ? " game-coming-soon-card-v5" : ""}`);
+    if (!comingSoon) link.href = `/games/${game.id}`;
+    window.BrowseRPPlatforms.theme(link, game.id);
+    const mark = node("span", "game-hub-mark-v4"); mark.append(gameMark(game.id, "game-card-artwork-v5"));
     const copy = node("span", "game-hub-copy-v4"); copy.append(node("strong", "", game.name), node("small", "", game.line));
-    link.append(mark, copy, node("b", "", "Explore"));
+    link.append(mark, copy, node("b", comingSoon ? "coming-soon-label-v5" : "", comingSoon ? "Coming soon" : "Explore servers"));
     return link;
   }
 
@@ -57,20 +72,32 @@
     const requested = location.pathname.split("/").filter(Boolean)[1] || new URLSearchParams(location.search).get("game") || "";
     const game = GAMES.find((item) => item.id === requested);
     const nav = $("#game-page-nav-v4");
-    nav.append(...GAMES.map((item) => { const link = node("a", "game-nav-chip-v4", item.name); link.href = `/games/${item.id}`; link.dataset.game = item.id; window.BrowseRPPlatforms.theme(link, item.id); link.prepend(icon(item.id, "game-nav-mark-v4")); if (game?.id === item.id) { link.classList.add("is-selected"); link.setAttribute("aria-current", "page"); } return link; }));
+    nav.append(...AVAILABLE_GAMES.map((item) => { const link = node("a", "game-nav-chip-v4", item.name); link.href = `/games/${item.id}`; link.dataset.game = item.id; window.BrowseRPPlatforms.theme(link, item.id); link.prepend(gameMark(item.id, "game-nav-mark-v4")); if (game?.id === item.id) { link.classList.add("is-selected"); link.setAttribute("aria-current", "page"); } return link; }));
+    $("#game-upcoming-grid-v5").append(...UPCOMING_GAMES.map((item) => gameCard(item, true)));
     if (!game) {
+      nav.hidden = true;
       $("#game-page-mark-v4").append(icon("other", "game-page-symbol-v4"));
-      $("#game-hub-grid-v4").append(...GAMES.map(gameCard));
+      $("#game-hub-grid-v4").append(...AVAILABLE_GAMES.map((item) => gameCard(item)));
       return;
     }
     window.BrowseRPPlatforms.theme(document.querySelector(".game-page-hero-v4"), game.id);
     document.title = `${game.name} roleplay servers — BrowseRP`;
     document.querySelector('meta[name="description"]').content = `Discover reviewed ${game.name} roleplay servers, communities and groups on BrowseRP.`;
-    $("#game-page-mark-v4").append(icon(game.id, "game-page-symbol-v4"));
+    $("#game-page-mark-v4").append(gameMark(game.id, "game-page-symbol-v4"));
     $("#game-page-eyebrow-v4").textContent = `${game.name} roleplay`;
     $("#game-page-title-v4").textContent = `Find your ${game.name} roleplay community.`;
     $("#game-page-lead-v4").textContent = game.description;
     $("#game-hub-grid-v4").hidden = true;
+    if (!AVAILABLE_GAME_IDS.has(game.id)) {
+      document.title = `${game.name} — Coming soon | BrowseRP`;
+      document.querySelector('meta[name="description"]').content = `${game.name} discovery is coming soon to BrowseRP.`;
+      $("#game-page-eyebrow-v4").textContent = "Coming soon";
+      $("#game-page-title-v4").textContent = `${game.name} is coming soon.`;
+      $("#game-page-lead-v4").textContent = "We’re starting with FiveM, RedM, Roblox and Minecraft. More games will join the directory in future.";
+      const browse = node("a", "button-v3 button-primary-v3", "Explore available games"); browse.href = "/games";
+      $("#game-page-actions-v4").replaceChildren(browse);
+      return;
+    }
     const results = $("#game-results-v4"); results.hidden = false;
     $("#game-results-title-v4").textContent = `${game.name} servers`;
     $("#game-results-lead-v4").textContent = `Reviewed ${game.line.toLowerCase()} listings appear below.`;
