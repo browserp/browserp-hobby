@@ -1,7 +1,7 @@
 /* One public navigation surface, independent of the staff workspace. */
 .public-header-v6 { background: color-mix(in srgb, var(--bg) 94%, transparent); }
 .public-nav-v6 { min-height: 80px; display: flex; align-items: center; gap: 26px; }
-.navigation-brand-v6 { display: inline-flex; align-items: center; flex: none; }
+.navigation-brand-v6 { display: inline-flex; align-items: center; flex: none; transform-origin: left center; animation: browserp-brand-pulse-v4 5.4s ease-in-out infinite; }
 .navigation-brand-v6 img { width: 190px; height: 54px; object-fit: contain; }
 .public-nav-links-v6 { display: flex; align-items: center; gap: 3px; margin-right: auto; }
 .public-nav-links-v6 > a { position: relative; padding: 12px; color: var(--copy); font-size: 14px; font-weight: 650; transition: color .2s ease; }
