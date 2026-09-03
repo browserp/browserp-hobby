@@ -219,6 +219,10 @@
       "destination": "/staffpanel-moderation"
     },
     {
+      "source": "/staffpanel/scrapers",
+      "destination": "/staffpanel-scrapers"
+    },
+    {
       "source": "/staffpanel/profiles",
       "destination": "/staffpanel-profiles"
     },
