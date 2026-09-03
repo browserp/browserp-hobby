@@ -64,7 +64,7 @@ test("signed-in navigation uses a permission-backed avatar menu and dark-only th
   assert.doesNotMatch(shell, /browserp-theme/);
   assert.doesNotMatch(css, /:root\[data-theme="light"\]/);
   assert.match(css, /account-popover-v3/);
-  assert.match(portalShell, /\["Guides", "\/blog"\]/);
+  assert.match(portalShell, /\["Blog", "\/blog"\]/);
   assert.match(portalShell, /\["Games", "\/games"\]/);
 });
 
