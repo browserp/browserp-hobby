@@ -27,6 +27,8 @@ test("games hub offers exactly the four launch games in the requested order", ()
   assert.equal(nodes.get("#game-page-nav-v4").hidden, true);
   const upcoming = nodes.get("#game-upcoming-grid-v5").children;
   assert.equal(upcoming.length, 9);
+  const forza = upcoming.find((card) => card.dataset.platform === "forza");
+  assert.equal(forza.children[0].children[0].src, "/assets/games/forza-roleplay.webp");
   assert.ok(upcoming.every((card) => card.tagName === "article" && !card.href && card.children.at(-1).textContent === "Coming soon"));
   const html = readFileSync(new URL("../public/game.html", import.meta.url), "utf8");
   assert.match(html, /<details class="game-upcoming-v5" id="game-upcoming-v5">/);

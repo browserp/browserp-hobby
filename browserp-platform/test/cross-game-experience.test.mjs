@@ -14,7 +14,7 @@ test("the public directory is cross-game and the side advert is a visual carouse
   const directory = read("public/browserp-directory.js");
   const shell = read("public/browserp-v3.js");
   const css = read("public/browserp-v3.css");
-  for (const game of ["FiveM", "RedM", "Roblox", "Minecraft", "Forza"]) assert.match(home, new RegExp(game));
+  for (const game of ["FiveM", "RedM", "Roblox", "Minecraft"]) assert.match(home, new RegExp(game));
   assert.match(servers, /id="platform-filter"/);
   assert.match(listing, /name="platform"/);
   assert.doesNotMatch(directory, /platform:\s*"fivem"/);
@@ -82,11 +82,13 @@ test("search suggestions cover games, frameworks, tags, access and regions", () 
 test("homepage game cards use local original artwork instead of letter tiles", () => {
   const home = read("public/index.html");
   const css = read("public/browserp-v3.css");
-  for (const game of ["fivem", "redm", "roblox", "minecraft", "forza"]) {
+  for (const game of ["fivem", "redm", "roblox", "minecraft"]) {
     assert.match(home, new RegExp(`game-art-${game}-v3`));
     assert.match(css, new RegExp(`/assets/games/${game}-roleplay\\.webp`));
   }
   assert.doesNotMatch(home, /<b>(5M|RM|RB|MC|FZ)<\/b>/);
+  assert.doesNotMatch(home, /href="\/games\/forza"/);
+  assert.match(home, /src="\/assets\/games\/all-games-logo\.png"/);
 });
 
 test("profile picture previews remain compatible with the strict image CSP", () => {

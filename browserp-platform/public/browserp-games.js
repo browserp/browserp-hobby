@@ -17,6 +17,7 @@
     { id: "beamng", name: "BeamNG.drive", line: "Driving simulation roleplay", description: "Explore vehicle communities built around realistic driving, transport, emergency and open-world scenarios." }
   ]);
   const AVAILABLE_GAME_IDS = new Set(["fivem", "redm", "roblox", "minecraft"]);
+  const ARTWORK_GAME_IDS = new Set([...AVAILABLE_GAME_IDS, "forza"]);
   const AVAILABLE_GAMES = GAMES.filter((game) => AVAILABLE_GAME_IDS.has(game.id));
   const UPCOMING_GAMES = GAMES.filter((game) => !AVAILABLE_GAME_IDS.has(game.id));
   const FIVEM_SHOWCASE = Object.freeze({ slug: "san-andreas-county-roleplay-showcase", showcase_url: "/server/san-andreas-county-roleplay-showcase", name: "San Andreas County Roleplay", platform_id: "fivem", platform_name: "FiveM", language: "English", region: "United States", framework: "vMenu", description: "A complete BrowseRP showcase for a public-safety focused county community.", logo_url: "/assets/san-andreas-county-rp-mark-v4.svg", showcase: true });
@@ -26,7 +27,7 @@
   const icon = (id, className = "game-mark-v4") => { const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.classList.add(className); svg.setAttribute("aria-hidden", "true"); const use = document.createElementNS("http://www.w3.org/2000/svg", "use"); use.setAttribute("href", `/assets/game-marks-v4.svg#mark-${id}`); svg.append(use); return svg; };
 
   function gameMark(id, className) {
-    if (!AVAILABLE_GAME_IDS.has(id)) return icon(id, className);
+    if (!ARTWORK_GAME_IDS.has(id)) return icon(id, className);
     const image = node("img", `game-artwork-v5 ${className}`);
     image.src = `/assets/games/${id}-roleplay.webp`;
     image.alt = "";
