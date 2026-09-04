@@ -8,23 +8,6 @@
   };
   const select = (selector, root = document) => root.querySelector(selector);
   const DISCOVER_GAME_IDS = Object.freeze(["fivem", "redm", "roblox", "minecraft"]);
-  const SHOWCASE_SERVER = Object.freeze({
-    slug: "san-andreas-county-roleplay-showcase",
-    showcase_url: "/server/san-andreas-county-roleplay-showcase",
-    name: "San Andreas County Roleplay",
-    platform_id: "fivem",
-    platform_name: "FiveM",
-    region: "United States",
-    framework: "vMenu",
-    language: "English",
-    verified: true,
-    beginner_friendly: true,
-    online: false,
-    logo_url: "/assets/san-andreas-county-rp-mark-v4.svg",
-    description: "A complete BrowseRP showcase for a public-safety focused county community, with departments, civilian careers and structured roleplay.",
-    tags: ["Public safety", "Civilian life", "Custom vehicles"],
-    showcase: true
-  });
 
   async function api(path, options = {}) {
     const method = String(options.method || "GET").toUpperCase();
@@ -103,7 +86,7 @@
     const platformId = String(server.platform_id || "other").toLowerCase();
     const card = element("a", "server-card");
     window.BrowseRPPlatforms.theme(card, window.BrowseRPPlatforms.idFor(server));
-    card.href = server.showcase_url || `/server/${encodeURIComponent(slug)}`;
+    card.href = `/server/${encodeURIComponent(slug)}`;
     card.setAttribute("aria-label", `View ${String(server.name || "server")}`);
     const media = element("div", "server-card-media");
     const initial = element("span", "server-initials", initials(server.name));
@@ -123,7 +106,7 @@
 
     const top = element("div", "server-card-top");
     top.append(media);
-    const status = element("span", `status${server.online ? " online" : ""}${server.showcase ? " showcase" : ""}`, server.showcase ? "BrowseRP showcase" : server.online ? "Online now" : "Status unavailable");
+    const status = element("span", `status${server.online ? " online" : ""}`, server.online ? "Online now" : "Status unavailable");
     top.append(status);
     card.append(top);
 
@@ -138,7 +121,7 @@
     const bottom = element("div", "server-card-bottom");
     const playerText = server.online
       ? `${Number(server.players || 0).toLocaleString()}${server.capacity ? ` / ${Number(server.capacity).toLocaleString()}` : ""} players`
-      : server.showcase ? "Complete demo listing" : "Player count unavailable";
+      : "Player count unavailable";
     bottom.append(element("strong", "", playerText), element("span", "server-card-action", "View listing"));
     card.append(bottom);
     return card;
@@ -169,7 +152,7 @@
     if (!list || !empty) return;
     try {
       const payload = await api("/api/servers?sort=recommended&limit=4");
-      const servers = [SHOWCASE_SERVER, ...(Array.isArray(payload.servers) ? payload.servers : [])];
+      const servers = Array.isArray(payload.servers) ? payload.servers : [];
       renderServers(list, servers);
       list.hidden = servers.length === 0;
       empty.hidden = servers.length !== 0;
