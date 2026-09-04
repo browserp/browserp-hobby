@@ -13,9 +13,9 @@
       steps: ["Import a small selection of RP communities using their join codes.", "Confirm names, Discord invites, websites, artwork and game-specific tags. Flag conflicting details for review.", "Refresh known listings with a checked time. Keep missing or stale player counts unavailable, and confirm zero only when the source reports zero."]
     },
     redm: {
-      summary: "RedM is the next proposed pilot: use its official directory, verify that every listing is RedM, and review western roleplay details separately.",
+      summary: "Import individual records from the official RedM directory, then review their community evidence and western roleplay details. The source must explicitly identify RedM.",
       sources: [["RedM server list", "https://servers.redm.net/", "Discover RedM communities and their join codes."], ["RedM Server Bazaar", "https://forum.cfx.re/c/redm-server-development/redm-server-bazaar/69", "Find community-written introductions and joining requirements."]],
-      steps: ["Start with 3–5 reviewed RedM communities after the plan is agreed.", "Confirm the RedM game identifier and supported source access before importing. Check VORP, RSG and other framework claims against evidence.", "Use the existing review process for links, artwork and live counts, with RedM-specific tags and access requirements."]
+      steps: ["Paste a reviewed community’s Cfx join code to fetch its RedM information.", "Only rdr3 records pass the importer. Check VORP, RSG and other framework suggestions against each community’s evidence.", "Use the existing review process for links, artwork and live counts, with RedM-specific tags and access requirements."]
     },
     minecraft: {
       summary: "Use reviewed community addresses for a small Java and Bedrock pilot. A network-wide player total must stay separate from an individual roleplay world.",
@@ -56,7 +56,7 @@
       link.append(make("strong", `${title} ↗`), make("span", description)); sources.append(link);
     }
     const plan = make("details", undefined, "staff-scraper-plan");
-    plan.append(make("summary", game.id === "fivem" ? "Review and refresh plan" : "Proposed pilot — awaiting agreement"));
+    plan.append(make("summary", ["fivem", "redm", "minecraft"].includes(game.id) ? "Review and refresh plan" : "Proposed pilot — awaiting agreement"));
     const steps = make("ol"); for (const step of info.steps) steps.append(make("li", step)); plan.append(steps);
     section.append(sources, plan, make("p", "Researched 4 September 2026. These links are discovery references; future imports depend on supported access and source permissions.", "staff-scraper-note"));
     return section;
@@ -109,7 +109,7 @@
       }
       root.replaceChildren();
       let mount = null;
-      if (selected?.id === "fivem") {
+      if (["fivem", "redm", "minecraft"].includes(selected?.id)) {
         mount = make("section"); root.append(mount);
       } else if (selected) {
         const panel = make("section", undefined, "staff-scraper-preview");
@@ -128,7 +128,7 @@
         link.dataset.platform = game.id;
         if (selected?.id === game.id) link.setAttribute("aria-current", "page");
         const copy = make("span");
-        copy.append(make("strong", game.name), make("small", game.id === "fivem" ? "Import servers" : "Coming soon"));
+        copy.append(make("strong", game.name), make("small", ["fivem", "redm", "minecraft"].includes(game.id) ? "Import servers" : "Coming soon"));
         link.append(artwork(game, "staff-scrapers-thumb"), copy);
         link.addEventListener("click", () => { focusSection = true; if (location.hash === link.hash) focusHeading(); });
         grid.append(link);
@@ -137,7 +137,8 @@
       focusHeading();
       if (mount) {
         try {
-          const controller = await window.BrowseRPStaffFiveM.init({ api, root: mount, imageUrl: (url) => `/api/public/server-image?url=${encodeURIComponent(url)}` });
+          const importer = selected.id === "minecraft" ? window.BrowseRPStaffMinecraft : window.BrowseRPStaffFiveM;
+          const controller = await importer.init({ api, root: mount, platform: selected.id, imageUrl: (url) => `/api/public/server-image?url=${encodeURIComponent(url)}` });
           if (revision !== generation) controller?.destroy(); else scraper = controller;
         } catch (error) { if (revision === generation) mount.append(make("p", error.message || "The importer could not load. Please refresh.")); }
       }

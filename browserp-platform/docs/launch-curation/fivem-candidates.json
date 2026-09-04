@@ -1,0 +1,3580 @@
+{
+  "generatedAt": "2026-09-04T01:51:39.741Z",
+  "targetTotal": 40,
+  "alreadyLive": [
+    "CaliRP",
+    "ProdigyRP"
+  ],
+  "policy": "Research-only review suggestions. No automatic publication. One selected instance per community. Primary claims establish intended style, not a guarantee of actual player behaviour. All counts are historical Cfx observations, not website/Discord counts, and must never be copied into a live count field.",
+  "candidateCount": 55,
+  "publishCount": 30,
+  "candidates": [
+    {
+      "joinCode": "68oab8",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "EchoRP",
+      "description": "A character-focused city with an application process, a detailed gang handbook and rules centred on believable stories. Civilian careers, criminal groups and emergency services share an economy where relationships and consequences matter.",
+      "region": "United States",
+      "language": "English",
+      "framework": null,
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/echorp",
+      "websiteUrl": "https://echorp.net/",
+      "cfxJoinUrl": "https://cfx.re/join/68oab8",
+      "tags": [
+        "Serious RP",
+        "Economy",
+        "Gangs",
+        "Police",
+        "EMS",
+        "18+"
+      ],
+      "keywords": [
+        "echorp",
+        "serious rp",
+        "economy",
+        "gangs",
+        "police",
+        "ems",
+        "18+"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/68oab8/2119242944.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/68oab8",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://echorp.net/rules",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://apply.echorp.net/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Current rulebook was rewritten in August 2026; explicit scene and reporting standards.",
+        "Application and gang guidance provide concrete onboarding beyond promotional claims."
+      ],
+      "conflicts": [],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:19:37.506Z",
+        "status": "online",
+        "players": 165,
+        "max": 300,
+        "observedAt": "2026-09-04T01:17:02.983Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "EchoRP"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "v87yoq",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "HighLife Roleplay",
+      "description": "A long-running city built around civilian work, emergency services and criminal progression. Its public guide and player wiki explain how to get started and how everyday mechanics work, giving newcomers a clearer path into the community.",
+      "region": "United States",
+      "language": "English",
+      "framework": null,
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/highlife",
+      "websiteUrl": "https://highliferoleplay.net/",
+      "cfxJoinUrl": "https://cfx.re/join/v87yoq",
+      "tags": [
+        "Economy",
+        "Police",
+        "EMS",
+        "Jobs",
+        "Gangs"
+      ],
+      "keywords": [
+        "highlife roleplay",
+        "economy",
+        "police",
+        "ems",
+        "jobs",
+        "gangs"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/v87yoq/1511184802.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/v87yoq",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://highliferoleplay.net/guide",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://wiki.highliferoleplay.net/books/player/page/basic-mechanics",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Established documentation and a clear how-to-play route.",
+        "Only the main city is selected; training and development instances are omitted."
+      ],
+      "conflicts": [
+        "Current access requirement was not conclusively readable from the JavaScript guide. Leave access unconfirmed."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:19:40.067Z",
+        "status": "online",
+        "players": 275,
+        "max": 400,
+        "observedAt": "2026-09-04T01:16:45.827Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "HighLife"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "y5ox3y",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Ignite Roleplay",
+      "description": "An application-based, 18+ roleplay community set in 1980s Los Santos. Players are expected to stay within the period, speak English and build serious character stories, with detailed conduct and scene rules to guide them.",
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/igniterp",
+      "websiteUrl": "https://www.igniteroleplay.net/",
+      "cfxJoinUrl": "https://cfx.re/join/y5ox3y",
+      "tags": [
+        "Serious RP",
+        "Story-driven",
+        "18+",
+        "Retro"
+      ],
+      "keywords": [
+        "ignite roleplay",
+        "serious rp",
+        "story-driven",
+        "18+",
+        "retro"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/y5ox3y/-848564118.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": "Banner unavailable or exceeds the safe 2 MB image limit."
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/y5ox3y",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://www.igniteroleplay.net/rules",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://www.igniteroleplay.net/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Distinct period setting, explicit English requirement and public conduct standards.",
+        "Official applications establish the entry process."
+      ],
+      "conflicts": [
+        "Cfx public flag conflicts with official whitelist onboarding; use official access rules.",
+        "Official rules reference both 1985 and 1986. Description deliberately says 1980s."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:19:41.211Z",
+        "status": "online",
+        "players": 5,
+        "max": 64,
+        "observedAt": "2026-09-04T01:16:38.718Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Ignite Roleplay",
+        "checkedAt": "2026-09-04T01:32:52.935Z"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "3y3jjr",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Fat Duck Gaming",
+      "description": "An Australian roleplay community with extensive guides for civilian jobs, activities and public-service careers. Its rules require characters to stay in character and give conflicts believable reasons, supporting a mix of everyday city life and longer stories.",
+      "region": "Australia",
+      "language": "English",
+      "framework": null,
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/fatduckgaming",
+      "websiteUrl": "https://fatduckgaming.com/server-docs/",
+      "cfxJoinUrl": "https://cfx.re/join/3y3jjr",
+      "tags": [
+        "Economy",
+        "Police",
+        "EMS",
+        "Jobs",
+        "Serious RP"
+      ],
+      "keywords": [
+        "fat duck gaming",
+        "economy",
+        "police",
+        "ems",
+        "jobs",
+        "serious rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/3y3jjr/-2027583233.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/3y3jjr",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://fatduckgaming.com/server-docs/rules/fivem-rules/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://fatduckgaming.com/server-docs/rules/rules-overview/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Detailed rules and practical job documentation.",
+        "Adds an Australian community rather than another US-only city."
+      ],
+      "conflicts": [
+        "The www homepage returned an upstream error during checking; use the published documentation URL."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:19:42.599Z",
+        "status": "online",
+        "players": 79,
+        "max": 1000,
+        "observedAt": "2026-09-04T01:17:15.024Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Fat Duck Gaming Community"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "3jj3bz",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Distinct Roleplay",
+      "description": "A whitelisted city offering character-led stories across civilian businesses, emergency services and organised crime. The community describes a balanced economy, housing and crafting, with a development thread documenting changes across several seasons.",
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/distinctrp",
+      "websiteUrl": "https://distinct-roleplay.tebex.io/",
+      "cfxJoinUrl": "https://cfx.re/join/3jj3bz",
+      "tags": [
+        "Serious RP",
+        "Economy",
+        "Businesses",
+        "Housing",
+        "Gangs",
+        "Police",
+        "EMS"
+      ],
+      "keywords": [
+        "distinct roleplay",
+        "serious rp",
+        "economy",
+        "businesses",
+        "housing",
+        "gangs",
+        "police",
+        "ems"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/3jj3bz/-735791796.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/3jj3bz",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://forum.cfx.re/t/distinct-roleplay-season-4-patch-4-4-balanced-economy-whitelisted-discord-gg-distinctrp/4775802",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official development thread dates to 2021 and had activity in July 2026.",
+        "Specific civilian and public-service systems provide a broader identity than generic server adverts."
+      ],
+      "conflicts": [
+        "Forum title still says Season 4 while current Cfx and Discord say Season 5. Avoid a season number in the listing name."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:19:50.126Z",
+        "status": "online",
+        "players": 21,
+        "max": 64,
+        "observedAt": "2026-09-04T01:16:20.129Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "DistinctRP:S5"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "269jld",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "BlueBirdRP",
+      "description": "An Australian city inspired by Victoria and Melbourne. Players can begin with everyday civilian jobs, build experience towards emergency-service or business roles, or develop a criminal character within the community guidelines.",
+      "region": "Australia",
+      "language": "English",
+      "framework": "ESX",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/bluebird",
+      "websiteUrl": "https://bluebirdfivem.tebex.io/bbrp",
+      "cfxJoinUrl": "https://cfx.re/join/269jld",
+      "tags": [
+        "Economy",
+        "Jobs",
+        "Police",
+        "EMS",
+        "Businesses",
+        "Gangs"
+      ],
+      "keywords": [
+        "bluebirdrp",
+        "economy",
+        "jobs",
+        "police",
+        "ems",
+        "businesses",
+        "gangs"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/269jld/645334775.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": "Banner is a generic Cfx region placeholder, not community artwork."
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/269jld",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://bluebirdfivem.tebex.io/bbrp",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://bluebirdfivem.tebex.io/tac",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official onboarding distinguishes general entry from whitelisted jobs.",
+        "Specific Melbourne/Victoria setting and numerous civilian paths."
+      ],
+      "conflicts": [
+        "The older forum homepage returned an error; current official community guide and valid Discord are retained.",
+        "Restricted-mode periods can have additional access requirements; do not promise unrestricted access at every time."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:20:36.285Z",
+        "status": "online",
+        "players": 1,
+        "max": 300,
+        "observedAt": "2026-09-04T01:18:37.035Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "BlueBirdRP"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "l7o9o4",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "District 10",
+      "description": "A roleplay city with an allowlist application route, civilian jobs and a strong custom-car scene. Its community website shows city life across several years and directs new players to the Discord before joining.",
+      "region": null,
+      "language": "English",
+      "framework": "ESX",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/district10",
+      "websiteUrl": "https://www.district10rp.com/",
+      "cfxJoinUrl": "https://cfx.re/join/l7o9o4",
+      "tags": [
+        "Economy",
+        "Jobs",
+        "Custom Cars",
+        "Serious RP"
+      ],
+      "keywords": [
+        "district 10",
+        "economy",
+        "jobs",
+        "custom cars",
+        "serious rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/l7o9o4/-1347344689.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/l7o9o4",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://www.district10rp.com/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official application route and identifiable long-running community.",
+        "Adds a car-centred civilian style to the roster."
+      ],
+      "conflicts": [
+        "Cfx does not declare a usable locale. English is supported by the community-facing site; regional location remains unconfirmed.",
+        "Cfx public flag conflicts with the official allowlist applications. Official access wording takes precedence."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:20:40.131Z",
+        "status": "online",
+        "players": 228,
+        "max": 235,
+        "observedAt": "2026-09-04T01:19:28.806Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "District 10 V10"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "xddmlg",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "LiquidRP",
+      "description": "An application-based city with clear rules for businesses, organisations and everyday interactions. New players complete a rulebook-based application and character backstory, while published guides explain how to participate and how to report problems.",
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/liquidrp",
+      "websiteUrl": "https://www.liquidrp.info/",
+      "cfxJoinUrl": "https://cfx.re/join/xddmlg",
+      "tags": [
+        "Serious RP",
+        "Economy",
+        "Businesses",
+        "Gangs",
+        "Police",
+        "EMS",
+        "18+"
+      ],
+      "keywords": [
+        "liquidrp",
+        "serious rp",
+        "economy",
+        "businesses",
+        "gangs",
+        "police",
+        "ems",
+        "18+"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/xddmlg/1886052767.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/xddmlg",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://www.liquidrp.info/faqs",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://www.liquidrp.info/rules",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Explicit reviewed application flow and business/organisation standards.",
+        "Direct canonical join code appears on the official website."
+      ],
+      "conflicts": [],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:22:52.566Z",
+        "status": "online",
+        "players": 50,
+        "max": 150,
+        "observedAt": "2026-09-04T01:21:02.287Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "LiquidRP",
+        "checkedAt": "2026-09-04T01:32:54.306Z"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "m4v7dq",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "CityLife Roleplay",
+      "description": "A public city founded in 2019, combining serious roleplay with a job-skill system, housing and player businesses. Police, medical and criminal stories sit alongside civilian progression, with custom systems built around a QBCore foundation.",
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/CLRP",
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/m4v7dq",
+      "tags": [
+        "Serious RP",
+        "Economy",
+        "Jobs",
+        "Businesses",
+        "Housing",
+        "Gangs",
+        "Police",
+        "EMS"
+      ],
+      "keywords": [
+        "citylife roleplay",
+        "serious rp",
+        "economy",
+        "jobs",
+        "businesses",
+        "housing",
+        "gangs",
+        "police",
+        "ems"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/m4v7dq/-1141714603.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/m4v7dq",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://forum.cfx.re/t/citylife-roleplay-the-best-public-server-custom-jobs-housing-crime-heists/5234768",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://discord.com/servers/570416248421220363",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official Bazaar post documents public access, the 2019 origin and QBCore foundation.",
+        "Distinct skill progression and civilian systems; valid current community invite."
+      ],
+      "conflicts": [
+        "No separate canonical website was confirmed; do not substitute another similarly named CityLife domain."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:22:54.045Z",
+        "status": "online",
+        "players": 224,
+        "max": 275,
+        "observedAt": "2026-09-04T01:22:06.775Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "💎CityLife Roleplay"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "x38gge",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Moonlit Hills RP",
+      "description": "An 18+ whitelisted community with a cyberpunk-inspired setting and narrative-focused roleplay. Cybernetics and science-fiction elements sit alongside civilian, business and criminal stories, offering an alternative to a conventional modern city.",
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/PW2HksxnbV",
+      "websiteUrl": "https://www.moonlithills.net/",
+      "cfxJoinUrl": "https://cfx.re/join/x38gge",
+      "tags": [
+        "Story-driven",
+        "18+",
+        "Sci-fi",
+        "Cyberpunk",
+        "Economy"
+      ],
+      "keywords": [
+        "moonlit hills rp",
+        "story-driven",
+        "18+",
+        "sci-fi",
+        "cyberpunk",
+        "economy"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/x38gge/-424846849.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/x38gge",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://forum.cfx.re/t/moonlit-hills-rp-1-cyberpunk-inspired-server-in-the-world-18-whitelist-narrative-rp-full-cybernetics-sci-fi-custom-features-tos-lore-friendly-economy-drugs-gangs-clothing-streamer-friendly-lgbtq-friendly/5203256",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://www.moonlithills.net/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Distinctive science-fiction setting and narrative focus.",
+        "Community thread spans 2024–2026 and the current Cfx server and Discord both resolve."
+      ],
+      "conflicts": [
+        "Unsubstantiated number-one or world-record promotional claims are intentionally omitted."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:22:56.611Z",
+        "status": "online",
+        "players": 3,
+        "max": 64,
+        "observedAt": "2026-09-04T01:20:31.879Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Moonlit Hills RP"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "ogpvmv",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Vital RP",
+      "description": "An 18+ whitelisted city that describes its style as semi-serious and story-first. Civilian businesses, police and criminal groups all have space in a community focused on continuing character stories rather than isolated encounters.",
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/vitalRP",
+      "websiteUrl": "https://vitalrp.net/",
+      "cfxJoinUrl": "https://cfx.re/join/ogpvmv",
+      "tags": [
+        "Semi-serious RP",
+        "Story-driven",
+        "Economy",
+        "Businesses",
+        "Police",
+        "Gangs",
+        "18+"
+      ],
+      "keywords": [
+        "vital rp",
+        "semi-serious rp",
+        "story-driven",
+        "economy",
+        "businesses",
+        "police",
+        "gangs",
+        "18+"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/ogpvmv/1446839061.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/ogpvmv",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://vitalrp.net/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official onboarding confirms the whitelist and age requirement.",
+        "Specific story-first identity and direct canonical connect link."
+      ],
+      "conflicts": [],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:22:58.048Z",
+        "status": "online",
+        "players": 63,
+        "max": 175,
+        "observedAt": "2026-09-04T01:21:09.209Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "VITAL RP"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "e6ey97b",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "West Coast Roleplay",
+      "description": "A Los Santos community focused on serious character stories, civilian work and a player economy. Its newcomer guidance explains the city and introduces a staff conversation before players settle into their role.",
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": "https://westcoastrp.io/",
+      "cfxJoinUrl": "https://cfx.re/join/e6ey97b",
+      "tags": [
+        "Serious RP",
+        "Economy",
+        "Jobs",
+        "Businesses"
+      ],
+      "keywords": [
+        "west coast roleplay",
+        "serious rp",
+        "economy",
+        "jobs",
+        "businesses"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/e6ey97b/-1607883191.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/e6ey97b",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://westcoastrp.io/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Public newcomer guidance and a direct join link.",
+        "Smaller-city option; selected for its roleplay focus rather than occupancy."
+      ],
+      "conflicts": [
+        "Current listing says WL OFF, while website onboarding describes staff review. Access stays unconfirmed.",
+        "The sampled server was reachable with zero players; do not describe it as busy or guaranteed active at all hours."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:22:59.217Z",
+        "status": "online",
+        "players": 0,
+        "max": 300,
+        "observedAt": "2026-09-04T01:20:41.292Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "9x3aee",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Blaine County Network",
+      "description": "A 16+ whitelisted vMenu community based in San Andreas. It offers structured police, fire and medical roles alongside civilian characters, with a community application process and a long-running development presence.",
+      "region": "United States",
+      "language": "English",
+      "framework": "vMenu",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/ApBU259KP7",
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/9x3aee",
+      "tags": [
+        "vMenu",
+        "Serious RP",
+        "Police",
+        "EMS",
+        "Fire",
+        "Civilian RP"
+      ],
+      "keywords": [
+        "blaine county network",
+        "vmenu",
+        "serious rp",
+        "police",
+        "ems",
+        "fire",
+        "civilian rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/9x3aee/489302312.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": "Banner unavailable during independent image validation."
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/9x3aee",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://forum.cfx.re/t/blaine-county-network-16-vmenu-whitelisted-community/1856875",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official community thread dates to 2020 and was updated in June 2026.",
+        "Adds a structured vMenu option instead of duplicating economy frameworks."
+      ],
+      "conflicts": [
+        "Sample was reachable with zero players, which is not proof of an empty patrol schedule; no activity guarantee is made."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:23:59.553Z",
+        "status": "online",
+        "players": 0,
+        "max": 48,
+        "observedAt": "2026-09-04T01:23:05.258Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Blaine County Network FiveM"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "zy67ky",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Odyssey RP",
+      "description": "A public, 18+ city built around serious roleplay, player businesses and emergency-service careers. Its official site provides a clear join route and describes custom city systems with opportunities for both civilian and criminal stories.",
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/odysseyrp",
+      "websiteUrl": "https://odyrp.com/",
+      "cfxJoinUrl": "https://cfx.re/join/zy67ky",
+      "tags": [
+        "Serious RP",
+        "Economy",
+        "Businesses",
+        "Police",
+        "EMS",
+        "18+"
+      ],
+      "keywords": [
+        "odyssey rp",
+        "serious rp",
+        "economy",
+        "businesses",
+        "police",
+        "ems",
+        "18+"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/zy67ky/-284529378.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/zy67ky",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://odyrp.com/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official rules/onboarding and direct canonical join link.",
+        "Current main public instance is identified clearly."
+      ],
+      "conflicts": [
+        "Official site says whitelist is coming soon. Do not label the current public instance allowlisted in advance."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:24:00.959Z",
+        "status": "online",
+        "players": 318,
+        "max": 325,
+        "observedAt": "2026-09-04T01:20:20.231Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Odyssey V2"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "abpzk9",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Concrete RP",
+      "description": "An 18+ public city with civilian jobs, businesses and criminal groups. A published rulebook sets expectations for scene quality, player conduct and reports, with community support handled through Discord.",
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/ConcreteRP",
+      "websiteUrl": "https://concreterp.com/",
+      "cfxJoinUrl": "https://cfx.re/join/abpzk9",
+      "tags": [
+        "Serious RP",
+        "Economy",
+        "Jobs",
+        "Businesses",
+        "Gangs",
+        "18+"
+      ],
+      "keywords": [
+        "concrete rp",
+        "serious rp",
+        "economy",
+        "jobs",
+        "businesses",
+        "gangs",
+        "18+"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/abpzk9/-2133594949.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/abpzk9",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://concreterp.com/rules.php",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://www.concreterp.com/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "A detailed official rulebook supplies concrete scene and reporting standards.",
+        "Canonical live listing and same-name Discord community are confirmed."
+      ],
+      "conflicts": [
+        "Some direct site requests are bot-protected; indexed official rules were reviewed.",
+        "Generic promotional copy shared by several unrelated listings is not treated as independent proof of roleplay quality."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:24:02.392Z",
+        "status": "online",
+        "players": 349,
+        "max": 400,
+        "observedAt": "2026-09-04T01:22:45.592Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Concrete RP"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "n446av",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Space Turtles Roleplay Europe",
+      "description": "The European public city from Space Turtles Roleplay, combining jobs, businesses and criminal progression. Community support and development discussions are centred in the official Discord, with a long-running public-server identity.",
+      "region": "United Kingdom",
+      "language": "English",
+      "framework": "ESX",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/STRP",
+      "websiteUrl": "https://strp.tebex.io/",
+      "cfxJoinUrl": "https://cfx.re/join/n446av",
+      "tags": [
+        "Economy",
+        "Jobs",
+        "Businesses",
+        "Gangs"
+      ],
+      "keywords": [
+        "space turtles roleplay europe",
+        "economy",
+        "jobs",
+        "businesses",
+        "gangs"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/n446av/620840626.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/n446av",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://strp.tebex.io/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://discord.com/servers/space-turtles-312969478315048960",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official store confirms the EU public instance and a multi-year operating history.",
+        "Adds a British/European community; only one Space Turtles instance is selected."
+      ],
+      "conflicts": [],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:24:03.837Z",
+        "status": "online",
+        "players": 166,
+        "max": 750,
+        "observedAt": "2026-09-04T01:20:15.970Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Space Turtles"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "me9drd",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "CMG Roleplay",
+      "description": "A British and European public community with civilian jobs, police roles, criminal groups and community events. Its wiki explains basic controls and city systems, making the first steps into the server accessible.",
+      "region": "United Kingdom",
+      "language": "English",
+      "framework": null,
+      "accessType": "public",
+      "discordUrl": "https://discord.com/invite/cmg",
+      "websiteUrl": "https://www.cmgstudios.net/",
+      "cfxJoinUrl": "https://cfx.re/join/me9drd",
+      "tags": [
+        "Economy",
+        "Jobs",
+        "Police",
+        "Gangs",
+        "British RP"
+      ],
+      "keywords": [
+        "cmg roleplay",
+        "economy",
+        "jobs",
+        "police",
+        "gangs",
+        "british rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/me9drd/-270240104.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/me9drd",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://www.cmgstudios.net/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://wiki.cmgstudios.net/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://cmgstudios.net/forums/index.php?/fivem-rules/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official site provides direct join information and describes operation since 2018.",
+        "Practical wiki and published rules; regional variety beyond the US roster."
+      ],
+      "conflicts": [
+        "Promotional wording also emphasises PVP; this is a broader public RP option, not labelled hardcore storytelling."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:24:04.965Z",
+        "status": "online",
+        "players": 99,
+        "max": 1000,
+        "observedAt": "2026-09-04T01:19:46.975Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "CMG",
+        "checkedAt": "2026-09-04T01:32:56.982Z"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "3e49p8",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Circuit RP Public",
+      "description": "The public city from Circuit Roleplay, with an emphasis on character interaction and stories. Its community provides rules, guides and support alongside a separate application-based instance; this listing represents the public server only.",
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/circuit",
+      "websiteUrl": "https://www.circuitrp.com/",
+      "cfxJoinUrl": "https://cfx.re/join/3e49p8",
+      "tags": [
+        "Serious RP",
+        "Story-driven",
+        "Economy",
+        "Police",
+        "EMS"
+      ],
+      "keywords": [
+        "circuit rp public",
+        "serious rp",
+        "story-driven",
+        "economy",
+        "police",
+        "ems"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/3e49p8/1169136254.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/3e49p8",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://circuitrp.com/rules",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://www.circuitrp.com/faq",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://discord.com/servers/circuit-rp-702580819281182770",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official rules frame the community around roleplay and scene consequences.",
+        "Public and whitelist instances were individually checked and deduplicated."
+      ],
+      "conflicts": [
+        "Current Cfx resource detection indicates Qbox; promotional custom-framework claims are not used as a separate framework value."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:24:06.099Z",
+        "status": "online",
+        "players": 49,
+        "max": 110,
+        "observedAt": "2026-09-04T01:21:43.610Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Circuit RP",
+        "checkedAt": "2026-09-04T01:32:55.675Z"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "dppv4d",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Popcorn Roleplay",
+      "description": "A public community combining serious character roleplay with a player-run economy and businesses. Its detailed rulebook covers respectful conduct, scene context and player interactions, while the official community thread documents development over several years.",
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/popcornroleplay",
+      "websiteUrl": "https://popcornrp.city/",
+      "cfxJoinUrl": "https://cfx.re/join/dppv4d",
+      "tags": [
+        "Serious RP",
+        "Economy",
+        "Businesses",
+        "Police",
+        "Gangs"
+      ],
+      "keywords": [
+        "popcorn roleplay",
+        "serious rp",
+        "economy",
+        "businesses",
+        "police",
+        "gangs"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/dppv4d/919545309.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": "Banner is a generic Cfx region placeholder, not community artwork."
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/dppv4d",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://popcornrp.city/rules/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://forum.cfx.re/t/popcorn-rp-funny-name-serious-roleplay-1300-cars-75-custom-weapons-over-25-custom-businesses-thousands-of-custom-clothing-items-85-custom-pets-custom-gang-system-tos-and-lore-friendly/4951470",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Specific public rulebook and a community thread dating to 2022.",
+        "Current main server and same-name Discord invite confirmed."
+      ],
+      "conflicts": [],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:28:07.979Z",
+        "status": "online",
+        "players": 30,
+        "max": 128,
+        "observedAt": "2026-09-04T01:24:50.984Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Popcorn Roleplay"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "zjkqv4",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "BadlandsRP",
+      "description": "A public roleplay community with persistent characters, housing, civilian jobs and whitelisted emergency-service careers. Its longstanding forum publishes server rules, civilian rights and connection guidance, supporting both everyday city life and organised stories.",
+      "region": "United States",
+      "language": "English",
+      "framework": "vRP",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/badlandsrp",
+      "websiteUrl": "https://badlandsrp.com/",
+      "cfxJoinUrl": "https://cfx.re/join/zjkqv4",
+      "tags": [
+        "Economy",
+        "Housing",
+        "Jobs",
+        "Police",
+        "EMS",
+        "Serious RP"
+      ],
+      "keywords": [
+        "badlandsrp",
+        "economy",
+        "housing",
+        "jobs",
+        "police",
+        "ems",
+        "serious rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/zjkqv4/2030758942.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/zjkqv4",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://badlandsrp.com/topic/26/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://badlandsrp.com/forum/4-rules-and-announcements/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official connection history goes back to 2017; rules and community governance are publicly documented.",
+        "Current live listing points back to the exact official website and valid BadlandsRP Discord."
+      ],
+      "conflicts": [],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:30:40.113Z",
+        "status": "online",
+        "players": 291,
+        "max": 300,
+        "observedAt": "2026-09-04T01:26:03.274Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "BadlandsRP"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "yjy4gy",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Isles RP",
+      "description": "An allowlisted, beginner-friendly roleplay community with a focus on creative characters and collaborative stories. Its public community guide and social links introduce the city, while civilian businesses, organisations and emergency services offer different ways to participate.",
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/islesrp",
+      "websiteUrl": "https://isles.gitbook.io/isles-roleplay",
+      "cfxJoinUrl": "https://cfx.re/join/yjy4gy",
+      "tags": [
+        "Story-driven",
+        "Beginner Friendly",
+        "Economy",
+        "Businesses",
+        "Police",
+        "EMS"
+      ],
+      "keywords": [
+        "isles rp",
+        "story-driven",
+        "beginner friendly",
+        "economy",
+        "businesses",
+        "police",
+        "ems"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/yjy4gy/94732420.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/yjy4gy",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://linktr.ee/islesrp",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://isles.gitbook.io/isles-roleplay",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://cfx.re/join/yjy4gy",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official Linktree links the handbook and exact same Discord community.",
+        "Adds an explicitly beginner-friendly collaborative option rather than selecting purely by size."
+      ],
+      "conflicts": [],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:30:42.628Z",
+        "status": "online",
+        "players": 75,
+        "max": 200,
+        "observedAt": "2026-09-04T01:28:47.461Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "The Isles | FiveM"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "bdxvm7d",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Royalty Roleplay",
+      "description": "An application-based city with character-led stories, a player economy and room for civilian businesses. Its detailed rules cover scene boundaries, medical roleplay, crime and public-service interactions, with an official application route for newcomers.",
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/royalty",
+      "websiteUrl": "https://royalty.gg/",
+      "cfxJoinUrl": "https://cfx.re/join/bdxvm7d",
+      "tags": [
+        "Serious RP",
+        "Story-driven",
+        "Economy",
+        "Businesses",
+        "Police",
+        "EMS"
+      ],
+      "keywords": [
+        "royalty roleplay",
+        "serious rp",
+        "story-driven",
+        "economy",
+        "businesses",
+        "police",
+        "ems"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/bdxvm7d/2123917700.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/bdxvm7d",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://royalty.gg/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://royalty.gg/rules",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Detailed roleplay standards and explicit whitelist flow.",
+        "Website invite and Cfx vanity invite were compared against Discord and point to the same guild."
+      ],
+      "conflicts": [
+        "Do not substitute similarly named royalty-rp.com; only royalty.gg was tied to the current guild."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:30:13.528Z",
+        "status": "online",
+        "players": 273,
+        "max": 300,
+        "observedAt": "2026-09-04T01:25:38.812Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Royalty Roleplay"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "8emq8am",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "PeakRP",
+      "description": "A public city offering serious roleplay without a general whitelist. Newcomers can start with civilian jobs, while police, medical and business roles use applications; the website links rules and job guides for getting established.",
+      "region": "United States",
+      "language": "English",
+      "framework": null,
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/peakrp",
+      "websiteUrl": "https://peakrp.dtservers.com/",
+      "cfxJoinUrl": "https://cfx.re/join/8emq8am",
+      "tags": [
+        "Serious RP",
+        "Economy",
+        "Jobs",
+        "Businesses",
+        "Police",
+        "EMS",
+        "18+"
+      ],
+      "keywords": [
+        "peakrp",
+        "serious rp",
+        "economy",
+        "jobs",
+        "businesses",
+        "police",
+        "ems",
+        "18+"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/8emq8am/-1314874634.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/8emq8am",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://peakrp.dtservers.com/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://forum.cfx.re/t/peakrp-live-serious-roleplay-real-economy-no-whitelist-advanced-anticheat/5327542/48",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Explicit difference between open city entry and application-based careers.",
+        "Current official guide and direct canonical code; a smaller community selected on documented standards."
+      ],
+      "conflicts": [
+        "Website claims custom framework while current Cfx detection indicates Qbox; leave framework unconfirmed.",
+        "Website /peak-rp invite is invalid. Use the Cfx-provided /peakrp invite, which resolves to Peak RP.",
+        "Only one player was observed in the research sample; no busy-city claim is made."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:29:21.423Z",
+        "status": "online",
+        "players": 1,
+        "max": 256,
+        "observedAt": "2026-09-04T01:28:40.048Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Peak RP"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "xq555m",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Lucid Heights RP",
+      "description": "A newer semi-serious community welcoming founding members and players learning roleplay. Its recruitment post describes civilian businesses, police and medical roles, with community feedback helping shape the city as it develops.",
+      "region": "United States",
+      "language": "English",
+      "framework": "ESX",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/lucidheights",
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/xq555m",
+      "tags": [
+        "Semi-serious RP",
+        "Beginner Friendly",
+        "Economy",
+        "Businesses",
+        "Police",
+        "EMS"
+      ],
+      "keywords": [
+        "lucid heights rp",
+        "semi-serious rp",
+        "beginner friendly",
+        "economy",
+        "businesses",
+        "police",
+        "ems"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/xq555m/-223334506.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": "Banner unavailable during independent image validation."
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/xq555m",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://forum.cfx.re/t/lucid-heights-rp-semi-serious-rp-founding-members-wanted-free-gang-packages-active-development/5406799",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Specific beginner/founding-member identity documented by the community.",
+        "Current server and matching Discord resolve; retained as a smaller emerging option."
+      ],
+      "conflicts": [
+        "Newer community with a shorter track record; do not describe it as long-established.",
+        "No definitive current general-access requirement or separate official website was confirmed."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:23:11.702Z",
+        "status": "online",
+        "players": 6,
+        "max": 64,
+        "observedAt": "2026-09-04T01:21:42.382Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Lucid Heights RP"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "ypq96k",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "New Day RP",
+      "description": "An application-based community centred on immersive character stories, with public rules and a structured onboarding process. Civilian, business, emergency-service and criminal characters share a city documented through an established community forum.",
+      "region": "United States",
+      "language": "English",
+      "framework": null,
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/Mq6BN9Rftr",
+      "websiteUrl": "https://newdayrp.com/",
+      "cfxJoinUrl": "https://cfx.re/join/ypq96k",
+      "tags": [
+        "Serious RP",
+        "Story-driven",
+        "Economy",
+        "Businesses",
+        "Police",
+        "EMS"
+      ],
+      "keywords": [
+        "new day rp",
+        "serious rp",
+        "story-driven",
+        "economy",
+        "businesses",
+        "police",
+        "ems"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/ypq96k/895639747.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/ypq96k",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://newdayrp.com/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://newdayrp.com/threads/new-day-rp-rules-and-guidelines.24/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://newdayrp.com/threads/faqs.850/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official rules, whitelist process and current community announcements.",
+        "Canonical listing explicitly names NewDayRP.com; official Discord resolves to New Day RP."
+      ],
+      "conflicts": [
+        "Cfx metadata is available but occupancy is currently unavailable. Publish only with unknown live status/count until a fresh observation is available.",
+        "Do not use third-party code 9eydme or Danish newdayrp.dk; those identities were not established as this English community."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:42:48.802Z",
+        "status": "offline",
+        "players": null,
+        "max": 275,
+        "observedAt": null
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "New Day RP",
+        "checkedAt": "2026-09-04T01:33:02.417Z"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "5xdqg7",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "San Andreas Valley Roleplay",
+      "description": "A realism-focused community with detailed rules for character behaviour, injuries and scene consequences. Its official site describes civilian careers, a law-enforcement academy, fire and medical services, and a legal system supporting longer character stories.",
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/SAVRP",
+      "websiteUrl": "https://fivem.strengthonlinellc.com/",
+      "cfxJoinUrl": "https://cfx.re/join/5xdqg7",
+      "tags": [
+        "Hardcore RP",
+        "Story-driven",
+        "Economy",
+        "Jobs",
+        "Police",
+        "EMS",
+        "Fire"
+      ],
+      "keywords": [
+        "san andreas valley roleplay",
+        "hardcore rp",
+        "story-driven",
+        "economy",
+        "jobs",
+        "police",
+        "ems",
+        "fire"
+      ],
+      "logoUrl": null,
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": "Cfx icon is a generic FiveM top-hat/heart graphic, not corroborated SAVRP branding.",
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/5xdqg7",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://fivem.strengthonlinellc.com/#rules",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://fivem.strengthonlinellc.com/cfg/config.json",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://fivem.strengthonlinellc.com/cfg/rulesConfig.json",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Exact current canonical code is published in the official homepage configuration.",
+        "Substantial first-party rules and career descriptions establish its realism focus."
+      ],
+      "conflicts": [
+        "Old SAVRP code m6kl8d is dead; use 5xdqg7 only.",
+        "No explicit current general-access rule was confirmed, so access remains unconfirmed.",
+        "The unrelated German savrp.de community is excluded."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:38:19.880Z",
+        "status": "online",
+        "players": 103,
+        "max": 184,
+        "observedAt": "2026-09-04T01:36:12.954Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Strength Online: FiveM - SAVRP"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "583r8a",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "OzzyGaming DarkSide",
+      "description": "An Australian roleplay city within the established OzzyGaming community. Civilian work, businesses and emergency-service careers are supported by public guides, department applications and rules governing roleplay conduct and the economy.",
+      "region": "Australia",
+      "language": "English",
+      "framework": "ESX",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/ozzygaming",
+      "websiteUrl": "https://www.ozzygaming.com.au/",
+      "cfxJoinUrl": "https://cfx.re/join/583r8a",
+      "tags": [
+        "Economy",
+        "Jobs",
+        "Businesses",
+        "Police",
+        "EMS"
+      ],
+      "keywords": [
+        "ozzygaming darkside",
+        "economy",
+        "jobs",
+        "businesses",
+        "police",
+        "ems"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/583r8a/-924095883.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": "Banner is a generic Cfx region placeholder, not community artwork."
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/583r8a",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://www.ozzygaming.com.au/topic/23-ozzygaming-fivem-rules/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://www.ozzygaming.com.au/forum/55-guides/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "First-party rules date back to 2018 and were updated in February 2026.",
+        "Exact Cfx listing points to the same official website and valid OzzyGaming Discord."
+      ],
+      "conflicts": [
+        "DarkSide is the individually checked instance; no other OzzyGaming city is added.",
+        "General access for this specific instance remains unconfirmed; department applications alone do not establish a server whitelist."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:33:45.332Z",
+        "status": "online",
+        "players": 1,
+        "max": 150,
+        "observedAt": "2026-09-04T01:32:04.557Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "OzzyGaming"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "xgvk85",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Wild Haven Roleplay",
+      "description": "A whitelisted UK city built around grounded characters and serious scenes. Civilian businesses, police, medical and fire roles share an emphasis on believable driving, consequences and giving other players room to develop their stories.",
+      "region": "United Kingdom",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/wildhavenroleplay",
+      "websiteUrl": "https://wildhavenroleplay.co.uk/",
+      "cfxJoinUrl": "https://cfx.re/join/xgvk85",
+      "tags": [
+        "Serious RP",
+        "Story-driven",
+        "Businesses",
+        "Police",
+        "EMS",
+        "Fire",
+        "British RP"
+      ],
+      "keywords": [
+        "wild haven roleplay",
+        "serious rp",
+        "story-driven",
+        "businesses",
+        "police",
+        "ems",
+        "fire",
+        "british rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/xgvk85/1573543220.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/xgvk85",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://wildhavenroleplay.co.uk/#rules",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://wildhavenroleplay.co.uk/#whitelist",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Current site has a detailed live rulebook, character guidance and application link.",
+        "Valid Cfx listing and matching Wild Haven Roleplay V.2 community."
+      ],
+      "conflicts": [
+        "One website button has a trailing-d typo in /wildhavenroleplayd and is invalid. Use the matching valid /wildhavenroleplay invite shown elsewhere on the same page and in Cfx."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:40:57.319Z",
+        "status": "online",
+        "players": 16,
+        "max": 128,
+        "observedAt": "2026-09-04T01:39:12.211Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Wild Haven Roleplay V.2"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "e6e44gb",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Logic Roleplay",
+      "description": "A whitelist-based community with civilian, business, criminal and emergency-service paths. Its published standards emphasise believable character reactions and medical roleplay, with choices and injuries intended to carry through into continuing stories.",
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/logicrp",
+      "websiteUrl": "https://logicrp.net/",
+      "cfxJoinUrl": "https://cfx.re/join/e6e44gb",
+      "tags": [
+        "Serious RP",
+        "Story-driven",
+        "Economy",
+        "Businesses",
+        "Police",
+        "EMS",
+        "Fire"
+      ],
+      "keywords": [
+        "logic roleplay",
+        "serious rp",
+        "story-driven",
+        "economy",
+        "businesses",
+        "police",
+        "ems",
+        "fire"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/e6e44gb/-545162258.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/e6e44gb",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://logicrp.net/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://forum.cfx.re/t/the-1-server-for-serious-roleplay-logic-rp/445307",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Official site has application routes, rules and specific civilian/public-service systems.",
+        "Community thread supplies detailed roleplay expectations beyond promotional popularity."
+      ],
+      "conflicts": [
+        "Current Cfx public flag conflicts with the official website whitelist application. Use the explicit official onboarding."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:41:48.875Z",
+        "status": "online",
+        "players": 12,
+        "max": 64,
+        "observedAt": "2026-09-04T01:37:45.125Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Logic RP"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "8em4594",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "San Andreas First Response",
+      "description": "A cooperative first-responder server focused on procedure, teamwork and AI-driven incidents. Players join the Discord, complete a guided tutorial and patrol together as emergency services, offering a different experience from civilian-versus-criminal city roleplay.",
+      "region": "United States",
+      "language": "English",
+      "framework": "vMenu",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/TvAEGSzryd",
+      "websiteUrl": "https://www.sanandreasfirstresponse.net/",
+      "cfxJoinUrl": "https://cfx.re/join/8em4594",
+      "tags": [
+        "Co-op",
+        "Police",
+        "EMS",
+        "Fire",
+        "FivePD",
+        "vMenu",
+        "Beginner Friendly"
+      ],
+      "keywords": [
+        "san andreas first response",
+        "co-op",
+        "police",
+        "ems",
+        "fire",
+        "fivepd",
+        "vmenu",
+        "beginner friendly"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/8em4594/-422182722.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/8em4594",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://www.sanandreasfirstresponse.net/join",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://www.sanandreasfirstresponse.net/rules",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Exact current code, Discord and no-application onboarding are published by the operator.",
+        "Distinct cooperative style is explained clearly, with a substantive tutorial and rulebook."
+      ],
+      "conflicts": [
+        "Cfx indicates allowlisting, but official onboarding explicitly says no application: access roles come from joining Discord. Label public with Discord required.",
+        "This is co-operative RP against AI, not a conventional civilian/criminal RP city."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:42:14.458Z",
+        "status": "online",
+        "players": 9,
+        "max": 48,
+        "observedAt": "2026-09-04T01:41:48.843Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "San Andreas First Response | FiveM | LSPDFR Online"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "jq6oaa",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Lucid City Roleplay",
+      "description": "A public city offering civilian work, housing, player businesses and criminal missions. The community combines custom city content with police, medical and justice roles, with updates and support organised through its forum and Discord.",
+      "region": "United States",
+      "language": "English",
+      "framework": null,
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/lucidcity",
+      "websiteUrl": "https://forums.lucidcityrp.com/",
+      "cfxJoinUrl": "https://cfx.re/join/jq6oaa",
+      "tags": [
+        "Economy",
+        "Jobs",
+        "Housing",
+        "Businesses",
+        "Police",
+        "EMS"
+      ],
+      "keywords": [
+        "lucid city roleplay",
+        "economy",
+        "jobs",
+        "housing",
+        "businesses",
+        "police",
+        "ems"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/jq6oaa/-439649122.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T01:47:31Z",
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/jq6oaa",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://www.lucidcityrp.com/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://store.lucidcityrp.com/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://cfx.re/join/jq6oaa",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [
+        "Exact live Cfx listing points to the official Lucid City domain and identifies the current public city.",
+        "The established community invite resolves to LGN | Lucid City RP 3.0."
+      ],
+      "conflicts": [
+        "Official forum/store applies bot protection to some automated reads; no access bypass was attempted.",
+        "Do not confuse this with Lucid Heights or similarly named LucidRP communities."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:38:21.023Z",
+        "status": "online",
+        "players": 116,
+        "max": 350,
+        "observedAt": "2026-09-04T01:36:50.721Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "LGN | Lucid City RP 3.0",
+        "checkedAt": "2026-09-04T01:40:33.286Z"
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "bmp6dp",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "Everfall",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/bmp6dp",
+      "tags": [],
+      "keywords": [
+        "everfall"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/bmp6dp/137736726.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/bmp6dp",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://everfallcommunity.com/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Strong official rules and job guides, but both the website and listing advertise /everfall, which currently resolves to the unrelated-looking EverPhone guild. Do not publish this Discord link or add the listing until identity is resolved."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:20:38.761Z",
+        "status": "online",
+        "players": 123,
+        "max": 315,
+        "observedAt": "2026-09-04T01:17:13.244Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "y7qa45",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "TrueProjects RP",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/y7qa45",
+      "tags": [],
+      "keywords": [
+        "trueprojects rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/y7qa45/-1869474535.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/y7qa45",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://trueprojectsrp.com/whitelist.html",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Official site advertises a reviewed whitelist but its public config still has YOURINVITE and an application page exposes connection placeholders. Current Cfx public flag conflicts with onboarding. Confirm the usable owner-controlled front door first."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:19:48.665Z",
+        "status": "online",
+        "players": 7,
+        "max": 48,
+        "observedAt": "2026-09-04T01:16:56.708Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "y9vd5d9",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "The Academy Roleplay Ambassador",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/y9vd5d9",
+      "tags": [],
+      "keywords": [
+        "the academy roleplay ambassador"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/y9vd5d9/1670021097.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/y9vd5d9",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://sites.google.com/view/theacademyrp/join-in",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Current English Cfx instance exists, but the older Officer Messer Google Site gives another code (emkbaa). Public evidence has not tied usable current onboarding/Discord to the Ambassador instance. Do not add the Partnered instance as a second community."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:20:37.417Z",
+        "status": "online",
+        "players": 177,
+        "max": 310,
+        "observedAt": "2026-09-04T01:17:47.572Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "y93zp5",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "Big City Brooklyn",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/y93zp5",
+      "tags": [],
+      "keywords": [
+        "big city brooklyn"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/y93zp5/1160458543.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/y93zp5",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://bigcityrp.com/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Current English Brooklyn instance exists and official site/rules establish the community. Both Discord invites on that site (bigcityrp and 4PznPVw) are invalid. Find a current official invite or confirm direct-entry requirements before publishing."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:30:12.104Z",
+        "status": "online",
+        "players": 12,
+        "max": 80,
+        "observedAt": "2026-09-04T01:27:48.785Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "8674km",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "Vanity Network",
+      "description": null,
+      "region": "United Kingdom",
+      "language": "English",
+      "framework": null,
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/8674km",
+      "tags": [],
+      "keywords": [
+        "vanity network"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/8674km/2010712740.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/8674km",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://vanityrp.net/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Distinct British whitelisted community with public rules, but Cfx occupancy is unavailable and the canonical website failed direct requests. Recheck current operation before adding."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:42:46.517Z",
+        "status": "offline",
+        "players": null,
+        "max": 60,
+        "observedAt": null
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "r8q73g",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "NoPixel Public Green",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": null,
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/r8q73g",
+      "tags": [],
+      "keywords": [
+        "nopixel public green"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/r8q73g/-2115142404.png",
+      "bannerUrl": "https://i.imgur.com/4zVetLx.jpg",
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/r8q73g",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://www.nopixel.net/forum/index.php",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Official forum still lists Public Green 4.0, but both individual Cfx observations had unavailable occupancy. Hold this initial launch entry until current upstream operation is verifiable."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:42:47.662Z",
+        "status": "offline",
+        "players": null,
+        "max": 220,
+        "observedAt": null
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "m4zm5v7",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "Headliner RP",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/m4zm5v7",
+      "tags": [],
+      "keywords": [
+        "headliner rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/m4zm5v7/906092291.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/m4zm5v7",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://tebex.headlinerrp.com/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Current English listing and matching guild; official store confirms queue priority but no attributable current rulebook/onboarding was found. Popularity alone does not clear this roster quality bar."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:38:22.432Z",
+        "status": "online",
+        "players": 297,
+        "max": 300,
+        "observedAt": "2026-09-04T01:34:42.116Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "qlldgp",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "RedSky 3.0",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/qlldgp",
+      "tags": [],
+      "keywords": [
+        "redsky 3.0"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/qlldgp/-451779363.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/qlldgp",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://cfx.re/join/qlldgp",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Current listing and matching community invite exist, but the apparent community domain is parked and an attributable current rulebook was not found."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:40:04.133Z",
+        "status": "online",
+        "players": 1,
+        "max": 120,
+        "observedAt": "2026-09-04T01:39:39.047Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "gmegpm",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "The Gates RP",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "ESX",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/gmegpm",
+      "tags": [],
+      "keywords": [
+        "the gates rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/gmegpm/-1601434478.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/gmegpm",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://cfx.re/join/gmegpm",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Current English listing and matching guild exist, but current first-party rules and onboarding could not be corroborated."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:40:05.604Z",
+        "status": "online",
+        "players": 58,
+        "max": 125,
+        "observedAt": "2026-09-04T01:37:31.044Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "96jale",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "MidwestRP",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/96jale",
+      "tags": [],
+      "keywords": [
+        "midwestrp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/96jale/-299706981.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/96jale",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://midwestrp.net/apply",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Strong official application process and operating history, but Cfx occupancy is unavailable and the website Discord invite resolves to a Fan Server. Confirm the current operating instance and entry route."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:42:49.939Z",
+        "status": "offline",
+        "players": null,
+        "max": 64,
+        "observedAt": null
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "bp8p5d",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "DayV Survival Zombie RP",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/bp8p5d",
+      "tags": [],
+      "keywords": [
+        "dayv survival zombie rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/bp8p5d/1336625046.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/bp8p5d",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://cfx.re/join/bp8p5d",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Distinct zombie-story community with current English listing and a valid matching DayV invite, but current official onboarding/rules were not sufficiently corroborated for the initial roster."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:40:59.847Z",
+        "status": "online",
+        "players": 28,
+        "max": 80,
+        "observedAt": "2026-09-04T01:39:20.666Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "oaxrq5j",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "Obey RP",
+      "description": null,
+      "region": "United Kingdom",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/oaxrq5j",
+      "tags": [],
+      "keywords": [
+        "obey rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/oaxrq5j/1122278.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/oaxrq5j",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://cfx.re/join/oaxrq5j",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Current English listing and matching guild; no attributable current official rulebook/onboarding was located."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:40:58.691Z",
+        "status": "online",
+        "players": 2,
+        "max": 128,
+        "observedAt": "2026-09-04T01:37:11.723Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "867lgb",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "Sinister Roleplay",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/867lgb",
+      "tags": [],
+      "keywords": [
+        "sinister roleplay"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/867lgb/-449856500.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/867lgb",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://cfx.re/join/867lgb",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Live English listing and matching Discord, but no sufficiently attributable current official rulebook/onboarding was found. Generic serious-RP advert text alone did not clear the curation bar."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:19:44.003Z",
+        "status": "online",
+        "players": 14,
+        "max": 200,
+        "observedAt": "2026-09-04T01:18:19.372Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "jkp37m",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "AfterHours 99 RolePlay",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/jkp37m",
+      "tags": [],
+      "keywords": [
+        "afterhours 99 roleplay"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/jkp37m/164090213.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/jkp37m",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://cfx.re/join/jkp37m",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Current English server exists, but its identity could not be tied to the older After Hours community advertising a different dead code. Do not merge the communities."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:19:46.300Z",
+        "status": "online",
+        "players": 4,
+        "max": 128,
+        "observedAt": "2026-09-04T01:16:02.796Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "7g7ezb",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "South Bay Roleplay",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": null,
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/7g7ezb",
+      "tags": [],
+      "keywords": [
+        "south bay roleplay"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/7g7ezb/-194713241.png",
+      "bannerUrl": "https://cdn.discordapp.com/attachments/1347634606077378652/1519251410217205781/CCRP_BANNER_1.png?ex=6a4c09e2&is=6a4ab862&hm=89eed505c3b34fc8a77f028eec7a3ef7e31eed17938a78297ea47a59444aab9e&",
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/7g7ezb",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://cfx.re/join/7g7ezb",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Current vMenu listing exists but older same-name community posts describe a different economy server. Canonical current rules/onboarding need corroboration."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:23:02.149Z",
+        "status": "online",
+        "players": 0,
+        "max": 48,
+        "observedAt": "2026-09-04T01:20:22.170Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "kroed6",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "VanityRP",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/kroed6",
+      "tags": [],
+      "keywords": [
+        "vanityrp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/kroed6/-416869022.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/kroed6",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://forum.cfx.re/t/vanityrp-serious-roleplay-player-driven-economy-businesses-housing-active-staff/5396878",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "A current US Qbox community, distinct from British Vanity Network. Primary recruitment exists but current rules, stable website and onboarding were not sufficiently established."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:23:03.300Z",
+        "status": "online",
+        "players": 0,
+        "max": 64,
+        "observedAt": "2026-09-04T01:19:47.054Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "98ymxxe",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "Storyline RP",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/98ymxxe",
+      "tags": [],
+      "keywords": [
+        "storyline rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/98ymxxe/-1917553319.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/98ymxxe",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://cfx.re/join/98ymxxe",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Current English server, but no attributable community rulebook/onboarding beyond generic directory descriptions was located."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:28:15.110Z",
+        "status": "online",
+        "players": 74,
+        "max": 120,
+        "observedAt": "2026-09-04T01:23:43.314Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "5qza6d",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "DiCE CiTY",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/5qza6d",
+      "tags": [],
+      "keywords": [
+        "dice city"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/5qza6d/-1253399289.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/5qza6d",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://cfx.re/join/5qza6d",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Current English listing exists; current official rules and onboarding could not be tied to the community."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:28:16.291Z",
+        "status": "online",
+        "players": 0,
+        "max": 48,
+        "observedAt": "2026-09-04T01:25:14.589Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "bp6pap",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "Station Red Roleplay",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "vMenu",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/bp6pap",
+      "tags": [],
+      "keywords": [
+        "station red roleplay"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/bp6pap/561304671.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/bp6pap",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://disboard.org/server/806649688152997929",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Interesting California freeform/D&D-style community; self-submitted advert and matching valid invite exist. Current official rules and evidence of an active organised RP schedule remain unconfirmed."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:28:17.450Z",
+        "status": "online",
+        "players": 0,
+        "max": 32,
+        "observedAt": "2026-09-04T01:25:16.263Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "89zgd5",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "Pacific Valley Project",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "vMenu",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/89zgd5",
+      "tags": [],
+      "keywords": [
+        "pacific valley project"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/89zgd5/1513979021.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/89zgd5",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://cfx.re/join/89zgd5",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "English listing exists, but several regional branches and similar names complicate identity. Current canonical onboarding and rules for this instance remain unconfirmed."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:28:18.598Z",
+        "status": "online",
+        "players": 2,
+        "max": 48,
+        "observedAt": "2026-09-04T01:26:28.783Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "opvd97",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "PowerRP",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/opvd97",
+      "tags": [],
+      "keywords": [
+        "powerrp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/opvd97/-743800198.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/opvd97",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://powerroleplay.net/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Live English listing and valid invite; guild name currently advertises an Enhanced edition coming soon. Confirm current edition/onboarding and official rules before adding."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:29:22.874Z",
+        "status": "online",
+        "players": 52,
+        "max": 150,
+        "observedAt": "2026-09-04T01:28:45.090Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "b9r7kb",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "GrizzleyWorld RP",
+      "description": null,
+      "region": "United States",
+      "language": "English",
+      "framework": "ESX",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/b9r7kb",
+      "tags": [],
+      "keywords": [
+        "grizzleyworld rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/b9r7kb/2064677665.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/b9r7kb",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://grizzleyworld-rp.tebex.io/",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Official store sells server access, while the listing does not clearly explain general entry requirements. Do not call it free/public or assume payment equals staff approval."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:30:14.900Z",
+        "status": "online",
+        "players": 0,
+        "max": 200,
+        "observedAt": "2026-09-04T01:28:33.944Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "a4zejj3",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "Rebound Roleplay",
+      "description": null,
+      "region": "United Kingdom",
+      "language": "English",
+      "framework": "ESX",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/a4zejj3",
+      "tags": [],
+      "keywords": [
+        "rebound roleplay"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/a4zejj3/-1244781919.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/a4zejj3",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://cfx.re/join/a4zejj3",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Current English/British listing exists, but current primary community rules and onboarding were not sufficiently established."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:30:43.758Z",
+        "status": "online",
+        "players": 11,
+        "max": 64,
+        "observedAt": "2026-09-04T01:29:05.537Z"
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "jg3d7m",
+      "platform": "fivem",
+      "status": "hold",
+      "name": "Rush Hour Roleplay",
+      "description": null,
+      "region": null,
+      "language": null,
+      "framework": "Ox Core",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/jg3d7m",
+      "tags": [],
+      "keywords": [
+        "rush hour roleplay"
+      ],
+      "logoUrl": null,
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": null,
+        "logoNote": null,
+        "bannerNote": null
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/jg3d7m",
+          "purpose": "Canonical Cfx identity, declared locale, framework evidence and image references; snapshot only."
+        },
+        {
+          "url": "https://rushhourroleplay.com/rules",
+          "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        }
+      ],
+      "inclusionReasons": [],
+      "conflicts": [
+        "Official rules and valid invite exist; the main instance has unavailable occupancy and lacks a declared locale. Recheck before publication. The performance-test instance is excluded."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T01:28:13.947Z",
+        "status": "offline",
+        "players": null,
+        "max": 150,
+        "observedAt": null
+      },
+      "discordCheck": {
+        "status": "not_supplied",
+        "guildName": null
+      },
+      "requiresStaffReview": true
+    }
+  ],
+  "exclusions": [
+    {
+      "name": "Orange County / OCRP",
+      "reason": "Archived at the user’s explicit request; do not re-add."
+    },
+    {
+      "name": "City of Justice",
+      "reason": "Archived at the user’s explicit request; do not re-add."
+    },
+    {
+      "joinCode": "jprk4p",
+      "name": "Circuit RP Whitelist",
+      "reason": "Duplicate community; select its public instance 3e49p8 only."
+    },
+    {
+      "joinCode": "kg3z87",
+      "name": "GrizzleyWorld Whitelist",
+      "reason": "Duplicate community, with access/payment ambiguity; public sibling also held."
+    },
+    {
+      "joinCode": "vqqbmgq",
+      "name": "Nexus Roleplay",
+      "reason": "Declares French (Canada); outside this English-speaking roster."
+    },
+    {
+      "joinCode": "bjzz5b",
+      "name": "Rush Hour performance test",
+      "reason": "Performance-test instance, not the live roleplay world."
+    },
+    {
+      "joinCode": "dmkjrq",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:19:45.156Z"
+    },
+    {
+      "joinCode": "zk4eo5",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:19:47.498Z"
+    },
+    {
+      "joinCode": "yzgmp9",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:19:51.275Z"
+    },
+    {
+      "joinCode": "m6kl8d",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:22:55.207Z"
+    },
+    {
+      "joinCode": "3ejvjo",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:23:04.447Z"
+    },
+    {
+      "joinCode": "zryg3d",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:23:05.601Z"
+    },
+    {
+      "joinCode": "d7ol3d",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:23:06.750Z"
+    },
+    {
+      "joinCode": "z5pabd",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:23:07.915Z"
+    },
+    {
+      "joinCode": "qldqqp",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:23:09.075Z"
+    },
+    {
+      "joinCode": "9v9q8k",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:23:10.229Z"
+    },
+    {
+      "joinCode": "y7kd55",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:28:09.118Z"
+    },
+    {
+      "joinCode": "d6z64j",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:28:10.261Z"
+    },
+    {
+      "joinCode": "xjbv6g",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:28:11.405Z"
+    },
+    {
+      "joinCode": "d94xzq",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:29:16.169Z"
+    },
+    {
+      "joinCode": "734okr",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:29:17.316Z"
+    },
+    {
+      "joinCode": "77pl7v",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:29:18.473Z"
+    },
+    {
+      "joinCode": "emvjbd",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:29:19.615Z"
+    },
+    {
+      "joinCode": "38ae9z",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:30:44.904Z"
+    },
+    {
+      "joinCode": "wzjb8d",
+      "reason": "Individual official Cfx check failed: wrong_platform",
+      "checkedAt": "2026-09-04T01:33:43.831Z"
+    },
+    {
+      "joinCode": "zx3apy",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:33:46.471Z"
+    },
+    {
+      "joinCode": "gadglpz",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:38:23.578Z"
+    },
+    {
+      "joinCode": "56py66",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:38:24.723Z"
+    },
+    {
+      "joinCode": "damq73",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:41:50.025Z"
+    },
+    {
+      "joinCode": "xl9dym",
+      "reason": "Individual official Cfx check failed: not_found",
+      "checkedAt": "2026-09-04T01:41:51.175Z"
+    }
+  ]
+}

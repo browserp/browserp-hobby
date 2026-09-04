@@ -10,7 +10,8 @@
   ],
   "functions": {
     "api/router.js": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "includeFiles": "docs/launch-curation/*-candidates.json"
     },
     "api/servers.js": {
       "maxDuration": 30
@@ -20,6 +21,14 @@
     }
   },
   "rewrites": [
+    {
+      "source": "/api/admin/redm",
+      "destination": "/api/router?_route=admin/redm"
+    },
+    {
+      "source": "/api/admin/minecraft",
+      "destination": "/api/router?_route=admin/minecraft"
+    },
     {
       "source": "/api/admin/fivem",
       "destination": "/api/router?_route=admin/fivem"
@@ -115,6 +124,10 @@
     {
       "source": "/api/me/overview",
       "destination": "/api/router?_route=me/overview"
+    },
+    {
+      "source": "/api/me/connections",
+      "destination": "/api/router?_route=me/connections"
     },
     {
       "source": "/api/me/profile",
@@ -323,7 +336,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; base-uri 'none'; connect-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' data: https://cdn.discordapp.com https://lh3.googleusercontent.com https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/; manifest-src 'self'; media-src 'none'; object-src 'none'; script-src 'self'; style-src 'self'; worker-src 'none'; upgrade-insecure-requests"
+          "value": "default-src 'self'; base-uri 'none'; connect-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' data: https://cdn.discordapp.com https://lh3.googleusercontent.com https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/; manifest-src 'self'; media-src 'none'; object-src 'none'; script-src 'self'; style-src 'self'; worker-src 'none'; upgrade-insecure-requests"
         },
         {
           "key": "Strict-Transport-Security",

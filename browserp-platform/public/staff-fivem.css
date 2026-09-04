@@ -1,6 +1,8 @@
 .staff-fivem { padding: 24px; min-width: 0; }
 .fivem-heading, .fivem-item { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
 .fivem-heading { margin-bottom: 20px; }.fivem-heading h2 { margin: 4px 0 8px; }.fivem-heading .eyebrow-v3 { color: #ffb77c; }
+.staff-fivem[data-platform="redm"] .fivem-heading .eyebrow-v3 { color: #ff969f; }
+.staff-fivem[data-platform="redm"] .fivem-fetch { border-color: #6e353d; }
 .fivem-help { display: block; color: var(--muted); font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
 .fivem-status { color: var(--copy); font-size: 13px; overflow-wrap: anywhere; }.fivem-status[data-error="true"], .fivem-errors { color: #ffadbd; }
 .fivem-fetch { padding: 20px; margin-bottom: 20px; border: 1px solid var(--line); background: var(--bg-soft); border-radius: 12px; }
@@ -19,3 +21,5 @@
 .fivem-confirm { max-width: min(530px,calc(100vw - 30px)); padding: 24px; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 15px; }.fivem-confirm::backdrop { background: rgb(0 0 0 / .72); }.fivem-confirm h3 { margin-top: 0; }.fivem-confirm p { color: var(--copy); line-height: 1.7; }.fivem-confirm .fivem-actions { justify-content: flex-end; margin-top: 22px; }
 .staff-fivem :disabled { opacity: .62; cursor: wait; }
 @media(max-width:700px) { .staff-fivem { padding: 16px; }.fivem-heading { align-items: stretch; flex-direction: column; }.fivem-fields { grid-template-columns: minmax(0,1fr); }.fivem-item { align-items: stretch; flex-direction: column; gap: 12px; }.fivem-item .fivem-actions { justify-content: space-between; }.fivem-actions > button { flex: 1 1 150px; }.fivem-evidence-list { grid-template-columns: minmax(0,1fr); gap: 5px; }.fivem-evidence dd { margin-bottom: 10px; }.fivem-fetch { padding: 15px; } }
+
+.staff-curation-list,.staff-curation-review{border:1px solid var(--line,#332638);border-radius:16px;padding:20px;margin:0 0 20px;background:rgba(200,68,167,.04)}.staff-curation-list summary{font-weight:750;cursor:pointer}.staff-curation-options{display:grid;gap:14px;margin-top:18px}.staff-curation-option{display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:16px;align-items:center}.staff-curation-review a{color:#ef9fd5;overflow-wrap:anywhere}.staff-curation-review li{margin-block:8px}@media(max-width:640px){.staff-curation-option{grid-template-columns:1fr;gap:6px}}

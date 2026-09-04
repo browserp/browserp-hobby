@@ -467,7 +467,7 @@
     const rawCapacity = server.max_players ?? server.capacity;
     const capacity = Number.isInteger(rawCapacity) && rawCapacity > 0 ? rawCapacity : null;
     const available = !stale && server.online === true && count !== null && (capacity === null || count <= capacity);
-    return { text: available ? `${count.toLocaleString()} / ${capacity === null ? "?" : capacity.toLocaleString()} online` : "Player count unavailable", checked, stale };
+    return { text: available ? `${count.toLocaleString()} / ${capacity === null ? "?" : capacity.toLocaleString()} ${server.count_scope === "network" ? "online across the network" : "online"}` : "Player count unavailable", checked, stale };
   }
 
   function updateServerPlayers(server, { failed = false } = {}) {
@@ -485,8 +485,8 @@
       const time = node("time", "", new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "medium" }).format(status.checked));
       time.dateTime = status.checked.toISOString();
       checked.append(document.createTextNode(failed ? "Last checked " : "Checked "), time);
-      if (failed || status.stale) checked.append(document.createTextNode(" · Waiting for a fresh FiveM update"));
-    } else checked.textContent = "Waiting for a fresh FiveM update";
+      if (failed || status.stale) checked.append(document.createTextNode(` · Waiting for a fresh ${server.platform_name || server.platform_id || "server"} update`));
+    } else checked.textContent = `Waiting for a fresh ${server.platform_name || server.platform_id || "server"} update`;
   }
 
   function refreshServerPlayers(server, slug) {
@@ -551,6 +551,13 @@
       const validConnect = typeof connectUrl === "string" && /^https:\/\/cfx\.re\/join\/[a-z0-9]{6,12}\/?$/i.test(connectUrl);
       connect.hidden = !validConnect;
       if (validConnect) { connect.href = connectUrl; connect.rel = "noopener noreferrer"; connect.textContent = "Connect via Cfx"; }
+      let addressBox = $("#server-minecraft-address");
+      if (server.minecraft_address && /^[a-z0-9.-]+:[0-9]{4,5}$/.test(server.minecraft_address)) {
+        if (!addressBox) { addressBox=node("div","server-minecraft-address");addressBox.id="server-minecraft-address";connect.parentElement.after(addressBox); }
+        const label=node("strong","",`Minecraft ${server.minecraft_edition === "bedrock" ? "Bedrock" : "Java"} address`),address=node("code","",server.minecraft_address),copy=node("button","button-v3 button-secondary-v3","Copy address");copy.type="button";
+        copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(server.minecraft_address);copy.textContent="Address copied";}catch{copy.textContent="Select the address to copy";}});
+        addressBox.replaceChildren(label,address,copy,node("p","muted-v3","Add this address in Minecraft Multiplayer. The player count covers the advertised server or network, including its lobby and other worlds."));
+      } else addressBox?.remove();
       const website = $("#server-website-v3");
       const websiteUrl = safeWebsiteUrl(server.website_url);
       if (website) {

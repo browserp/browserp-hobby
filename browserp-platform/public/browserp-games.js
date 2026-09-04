@@ -50,11 +50,11 @@
     window.BrowseRPPlatforms.theme(link, window.BrowseRPPlatforms.idFor(server));
     const media = node("div", "server-card-media");
     const imageUrl = String(server.logo_url || server.banner_url || "");
-    if (/^https?:\/\/|^\//i.test(imageUrl)) { const image = new Image(); image.src = imageUrl; image.alt = ""; image.loading = "lazy"; image.className = "server-card-media-image"; media.append(image); }
+    if (/^https?:\/\/|^\//i.test(imageUrl)) { const image = new Image(); image.src = imageUrl; image.alt = ""; image.loading = "lazy"; image.className = "server-card-media-image"; image.addEventListener("error", () => image.replaceWith(node("span", "server-initials", String(server.name || "RP").split(/\s+/).slice(0,2).map(part => part[0]).join("").toUpperCase())), { once: true }); media.append(image); }
     else media.append(node("span", "server-initials", String(server.name || "RP").split(/\s+/).slice(0,2).map((part) => part[0]).join("").toUpperCase()));
     const top = node("div", "server-card-top"); top.append(media, node("span", `status${server.online ? " online" : ""}`, server.online ? "Online now" : "Status unavailable"));
     link.append(top, node("h3", "", server.name || "Roleplay server"), window.BrowseRPPlatforms.metadata(server), node("p", "server-description", server.description || "Open the listing to learn more."));
-    const bottom = node("div", "server-card-bottom"); bottom.append(node("strong", "", server.online ? `${Number(server.players || 0).toLocaleString()} players` : "Player count unavailable"), node("span", "server-card-action", "View listing")); link.append(bottom);
+    const bottom = node("div", "server-card-bottom"); bottom.append(node("strong", "", server.online ? `${Number(server.players || 0).toLocaleString()} players${server.count_scope === "network" ? " across the network" : ""}` : "Player count unavailable"), node("span", "server-card-action", "View listing")); link.append(bottom);
     return link;
   }
 

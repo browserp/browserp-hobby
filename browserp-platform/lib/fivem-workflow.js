@@ -1,5 +1,6 @@
+import { launchCuration } from "./launch-curation.js";
 import { getSession, rpc } from "./supabase.js";
-import { fetchFiveMServer, fetchFiveMFeatured, parseFiveMJoinCode } from "./fivem-import.js";
+import { fetchCfxServer, fetchFiveMFeatured, parseFiveMJoinCode } from "./fivem-import.js";
 import { persistServerImage } from "./server-media.js";
 import { validatePublicDiscordInvite } from "./discord-claims.js";
 import { assertSameOrigin, readBody } from "./http.js";
@@ -10,7 +11,7 @@ import { auditReason, expectedVersion, recordId } from "./claim-workflow.js";
 
 export function candidateForStorage(source) {
   return {
-    joinCode: source.joinCode, name: source.name, description: source.description,
+    platform: source.platform || "fivem", joinCode: source.joinCode, name: source.name, description: source.description,
     region: source.region, language: source.language, framework: source.framework,
     accessType: source.access, discordUrl: source.links.communityUrl,
     websiteUrl: source.links.websiteUrl, joinUrl: source.links.cfxJoinUrl,
@@ -43,37 +44,44 @@ export async function checkCandidateDiscordInvite(source) {
 }
 
 const EDIT_FIELDS = ["name", "description", "region", "language", "framework", "accessType", "discordUrl", "websiteUrl", "bannerUrl", "logoUrl", "tags", "keywords"];
-export async function staffFiveM(req, res, requestId) {
+export function staffFiveM(req, res, requestId) { return staffCfx(req, res, requestId, "fivem"); }
+export async function staffCfx(req, res, requestId, platform = "fivem") {
+  if (!["fivem", "redm"].includes(platform)) throw Object.assign(new Error("Choose FiveM or RedM."), { status: 400 });
+  const platformName = platform === "redm" ? "RedM" : "FiveM";
   if (req.method === "POST") assertSameOrigin(req);
   const session = await getSession(req, res, { required: true, provider: "discord" });
   const query = new URL(req.url, "https://browserp.local").searchParams;
-  const workspace = await rpc("staff_fivem_candidates", {
+  const workspace = await rpc("staff_cfx_candidates", { p_platform: platform,
     p_status: req.method === "GET" ? (query.get("status") || "all").slice(0, 30) : "all",
     p_query: req.method === "GET" ? (query.get("q") || "").slice(0, 120) : "",
     p_limit: req.method === "GET" ? 25 : 1,
     p_offset: req.method === "GET" ? Math.min(Math.max(Math.floor(Number(query.get("offset")) || 0), 0), 10000) : 0
   }, session.accessToken);
+  if(req.method==="GET"&&query.get("research")==="true")return{curation:launchCuration(platform)};
   if (req.method === "GET") return { workspace: { ...workspace, canManage: true } };
-  await rateLimit(req, "staff-fivem", 30, 300);
+  await rateLimit(req, `staff-cfx-${platform}`, 30, 300);
   const body = await readBody(req, 48 * 1024);
-  if (body.action === "featured") return fetchFiveMFeatured({ limit: 20 });
+  if (body.action === "featured") {
+    if (platform !== "fivem") throw Object.assign(new Error("Use the official RedM list or a community's Cfx join code to find candidates."), { status: 400 });
+    return fetchFiveMFeatured({ limit: 20 });
+  }
   if (body.action === "fetch") {
-    if (!Array.isArray(body.inputs) || !body.inputs.length || body.inputs.length > 3) throw Object.assign(new Error("Fetch up to three FiveM codes per request."), { status: 400 });
+    if (!Array.isArray(body.inputs) || !body.inputs.length || body.inputs.length > 3) throw Object.assign(new Error(`Fetch up to three ${platformName} codes per request.`), { status: 400 });
     const codes = [...new Set(body.inputs.map(parseFiveMJoinCode))];
     const results = await Promise.allSettled(codes.map(async (code) => {
-      const source = await checkCandidateDiscordInvite(await fetchFiveMServer(code));
-      return rpc("service_stage_fivem_candidate", { p_actor_id: session.user.id, p_candidate: candidateForStorage(source), p_request_id: `${requestId}:${code}` }, undefined, { useSecret: true });
+      const source = await checkCandidateDiscordInvite(await fetchCfxServer(code, { platform }));
+      return rpc("service_stage_cfx_candidate", { p_platform: platform, p_actor_id: session.user.id, p_candidate: candidateForStorage(source), p_request_id: `${requestId}:${code}` }, undefined, { useSecret: true });
     }));
     return { candidates: results.filter(r => r.status === "fulfilled").map(r => r.value), errors: results.flatMap((r, index) => r.status === "rejected" ? [{ joinCode: codes[index], message: r.reason?.message || "The server could not be fetched." }] : []) };
   }
   const id = recordId(body.id); const reason = auditReason(body.reason);
-  if (body.action === "archive") return { result: await rpc("staff_dismiss_fivem_candidate", { p_id: id, p_expected_version: expectedVersion(body.expectedVersion), p_reason: reason, p_request_id: requestId }, session.accessToken) };
-  const entry = await rpc("staff_fivem_candidate", { p_id: id }, session.accessToken);
+  if (body.action === "archive") return { result: await rpc("staff_dismiss_cfx_candidate", { p_platform: platform, p_id: id, p_expected_version: expectedVersion(body.expectedVersion), p_reason: reason, p_request_id: requestId }, session.accessToken) };
+  const entry = await rpc("staff_cfx_candidate", { p_platform: platform, p_id: id }, session.accessToken);
   if (!entry) throw Object.assign(new Error("This import candidate is unavailable."), { status: 404 });
   if (body.action === "refresh") {
     if (!entry.serverId) throw Object.assign(new Error("Publish this candidate before refreshing its live count."), { status: 400 });
-    const result = await refreshFiveMCode(entry.joinCode, { strict: true });
-    return { result, message: result ? "The current FiveM observation was checked." : "This server was checked recently. Try again in one minute." };
+    const result = await refreshCfxCode(entry.joinCode, { platform, strict: true });
+    return { result, message: result ? `The current ${platformName} observation was checked.` : "This server was checked recently. Try again in one minute." };
   }
   if (body.action !== "publish") throw Object.assign(new Error("Choose a valid scraper action."), { status: 400 });
   const version = expectedVersion(body.expectedVersion);
@@ -85,19 +93,21 @@ export async function staffFiveM(req, res, requestId) {
   const assessment = assessContent({ name: merged.name, description: merged.description, tags: (merged.tags || []).join(", "), communityUrl: merged.discordUrl, websiteUrl: merged.websiteUrl });
   if (assessment.action === "reject") throw Object.assign(new Error("The reviewed listing does not meet the content standards."), { status: 422 });
   [data.bannerUrl, data.logoUrl] = await Promise.all([persistServerImage(merged.bannerUrl, entry.joinCode), persistServerImage(merged.logoUrl, entry.joinCode)]);
-  const result = await rpc("staff_publish_fivem_candidate", { p_id: id, p_expected_version: version, p_data: data, p_reason: reason, p_request_id: requestId }, session.accessToken);
+  const result = await rpc("staff_publish_cfx_candidate", { p_platform: platform, p_id: id, p_expected_version: version, p_data: data, p_reason: reason, p_request_id: requestId }, session.accessToken);
   return { result };
 }
-export async function refreshFiveMCode(joinCode, { strict = false } = {}) {
+export function refreshFiveMCode(joinCode, options = {}) { return refreshCfxCode(joinCode, { ...options, platform: "fivem" }); }
+export async function refreshCfxCode(joinCode, { platform = "fivem", strict = false } = {}) {
+  if (!["fivem", "redm"].includes(platform)) throw Object.assign(new Error("Unsupported Cfx platform."), { status: 400 });
   const code = parseFiveMJoinCode(joinCode);
-  const lease = await rpc("service_claim_fivem_refresh", { p_join_code: code }, undefined, { useSecret: true });
+  const lease = await rpc("service_claim_cfx_refresh", { p_platform: platform, p_join_code: code }, undefined, { useSecret: true });
   if (!lease) return null;
   try {
-    const source = await fetchFiveMServer(code);
-    if (source.players.status !== "online" || source.players.online === null || source.players.max === null || !source.players.observedAt) throw new Error("FiveM has no current player observation for this server.");
-    return await rpc("service_refresh_fivem_snapshot", { p_join_code: code, p_online: true, p_players: source.players.online, p_capacity: source.players.max, p_observed_at: source.players.observedAt }, undefined, { useSecret: true });
+    const source = await fetchCfxServer(code, { platform });
+    if (source.players.status !== "online" || source.players.online === null || source.players.max === null || !source.players.observedAt) throw new Error("Cfx has no current player observation for this server.");
+    return await rpc("service_refresh_cfx_snapshot", { p_platform: platform, p_join_code: code, p_online: true, p_players: source.players.online, p_capacity: source.players.max, p_observed_at: source.players.observedAt }, undefined, { useSecret: true });
   } catch (error) {
-    await rpc("service_mark_fivem_unavailable", { p_join_code: code }, undefined, { useSecret: true });
+    await rpc("service_mark_cfx_unavailable", { p_platform: platform, p_join_code: code }, undefined, { useSecret: true });
     if (strict) throw error;
     return { online: false, players: null, capacity: null, unavailable: true };
   }
@@ -105,9 +115,9 @@ export async function refreshFiveMCode(joinCode, { strict = false } = {}) {
 export async function refreshDueFiveMServers() {
   if (!supabaseConfig().privileged) return [];
   let due;
-  try { due = await rpc("service_fivem_sources", { p_server_id: null, p_due_only: true, p_limit: 3 }, undefined, { useSecret: true }); }
+  try { due = await rpc("service_cfx_sources", { p_platform: null, p_server_id: null, p_due_only: true, p_limit: 3 }, undefined, { useSecret: true }); }
   catch (error) { if (error.code === "PGRST202") return []; throw error; }
-  const results = await Promise.allSettled((Array.isArray(due) ? due : []).slice(0, 3).map(item => refreshFiveMCode(item.joinCode)));
+  const results = await Promise.allSettled((Array.isArray(due) ? due : []).slice(0, 3).map(item => refreshCfxCode(item.joinCode, { platform: item.platform || "fivem" })));
   return results.flatMap(result => result.status === "fulfilled" && result.value ? [result.value] : []);
 }
 
@@ -121,7 +131,7 @@ export async function enrichImportedServers(servers, { refresh = false } = {}) {
   const refreshed = new Map();
   if (refresh && supabaseConfig().privileged) {
     const due = (details || []).filter(item => item.imported && (!item.lastCheckedAt || Date.now() - Date.parse(item.lastCheckedAt) >= 60_000)).slice(0, 3);
-    await Promise.allSettled(due.map(async item => { const result = await refreshFiveMCode(item.joinCode); if (result) refreshed.set(item.serverId, result); }));
+    await Promise.allSettled(due.map(async item => { const result = await refreshCfxCode(item.joinCode, { platform: item.platform || "fivem" }); if (result) refreshed.set(item.serverId, result); }));
   }
   return servers.map(server => {
     const info = byId.get(server.id); if (!info) return server;

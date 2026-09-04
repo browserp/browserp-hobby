@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { fetchFiveMFeatured, fetchFiveMServer, normalizeFiveMServer, parseFiveMJoinCode, safeFiveMImageUrl } from "../lib/fivem-import.js";
+import { fetchCfxServer, normalizeCfxServer, fetchFiveMFeatured, fetchFiveMServer, normalizeFiveMServer, parseFiveMJoinCode, safeFiveMImageUrl } from "../lib/fivem-import.js";
 
 const now = "2026-09-04T12:00:00.000Z";
 const make = (data = {}, vars = {}) => ({ EndPoint: "abc123", Data: { hostname: "^3Example City", clients: 12, svMaxclients: 64, lastSeen: "2026-09-04T11:59:30Z", iconVersion: 42, resources: ["qb-core"], ...data, vars: { gamename: "gta5", sv_projectName: "^6Example Roleplay", sv_projectDesc: "A friendly roleplay community with businesses and character stories.", locale: "en_GB", tags: "roleplay, custom-cars, player_owned_businesses", sv_appearAllowlisted: "false", ...vars } } });
@@ -57,6 +57,18 @@ test("Conflicting access claims stay unknown instead of advertising an allowlist
   assert.equal(result.access, null); assert.ok(result.issues.some((entry) => entry.code === "conflicting_access"));
   assert.equal(normalize(make({}, { sv_appearAllowlisted: "true", tags: "roleplay,public" })).access, null);
   assert.equal(normalize(make({}, { sv_appearAllowlisted: "true", tags: "roleplay,allowlist" })).access, "allowlisted");
+});
+
+test("Explicit no-whitelist wording is a public-access claim, including when it conflicts with a RedM allowlist flag", () => {
+  const vars = { gamename: "rdr3", sv_projectName: "LEMOYNE: 1908 | No Whitelist", sv_projectDesc: "No whitelist necessary, join Discord to play.", sv_appearAllowlisted: "true" };
+  const result = normalizeCfxServer(make({}, vars), { platform: "redm", now });
+  assert.equal(result.access, null);
+  assert.ok(result.issues.some((entry) => entry.code === "conflicting_access"));
+  assert.equal(normalizeCfxServer(make({}, { ...vars, sv_appearAllowlisted: "false" }), { platform: "redm", now }).access, "public");
+  for (const wording of ["Whitelist is not required", "Play without a whitelist", "Non-whitelisted roleplay"]) {
+    const current = normalize(make({}, { sv_projectName: wording, sv_appearAllowlisted: "true" }));
+    assert.equal(current.access, null, wording);
+  }
 });
 
 test("Image candidates use only approved image sources and exclude private, unsafe, or mislabeled URLs", () => {
@@ -124,4 +136,25 @@ test("Featured discovery is bounded, deduplicates current IDs, and does not auto
   assert.equal(calls.length, 1); assert.equal(calls[0], "https://gss.cfx-services.net/v1/public/featured-servers/fivem");
   assert.match(result.notice, /freeroam/);
   await assert.rejects(fetchFiveMFeatured({ limit: 21, fetchImpl: () => assert.fail("invalid limits must not fetch") }), { code: "invalid_limit" });
+});
+
+
+test("RedM requires explicit rdr3, uses western frameworks and retains unknown observations", async () => {
+  for (const gamename of [undefined, "", "gta5", "gta5_enhanced", "redm"]) assert.throws(() => normalizeCfxServer(make({}, { gamename }), { platform: "redm", now }), { code: "wrong_platform" });
+  assert.throws(() => normalizeFiveMServer(make({}, { gamename: undefined }), { now }), { code: "wrong_platform" });
+  assert.throws(() => normalizeCfxServer(make(), { platform: "minecraft", now }), { code: "wrong_platform" });
+  for (const [resource, expected] of [["vorp_core", "VORP"], ["rsg-core", "RSG"], ["redem_roleplay", "RedEM:RP"], ["qbr-core", "QBR"]]) {
+    const result = normalizeCfxServer(make({ resources: [resource], clients: undefined }, { gamename: "rdr3" }), { platform: "redm", now });
+    assert.equal(result.framework, expected); assert.equal(result.platform, "redm"); assert.equal(result.players.online, null); assert.equal(result.players.observedAt, null);
+    assert.equal(result.source.listingUrl, "https://servers.redm.net/servers/detail/abc123");
+    assert.ok(result.evidence.some(item => item.field === "platform" && item.value === "rdr3"));
+  }
+  const conflict = normalizeCfxServer(make({ resources: ["vorp_core", "rsg-core"] }, { gamename: "rdr3" }), { platform: "redm", now });
+  assert.equal(conflict.framework, null); assert.ok(conflict.issues.some(item => item.code === "conflicting_frameworks"));
+  const stale = normalizeCfxServer(make({ lastSeen: "2026-09-04T11:40:00Z" }, { gamename: "rdr3" }), { platform: "redm", now });
+  assert.equal(stale.players.online, null); assert.equal(stale.players.status, "unknown");
+  let requested;
+  const fetched = await fetchCfxServer("abc123", { platform: "redm", now, fetchImpl: async (url, options) => { requested = url; assert.equal(options.redirect, "error"); return json(make({ resources: ["vorp_core"], clients: 0 }, { gamename: "rdr3" })); } });
+  assert.equal(fetched.players.online, 0); assert.equal(requested, "https://frontend.cfx-services.net/api/servers/single/abc123");
+  await assert.rejects(fetchCfxServer("abc123", { platform: "redm", fetchImpl: async () => json(make()) }), { code: "wrong_platform" });
 });

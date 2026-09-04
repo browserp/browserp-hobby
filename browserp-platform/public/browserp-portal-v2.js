@@ -420,7 +420,10 @@
         toast("Profile saved. Bio changes may still require review."); await refresh();
       } catch (error) { toast(error.message, "error"); submit.disabled = false; }
     });
-    section.append(form); return section;
+    section.append(form);
+    const connections = make("section"); connections.setAttribute("aria-label", "Connected accounts"); section.append(connections);
+    void window.BrowseRPMemberConnections?.init({ api, root: connections });
+    return section;
   }
 
   function dashboardFavorites(favorites, refresh) {

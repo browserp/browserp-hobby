@@ -172,6 +172,21 @@ body.staff-v3 {
 .staff-v3 .staff-login-card-v3 h1 { font-size: clamp(30px, 5vw, 38px); }
 .staff-v3 .staff-login-card-v3 .staff-theme-v3 { position: absolute; right: 20px; top: 18px; }
 .staff-v3 .staff-login-card-v3 .access-note { font-size: 13px; line-height: 1.7; }
+.staff-v3 .staff-login-card-v3 > .logo-v3 { width: min(100%, 240px); margin-block: 32px 30px; }
+.staff-v3 .staff-login-card-v3 > .logo-v3 .logo-lockup-v3 { min-width: 0; width: 100%; }
+.staff-v3 .staff-login-card-v3 > .logo-v3 .logo-full-v5 { width: 100%; height: auto; }
+.staff-v3 .staff-login-card-v3 > .eyebrow-v3 { margin-bottom: 14px; }
+.staff-v3 .staff-login-card-v3 > p { line-height: 1.7; margin-block: 14px 22px; }
+.staff-v3 .staff-login-card-v3 > .provider-button-v4 { width: 100%; min-height: 50px; margin-block: 4px 2px; }
+.staff-v3 .staff-login-card-v3 .staff-form-v3 { padding: 20px 0 0; gap: 18px; }
+.staff-v3 .staff-login-card-v3 .staff-form-v3 input[name="code"] { font-size: 23px; letter-spacing: .28em; font-variant-numeric: tabular-nums; }
+.staff-v3 .staff-login-card-v3 .staff-form-status-v3 { margin-block: 10px; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.staff-v3 .staff-login-card-v3 .staff-form-status-v3:empty { display: none; }
+.staff-v3 .staff-access-actions-v3 { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
+.staff-v3 .staff-access-actions-v3 > .button-v3 { flex: 1 1 160px; }
+.staff-v3 .staff-login-card-v3 .qr-frame-v3 { display: grid; place-items: center; margin-block: 22px; }
+.staff-v3 .staff-login-card-v3 .secret-v3 { margin-top: 16px; border-radius: 10px; padding: 14px; }
+.staff-v3 .staff-login-card-v3:focus { outline: none; }
 
 @media (min-width: 1800px) { .staff-v3 .staff-main-v3 { padding-inline: 54px; } }
 @media (max-width: 1200px) {

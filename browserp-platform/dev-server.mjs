@@ -34,10 +34,19 @@ const apiRoutes = new Map([
   ["POST /api/checkout", "api/checkout.js"],
   ["POST /api/webhooks/stripe", "api/webhooks/stripe.js"],
   ["GET /api/me/overview", ["api/router.js", "me/overview"]],
+  ["GET /api/me/connections", ["api/router.js", "me/connections"]],
+  ["POST /api/me/connections", ["api/router.js", "me/connections"]],
+  ["GET /api/me/profile", ["api/router.js", "me/profile"]],
+  ["POST /api/me/profile", ["api/router.js", "me/profile"]],
+  ["POST /api/me/avatar", ["api/router.js", "me/avatar"]],
   ["GET /api/me/favorites", ["api/router.js", "me/favorites"]],
   ["POST /api/me/favorites", ["api/router.js", "me/favorites"]],
   ["POST /api/me/notifications/read", ["api/router.js", "me/notifications/read"]],
   ["GET /api/admin/overview", ["api/router.js", "admin/overview"]],
+  ["GET /api/admin/redm", ["api/router.js", "admin/redm"]],
+  ["POST /api/admin/redm", ["api/router.js", "admin/redm"]],
+  ["GET /api/admin/minecraft", ["api/router.js", "admin/minecraft"]],
+  ["POST /api/admin/minecraft", ["api/router.js", "admin/minecraft"]],
   ["GET /api/admin/fivem", ["api/router.js", "admin/fivem"]],
   ["POST /api/admin/fivem", ["api/router.js", "admin/fivem"]],
   ["GET /api/server-claims", ["api/router.js", "server-claims"]],
@@ -89,7 +98,7 @@ function securityHeaders(res) {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("Content-Security-Policy", "default-src 'self'; img-src 'self' data: https://cdn.discordapp.com https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/; style-src 'self'; script-src 'self' 'sha256-mjT0FPG3NQWnJyjqoM1ha+xDb2mlOSS3l/dtDWVxA8c='; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+  res.setHeader("Content-Security-Policy", "default-src 'self'; img-src 'self' data: https://cdn.discordapp.com https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/; style-src 'self'; script-src 'self' 'sha256-mjT0FPG3NQWnJyjqoM1ha+xDb2mlOSS3l/dtDWVxA8c='; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), browsing-topics=()");
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
@@ -120,6 +129,7 @@ function staticRoute(pathname) {
   if (pathname === "/servers") return "servers.html";
   if (pathname === "/list-server") return "list-server.html";
   if (pathname === "/dashboard") return "dashboard.html";
+  if (pathname === "/profile") return "profile.html";
   if (pathname === "/legal") return "legal.html";
   if (pathname === "/about") return "about.html";
   if (pathname === "/games" || /^\/games\/[a-z0-9-]+$/i.test(pathname)) return "game.html";

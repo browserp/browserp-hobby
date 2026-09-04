@@ -141,3 +141,22 @@ test("staff approval needs a reason and explicit confirmation; failed decisions 
   assert.deepEqual(posts[0], { id: "claim-fixture", expectedVersion: 4, decision: "approve", reason: "Confirmed game server ownership with supporting records" });
   assert.equal(h.$("dialog").open, true); assert.equal(h.$('dialog [name="reason"]').disabled, false); assert.match(h.$('dialog [name="reason"]').value, /Confirmed game server/); assert.match(h.$("dialog .staff-claims-status").textContent, /claim was updated/);
 });
+
+
+test("RedM review uses its own route and labels without offering FiveM featured suggestions", async t => {
+  const h = harness("staff-fivem"); t.after(() => h.dom.window.close()); const calls = [];
+  const api = async (path, options = {}) => {
+    calls.push({ path, body: options.body ? JSON.parse(options.body) : null });
+    if (!options.body) return { workspace: { items: [record({ platform: "redm", candidate: { ...candidate, platform: "redm", framework: "VORP", accessType: "unknown" } })], total: 1, canManage: true } };
+    return { candidates: [], errors: [] };
+  };
+  await h.w.BrowseRPStaffFiveM.init({ root: h.root, api, platform: "redm" });
+  assert.equal(h.root.dataset.platform, "redm"); assert.ok(calls[0].path.startsWith("/api/admin/redm?"));
+  assert.ok(![...h.root.querySelectorAll("button")].some(button => button.textContent === "Find featured servers"));
+  h.click("Review"); await tick();
+  assert.equal(h.$('[name="framework"]').value, "VORP"); assert.equal(h.$('[name="accessType"]').value, "unknown");
+  assert.match(h.$('.fivem-platform').textContent, /RedM/); assert.match(h.$('.fivem-join').textContent, /RedM join link/);
+  h.$('[name="inputs"]').value = "abc123"; h.submit('.fivem-fetch form'); await tick();
+  assert.ok(calls.some(call => call.path === "/api/admin/redm" && call.body?.action === "fetch"));
+  assert.ok(!calls.some(call => call.body?.action === "publish"));
+});

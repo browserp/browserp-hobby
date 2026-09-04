@@ -5,6 +5,11 @@ import { assessContent } from "./moderation.js";
 // The source is a self-reported directory snapshot, not proof of ownership or accuracy.
 const API = "https://frontend.cfx-services.net/api/servers";
 const FEATURED = "https://gss.cfx-services.net/v1/public/featured-servers/fivem";
+const CFX_PLATFORMS = Object.freeze({ fivem: { name: "FiveM", games: ["gta5", "gta5_enhanced"], listing: "https://servers.fivem.net" }, redm: { name: "RedM", games: ["rdr3"], listing: "https://servers.redm.net" } });
+function cfxPlatform(platform) {
+  if (!Object.hasOwn(CFX_PLATFORMS, platform)) throw new FiveMImportError("wrong_platform", "Choose FiveM or RedM.", 400);
+  return CFX_PLATFORMS[platform];
+}
 const MAX_BODY = 1_048_576;
 const STALE_AFTER_MS = 5 * 60_000;
 const IMAGE_HOSTS = new Set(["cdn.discordapp.com", "media.discordapp.net", "i.imgur.com", "i.postimg.cc", "res.cloudinary.com"]);
@@ -23,13 +28,13 @@ export class FiveMImportError extends Error {
 }
 
 export function parseFiveMJoinCode(input) {
-  if (typeof input !== "string" || input.length > 160) throw new FiveMImportError("invalid_join_code", "Enter a FiveM join code or a cfx.re/join link.", 400);
+  if (typeof input !== "string" || input.length > 160) throw new FiveMImportError("invalid_join_code", "Enter a Cfx join code or a cfx.re/join link.", 400);
   const value = input.trim();
   if (/^[a-z0-9]{6,12}$/i.test(value)) return value.toLowerCase();
   let url;
   try { url = new URL(/^cfx\.re\//i.test(value) ? `https://${value}` : value); } catch { /* rejected below */ }
   if (url && url.protocol === "https:" && url.hostname === "cfx.re" && !url.username && !url.password && !url.port && !url.search && !url.hash && /^\/join\/[a-z0-9]{6,12}\/?$/i.test(url.pathname)) return url.pathname.split("/")[2].toLowerCase();
-  throw new FiveMImportError("invalid_join_code", "Use a 6–12 character FiveM join code or an HTTPS cfx.re/join link.", 400);
+  throw new FiveMImportError("invalid_join_code", "Use a 6–12 character Cfx join code or an HTTPS cfx.re/join link.", 400);
 }
 
 function safeUrl(value) {
@@ -74,17 +79,19 @@ function fieldStrings(data, vars) {
   return fields.filter((field) => typeof field.value === "string");
 }
 
-export function normalizeFiveMServer(raw, { joinCode: requested, now = new Date() } = {}) {
-  if (!object(raw) || !object(raw.Data)) throw new FiveMImportError("invalid_response", "FiveM returned an invalid server record.");
+export function normalizeCfxServer(raw, { platform = "fivem", joinCode: requested, now = new Date() } = {}) {
+  const game = cfxPlatform(platform);
+  if (!object(raw) || !object(raw.Data)) throw new FiveMImportError("invalid_response", `${game.name} returned an invalid server record.`);
   const joinCode = parseFiveMJoinCode(raw.EndPoint);
-  if (requested && parseFiveMJoinCode(requested) !== joinCode) throw new FiveMImportError("mismatched_server", "FiveM returned a different server. Nothing was imported.");
+  if (requested && parseFiveMJoinCode(requested) !== joinCode) throw new FiveMImportError("mismatched_server", `${game.name} returned a different server. Nothing was imported.`);
   const fetchedAt = new Date(now).toISOString();
   const data = raw.Data;
   const vars = object(data.vars) ? data.vars : {};
-  if (typeof vars.gamename === "string" && !["gta5", "gta5_enhanced"].includes(vars.gamename.toLowerCase())) throw new FiveMImportError("wrong_platform", "This listing is not a FiveM server.", 422);
+  if (!game.games.includes(typeof vars.gamename === "string" ? vars.gamename.toLowerCase() : "")) throw new FiveMImportError("wrong_platform", `The source must explicitly identify this listing as ${game.name}. Nothing was imported.`, 422);
   const evidence = [], issues = [];
   const issue = (code, field, message, severity = "warning") => { if (!issues.some((item) => item.code === code && item.field === field) && issues.length < 40) issues.push({ code, field, severity, message }); };
   const record = (field, source, value, confidence = "high") => { if (value !== null && value !== "" && evidence.length < 80) evidence.push({ field, source, value, confidence }); };
+  record("platform", "vars.gamename", vars.gamename.toLowerCase());
   const fields = fieldStrings(data, vars);
   const candidates = [];
   for (const field of fields) {
@@ -152,20 +159,26 @@ export function normalizeFiveMServer(raw, { joinCode: requested, now = new Date(
   if (region) issue("locale_region", "region", "The suggested region comes from the language locale, not a verified server location.", "info");
   if (!language) issue("unknown_language", "language", "The listing does not provide a usable primary language.");
   const resources = Array.isArray(data.resources) ? data.resources.filter((value) => typeof value === "string").slice(0, 2_000) : [];
-  const frameworks = [["qbx_core", "Qbox"], ["qb-core", "QBCore"], ["es_extended", "ESX"], ["vrp", "vRP"], ["ox_core", "Ox Core"]].filter(([resource]) => resources.some((value) => value.toLowerCase() === resource));
+  const frameworkResources = platform === "redm"
+    ? [["vorp_core", "VORP"], ["rsg-core", "RSG"], ["redem_roleplay", "RedEM:RP"], ["qbr-core", "QBR"]]
+    : [["qbx_core", "Qbox"], ["qb-core", "QBCore"], ["es_extended", "ESX"], ["vrp", "vRP"], ["ox_core", "Ox Core"], ["vmenu", "vMenu"]];
+  const frameworks = frameworkResources.filter(([resource]) => resources.some((value) => value.toLowerCase() === resource));
   let framework = frameworks.length === 1 ? frameworks[0][1] : null;
   if (framework) record("framework", `resources.${frameworks[0][0]}`, framework, "medium");
   if (frameworks.length > 1) issue("conflicting_frameworks", "framework", "Several framework resources were found. Confirm the active setup.");
   if (!framework && !frameworks.length) {
     const declared = plain(vars.framework, 80).toLowerCase();
-    const known = { esx: "ESX", qbcore: "QBCore", "qb-core": "QBCore", qbox: "Qbox", vrp: "vRP", "ox core": "Ox Core" };
+    const known = platform === "redm"
+      ? { vorp: "VORP", vorp_core: "VORP", rsg: "RSG", "rsg-core": "RSG", "rsg core": "RSG", "redem:rp": "RedEM:RP", redemrp: "RedEM:RP", redem_roleplay: "RedEM:RP", qbr: "QBR", "qbr-core": "QBR" }
+      : { esx: "ESX", qbcore: "QBCore", "qb-core": "QBCore", qbox: "Qbox", vrp: "vRP", "ox core": "Ox Core", vmenu: "vMenu" };
     framework = known[declared] || null;
     if (framework) record("framework", "vars.framework", framework, "low");
   }
   let access = String(vars.sv_appearAllowlisted).toLowerCase() === "true" ? "allowlisted" : String(vars.sv_appearAllowlisted).toLowerCase() === "false" ? "public" : null;
-  const claimsRestrictedAccess = /\b(?:allowlist|whitelist)(?:ed)?\b/i.test(name) || tags.some((tag) => /^(?:allowlist|whitelist)(?:ed)?$/.test(tag));
-  const claimsPublicAccess = tags.some((tag) => /^(?:public|no (?:allowlist|whitelist)|free access)$/.test(tag));
-  if (access === "public" && claimsRestrictedAccess || access === "allowlisted" && claimsPublicAccess) { access = null; issue("conflicting_access", "access", "The access flag conflicts with the name or tags. Confirm whether approval is required."); }
+  const publicAccessClaim = /\b(?:no|without)\s+(?:an?\s+)?(?:allowlist|whitelist)(?:ed)?\b|\b(?:allowlist|whitelist)(?:ing)?\s+(?:is\s+)?not\s+(?:required|needed)\b|\bnon[- ](?:allowlist|whitelist)ed\b/gi;
+  const claimsRestrictedAccess = /\b(?:allowlist|whitelist)(?:ed)?\b/i.test(name.replace(publicAccessClaim, "")) || tags.some((tag) => /^(?:allowlist|whitelist)(?:ed)?$/.test(tag));
+  const claimsPublicAccess = Boolean(`${name} ${description}`.match(publicAccessClaim)) || tags.some((tag) => /^(?:public|no (?:allowlist|whitelist)|free access)$/.test(tag));
+  if (access === "public" && claimsRestrictedAccess || access === "allowlisted" && claimsPublicAccess) { access = null; issue("conflicting_access", "access", "The access flag conflicts with the name, description or tags. Confirm whether approval is required."); }
   if (access) record("access", "vars.sv_appearAllowlisted", access, "medium");
   const imageEntries = candidates.filter((entry) => entry.type === "image");
   for (const entry of imageEntries.filter((image) => !image.trusted)) { record("images.untrusted", entry.source, entry.url, "low"); issue("untrusted_image_host", "images", "An image uses an unsupported host. Upload or replace it during review."); }
@@ -186,15 +199,14 @@ export function normalizeFiveMServer(raw, { joinCode: requested, now = new Date(
   if (max === 0) max = null;
   if (online !== null && max !== null && online > max) { issue("inconsistent_players", "players", "The reported player count exceeds the reported capacity. The count was excluded."); online = null; }
   if (stale) { online = null; issue("stale_snapshot", "players", "The directory snapshot is offline, stale or has an invalid timestamp. No live count is shown."); }
-  if (!lastSeen) issue("unknown_upstream_age", "players", "FiveM did not supply a last-seen time; the count is only a snapshot fetched now.");
+  if (!lastSeen) issue("unknown_upstream_age", "players", `${game.name} did not supply a last-seen time; the count is only a snapshot fetched now.`);
   if (online === null && !stale) issue("unknown_players", "players", "A reliable player count was not supplied.");
   const players = { online, max, observedAt: online === null ? null : lastSeen || fetchedAt, status: data.fallback === true ? "offline" : online === null ? "unknown" : "online" };
   if (online !== null) record("players.online", "clients", online);
   if (max !== null) record("players.max", "svMaxclients", max);
   const moderation = assessContent({ name, description, tags: tags.join(", "), communityUrl, websiteUrl });
   for (const reason of moderation.reasons) issue("content_review", "content", reason, moderation.action === "reject" ? "error" : "warning");
-  if (!vars.gamename) issue("missing_game_name", "platform", "The source did not explicitly identify its game. Confirm this is FiveM.");
-  return { joinCode, platform: "fivem", name, description, links: { cfxJoinUrl, communityUrl, websiteUrl }, players, images: { logoUrl, bannerUrl }, tags, keywords, locale, language, region, framework, access, evidence, issues, confidence: issues.some((entry) => entry.severity === "error") ? "low" : issues.some((entry) => entry.severity === "warning") ? "medium" : "high", source: { provider: "cfx", url: `${API}/single/${joinCode}`, listingUrl: `https://servers.fivem.net/servers/detail/${joinCode}`, fetchedAt, lastSeen }, requiresReview: true };
+  return { joinCode, platform, name, description, links: { cfxJoinUrl, communityUrl, websiteUrl }, players, images: { logoUrl, bannerUrl }, tags, keywords, locale, language, region, framework, access, evidence, issues, confidence: issues.some((entry) => entry.severity === "error") ? "low" : issues.some((entry) => entry.severity === "warning") ? "medium" : "high", source: { provider: "cfx", url: `${API}/single/${joinCode}`, listingUrl: `${game.listing}/servers/detail/${joinCode}`, fetchedAt, lastSeen }, requiresReview: true };
 }
 
 async function readJson(url, { fetchImpl = globalThis.fetch, timeoutMs = 5_000, maxBytes = MAX_BODY } = {}) {
@@ -205,36 +217,40 @@ async function readJson(url, { fetchImpl = globalThis.fetch, timeoutMs = 5_000, 
     if (!response.ok) {
       await response.body?.cancel();
       const code = response.status === 404 ? "not_found" : response.status === 429 ? "upstream_rate_limited" : [401, 403].includes(response.status) ? "upstream_unavailable" : "upstream_error";
-      throw new FiveMImportError(code, response.status === 404 ? "That server is not in the FiveM list. Check its join code." : response.status === 429 ? "FiveM is limiting requests. Try again later." : "The FiveM list is unavailable. No existing data was changed.", response.status === 404 ? 404 : response.status === 429 ? 429 : 502);
+      throw new FiveMImportError(code, response.status === 404 ? "That server is not in the Cfx list. Check its join code." : response.status === 429 ? "Cfx is limiting requests. Try again later." : "The Cfx list is unavailable. No existing data was changed.", response.status === 404 ? 404 : response.status === 429 ? 429 : 502);
     }
-    if (!/^application\/(?:json|[a-z0-9.+-]+\+json)(?:;|$)/i.test(response.headers.get("content-type") || "")) { await response.body?.cancel(); throw new FiveMImportError("invalid_response", "FiveM returned an unexpected response. Try again later."); }
-    if (Number(response.headers.get("content-length")) > maxBytes) { await response.body?.cancel(); throw new FiveMImportError("response_too_large", "The FiveM record is too large to safely import."); }
+    if (!/^application\/(?:json|[a-z0-9.+-]+\+json)(?:;|$)/i.test(response.headers.get("content-type") || "")) { await response.body?.cancel(); throw new FiveMImportError("invalid_response", "Cfx returned an unexpected response. Try again later."); }
+    if (Number(response.headers.get("content-length")) > maxBytes) { await response.body?.cancel(); throw new FiveMImportError("response_too_large", "The Cfx record is too large to safely import."); }
     const reader = response.body?.getReader();
-    if (!reader) throw new FiveMImportError("invalid_response", "FiveM returned an empty response.");
+    if (!reader) throw new FiveMImportError("invalid_response", "Cfx returned an empty response.");
     const chunks = []; let size = 0;
     while (true) {
       const { value, done } = await reader.read(); if (done) break;
       size += value.byteLength;
-      if (size > maxBytes) { await reader.cancel(); throw new FiveMImportError("response_too_large", "The FiveM record is too large to safely import."); }
+      if (size > maxBytes) { await reader.cancel(); throw new FiveMImportError("response_too_large", "The Cfx record is too large to safely import."); }
       chunks.push(value);
     }
-    try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); } catch { throw new FiveMImportError("invalid_response", "FiveM returned an invalid response."); }
+    try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); } catch { throw new FiveMImportError("invalid_response", "Cfx returned an invalid response."); }
   } catch (error) {
     if (error instanceof FiveMImportError) throw error;
-    throw new FiveMImportError(controller.signal.aborted ? "upstream_timeout" : "upstream_unavailable", controller.signal.aborted ? "FiveM took too long to respond. Try again later." : "The FiveM list could not be reached. No existing data was changed.");
+    throw new FiveMImportError(controller.signal.aborted ? "upstream_timeout" : "upstream_unavailable", controller.signal.aborted ? "Cfx took too long to respond. Try again later." : "The Cfx list could not be reached. No existing data was changed.");
   } finally { clearTimeout(timer); }
 }
 
-export async function fetchFiveMServer(input, { fetchImpl, now, timeoutMs } = {}) {
+export function normalizeFiveMServer(raw, options = {}) { return normalizeCfxServer(raw, { ...options, platform: "fivem" }); }
+export async function fetchCfxServer(input, { platform = "fivem", fetchImpl, now, timeoutMs } = {}) {
+  cfxPlatform(platform);
   const joinCode = parseFiveMJoinCode(input);
   const raw = await readJson(`${API}/single/${joinCode}`, { fetchImpl, timeoutMs });
-  return normalizeFiveMServer(raw, { joinCode, now });
+  return normalizeCfxServer(raw, { platform, joinCode, now });
 }
+
+export function fetchFiveMServer(input, options = {}) { return fetchCfxServer(input, { ...options, platform: "fivem" }); }
 
 export async function fetchFiveMFeatured({ limit = 20, fetchImpl, timeoutMs, now = new Date() } = {}) {
   if (!Number.isInteger(limit) || limit < 1 || limit > 20) throw new FiveMImportError("invalid_limit", "Choose between 1 and 20 featured servers.", 400);
   const raw = await readJson(FEATURED, { fetchImpl, timeoutMs, maxBytes: 262_144 });
-  if (!object(raw) || !Array.isArray(raw.pinnedServers) && !Array.isArray(raw.servers)) throw new FiveMImportError("invalid_response", "FiveM returned an invalid featured list.");
+  if (!object(raw) || !Array.isArray(raw.pinnedServers) && !Array.isArray(raw.servers)) throw new FiveMImportError("invalid_response", "Cfx returned an invalid featured list.");
   const entries = [];
   function add(code, name) { try { const joinCode = parseFiveMJoinCode(code); if (!entries.some((entry) => entry.joinCode === joinCode) && entries.length < limit) entries.push({ joinCode, name: plain(name, 80) || null, sourceUrl: FEATURED }); } catch { /* invalid source codes are not fetched */ } }
   for (const entry of (raw.servers || []).slice(0, 100)) if (object(entry)) { if (entry.hash_id) add(entry.hash_id, entry.name); for (const code of (Array.isArray(entry.hash_ids) ? entry.hash_ids : []).slice(0, 20)) add(code, entry.name); }

@@ -41,7 +41,7 @@ export function only(req, res, methods) {
 }
 
 export async function readBody(req, maxBytes = 64 * 1024) {
-  const limit = Math.min(Math.max(Number(maxBytes) || 64 * 1024, 1), 1024 * 1024);
+  const limit = Math.min(Math.max(Number(maxBytes) || 64 * 1024, 1), 2 * 1024 * 1024);
   const contentType = String(req.headers?.["content-type"] || "").trim();
   if (!JSON_MIME.test(contentType)) {
     throw Object.assign(new Error("Content-Type must be application/json."), { status: 415 });

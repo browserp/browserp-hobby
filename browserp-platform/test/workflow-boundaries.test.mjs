@@ -87,31 +87,31 @@ test('claim requests discard client-supplied verification and keep evidence with
 
 test('staff filtering clamps offsets and candidate lookup preserves the authenticated permission boundary',async()=>backend(({url,body,options})=>{
  if(url.pathname.endsWith('/rpc/staff_server_claims')){assert.equal(body.p_offset,10000);return response({items:[],total:0});}
- if(url.pathname.endsWith('/rpc/staff_fivem_candidates')){assert.equal(body.p_offset,0);return response({items:[],total:0});}
- if(url.pathname.endsWith('/rpc/staff_fivem_candidate')){assert.equal(options.headers.Authorization,`Bearer ${token}`);return response({id:candidateId,joinCode:'6myr996',version:1,serverId,candidate:{name:'Fixture',description:'An accurate description of this server and its roleplay community.',tags:['roleplay']}});}
+ if(url.pathname.endsWith('/rpc/staff_cfx_candidates')){assert.equal(body.p_offset,0);return response({items:[],total:0});}
+ if(url.pathname.endsWith('/rpc/staff_cfx_candidate')){assert.equal(options.headers.Authorization,`Bearer ${token}`);return response({id:candidateId,joinCode:'6myr996',version:1,serverId,candidate:{name:'Fixture',description:'An accurate description of this server and its roleplay community.',tags:['roleplay']}});}
 },async(calls)=>{
  await staffClaims(req('GET',undefined,'/api/admin/claims?offset=100000.5'),res(),'request-fixture');
  await assert.rejects(staffFiveM(req('POST',{action:'publish',id:candidateId,expectedVersion:1,reason:'Reviewing this candidate',data:{tags:'https://discord.gg/not-a-tag'}}),res(),'request-fixture'),{status:400});
  assert.equal(calls.some(call=>call.url.pathname==='/rest/v1/fivem_import_candidates'),false);
- assert.equal(calls.some(call=>call.url.pathname.endsWith('/rpc/staff_publish_fivem_candidate')),false);
+ assert.equal(calls.some(call=>call.url.pathname.endsWith('/rpc/staff_publish_cfx_candidate')),false);
 }));
 
 test('scraper permission failures stop before upstream fetch or private candidate access',async()=>backend(({url})=>{
- if(url.pathname.endsWith('/rpc/staff_fivem_candidates'))return response({message:'Scraper permission required',code:'42501'},403);
+ if(url.pathname.endsWith('/rpc/staff_cfx_candidates'))return response({message:'Scraper permission required',code:'42501'},403);
 },async(calls)=>{
  await assert.rejects(staffFiveM(req('POST',{action:'fetch',inputs:['6myr996']}),res(),'request-fixture'),{status:403});
  assert.equal(calls.some(call=>call.url.hostname!=='fixture.supabase.co'),false);
- assert.equal(calls.some(call=>call.url.pathname.endsWith('/rpc/service_stage_fivem_candidate')),false);
+ assert.equal(calls.some(call=>call.url.pathname.endsWith('/rpc/service_stage_cfx_candidate')),false);
 }));
 
 test('due refresh reads only stored sources, takes a lease and persists current observations',async()=>backend(({url,body})=>{
- if(url.pathname.endsWith('/rpc/service_fivem_sources')){assert.equal(body.p_due_only,true);assert.equal(body.p_limit,3);return response([{serverId,joinCode:'6myr996'}]);}
- if(url.pathname.endsWith('/rpc/service_claim_fivem_refresh')){assert.equal(body.p_join_code,'6myr996');return response(true);}
+ if(url.pathname.endsWith('/rpc/service_cfx_sources')){assert.equal(body.p_due_only,true);assert.equal(body.p_limit,3);return response([{serverId,joinCode:'6myr996'}]);}
+ if(url.pathname.endsWith('/rpc/service_claim_cfx_refresh')){assert.equal(body.p_join_code,'6myr996');return response(true);}
  if(url.hostname==='frontend.cfx-services.net'){assert.equal(url.pathname,'/api/servers/single/6myr996');return response(source());}
- if(url.pathname.endsWith('/rpc/service_refresh_fivem_snapshot')){assert.equal(body.p_players,8);return response({serverId,online:true,players:8,capacity:64,checkedAt:body.p_observed_at});}
+ if(url.pathname.endsWith('/rpc/service_refresh_cfx_snapshot')){assert.equal(body.p_platform,'fivem');assert.equal(body.p_players,8);return response({serverId,online:true,players:8,capacity:64,checkedAt:body.p_observed_at});}
 },async(calls)=>{
  const result=await refreshDueFiveMServers();assert.equal(result.length,1);assert.equal(result[0].players,8);
- assert.ok(calls.findIndex(call=>call.url.pathname.endsWith('/rpc/service_claim_fivem_refresh'))<calls.findIndex(call=>call.url.hostname==='frontend.cfx-services.net'));
+ assert.ok(calls.findIndex(call=>call.url.pathname.endsWith('/rpc/service_claim_cfx_refresh'))<calls.findIndex(call=>call.url.hostname==='frontend.cfx-services.net'));
 }));
 
 test('unavailable imported observations remain unknown when enriching cached directory results',async()=>backend(({url})=>{
@@ -159,10 +159,10 @@ test('public Discord invite validation uses a fixed unauthenticated endpoint and
 
 test('staff fetch removes dead Discord invites but retains inconclusive links for review',async()=>{
  for(const status of [404,200,429])await backend(({url,body,options})=>{
-  if(url.pathname.endsWith('/rpc/staff_fivem_candidates'))return response({items:[],total:0});
+  if(url.pathname.endsWith('/rpc/staff_cfx_candidates'))return response({items:[],total:0});
   if(url.hostname==='frontend.cfx-services.net'){const fixture=source();fixture.Data.vars.discord='https://discord.gg/fixture';return response(fixture);}
   if(url.hostname==='discord.com'){assert.equal(url.pathname,'/api/v10/invites/fixture');assert.equal(options.headers.Authorization,undefined);return response(status===200?{type:0,guild:{id:guildId,name:'Fixture guild'}}:{code:10006},status);}
-  if(url.pathname.endsWith('/rpc/service_stage_fivem_candidate')){
+  if(url.pathname.endsWith('/rpc/service_stage_cfx_candidate')){
    const candidate=body.p_candidate;
    assert.equal(candidate.discordUrl,status===404?null:'https://discord.gg/fixture');
    if(status===200){assert.equal(candidate.evidence.find(item=>item.field==='links.communityGuildName').value,'Fixture guild');assert.equal(Object.hasOwn(candidate,'verificationStatus'),false);}
