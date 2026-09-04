@@ -105,7 +105,7 @@ test("database discovery counts beyond page size and excludes private, adult and
     const migrations = readdirSync(new URL("../supabase/migrations", import.meta.url));
     const importSQL = read(`supabase/migrations/${migrations.find(name => name.endsWith("_fivem_imports_and_server_claims.sql"))}`);
     await db.exec(importSQL.match(/create or replace view private\.effective_server_status[\s\S]*?revoke all on private\.effective_server_status[^;]*;/)[0]);
-    for (const suffix of ["_searchable_import_keywords.sql", "_tailored_game_discovery_filters.sql"]) await db.exec(read(`supabase/migrations/${migrations.find(name => name.endsWith(suffix))}`));
+    for (const suffix of ["_searchable_import_keywords.sql", "_tailored_game_discovery_filters.sql", "_public_whitelisted_discovery_filters.sql"]) await db.exec(read(`supabase/migrations/${migrations.find(name => name.endsWith(suffix))}`));
     const query = async filters => (await db.query("select public.search_public_directory($1::jsonb) as result", [JSON.stringify(filters)])).rows[0].result;
     const first = await query({ platform: "fivem", feature: "custom cars", limit: 24 });
     assert.equal(first.total, 125); assert.equal(first.servers.length, 24); assert.deepEqual(first.facets.mode, [{ value: "qbcore", count: 125 }]);
@@ -129,8 +129,63 @@ test("database discovery counts beyond page size and excludes private, adult and
     assert.equal((await query({platform:'minecraft',mode:'school rp'})).total,0);
     const popular = await query({platform:'fivem'});assert.deepEqual(popular.facets.mode,[{value:'qbcore',count:125},{value:'vmenu',count:1}]);
     assert.ok(popular.servers.every(row=>!Object.hasOwn(row,'mode_values')&&!Object.hasOwn(row,'feature_values')));
+    await db.exec(`update public.servers set access_type='application' where slug='community-1';
+      update public.servers set access_type='allowlisted',region='United States' where slug='community-2';
+      update public.servers set access_type='unknown' where slug='community-3';`);
+    for (const alias of ['whitelisted','allowlisted','application','whitelist','allowlist','application_required','Approval Required']) {
+      const whitelist = await query({platform:'fivem',access:alias});
+      assert.equal(whitelist.total,2,alias);
+      assert.deepEqual(whitelist.servers.map(row=>row.access_type).sort(),['allowlisted','application']);
+      const canonical = (await db.query("select private.discovery_game_value('fivem','access',$1) as value",[alias])).rows[0].value;
+      assert.equal(canonical,M.canonical('access',alias),'SQL and JS must agree on '+alias);
+    }
+    assert.equal((await query({platform:'fivem',access:'whitelisted',region:'Europe'})).total,1);
+    assert.equal((await query({platform:'minecraft',access:'whitelisted'})).total,0);
+    assert.equal((await query({platform:'fivem',access:'public'})).total,123);
+    const accessFacets = (await query({platform:'fivem'})).facets.access;
+    assert.deepEqual(accessFacets,[{value:'public',count:123},{value:'whitelisted',count:2},{value:'unknown',count:1}]);
+    assert.equal((await query({platform:'fivem',access:'unknown'})).servers[0].access_type,'unknown');
+    assert.equal((await db.query("select has_function_privilege('anon','private.discovery_game_value(text,text,text)','execute') as allowed")).rows[0].allowed,false);
     await db.exec('set role anon');assert.equal((await query({platform:'fivem',mode:'QBCore'})).total,125);
   } finally { await db.close(); }
+});
+
+test("Public and Whitelisted group old joining values without reclassifying unknown or changing raw metadata", () => {
+  const fixtures = [sample('open'),sample('applied',{access_type:'application'}),sample('approved',{access_type:'allowlisted'}),sample('uncertain',{access_type:'unknown'})];
+  for (const alias of ['whitelisted','allowlisted','application','Whitelist','allowlist','application_required','approval-required']) {
+    assert.equal(M.normalize({access:alias}).access,'whitelisted');
+    assert.deepEqual(fixtures.filter(row=>M.matches(row,{access:alias})).map(row=>row.slug),['applied','approved']);
+    assert.equal(M.params({access:alias}).get('access'),'whitelisted');
+  }
+  assert.deepEqual(fixtures.filter(row=>M.matches(row,{access:'open'})).map(row=>row.slug),['open']);
+  assert.deepEqual(M.facets(fixtures,{}).access,[{value:'whitelisted',count:2},{value:'unknown',count:1},{value:'public',count:1}]);
+  assert.deepEqual(fixtures.map(row=>row.access_type),['public','application','allowlisted','unknown']);
+  assert.equal(M.display('access','application'),'Whitelisted');assert.equal(M.display('access','public'),'Public');
+});
+
+test("visible joining choices work on Discover and game pages, restore old URLs, and never display facet counts", async () => {
+  const fixtures=[sample('open'),sample('applied',{access_type:'application'}),sample('approved',{access_type:'allowlisted'}),sample('uncertain',{access_type:'unknown'})];
+  for (const fixedGame of [undefined,'fivem']) {
+    const h=harness({url:`https://browserp.test/${fixedGame?'games/fivem':'servers'}?access=application`,fixedGame,fetcher:async url=>{
+      const filters=Object.fromEntries(new URL(url,'https://browserp.test').searchParams);
+      const servers=fixtures.filter(row=>M.matches(row,filters));
+      return {ok:true,json:async()=>({servers,total:servers.length,facets:M.facets(fixtures,filters),nextOffset:null})};
+    }});
+    await pause(10);
+    assert.equal(h.$('#access-whitelisted').checked,true);
+    assert.equal(h.$('#access-filter').closest('.smart-refinements'),null);
+    assert.equal(h.$('#access-filter').tagName,'FIELDSET');
+    assert.equal(h.$('#access-filter').getAttribute('aria-describedby'),'access-filter-help');
+    assert.equal(h.$('#list').textContent,'applied,approved');
+    assert.deepEqual([...h.w.document.querySelectorAll('.smart-access-choice span')].map(x=>x.textContent),['All','Public','Whitelisted','Not confirmed']);
+    h.$('#access-public').click();await pause(10);
+    assert.equal(h.$('#list').textContent,'open');assert.equal(new URLSearchParams(h.w.location.search).get('access'),'public');
+    h.$('#access-unknown').click();await pause(10);assert.equal(h.$('#list').textContent,'uncertain');
+    h.w.history.replaceState(null,'',`${h.w.location.pathname}?access=allowlisted`);h.w.dispatchEvent(new h.w.PopStateEvent('popstate'));await pause(10);
+    assert.equal(h.$('#access-whitelisted').checked,true);assert.equal(h.$('#list').textContent,'applied,approved');
+    h.$('[aria-label="Remove How to join: Whitelisted"]').click();await pause(10);assert.equal(h.$('#access-all').checked,true);
+    h.dom.window.close();
+  }
 });
 
 test("typing spaces preserves ordinary multiword searches and first ArrowUp selects the last choice", async () => {

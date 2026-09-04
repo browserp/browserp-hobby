@@ -784,6 +784,15 @@ main { animation: page-enter-v3 .42s cubic-bezier(.22,.75,.26,1) both; }
 .smart-search-row { display:flex; gap:12px; align-items:end; margin-bottom:16px; }
 .smart-search-row .field-v3 { flex:1; min-width:0; }
 .smart-primary-filters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.smart-access-filters { min-width:0; margin:18px 0 0; padding:0; border:0; }
+.smart-access-filters legend { margin-bottom:9px; padding:0; color:var(--copy); font-size:14px; font-weight:700; }
+.smart-access-choices { display:flex; flex-wrap:wrap; gap:8px; }
+.smart-access-choice { display:flex; align-items:center; gap:9px; min-height:44px; padding:9px 14px; border:1px solid var(--line-strong, #554663); border-radius:10px; color:var(--copy, #eeeafc); background:var(--panel, #131018); cursor:pointer; }
+.smart-access-choice input { flex:none; width:16px; height:16px; margin:0; accent-color:var(--pink-strong, #ff5ab5); }
+.smart-access-choice:has(input:checked) { border-color:var(--pink-strong, #ff5ab5); background:#382036; color:#fff; }
+.smart-access-choice:has(input:focus-visible) { outline:2px solid #b697ff; outline-offset:3px; }
+.smart-access-choice:has(input:disabled) { color:var(--muted, #b0a7b7); border-style:dashed; cursor:not-allowed; }
+.smart-access-help { margin:10px 0 0; color:var(--muted, #bdb7ca); font-size:13px; line-height:1.6; }
 .smart-refinements { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-top:16px; }
 .smart-checks { grid-column:1/-1; display:flex; flex-wrap:wrap; align-items:center; gap:18px; }
 .smart-filter-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }

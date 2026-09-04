@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-04T01:42:42.997933+00:00",
+  "generatedAt": "2026-09-04T13:27:53.503Z",
   "targetTotal": 20,
   "publicationMeaning": "status=publish is an editorial shortlist for the explicit staff review/publish flow. This manifest does not authorize automation to skip review, create ownership, mark communities verified or reuse historical counts as live.",
   "method": "Each selected code was fetched individually from the fixed official Cfx server endpoint and required gamename rdr3. English metadata was checked against community-authored descriptions and public rules where available. Public Discord invites were resolved to matching guild names. Logos and supported banners were fetched through the restricted image guard; known placeholders were visually rejected. Selection considers distinct roleplay styles, public community information and usable onboarding links rather than sorting solely by player count. No private Discord channels, server IP endpoints, player identifiers or accounts were collected.",
@@ -851,11 +851,11 @@
       "status": "publish",
       "reviewStatus": "reviewed_public_sources",
       "name": "Gilded Roleplay",
-      "description": "Gilded Roleplay is an English-speaking RedM community for adults with a serious western setting. Its current listing describes a 1904 world with criminal story opportunities, while the official website provides rules and a detailed getting-started guide. The guide covers Discord roles, a whitelist application and TeamSpeak with SaltyChat. Follow the current community instructions before joining.",
+      "description": "Gilded Roleplay is an English-speaking RedM community for adults with a serious western setting. Its current listing describes a 1904 world with criminal story opportunities, while the official website provides rules and a detailed getting-started guide. New players complete an in-game entry quiz on their first login. Follow the official Discord for current admission and voice-setup instructions.",
       "region": "Not confirmed",
       "language": "English",
       "framework": "VORP",
-      "accessType": "unknown",
+      "accessType": "allowlisted",
       "discordUrl": "https://discord.gg/gildedrp",
       "websiteUrl": "https://www.gildedroleplay.com/",
       "tags": [
@@ -894,6 +894,10 @@
         {
           "url": "https://www.gildedroleplay.com/rules",
           "purpose": "Official rules destination"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/Inepsa/Gilded-RP-Rules/main/Gilded%20RP%20Rules.md",
+          "purpose": "Current rulebook fetched by the iframe on the official /rules page; explicitly places the whitelist application quiz in-game on first login."
         }
       ],
       "inclusionReasons": [
@@ -902,7 +906,7 @@
       ],
       "conflicts": [
         "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
-        "The getting-started guide says “when the whitelist is on” and the current Cfx record has no reliable access flag. Leave Not confirmed.",
+        "Access review (4 September 2026): the current official rulebook explicitly calls the first-login in-game quiz a whitelist application, supporting Whitelisted under the site definition. Older Discord-application guidance does not describe the current entry method. Whether the quiz is auto-scored or staff-reviewed was not established and is not required for this classification.",
         "The Imgur banner returned a region-unavailable placeholder and is omitted."
       ],
       "sourceObservation": {
@@ -1320,7 +1324,7 @@
     {
       "joinCode": "bdx8ak8",
       "platform": "redm",
-      "status": "publish",
+      "status": "hold",
       "reviewStatus": "reviewed_public_sources",
       "name": "Lemoyne: 1908",
       "description": "Lemoyne: 1908 is an English-speaking RedM community centered on heavy text roleplay and character interaction during the early twentieth century. Its official site and current listing describe a setting shaped by industrial change. This is a text-focused alternative to the usual voice-led frontier server. Join the verified Discord and read the official forums for current rules and joining requirements.",
@@ -1373,7 +1377,8 @@
       ],
       "conflicts": [
         "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
-        "The current name and description explicitly say no whitelist, while the upstream allowlist flag is true. Access must remain Not confirmed until the community resolves the conflict."
+        "The current name and description explicitly say no whitelist, while the upstream allowlist flag is true. Access must remain Not confirmed until the community resolves the conflict.",
+        "Provisional launch hold (4 September 2026): the separate seven-day RedMMetrics review peaked at 23 players, with a median daily peak of 22.5 and no repeated 35+ sessions on any of the six complete UTC days. This adds representative-session evidence beyond the short BrowseRP history. Retain the documented text-roleplay identity for reconsideration; this is a reversible launch selection, not a finding of closure, poor management or guaranteed future inactivity. See activity-review-2026-09-04.md and https://redmmetrics.com/server/bdx8ak8?hours=168."
       ],
       "sourceObservation": {
         "fetchedAt": "2026-09-04T01:36:59.105Z",
@@ -1883,6 +1888,175 @@
           "sha256": "faa24ec881e6040655c187a681d6dc496eb8aa41e1bd0652a180b3a40b457187"
         }
       }
+    },
+    {
+      "name": "The Tackroom",
+      "platform": "redm",
+      "joinCode": "ov754y",
+      "status": "publish",
+      "publishReady": true,
+      "proposedReplacementFor": "Lemoyne County",
+      "description": "An 18+ equestrian sandbox with optional roleplay, custom horses and tack, ranch building, cattle herding and community events. Train and trade horses, build a homestead or explore slice-of-life activities at your own pace. Join the official Discord, answer the short whitelist questions and wait for staff approval before connecting. Optional paid support includes some housing eligibility and activity perks.",
+      "region": null,
+      "regionEvidence": "The Cfx locale is en-US; a physical server location or primary player region was not independently confirmed. Do not present locale as a verified country.",
+      "language": "English",
+      "languageEvidence": "The official 2026 rulebook requires English in public channels.",
+      "framework": "VORP",
+      "frameworkEvidence": "Current official Cfx resource evidence includes vorp_core; medium-confidence framework inference.",
+      "accessType": "allowlisted",
+      "applicationRequired": true,
+      "applicationEvidence": "Official joining instructions require Discord verification, three questions, then manual administrator approval.",
+      "discordUrl": "https://discord.gg/thetackroom-redm",
+      "websiteUrl": "https://thetackroom-redm.com/",
+      "joinUrl": "https://cfx.re/join/ov754y",
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/ov754y/-1399333826.png",
+      "bannerUrl": null,
+      "mediaCheck": {
+        "checkedAt": "2026-09-04T13:06:09.509Z",
+        "format": "png",
+        "bytes": 13916,
+        "animated": false,
+        "currentImageGuardPassed": true,
+        "bannerReason": "No corroborated supported static banner; source banner URLs were unsupported or animated."
+      },
+      "tags": [
+        "horses",
+        "ranching",
+        "housing",
+        "community-events",
+        "casual-rp",
+        "sandbox"
+      ],
+      "keywords": [
+        "tackroom",
+        "equestrian",
+        "slice of life",
+        "horse breeding",
+        "custom tack",
+        "roleplay optional"
+      ],
+      "observedForResearch": {
+        "players": 83,
+        "capacity": 200,
+        "observedAt": "2026-09-04T12:53:44.955Z",
+        "fetchedAt": "2026-09-04T12:55:55.774Z",
+        "note": "Historical check only; publication must fetch a new source observation. Do not seed live counts from research."
+      },
+      "sourceChecks": {
+        "canonicalCfxCode": true,
+        "discordInviteHttpStatus": 200,
+        "discordGuildId": "1277386428678012979",
+        "discordGuildName": "The Tackroom",
+        "reciprocalWebsiteAndDiscordIdentity": true
+      },
+      "history": {
+        "code": "ov754y",
+        "name": "The Tackroom",
+        "title": "The Tackroom — RedMMetrics",
+        "url": "https://redmmetrics.com/server/ov754y?hours=168",
+        "samples": 2730,
+        "start": "2026-08-28T12:57:11Z",
+        "end": "2026-09-04T12:56:48Z",
+        "mean": 61.3,
+        "peak": 176,
+        "atLeast35": 2171,
+        "fullDays35": 6,
+        "medianDailyPeak": 153,
+        "days": [
+          {
+            "date": "2026-08-29",
+            "samples": 414,
+            "max": 139,
+            "atLeast35": 310
+          },
+          {
+            "date": "2026-08-30",
+            "samples": 345,
+            "max": 176,
+            "atLeast35": 220
+          },
+          {
+            "date": "2026-08-31",
+            "samples": 339,
+            "max": 155,
+            "atLeast35": 313
+          },
+          {
+            "date": "2026-09-01",
+            "samples": 319,
+            "max": 148,
+            "atLeast35": 284
+          },
+          {
+            "date": "2026-09-02",
+            "samples": 394,
+            "max": 164,
+            "atLeast35": 309
+          },
+          {
+            "date": "2026-09-03",
+            "samples": 471,
+            "max": 151,
+            "atLeast35": 404
+          }
+        ]
+      },
+      "sources": [
+        {
+          "url": "https://thetackroom-redm.com/",
+          "purpose": "Community identity, equestrian sandbox and documented features."
+        },
+        {
+          "url": "https://thetackroom-redm.com/how-to-join/",
+          "purpose": "Application plus manual approval, newcomer setup and support."
+        },
+        {
+          "url": "https://thetackroom-redm.com/the-rules/",
+          "purpose": "Official wrapper embedding the readable 2026 public rulebook."
+        },
+        {
+          "url": "https://docs.google.com/document/d/e/2PACX-1vRJR0tiC-ZkFBEvKrXXWpIW7NlcaScFTNNn24HNj_GMn1R6-wHS09XS7r5IXvvLBX8JDJCBnjmp5c41/pub?embedded=true",
+          "purpose": "English, age, conduct, accessibility, consent, support, reports and appeals. Public unauthenticated HTTP 200."
+        },
+        {
+          "url": "https://thetackroom-redm.com/frequently-asked-questions/",
+          "purpose": "Optional roleplay and actual horse, ranching, event and economy features."
+        },
+        {
+          "url": "https://thetackroom-redm.com/meet-the-team/",
+          "purpose": "Public staff, player-experience, event and housing support roles."
+        },
+        {
+          "url": "https://thetackroom-redm.tebex.io/",
+          "purpose": "Paid support and housing perks caveat."
+        },
+        {
+          "url": "https://discord.com/api/v10/invites/thetackroom-redm?with_counts=true&with_expiration=true",
+          "purpose": "Valid exact Discord guild whose description links back to the official website."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/ov754y",
+          "purpose": "Current authoritative RedM code, framework evidence, observation and icon."
+        },
+        {
+          "url": "https://redmmetrics.com/server/ov754y?hours=168",
+          "purpose": "Third-party seven-day aggregate occupancy history."
+        }
+      ],
+      "cfxJoinUrl": "https://cfx.re/join/ov754y",
+      "inclusionReasons": [
+        "Sustained activity comfortably meets the approximate 35-player normal-session floor across every complete sampled UTC day.",
+        "Distinctive equestrian and ranching gameplay with publicly documented systems and beginner guides.",
+        "Readable conduct rules, player/staff report routes, ban appeals and accessibility protections.",
+        "Explicit application and manual approval process; English is required in public channels."
+      ],
+      "conflicts": [
+        "Roleplay is optional. Label this as a sandbox/casual roleplay community; do not market it as strict narrative or serious RP.",
+        "Published procedures are evidence of support structure, not an independent guarantee of friendly interactions or fair decisions.",
+        "Rules prohibit discussion or promotion of other communities/products even when positive; this is stricter than a usual no-advertising rule.",
+        "Current paid support perks include housing eligibility/activity exceptions. Do not describe the server as having no paid gameplay benefits.",
+        "No independently verified physical region; preserve unknown."
+      ]
     }
   ],
   "reserves": [

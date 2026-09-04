@@ -1,0 +1,216 @@
+{
+  "generatedAt": "2026-09-04T12:02:48.733Z",
+  "candidates": [
+    {
+      "joinCode": "pqqvj8",
+      "platform": "fivem",
+      "status": "review",
+      "name": "San Andreas County Roleplay",
+      "description": "An English-speaking vMenu community with public civilian and community-officer roleplay, structured emergency-service departments, player businesses and certified gangs. The county also supports car meets, racing and social activities, with published scene-consent rules, support tickets and an appeals route.",
+      "region": "United States",
+      "language": "English",
+      "framework": "vMenu",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/sacrp",
+      "websiteUrl": "https://sacrp.co/",
+      "cfxJoinUrl": "https://cfx.re/join/pqqvj8",
+      "tags": [
+        "Roleplay",
+        "Police",
+        "EMS",
+        "Fire",
+        "Businesses",
+        "Gangs",
+        "Car Meets",
+        "New Player Friendly"
+      ],
+      "keywords": [
+        "san andreas county roleplay",
+        "sacrp",
+        "vmenu",
+        "civilian roleplay",
+        "community officer",
+        "departments",
+        "car meets"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/pqqvj8/-1736587857.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T11:58:50.704Z",
+        "logoNote": "Guarded Cfx PNG fetch succeeded (17,776 bytes); static image visually matches SACRP wordmark, palms and dark orange background.",
+        "bannerNote": "Unsupported forums.sacrp.co banner omitted; no unrelated replacement."
+      },
+      "sources": [
+        {
+          "url": "https://sacrp.co/",
+          "purpose": "Official home links this exact Cfx code and /sacrp Discord. Explicit United States community origin, newcomer flow and available RP paths."
+        },
+        {
+          "url": "https://sacrp.co/rules",
+          "purpose": "Current detailed conduct, anti-harassment, scene-consent, reporting and staff/no-exemption rules; distinguishes whitelisted departments from public paths."
+        },
+        {
+          "url": "https://sacrp.co/development",
+          "purpose": "Dated February 2026 activities/prison release and April 2026 website release; no claim of verified weekly delivery."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/pqqvj8",
+          "purpose": "Canonical gta5 name/code, English locale, public flag, vMenu advertised and count observation."
+        },
+        {
+          "url": "https://discord.com/api/v10/invites/sacrp?with_counts=true",
+          "purpose": "Invite HTTP 200; exact guild 652246210706669581 named San Andreas County Roleplay."
+        },
+        {
+          "url": "https://fivestatus.com/fivem/servers/pqqvj8",
+          "purpose": "Attributed historical public-Cfx monitoring: 36 peak/15 average during previous 24h when opened at 11:55 UTC; busiest around 02:00 UTC, quietest 11:00 UTC. Not our independently collected time series."
+        },
+        {
+          "url": "https://fivemonitor.com/en/servers/pqqvj8",
+          "purpose": "Separately indexed public-Cfx history: 46 peak and 16 average over 7 days. Supports session-aware inclusion, not a quality rating."
+        },
+        {
+          "url": "https://store.sacrp.co/",
+          "purpose": "Official paid-perk store; rules allow donor personal items and some weapon/explosive privileges. Not cosmetic-only."
+        }
+      ],
+      "inclusionReasons": [
+        "Explicitly requested community with exact official website, Cfx and Discord identity agreement.",
+        "Documented newcomer paths, department structure, scene consent and support/appeals.",
+        "Historical public-Cfx monitoring exceeds roughly 35 during normal active sessions; current quiet morning snapshot does not establish inactivity.",
+        "Current scripts support emergency services, business/social activities and community-specific resources; functionality not independently playtested."
+      ],
+      "conflicts": [
+        "Public flag and public-officer advertising support public entry, while homepage mentions clearance/whitelist updates; those may refer to department access. Confirm any universal Discord-verification step before calling entry unrestricted.",
+        "Framework detection sees mixed resources; official title and description explicitly advertise vMenu, so use that player-facing choice.",
+        "Paid donor privileges can include weapons/explosives; do not label cosmetic-only or no-pay-to-win.",
+        "No independent player review was robust enough to establish consistent enforcement or guarantee friendliness.",
+        "Site development page has only two current public release entries; source claim of weekly updates has not been independently corroborated."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T11:55:35.868Z",
+        "status": "online",
+        "players": 1,
+        "max": 250,
+        "observedAt": "2026-09-04T11:53:33.451Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "San Andreas County Roleplay",
+        "guildId": "652246210706669581",
+        "identityConfirmedBy": "Official home and Cfx both link /sacrp; fixed invite API matches full community name."
+      },
+      "requiresStaffReview": true
+    }
+  ],
+  "redline": {
+    "status": "hold",
+    "name": "Redline RP (whitelisted)",
+    "joinCode": "dg3dpkd",
+    "platform": "fivem",
+    "description": "A whitelisted English-speaking roleplay community centred on character progression and connected storylines, with civilian businesses, emergency services and criminal paths. Its current 2.0 rules prohibit harassment, random violence and metagaming, and direct reports and bugs to the community’s support processes.",
+    "region": null,
+    "language": "English",
+    "framework": "Qbox",
+    "accessType": "allowlisted",
+    "discordUrl": "https://discord.gg/redlinerp",
+    "websiteUrl": "https://redlinerp.net/",
+    "cfxJoinUrl": "https://cfx.re/join/dg3dpkd",
+    "tags": [
+      "Roleplay",
+      "Allowlisted",
+      "Character Development",
+      "Businesses",
+      "Police",
+      "EMS",
+      "Gangs"
+    ],
+    "keywords": [
+      "redline",
+      "redlinerp",
+      "whitelisted roleplay",
+      "character development",
+      "civilian businesses",
+      "storylines"
+    ],
+    "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/dg3dpkd/-1125966651.png",
+    "bannerUrl": null,
+    "lastCheck": {
+      "checkedAt": "2026-09-04T11:57:20.744Z",
+      "status": "offline",
+      "players": null,
+      "max": 100,
+      "observedAt": null
+    },
+    "rawSourceObservation": {
+      "players": 11,
+      "max": 100,
+      "lastSeen": "2026-09-04T11:56:43.070Z",
+      "private": true,
+      "fallback": true,
+      "note": "Diagnostic evidence only. Do not publish as a live count."
+    },
+    "discordCheck": {
+      "status": "valid",
+      "guildName": "REDLINE",
+      "guildId": "461581596101705758"
+    },
+    "imageReview": {
+      "checkedAt": "2026-09-04T12:02:48.727Z",
+      "logoBytes": 17962,
+      "logoFormat": "png",
+      "note": "Existing image guard and static PNG processing passed; see /tmp/browserp-dg3dpkd-logo.png for visual check."
+    },
+    "sources": [
+      {
+        "url": "https://redlinerp.net/",
+        "purpose": "Official community homepage and Discord /redlinerp, public 2.0 RP description; shipped status UI hardcodes development code lg6ep7, not a confirmed main-server join link."
+      },
+      {
+        "url": "https://redlinerp.net/rules",
+        "purpose": "Read 29 enabled public rule texts through the exact anonymous request used by this page. Anti-harassment, RDM/VDM, microphone, conduct and reporting rules are current primary evidence."
+      },
+      {
+        "url": "https://frontend.cfx-services.net/api/servers/single/dg3dpkd",
+        "purpose": "Public Cfx record: Redline 2.0, Qbox; owner Redline-Development and icon match website-linked development server; private=true/fallback=true."
+      },
+      {
+        "url": "https://frontend.cfx-services.net/api/servers/single/lg6ep7",
+        "purpose": "Explicitly excluded development instance, 10 slots. Identical owner/icon corroborate affiliation but do not establish the main join method."
+      },
+      {
+        "url": "https://discord.com/api/v10/invites/redlinerp?with_counts=true",
+        "purpose": "Fixed invite API confirms REDLINE guild 461581596101705758."
+      },
+      {
+        "url": "https://appsystems.co.uk/",
+        "purpose": "Official service partner lists Redline and describes history since 2019; promotional partner evidence, not independent quality review."
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=8s7sfLOmaaM",
+        "purpose": "Attributed English gameplay participant JimboTJoker, August 2022, calls this creator community whitelisted; historical evidence rather than current entry guarantee."
+      },
+      {
+        "url": "https://fivestatus.com/fivem/servers/dg3dpkd",
+        "purpose": "Third-party historical public-Cfx observations exceed 35 peak; current indexed versus opened page snapshots differ. Not our own historical measurement."
+      },
+      {
+        "url": "https://docs.fivem.net/docs/server-manual/server-commands/#sv_master1-newvalue",
+        "purpose": "Primary distinction: private listing disables browser connect, cannot delist it, and is separate from sv_appearAllowlisted."
+      }
+    ],
+    "blockers": [
+      "Canonical current production join code still needs a current official link/instruction. Matching Cfx owner/icon and name are supporting affiliation evidence, not proof of the whitelisted production join route.",
+      "Cfx returns fallback=true; the existing normalizer conservatively suppresses count for fallback data. private=true is NOT the suppression cause and is NOT proof of whitelist access.",
+      "Current exact universal application requirements/age and paid-perk catalogue not yet confirmed. Do not advertise free access or no-pay-to-win."
+    ],
+    "excludedDevelopmentCode": "lg6ep7",
+    "excludedUnrelated": [
+      "redlinerp.dk / am5v6k (Danish public)",
+      "redlinerp.gg (different owner identity)",
+      "redlinerp.com (parked domain)",
+      "redlineroleplay.net (Norman Software Google Site, uncorroborated)"
+    ],
+    "requiresStaffReview": true
+  }
+}

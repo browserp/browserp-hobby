@@ -167,6 +167,68 @@ test("opening and closing preserves scroll state and returns focus to the menu t
   } finally { h.dom.window.close(); }
 });
 
+test("the close control keeps the opener's exact box before scroll locking moves the header", () => {
+  const h = harness({ overflow: "auto" });
+  try {
+    const toggle = h.$(".navigation-toggle-v6");
+    toggle.getBoundingClientRect = () => ({ left: h.w.document.body.style.overflow === "hidden" ? 1224 : 1216, top: 18, width: 94.625, height: 44 });
+    open(h);
+    const close = h.$(".navigation-close-v6");
+    assert.equal(close.style.left, "1216px", "the original position is captured before the scrollbar disappears");
+    assert.equal(close.style.top, "18px");
+    assert.equal(close.style.width, "94.625px");
+    assert.equal(close.style.height, "44px");
+    assert.equal(close.textContent, "Close");
+    assert.equal(h.w.document.activeElement, close);
+    close.click();
+    h.tick(220);
+    assertClosed(h, "auto");
+    assert.equal(h.w.document.activeElement, toggle);
+  } finally { h.dom.window.close(); }
+});
+
+test("an open menu follows viewport changes without losing its modal state or focus", () => {
+  const h = harness();
+  try {
+    let box = { left: 274.375, top: 12, width: 94.625, height: 44 };
+    h.$(".navigation-toggle-v6").getBoundingClientRect = () => box;
+    const dialog = open(h);
+    const input = h.$(".navigation-search-v6 input");
+    input.focus();
+    input.value = "RedM community";
+    box = { left: 304.375, top: 14, width: 94.625, height: 44 };
+    h.w.dispatchEvent(new h.w.Event("resize"));
+    const close = h.$(".navigation-close-v6");
+    assert.equal(close.style.left, "304.375px");
+    assert.equal(close.style.top, "14px");
+    assert.equal(dialog.open, true);
+    assert.equal(input.value, "RedM community");
+    assert.equal(h.w.document.activeElement, input);
+    dialog.dispatchEvent(new h.w.Event("cancel", { cancelable: true }));
+    h.tick(220);
+    box = { left: 0, top: 0, width: 0, height: 0 };
+    h.w.dispatchEvent(new h.w.Event("resize"));
+    assert.equal(close.style.left, "304.375px", "a closed menu does not read or update layout");
+    assertClosed(h);
+  } finally { h.dom.window.close(); }
+});
+
+test("the anchored menu stays around its control on wide centred headers and fills a phone screen", () => {
+  const h = harness();
+  try {
+    h.w.innerWidth = 2560;
+    let box = { left: 1785.375, top: 18, width: 94.625, height: 44 };
+    h.$(".navigation-toggle-v6").getBoundingClientRect = () => box;
+    const dialog = open(h);
+    assert.equal(dialog.style.right, "656px");
+    h.w.innerWidth = 390;
+    box = { left: 274.375, top: 12, width: 94.625, height: 44 };
+    h.w.dispatchEvent(new h.w.Event("resize"));
+    assert.equal(dialog.style.right, "0px");
+    assert.equal(h.$(".navigation-close-v6").style.left, "274.375px");
+  } finally { h.dom.window.close(); }
+});
+
 test("native Escape cancellation follows the animated close path", () => {
   const h = harness();
   try {
@@ -178,6 +240,60 @@ test("native Escape cancellation follows the animated close path", () => {
     h.tick(220);
     assertClosed(h);
     assert.equal(h.w.document.activeElement, h.$(".navigation-toggle-v6"));
+  } finally { h.dom.window.close(); }
+});
+
+test("Escape dismisses the menu from a filled search input without silently clearing the query", () => {
+  const h = harness();
+  try {
+    const dialog = open(h);
+    const input = h.$(".navigation-search-v6 input");
+    input.value = "RedM roleplay";
+    input.focus();
+    const event = new h.w.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true });
+    input.dispatchEvent(event);
+    assert.equal(event.defaultPrevented, true);
+    assert.equal(dialog.dataset.open, "false");
+    assert.equal(input.value, "RedM roleplay");
+    h.tick(220);
+    assertClosed(h);
+    assert.equal(h.w.document.activeElement, h.$(".navigation-toggle-v6"));
+  } finally { h.dom.window.close(); }
+});
+
+test("modal Tab traversal reaches buttons and links even when native keyboard preferences skip them", () => {
+  const h = harness();
+  try {
+    const dialog = open(h);
+    for (const element of dialog.querySelectorAll("a,button,input")) element.getClientRects = () => [{}];
+    const search = h.$(".navigation-search-v6 input");
+    const submit = h.$(".navigation-search-v6 button");
+    function tab(shiftKey = false) {
+      const event = new h.w.KeyboardEvent("keydown", { key: "Tab", shiftKey, bubbles: true, cancelable: true });
+      h.w.document.activeElement.dispatchEvent(event);
+      assert.equal(event.defaultPrevented, true, "the modal controls the complete traversal instead of relying on native skipping");
+    }
+    search.focus();
+    tab();
+    assert.equal(h.w.document.activeElement, submit);
+    tab();
+    assert.equal(h.w.document.activeElement, h.$(".navigation-links-v6 a[href='/servers']"));
+    tab(true);
+    assert.equal(h.w.document.activeElement, submit);
+    const hidden = h.w.document.createElement("a");
+    hidden.href = "/hidden";
+    hidden.hidden = true;
+    hidden.getClientRects = () => [{}];
+    const excluded = hidden.cloneNode();
+    excluded.hidden = false;
+    excluded.tabIndex = -1;
+    excluded.getClientRects = () => [{}];
+    dialog.append(hidden, excluded);
+    h.$(".navigation-extra-v6 a[href='/legal']").focus();
+    tab();
+    assert.equal(h.w.document.activeElement, h.$(".navigation-top-v6 .navigation-brand-v6"));
+    tab(true);
+    assert.equal(h.w.document.activeElement, h.$(".navigation-extra-v6 a[href='/legal']"));
   } finally { h.dom.window.close(); }
 });
 
