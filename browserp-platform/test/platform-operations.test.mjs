@@ -43,7 +43,7 @@ test("network evidence is masked, keyed, encrypted and recoverable only with the
   }
 });
 
-test("Cloudflare client addresses are trusted only on the proxied BrowseRP host", () => {
+test("Cloudflare client addresses require proven Cloudflare ingress on the proxied BrowseRP host", () => {
   const oldProxy = process.env.CLOUDFLARE_PROXY_ENABLED;
   const oldVercel = process.env.VERCEL;
   const oldPrivacy = process.env.PRIVACY_HASH_SECRET;
@@ -54,7 +54,7 @@ test("Cloudflare client addresses are trusted only on the proxied BrowseRP host"
   process.env.NETWORK_EVIDENCE_KEY = "22".repeat(32);
   try {
     const base = { "user-agent": "Mozilla/5.0", "cf-ray": "8f1234567890abcd-LHR", "cf-connecting-ip": "198.51.100.44", "x-vercel-forwarded-for": "203.0.113.10" };
-    const proxied = securityFingerprintContext({ headers: { ...base, host: "www.browserp.com" }, socket: {} }, response());
+    const proxied = securityFingerprintContext({ headers: { ...base, host: "www.browserp.com", "x-vercel-forwarded-for": "104.16.0.1" }, socket: {} }, response());
     const direct = securityFingerprintContext({ headers: { ...base, host: "browserp-hobby.vercel.app" }, socket: {} }, response());
     assert.equal(proxied.maskedNetwork, "198.51.100.0/24");
     assert.equal(direct.maskedNetwork, "203.0.113.0/24");

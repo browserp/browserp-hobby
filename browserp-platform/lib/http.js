@@ -1,5 +1,6 @@
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { appUrl, env, isProductionRuntime } from "./config.js";
+import { requestAddress } from "./request-address.js";
 
 const JSON_MIME = /^application\/json(?:\s*;\s*charset=(?:utf-8|"utf-8"))?$/i;
 const STATE_CHANGING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
@@ -147,10 +148,7 @@ export function setCookies(res, values) {
 }
 
 export function clientSignal(req) {
-  const vercelForwarded = String(req.headers?.["x-vercel-forwarded-for"] || "").split(",")[0].trim();
-  const standardForwarded = String(req.headers?.["x-forwarded-for"] || "").split(",")[0].trim();
-  const realIp = String(req.headers?.["x-real-ip"] || "").trim();
-  const raw = vercelForwarded || (process.env.VERCEL === "1" ? standardForwarded : realIp) || String(req.socket?.remoteAddress || "unknown");
+  const raw = requestAddress(req);
   const configuredSecret = env("PRIVACY_HASH_SECRET");
   if (!configuredSecret && isProductionRuntime()) {
     throw Object.assign(new Error("Server privacy hashing is not configured."), {

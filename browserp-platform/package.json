@@ -9,7 +9,8 @@
     "start": "node dev-server.mjs",
     "check": "node test/check.mjs",
     "test": "node --test test/*.test.mjs",
-    "verify": "npm run check && npm test"
+    "test:db": "node --test test/*-db.mjs",
+    "verify": "npm run check && npm test && npm run test:db"
   },
   "engines": {
     "node": "24.x"

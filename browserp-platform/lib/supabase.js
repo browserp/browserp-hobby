@@ -264,26 +264,22 @@ export async function getSession(req, res, { required = false, provider } = {}) 
   const claims = accessTokenClaims(accessToken);
   const factors = Array.isArray(user.factors) ? user.factors.filter((factor) => factor?.factor_type === "totp") : [];
   if (supabaseConfig().privileged) {
-    try {
-      const { securityFingerprintContext } = await import("./security.js");
-      const security = securityFingerprintContext(req, res);
-      const ban = await rpc("check_security_ban_server", {
-        p_user_id: user.id,
-        p_network_hash: security.networkHash,
-        p_device_hash: security.deviceHash
-      }, undefined, { useSecret: true });
-      if (ban?.reference) {
-        clearSession(res);
-        throw Object.assign(new Error(`This account is restricted. Appeal reference: ${ban.reference}`), {
-          status: 403,
-          code: "ACCOUNT_RESTRICTED",
-          reference: ban.reference
-        });
-      }
-    } catch (error) {
-      // Allows the application code to be deployed safely before the additive
-      // migration. Once the function exists, failures are intentionally closed.
-      if (error?.code !== "PGRST202" && !String(error?.message || "").includes("check_security_ban_server")) throw error;
+    const { securityFingerprintContext } = await import("./security.js");
+    const security = securityFingerprintContext(req, res);
+    // No successful lookup means no authorization decision. Schema, permission
+    // and transient backend failures must all deny access without erasing tokens.
+    const ban = await rpc("check_security_ban_server", {
+      p_user_id: user.id,
+      p_network_hash: security.networkHash,
+      p_device_hash: security.deviceHash
+    }, undefined, { useSecret: true });
+    if (ban?.reference) {
+      clearSession(res);
+      throw Object.assign(new Error(`This account is restricted. Appeal reference: ${ban.reference}`), {
+        status: 403,
+        code: "ACCOUNT_RESTRICTED",
+        reference: ban.reference
+      });
     }
   }
   return {

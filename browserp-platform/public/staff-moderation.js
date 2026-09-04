@@ -179,7 +179,7 @@
       const common = [["id", "Record ID"], ["createdAt", "Created"], ["updatedAt", "Updated"]];
       const specific = {
         members: [["userId", "Account ID"], ["discordId", "Discord user ID"], ["username", "Username"], ["displayName", "Display name"], ["bio", "Bio"], ["visibility", "Profile visibility"], ["joinedAt", "Joined"], ["lastSignInAt", "Last sign-in"], ["provider", "Sign-in provider"], ["staffRole", "Staff role"], ["activeBans", "Active restrictions"]],
-        servers: [["name", "Name"], ["platform", "Game"], ["region", "Region"], ["language", "Language"], ["framework", "Framework"], ["access", "Access"], ["description", "Description"], ["tags", "Features"], ["ownerName", "Owner"], ["ownerId", "Owner account"], ["communityUrl", "Community URL"], ["websiteUrl", "Website URL"], ["cfxJoinUrl", "FiveM join URL"], ["verified", "Verified"], ["beginnerFriendly", "Beginner friendly"], ["online", "Online"]],
+        servers: [["name", "Name"], ["platform", "Game"], ["region", "Region"], ["language", "Language"], ["framework", "Framework"], ["access", "Access"], ["description", "Description"], ["tags", "Features"], ["ownerName", "Owner"], ["ownerId", "Owner account"], ["communityUrl", "Community URL"], ["websiteUrl", "Website URL"], ["cfxJoinUrl", "Cfx join link (FiveM / RedM)"], ["verified", "Verified"], ["beginnerFriendly", "Beginner friendly"], ["online", "Online"]],
         reports: [["reporterName", "Reporter"], ["reporterId", "Reporter account"], ["targetType", "Target type"], ["targetId", "Target ID"], ["details", "Report details"], ["resolutionNote", "Resolution note"], ["deletedAt", "Deleted at"], ["deletedReason", "Deletion reason"]],
         activity: [["userId", "Account ID"], ["eventType", "Event"], ["maskedNetwork", "Masked network"], ["browser", "Browser"], ["os", "Operating system"], ["device", "Device category"], ["details", "Recorded details"]],
         logs: [["actorName", "Staff member"], ["actorId", "Staff account"], ["action", "Action"], ["targetType", "Target type"], ["targetId", "Target ID"], ["reason", "Reason"], ["details", "Recorded details"]],
@@ -233,7 +233,7 @@
           add("Description", "description", { type: "textarea", required: true, minLength: 40, maxLength: 3000, wide: true });
           add("Community URL", "communityUrl", { type: "url", maxLength: 500 });
           add("Website URL", "websiteUrl", { type: "url", maxLength: 500 });
-          add("FiveM join URL", "cfxJoinUrl", { type: "url", maxLength: 100, wide: true });
+          add("Cfx join link (FiveM / RedM)", "cfxJoinUrl", { type: "url", maxLength: 100, wide: true });
           for (const [name, label] of [["verified", "Verified community"], ["beginnerFriendly", "Beginner friendly"]]) { const wrapper = make("label", undefined, "moderation-filter-booleans"); const input = make("input"); input.type = "checkbox"; input.name = name; input.checked = record[name] === true; controls[name] = input; wrapper.append(input, make("span", label)); grid.append(wrapper); }
         }
         return controls;

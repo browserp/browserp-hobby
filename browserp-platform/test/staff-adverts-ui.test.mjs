@@ -21,7 +21,7 @@ class Element {
 function runtime() {
   const root = new Element(); const body = new Element("body");
   const document = { body, createElement: (tag) => new Element(tag), querySelector: (selector) => selector === "#overview-adverts" ? root : null };
-  const window = {};
+  const window = { addEventListener() {} };
   vm.runInNewContext(readFileSync(new URL("../public/staff-adverts.js", import.meta.url), "utf8"), { window, document, URL, Intl, Date });
   return { root, body, api: window.BrowseRPStaffAdverts };
 }

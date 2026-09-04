@@ -102,6 +102,9 @@
     form.append(editorTitle, editNotice, grid, preview, actions, formStatus);
     panel.append(head, intro, listStatus, retry, list, form);
     let current = null; let busy = false; let dirty = false; let items = [];
+    window.addEventListener("beforeunload", (event) => {
+      if (dirty && panel.isConnected) { event.preventDefault(); event.returnValue = ""; }
+    });
     const status = (message, error = false) => { formStatus.textContent = message; formStatus.dataset.error = String(error); };
     const setBusy = (value) => { busy = value; panel.setAttribute("aria-busy", String(value)); panel.querySelectorAll("button,input,textarea,select").forEach((element) => { element.disabled = value; }); };
     function renderPreview() {
