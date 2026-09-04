@@ -92,7 +92,7 @@
   close.type = "button";
   close.setAttribute("aria-label", "Close menu");
   close.autofocus = true;
-  close.append(icon("close"));
+  close.append(icon("close"), make("span", "", "Close"));
   top.append(brand(), close);
   const scroll = make("div", "navigation-scroll-v6");
   const intro = make("div", "navigation-intro-v6 navigation-enter-v6");
@@ -169,6 +169,16 @@
   let closeTimer;
   let openingFrame;
   let previousOverflow;
+  function alignCloseButton() {
+    // Read before scroll locking: removing a scrollbar can move the header.
+    const box = toggle.getBoundingClientRect();
+    if (!(box.width > 0 && box.height > 0)) return;
+    for (const [property, value] of Object.entries({ left: box.left, top: box.top, width: box.width, height: box.height })) {
+      close.style.setProperty(property, `${value}px`);
+    }
+    // Keep the anchored control inside the panel on wide, centred layouts.
+    dialog.style.right = `${window.innerWidth <= 520 ? 0 : Math.max(12, window.innerWidth - box.left - box.width - 24)}px`;
+  }
   function finishClose() {
     clearTimeout(closeTimer);
     cancelAnimationFrame(openingFrame);
@@ -199,6 +209,7 @@
       close.focus({ preventScroll: true });
       return;
     }
+    alignCloseButton();
     previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     document.body.classList.add("navigation-open-v6");
@@ -212,13 +223,23 @@
   close.addEventListener("click", () => closeMenu());
   dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeMenu(); });
   dialog.addEventListener("keydown", (event) => {
+    // Search inputs can consume native Escape to clear their text before the
+    // dialog receives a cancel event. Keep the menu's dismissal consistent.
+    if (event.key === "Escape" && !event.defaultPrevented) {
+      event.preventDefault();
+      closeMenu();
+      return;
+    }
     if (event.key !== "Tab" || dialog.inert) return;
     const controls = [...dialog.querySelectorAll('a[href],button,input,[tabindex="0"]')]
-      .filter((element) => !element.disabled && !element.closest("[inert],[hidden]") && element.getClientRects().length);
-    const first = controls[0];
-    const last = controls.at(-1);
-    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      .filter((element) => !element.disabled && element.tabIndex >= 0 && !element.closest("[inert],[hidden]") && element.getClientRects().length);
+    if (!controls.length) return;
+    // Some browser keyboard preferences skip links and buttons. Explicitly
+    // advance within this modal so those preferences cannot strand focus.
+    const index = controls.indexOf(document.activeElement);
+    const next = index < 0 ? (event.shiftKey ? controls.length - 1 : 0) : (index + (event.shiftKey ? -1 : 1) + controls.length) % controls.length;
+    event.preventDefault();
+    controls[next].focus();
   });
   // A native modal contains keyboard focus and makes the background inert.
   let backdropPointer = false;
@@ -233,4 +254,5 @@
     toggle.setAttribute("aria-expanded", "false");
   });
   compact.addEventListener("change", () => closeMenu(true));
+  window.addEventListener("resize", () => { if (dialog.open) alignCloseButton(); });
 })();

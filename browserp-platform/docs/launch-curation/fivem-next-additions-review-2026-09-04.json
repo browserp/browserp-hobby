@@ -1,0 +1,216 @@
+{
+  "generatedAt": "2026-09-04T12:53:25.385Z",
+  "scope": "FiveM additions after existing roster quality review. Research only; no publication or manifest changes.",
+  "recommended": [
+    {
+      "joinCode": "oq5mx7",
+      "platform": "fivem",
+      "status": "review",
+      "name": "Resilient Roleplay",
+      "description": "An 18+ English-speaking community focused on long-form character stories, player-run businesses and a working police, medical and justice system. Civilian jobs include mechanics, towing, electrical work and fishing. Joining requires a whitelist application; the published rules cover consent, harassment, meaningful roleplay and protection for newcomer and medical areas.",
+      "region": "United Kingdom",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/resilientrp",
+      "websiteUrl": "https://resilientrp.net/",
+      "cfxJoinUrl": "https://cfx.re/join/oq5mx7",
+      "tags": [
+        "Roleplay",
+        "Serious RP",
+        "Whitelist",
+        "Businesses",
+        "Police",
+        "EMS",
+        "DOJ",
+        "Civilian Jobs"
+      ],
+      "keywords": [
+        "resilient",
+        "resilient roleplay",
+        "long form stories",
+        "character development",
+        "player businesses",
+        "british roleplay",
+        "whitelist",
+        "qbox"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/oq5mx7/961106737.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://resilientrp.net/",
+          "purpose": "Official home directly configures oq5mx7 as its connect code and links rules, application portal, Discord and store. Identifies staff and four development roles; describes business and civilian RP."
+        },
+        {
+          "url": "https://resilientrp.net/rules",
+          "purpose": "Current published rules: 18+, anti-harassment, consent for sensitive scenes, no ERP, no metagaming, recorded reports, newcomer/medical safe areas, meaningful RP before violence. Read from the publicly served app data."
+        },
+        {
+          "url": "https://apply.resilientrp.net/",
+          "purpose": "Current whitelist application entry responds HTTP200 and requests Discord authentication; no account was created or application submitted."
+        },
+        {
+          "url": "https://github.com/resilient-roleplay/",
+          "purpose": "Community-owned organization links resilientrp.net and explicitly identifies United Kingdom; government website repository updated August4,2026."
+        },
+        {
+          "url": "https://gov.resilientrp.net/",
+          "purpose": "Public government and legislation hub supports police, medical, business and justice roleplay; this is in-character documentation, not proof of fair staff enforcement."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/oq5mx7",
+          "purpose": "Current canonical gta5 listing, English locale, Qbox, explicit allowlist flag and timestamped live count."
+        },
+        {
+          "url": "https://discord.com/api/v10/invites/resilientrp?with_counts=true",
+          "purpose": "HTTP200; guild1420379377199218788 named Resilient Roleplay, 2902 members during this review; matches official homepage and Cfx invite."
+        },
+        {
+          "url": "https://fivestatus.com/fivem/servers/oq5mx7",
+          "purpose": "External Cfx monitoring showed79 peak/25 average in preceding24h when opened12:52UTC. An attributed historical signal supporting35+ active-session criterion, not an independent quality score."
+        },
+        {
+          "url": "https://store.resilientrp.net/",
+          "purpose": "Official store discloses application-processing priority, queue priority, extra character slots and approved custom peds. Do not imply all features are free."
+        },
+        {
+          "url": "https://www.reddit.com/r/FiveMServers/comments/1q3qvor/resilient_rp_longterm_fivem_roleplay/",
+          "purpose": "Dated community recruitment corroborates long-form stories/newcomer intake; treat as advertising rather than independent player endorsement."
+        }
+      ],
+      "inclusionReasons": [
+        "Exact official identity agreement across website, Cfx and Discord.",
+        "Public rules and onboarding support serious character-led RP and civilian inclusion, instead of relying on player-count marketing.",
+        "Named staff/developers and maintained public government tooling provide tangible organizational evidence.",
+        "Observed activity and attributed24h history exceed the normal-session threshold despite a quieter midday snapshot."
+      ],
+      "conflicts": [
+        "No first-hand playtest or robust independent player-review sample; friendliness and consistent moderation are not guaranteed.",
+        "Reports require at least a two-minute full-audio clip. Players should know this evidence requirement before joining.",
+        "Paid application/queue priority, extra character slots and custom peds are offered; no claim of cosmetic-only or no-pay-to-win.",
+        "Homepage uptime/optimization claims were not independently validated; public government-code activity does not prove every server script is developed in-house.",
+        "Official banner host r2.fivemanage.com is outside the current image guard; omit banner instead of weakening validation."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T12:53:25.355Z",
+        "status": "online",
+        "players": 27,
+        "max": 120,
+        "observedAt": "2026-09-04T12:52:21.291Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Resilient Roleplay",
+        "guildId": "1420379377199218788",
+        "checkedAt": "2026-09-04T12:52:00Z",
+        "identityConfirmedBy": "Official homepage and Cfx both link /resilientrp; fixed invite endpoint agrees."
+      },
+      "imageReview": {
+        "checkedAt": "2026-09-04T12:52:15.727Z",
+        "logoNote": "Guarded static Cfx PNG fetch succeeded,7543bytes. Visually matches teal R community identity; no stock or unrelated artwork.",
+        "bannerNote": "Unsupported official host omitted."
+      },
+      "requiresStaffReview": true
+    }
+  ],
+  "notRecommendedForAutomaticAddition": [
+    {
+      "name": "New Day RP",
+      "joinCode": "ypq96k",
+      "decision": "Quality shortlist, publication held pending usable current source status",
+      "reason": "Strong official rulebook, newcomer FAQ and May2026 leadership newsletter; Cfx adapter currently returns fallback/unavailable. Third-party history shows128peak but must not be called a current live count.",
+      "sources": [
+        "https://newdayrp.com/threads/new-day-rp-rules-and-guidelines.24/",
+        "https://newdayrp.com/threads/faqs.850/",
+        "https://newdayrp.com/threads/community-newsletter-may-2026.73903/",
+        "https://www.gtaboom.com/servers/ypq96k"
+      ]
+    },
+    {
+      "name": "UmbraRP (formerly Purple/Unscripted)",
+      "joinCode": "33xqzy",
+      "decision": "Hold",
+      "reason": "Current official website and Discord identity agree, but current Cfx adapter count unavailable and publicly attributable current rules/onboarding not established sufficiently. Do not import as old Purple branding.",
+      "sources": [
+        "https://umbrarp.net/",
+        "https://cfx.re/join/33xqzy"
+      ]
+    },
+    {
+      "name": "ONX",
+      "joinCode": null,
+      "decision": "Hold",
+      "reason": "Strong primary rules/FAQ and evidenced development. Only discoverable code9pk56y is its asset showcase, not the main community; do not substitute.",
+      "sources": [
+        "https://onx.gg/rules",
+        "https://onx.gg/faq",
+        "https://github.com/onxgg/rockstar"
+      ]
+    },
+    {
+      "name": "Brighter Times RP3.0",
+      "joinCode": "98yx4my",
+      "decision": "Needs editorial review, not an equally strong recommendation",
+      "reason": "Canonical current main server33/220 at12:45:31Z, valid Discord guild1150093495894298708, matching static logo22956bytes; official Cfx onboarding explicitly requests whitelist. Public recruitment documents development since2024 and activity history supports195peak, but no current complete public rulebook located. A2024 Cfx participant alleges favoritism/performance issues; community representative replied that players may try it and judge. Allegations unverified; paid armory/vehicle/asset catalogue needs explicit review. Old89b834 is gone and4gb4kbv is LabRats, not main.",
+      "sources": [
+        "https://forum.cfx.re/t/5209446",
+        "https://brightertimesrp.tebex.io/policy",
+        "https://brightertimesrp.tebex.io/",
+        "https://www.gtaboom.com/servers/98yx4my"
+      ]
+    },
+    {
+      "name": "PMA",
+      "joinCode": "7blbde",
+      "decision": "Needs editorial review, not an equally strong recommendation",
+      "reason": "Active87/250 at12:45:00Z, valid Discord guild591107228665249805, matching static logo8906bytes. Rules updatedAugust14,2026 and history extends to2019; long-form player criticism in2024 alleges owner favoritism/abuse. Unverified but directly relevant to requested management quality. Do not confuse with older vMenu PMA code734okr.",
+      "sources": [
+        "https://pma.network/rules",
+        "https://forum.cfx.re/t/pmarp-tokovoip-active-devs-staff-community-focused-serious-rp/902419",
+        "https://forum.cfx.re/t/pma-rp-1500-hour-review/5210858"
+      ]
+    },
+    {
+      "name": "The Fracture",
+      "joinCode": "elalma",
+      "decision": "Hold for moderation/consent review",
+      "reason": "Clear supernatural/horror niche,26/150 current and150 external24hpeak. Multiple dated player accounts raise moderation/consent concerns; a later2026 participant says staff improved. These are disputed reports, not established wrongdoing. This is weaker evidence for a welcoming launch recommendation than its activity alone suggests.",
+      "sources": [
+        "https://fracturerp.crd.co/",
+        "https://www.reddit.com/r/FiveMServers/comments/1m8iki0",
+        "https://www.reddit.com/r/FiveMServers/comments/1mom9r2/",
+        "https://www.reddit.com/r/FiveMServers/comments/1h6fkvg/the_fracture_rp/"
+      ]
+    },
+    {
+      "name": "The Towns",
+      "joinCode": "rxb9x7",
+      "decision": "Hold",
+      "reason": "Active44/225 during check; public onboarding requires whitelist and sells instant entry. Female-priority instructions require camera verification; current store wording references ChicagoStreets, creating identity/entry-policy questions. Not a high-confidence newcomer recommendation without further clarification.",
+      "sources": [
+        "https://thetownsroleplay.com/threads/server-guidelines.2/",
+        "https://thetownsroleplay.com/threads/female-whitelist.7264/",
+        "https://thetownsroleplay.tebex.io/package/7212163"
+      ]
+    },
+    {
+      "name": "Los Angeles Roleplay (LARP)",
+      "joinCode": null,
+      "decision": "Do not use historical website",
+      "reason": "Old official forum now serves unrelated gambling content, and old root site returns404. Historical positive reputation is insufficient to recommend current official identity.",
+      "sources": [
+        "https://forum.cfx.re/t/los-angeles-roleplay-larp-public-server-s/207303"
+      ]
+    },
+    {
+      "name": "RevolutionRP",
+      "joinCode": null,
+      "decision": "Hold",
+      "reason": "Current candidate website hasOctober31,2026 countdown and unfinished image/news placeholders. Do not confuse French or Brazilian Cfx communities with same name.",
+      "sources": [
+        "https://revolutionrp.network/"
+      ]
+    }
+  ]
+}

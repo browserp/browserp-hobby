@@ -4,7 +4,7 @@
   const defaults = { query: "", platform: "all", region: "all", mode: "all", feature: "all", access: "all", language: "all", online: false, verified: false, beginner: false, sort: "recommended", offset: 0, limit: 24 };
   const fields = { platform: "platform_id", region: "region", mode: "framework", feature: "tags", access: "access_type", language: "language", online: "online", verified: "verified", beginner: "beginner_friendly" };
   const labels = { platform: "Game", region: "Region", mode: "Game mode", feature: "Features", access: "How to join", language: "Language", online: "Online now", verified: "Owner verified", beginner: "Beginner friendly" };
-  const accessNames = { public: "Open to everyone", allowlisted: "Approval required", application: "Application required", whitelisted: "Approval required", unknown: "Not confirmed" };
+  const accessNames = { public: "Public", whitelisted: "Whitelisted", unknown: "Not confirmed" };
   const normal = value => String(value || "").toLowerCase().replace(/[-_]/g, " ").replace(/\s+/g, " ").trim();
   const taxonomy = {
     fivem: { modeLabel: "Framework", modeAny: "Any framework", modes: [
@@ -28,7 +28,8 @@
       ["private servers", "Private servers", "private server"], ["public servers", "Public servers", "public server"], ["voice chat", "Voice chat", "vc"], ["custom avatars", "Custom avatars", "custom avatar"], ["vehicles", "Vehicles", "driving"], ["housing", "Housing", "houses"], ["jobs", "Jobs", "careers"], ["events", "Community events", "community events"], ["mobile friendly", "Mobile friendly", "mobile"], ["controller support", "Controller support", "console support"]
     ] }
   };
-  const accessAliases = { whitelisted: "allowlisted", whitelist: "allowlisted", allowlist: "allowlisted", open: "public", "open access": "public", "application required": "application" };
+  // Joining filters group the legacy approval/application values; listing metadata stays intact.
+  const accessAliases = { allowlisted: "whitelisted", whitelist: "whitelisted", allowlist: "whitelisted", application: "whitelisted", "application required": "whitelisted", "approval required": "whitelisted", open: "public", "open access": "public", "open to everyone": "public", "not confirmed": "unknown" };
   const entries = (key, platform) => key === "mode" ? taxonomy[platform]?.modes || [] : key === "feature" ? taxonomy[platform]?.features || [] : [];
   function canonical(key, value, platform = "all") {
     const normalized = normal(value);

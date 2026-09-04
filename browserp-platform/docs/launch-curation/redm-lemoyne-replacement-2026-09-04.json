@@ -1,0 +1,247 @@
+{
+  "reviewedAt": "2026-09-04T13:02:07.037Z",
+  "decision": "Recommend The Tackroom as the Lemoyne replacement, explicitly labeled as equestrian sandbox with optional roleplay.",
+  "historyMethod": "Public RedMMetrics chart observations, Aug28-Sep4. Arithmetic sample mean; six full UTC days Aug29-Sep3. Repeated threshold means at least three samples of 35 or more within a day. Uneven sampling and gaps are possible; these are occupancy observations, not unique users or staff-quality measurements.",
+  "candidate": {
+    "name": "The Tackroom",
+    "platform": "redm",
+    "joinCode": "ov754y",
+    "status": "publish",
+    "publishReady": true,
+    "proposedReplacementFor": "Lemoyne County",
+    "description": "An 18+ equestrian sandbox with optional roleplay, custom horses and tack, ranch building, cattle herding and community events. Train and trade horses, build a homestead or explore slice-of-life activities at your own pace. Join the official Discord, answer the short whitelist questions and wait for staff approval before connecting.",
+    "region": null,
+    "regionEvidence": "The Cfx locale is en-US; a physical server location or primary player region was not independently confirmed. Do not present locale as a verified country.",
+    "language": "English",
+    "languageEvidence": "The official 2026 rulebook requires English in public channels.",
+    "framework": "VORP",
+    "frameworkEvidence": "Current official Cfx resource evidence includes vorp_core; medium-confidence framework inference.",
+    "accessType": "allowlisted",
+    "applicationRequired": true,
+    "applicationEvidence": "Official joining instructions require Discord verification, three questions, then manual administrator approval.",
+    "discordUrl": "https://discord.gg/thetackroom-redm",
+    "websiteUrl": "https://thetackroom-redm.com/",
+    "joinUrl": "https://cfx.re/join/ov754y",
+    "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/ov754y/-1399333826.png",
+    "bannerUrl": null,
+    "mediaCheck": {
+      "checkedAt": "2026-09-04T13:06:09.509Z",
+      "format": "png",
+      "bytes": 13916,
+      "animated": false,
+      "currentImageGuardPassed": true,
+      "bannerReason": "No corroborated supported static banner; source banner URLs were unsupported or animated."
+    },
+    "tags": [
+      "horses",
+      "ranching",
+      "housing",
+      "community-events",
+      "casual-rp",
+      "sandbox"
+    ],
+    "keywords": [
+      "tackroom",
+      "equestrian",
+      "slice of life",
+      "horse breeding",
+      "custom tack",
+      "roleplay optional"
+    ],
+    "players": null,
+    "capacity": null,
+    "observedForResearch": {
+      "players": 83,
+      "capacity": 200,
+      "observedAt": "2026-09-04T12:53:44.955Z",
+      "fetchedAt": "2026-09-04T12:55:55.774Z",
+      "note": "Historical check only; publication must fetch a new source observation. Do not seed live counts from research."
+    },
+    "sourceChecks": {
+      "canonicalCfxCode": true,
+      "discordInviteHttpStatus": 200,
+      "discordGuildId": "1277386428678012979",
+      "discordGuildName": "The Tackroom",
+      "reciprocalWebsiteAndDiscordIdentity": true
+    },
+    "reasons": [
+      "Sustained activity comfortably meets the approximate 35-player normal-session floor across every complete sampled UTC day.",
+      "Distinctive equestrian and ranching gameplay with publicly documented systems and beginner guides.",
+      "Readable conduct rules, player/staff report routes, ban appeals and accessibility protections.",
+      "Explicit application and manual approval process; English is required in public channels."
+    ],
+    "caveats": [
+      "Roleplay is optional. Label this as a sandbox/casual roleplay community; do not market it as strict narrative or serious RP.",
+      "Published procedures are evidence of support structure, not an independent guarantee of friendly interactions or fair decisions.",
+      "Rules prohibit discussion or promotion of other communities/products even when positive; this is stricter than a usual no-advertising rule.",
+      "Current paid support perks include housing eligibility/activity exceptions. Do not describe the server as having no paid gameplay benefits.",
+      "No independently verified physical region; preserve unknown."
+    ],
+    "history": {
+      "code": "ov754y",
+      "name": "The Tackroom",
+      "title": "The Tackroom — RedMMetrics",
+      "url": "https://redmmetrics.com/server/ov754y?hours=168",
+      "samples": 2730,
+      "start": "2026-08-28T12:57:11Z",
+      "end": "2026-09-04T12:56:48Z",
+      "mean": 61.3,
+      "peak": 176,
+      "atLeast35": 2171,
+      "fullDays35": 6,
+      "medianDailyPeak": 153,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 414,
+          "max": 139,
+          "atLeast35": 310
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 345,
+          "max": 176,
+          "atLeast35": 220
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 339,
+          "max": 155,
+          "atLeast35": 313
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 319,
+          "max": 148,
+          "atLeast35": 284
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 394,
+          "max": 164,
+          "atLeast35": 309
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 471,
+          "max": 151,
+          "atLeast35": 404
+        }
+      ]
+    },
+    "sources": [
+      {
+        "url": "https://thetackroom-redm.com/",
+        "supports": "Community identity, equestrian sandbox and documented features."
+      },
+      {
+        "url": "https://thetackroom-redm.com/how-to-join/",
+        "supports": "Application plus manual approval, newcomer setup and support."
+      },
+      {
+        "url": "https://thetackroom-redm.com/the-rules/",
+        "supports": "Official wrapper embedding the readable 2026 public rulebook."
+      },
+      {
+        "url": "https://docs.google.com/document/d/e/2PACX-1vRJR0tiC-ZkFBEvKrXXWpIW7NlcaScFTNNn24HNj_GMn1R6-wHS09XS7r5IXvvLBX8JDJCBnjmp5c41/pub?embedded=true",
+        "supports": "English, age, conduct, accessibility, consent, support, reports and appeals. Public unauthenticated HTTP 200."
+      },
+      {
+        "url": "https://thetackroom-redm.com/frequently-asked-questions/",
+        "supports": "Optional roleplay and actual horse, ranching, event and economy features."
+      },
+      {
+        "url": "https://thetackroom-redm.com/meet-the-team/",
+        "supports": "Public staff, player-experience, event and housing support roles."
+      },
+      {
+        "url": "https://thetackroom-redm.tebex.io/",
+        "supports": "Paid support and housing perks caveat."
+      },
+      {
+        "url": "https://discord.com/api/v10/invites/thetackroom-redm?with_counts=true&with_expiration=true",
+        "supports": "Valid exact Discord guild whose description links back to the official website."
+      },
+      {
+        "url": "https://frontend.cfx-services.net/api/servers/single/ov754y",
+        "supports": "Current authoritative RedM code, framework evidence, observation and icon."
+      },
+      {
+        "url": "https://redmmetrics.com/server/ov754y?hours=168",
+        "supports": "Third-party seven-day aggregate occupancy history."
+      }
+    ]
+  },
+  "alternatives": [
+    {
+      "name": "New Dakota",
+      "joinCode": "969koe",
+      "status": "hold",
+      "history": {
+        "code": "969koe",
+        "name": "New Dakota",
+        "title": "[VORPCore] New Dakota — RedMMetrics",
+        "url": "https://redmmetrics.com/server/969koe?hours=168",
+        "samples": 2681,
+        "start": "2026-08-28T13:00:38Z",
+        "end": "2026-09-04T12:56:51Z",
+        "mean": 43.1,
+        "peak": 104,
+        "atLeast35": 1416,
+        "fullDays35": 6,
+        "medianDailyPeak": 86,
+        "days": [
+          {
+            "date": "2026-08-29",
+            "samples": 413,
+            "max": 90,
+            "atLeast35": 245
+          },
+          {
+            "date": "2026-08-30",
+            "samples": 339,
+            "max": 104,
+            "atLeast35": 215
+          },
+          {
+            "date": "2026-08-31",
+            "samples": 337,
+            "max": 98,
+            "atLeast35": 171
+          },
+          {
+            "date": "2026-09-01",
+            "samples": 320,
+            "max": 82,
+            "atLeast35": 140
+          },
+          {
+            "date": "2026-09-02",
+            "samples": 398,
+            "max": 77,
+            "atLeast35": 186
+          },
+          {
+            "date": "2026-09-03",
+            "samples": 474,
+            "max": 69,
+            "atLeast35": 262
+          }
+        ]
+      },
+      "reason": "Activity qualifies, but readable current rules and reporting/appeal routes were not established. Exact Cfx/Discord identity is confirmed. Do not reuse the obsolete drb.gg website: its current content is unrelated gambling material."
+    },
+    {
+      "name": "New Eden Roleplay",
+      "joinCode": "lg53q5",
+      "status": "hold",
+      "reason": "Activity and exact Providence1894 identity qualify; public Discord invite works but guild preview and verification endpoints require authentication (401). No current public governance text or exact application requirement was readable. No account join or access escalation attempted."
+    },
+    {
+      "name": "Providence Roleplay",
+      "joinCode": "z8a459",
+      "status": "hold",
+      "reason": "A distinct text-roleplay community set in 1900, not New Eden. Excellent readable rules but old Cfx code and history URL both return404. No replacement code proven; do not infer one from another metrics query."
+    }
+  ]
+}

@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-04T11:46:46.374Z",
+  "generatedAt": "2026-09-04T13:31:22.661Z",
   "targetTotal": 40,
   "alreadyLive": [
     "CaliRP",
     "ProdigyRP"
   ],
   "policy": "Research-only review suggestions. No automatic publication. One selected instance per community. Primary claims establish intended style, not a guarantee of actual player behaviour. All counts are historical Cfx observations, not website/Discord counts, and must never be copied into a live count field.",
-  "candidateCount": 55,
-  "publishCount": 27,
+  "candidateCount": 57,
+  "publishCount": 23,
   "candidates": [
     {
       "joinCode": "68oab8",
@@ -150,7 +150,7 @@
     {
       "joinCode": "y5ox3y",
       "platform": "fivem",
-      "status": "publish",
+      "status": "hold",
       "name": "Ignite Roleplay",
       "description": "An application-based, 18+ roleplay community set in 1980s Los Santos. Players are expected to stay within the period, speak English and build serious character stories, with detailed conduct and scene rules to guide them.",
       "region": "United States",
@@ -200,7 +200,8 @@
       ],
       "conflicts": [
         "Cfx public flag conflicts with official whitelist onboarding; use official access rules.",
-        "Official rules reference both 1985 and 1986. Description deliberately says 1980s."
+        "Official rules reference both 1985 and 1986. Description deliberately says 1980s.",
+        "Provisional launch hold (4 September 2026): 182 retained observations ranged from 0–6 players, including 30 late US East Coast and 89 West Coast evening samples. The distinctive period setting remains documented, but the current active-launch criterion lacks support. One night does not establish long-term inactivity or poor management; see activity-review-2026-09-04.md."
       ],
       "lastCheck": {
         "checkedAt": "2026-09-04T01:19:41.211Z",
@@ -288,7 +289,7 @@
     {
       "joinCode": "3jj3bz",
       "platform": "fivem",
-      "status": "publish",
+      "status": "hold",
       "name": "Distinct Roleplay",
       "description": "A whitelisted city offering character-led stories across civilian businesses, emergency services and organised crime. The community describes a balanced economy, housing and crafting, with a development thread documenting changes across several seasons.",
       "region": "United States",
@@ -339,7 +340,8 @@
         "Specific civilian and public-service systems provide a broader identity than generic server adverts."
       ],
       "conflicts": [
-        "Forum title still says Season 4 while current Cfx and Discord say Season 5. Avoid a season number in the listing name."
+        "Forum title still says Season 4 while current Cfx and Discord say Season 5. Avoid a season number in the listing name.",
+        "Provisional launch hold (4 September 2026): 175 retained observations ranged from 0–23 players, including 29 late US East Coast evening samples at 22–23 and 86 West Coast evening samples at 1–23. For the current established, active launch selection, seek stronger representative-session evidence. This is one night, not proof of long-term inactivity or poor management; see activity-review-2026-09-04.md."
       ],
       "lastCheck": {
         "checkedAt": "2026-09-04T01:19:50.126Z",
@@ -640,7 +642,7 @@
     {
       "joinCode": "x38gge",
       "platform": "fivem",
-      "status": "publish",
+      "status": "hold",
       "name": "Moonlit Hills RP",
       "description": "An 18+ whitelisted community with a cyberpunk-inspired setting and narrative-focused roleplay. Cybernetics and science-fiction elements sit alongside civilian, business and criminal stories, offering an alternative to a conventional modern city.",
       "region": "United States",
@@ -691,7 +693,8 @@
         "Community thread spans 2024–2026 and the current Cfx server and Discord both resolve."
       ],
       "conflicts": [
-        "Unsubstantiated number-one or world-record promotional claims are intentionally omitted."
+        "Unsubstantiated number-one or world-record promotional claims are intentionally omitted.",
+        "Provisional launch hold (4 September 2026): 162 retained observations ranged from 0–4 players, including 30 late US East Coast evening samples at 2–4 and 77 West Coast samples at 0–4. The distinctive setting is retained for future review, but current active-session evidence is too limited for this launch selection. One night is not proof of long-term inactivity or poor management; see activity-review-2026-09-04.md."
       ],
       "lastCheck": {
         "checkedAt": "2026-09-04T01:22:56.611Z",
@@ -1854,7 +1857,7 @@
     {
       "joinCode": "583r8a",
       "platform": "fivem",
-      "status": "publish",
+      "status": "hold",
       "name": "OzzyGaming DarkSide",
       "description": "An Australian roleplay city within the established OzzyGaming community. Civilian work, businesses and emergency-service careers are supported by public guides, department applications and rules governing roleplay conduct and the economy.",
       "region": "Australia",
@@ -1906,7 +1909,8 @@
       ],
       "conflicts": [
         "DarkSide is the individually checked instance; no other OzzyGaming city is added.",
-        "General access for this specific instance remains unconfirmed; department applications alone do not establish a server whitelist."
+        "General access for this specific instance remains unconfirmed; department applications alone do not establish a server whitelist.",
+        "Provisional launch hold (4 September 2026): 176 retained observations ranged from 0–6 players; Australian evening subsets included 37 Perth samples at 0–3 and 72 Sydney samples at 0–4. This specific DarkSide instance lacks supporting activity for the current launch selection despite the wider community history. One day is not proof of long-term inactivity or poor management; see activity-review-2026-09-04.md."
       ],
       "lastCheck": {
         "checkedAt": "2026-09-04T01:33:45.332Z",
@@ -1997,7 +2001,7 @@
     {
       "joinCode": "e6e44gb",
       "platform": "fivem",
-      "status": "publish",
+      "status": "hold",
       "name": "Logic Roleplay",
       "description": "A whitelist-based community with civilian, business, criminal and emergency-service paths. Its published standards emphasise believable character reactions and medical roleplay, with choices and injuries intended to carry through into continuing stories.",
       "region": "United States",
@@ -2052,7 +2056,8 @@
         "Community thread supplies detailed roleplay expectations beyond promotional popularity."
       ],
       "conflicts": [
-        "Current Cfx public flag conflicts with the official website whitelist application. Use the explicit official onboarding."
+        "Current Cfx public flag conflicts with the official website whitelist application. Use the explicit official onboarding.",
+        "Provisional launch hold (4 September 2026): 168 retained observations ranged from 0–10 players, including 29 late US East Coast evening samples at 5–10 and 85 West Coast samples at 0–10. Reconsider with stronger representative-session evidence for the current active-launch selection. One night does not establish long-term inactivity or poor management; see activity-review-2026-09-04.md."
       ],
       "lastCheck": {
         "checkedAt": "2026-09-04T01:41:48.875Z",
@@ -2070,7 +2075,7 @@
     {
       "joinCode": "8em4594",
       "platform": "fivem",
-      "status": "publish",
+      "status": "hold",
       "name": "San Andreas First Response",
       "description": "A cooperative first-responder server focused on procedure, teamwork and AI-driven incidents. Players join the Discord, complete a guided tutorial and patrol together as emergency services, offering a different experience from civilian-versus-criminal city roleplay.",
       "region": "United States",
@@ -2126,7 +2131,8 @@
       ],
       "conflicts": [
         "Cfx indicates allowlisting, but official onboarding explicitly says no application: access roles come from joining Discord. Label public with Discord required.",
-        "This is co-operative RP against AI, not a conventional civilian/criminal RP city."
+        "This is co-operative RP against AI, not a conventional civilian/criminal RP city.",
+        "Provisional launch hold (4 September 2026): 170 retained observations ranged from 0–11 players, including 27 late US East Coast evening samples at 4–8 and 81 West Coast samples at 4–11. Its guided co-operative format remains documented, but current active-session evidence does not support this launch selection. One night is not proof of long-term inactivity or poor management; see activity-review-2026-09-04.md."
       ],
       "lastCheck": {
         "checkedAt": "2026-09-04T01:42:14.458Z",
@@ -2223,7 +2229,7 @@
       "platform": "fivem",
       "status": "publish",
       "name": "Everfall",
-      "description": "An established 18+ city with detailed roleplay rules, practical newcomer guides and a range of civilian, emergency-service and criminal paths. Players can begin with contract work, join a business or apply to a public-service department, while the community provides reporting and support channels for problems.",
+      "description": "An established 18+ city with detailed roleplay rules, practical newcomer guides and a range of civilian, emergency-service and criminal paths. Players can begin with contract work, join a business or apply to a public-service department, while the community provides reporting and support channels for problems. The community also offers optional paid content; check its current rules and joining guide before playing.",
       "region": null,
       "language": "English",
       "framework": "Qbox",
@@ -3500,6 +3506,218 @@
       "discordCheck": {
         "status": "not_supplied",
         "guildName": null
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "pqqvj8",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "San Andreas County Roleplay",
+      "description": "An English-speaking vMenu community with public civilian and community-officer roleplay, structured emergency-service departments, player businesses and certified gangs. The county also supports car meets, racing and social activities, with published scene-consent rules, support tickets and an appeals route. Some departments require applications. Optional paid perks include gameplay privileges, so review the current rules and store before joining.",
+      "region": "United States",
+      "language": "English",
+      "framework": "vMenu",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/sacrp",
+      "websiteUrl": "https://sacrp.co/",
+      "cfxJoinUrl": "https://cfx.re/join/pqqvj8",
+      "tags": [
+        "Roleplay",
+        "Police",
+        "EMS",
+        "Fire",
+        "Businesses",
+        "Gangs",
+        "Car Meets",
+        "New Player Friendly"
+      ],
+      "keywords": [
+        "san andreas county roleplay",
+        "sacrp",
+        "vmenu",
+        "civilian roleplay",
+        "community officer",
+        "departments",
+        "car meets"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/pqqvj8/-1736587857.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T11:58:50.704Z",
+        "logoNote": "Guarded Cfx PNG fetch succeeded (17,776 bytes); static image visually matches SACRP wordmark, palms and dark orange background.",
+        "bannerNote": "Unsupported forums.sacrp.co banner omitted; no unrelated replacement."
+      },
+      "sources": [
+        {
+          "url": "https://sacrp.co/",
+          "purpose": "Official home links this exact Cfx code and /sacrp Discord. Explicit United States community origin, newcomer flow and available RP paths."
+        },
+        {
+          "url": "https://sacrp.co/rules",
+          "purpose": "Current detailed conduct, anti-harassment, scene-consent, reporting and staff/no-exemption rules; distinguishes whitelisted departments from public paths."
+        },
+        {
+          "url": "https://sacrp.co/development",
+          "purpose": "Dated February 2026 activities/prison release and April 2026 website release; no claim of verified weekly delivery."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/pqqvj8",
+          "purpose": "Canonical gta5 name/code, English locale, public flag, vMenu advertised and count observation."
+        },
+        {
+          "url": "https://discord.com/api/v10/invites/sacrp?with_counts=true",
+          "purpose": "Invite HTTP 200; exact guild 652246210706669581 named San Andreas County Roleplay."
+        },
+        {
+          "url": "https://fivestatus.com/fivem/servers/pqqvj8",
+          "purpose": "Attributed historical public-Cfx monitoring: 36 peak/15 average during previous 24h when opened at 11:55 UTC; busiest around 02:00 UTC, quietest 11:00 UTC. Not our independently collected time series."
+        },
+        {
+          "url": "https://fivemonitor.com/en/servers/pqqvj8",
+          "purpose": "Separately indexed public-Cfx history: 46 peak and 16 average over 7 days. Supports session-aware inclusion, not a quality rating."
+        },
+        {
+          "url": "https://store.sacrp.co/",
+          "purpose": "Official paid-perk store; rules allow donor personal items and some weapon/explosive privileges. Not cosmetic-only."
+        }
+      ],
+      "inclusionReasons": [
+        "Explicitly requested community with exact official website, Cfx and Discord identity agreement.",
+        "Documented newcomer paths, department structure, scene consent and support/appeals.",
+        "Historical public-Cfx monitoring exceeds roughly 35 during normal active sessions; current quiet morning snapshot does not establish inactivity.",
+        "Current scripts support emergency services, business/social activities and community-specific resources; functionality not independently playtested."
+      ],
+      "conflicts": [
+        "Public flag and public-officer advertising support public entry, while homepage mentions clearance/whitelist updates; those may refer to department access. Confirm any universal Discord-verification step before calling entry unrestricted.",
+        "Framework detection sees mixed resources; official title and description explicitly advertise vMenu, so use that player-facing choice.",
+        "Paid donor privileges can include weapons/explosives; do not label cosmetic-only or no-pay-to-win.",
+        "No independent player review was robust enough to establish consistent enforcement or guarantee friendliness.",
+        "Site development page has only two current public release entries; source claim of weekly updates has not been independently corroborated."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T11:55:35.868Z",
+        "status": "online",
+        "players": 1,
+        "max": 250,
+        "observedAt": "2026-09-04T11:53:33.451Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "San Andreas County Roleplay",
+        "guildId": "652246210706669581",
+        "identityConfirmedBy": "Official home and Cfx both link /sacrp; fixed invite API matches full community name."
+      },
+      "requiresStaffReview": true
+    },
+    {
+      "joinCode": "oq5mx7",
+      "platform": "fivem",
+      "status": "publish",
+      "name": "Resilient Roleplay",
+      "description": "An 18+ English-speaking community focused on long-form character stories, player-run businesses and a working police, medical and justice system. Civilian jobs include mechanics, towing, electrical work and fishing. Joining requires a whitelist application; the published rules cover consent, harassment, meaningful roleplay and protection for newcomer and medical areas. Optional paid benefits include application and queue priority, extra character slots and approved custom characters.",
+      "region": "United Kingdom",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/resilientrp",
+      "websiteUrl": "https://resilientrp.net/",
+      "cfxJoinUrl": "https://cfx.re/join/oq5mx7",
+      "tags": [
+        "Roleplay",
+        "Serious RP",
+        "Whitelist",
+        "Businesses",
+        "Police",
+        "EMS",
+        "DOJ",
+        "Civilian Jobs"
+      ],
+      "keywords": [
+        "resilient",
+        "resilient roleplay",
+        "long form stories",
+        "character development",
+        "player businesses",
+        "british roleplay",
+        "whitelist",
+        "qbox"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/oq5mx7/961106737.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://resilientrp.net/",
+          "purpose": "Official home directly configures oq5mx7 as its connect code and links rules, application portal, Discord and store. Identifies staff and four development roles; describes business and civilian RP."
+        },
+        {
+          "url": "https://resilientrp.net/rules",
+          "purpose": "Current published rules: 18+, anti-harassment, consent for sensitive scenes, no ERP, no metagaming, recorded reports, newcomer/medical safe areas, meaningful RP before violence. Read from the publicly served app data."
+        },
+        {
+          "url": "https://apply.resilientrp.net/",
+          "purpose": "Current whitelist application entry responds HTTP200 and requests Discord authentication; no account was created or application submitted."
+        },
+        {
+          "url": "https://github.com/resilient-roleplay/",
+          "purpose": "Community-owned organization links resilientrp.net and explicitly identifies United Kingdom; government website repository updated August4,2026."
+        },
+        {
+          "url": "https://gov.resilientrp.net/",
+          "purpose": "Public government and legislation hub supports police, medical, business and justice roleplay; this is in-character documentation, not proof of fair staff enforcement."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/oq5mx7",
+          "purpose": "Current canonical gta5 listing, English locale, Qbox, explicit allowlist flag and timestamped live count."
+        },
+        {
+          "url": "https://discord.com/api/v10/invites/resilientrp?with_counts=true",
+          "purpose": "HTTP200; guild1420379377199218788 named Resilient Roleplay, 2902 members during this review; matches official homepage and Cfx invite."
+        },
+        {
+          "url": "https://fivestatus.com/fivem/servers/oq5mx7",
+          "purpose": "External Cfx monitoring showed79 peak/25 average in preceding24h when opened12:52UTC. An attributed historical signal supporting35+ active-session criterion, not an independent quality score."
+        },
+        {
+          "url": "https://store.resilientrp.net/",
+          "purpose": "Official store discloses application-processing priority, queue priority, extra character slots and approved custom peds. Do not imply all features are free."
+        },
+        {
+          "url": "https://www.reddit.com/r/FiveMServers/comments/1q3qvor/resilient_rp_longterm_fivem_roleplay/",
+          "purpose": "Dated community recruitment corroborates long-form stories/newcomer intake; treat as advertising rather than independent player endorsement."
+        }
+      ],
+      "inclusionReasons": [
+        "Exact official identity agreement across website, Cfx and Discord.",
+        "Public rules and onboarding support serious character-led RP and civilian inclusion, instead of relying on player-count marketing.",
+        "Named staff/developers and maintained public government tooling provide tangible organizational evidence.",
+        "Observed activity and attributed24h history exceed the normal-session threshold despite a quieter midday snapshot."
+      ],
+      "conflicts": [
+        "No first-hand playtest or robust independent player-review sample; friendliness and consistent moderation are not guaranteed.",
+        "Reports require at least a two-minute full-audio clip. Players should know this evidence requirement before joining.",
+        "Paid application/queue priority, extra character slots and custom peds are offered; no claim of cosmetic-only or no-pay-to-win.",
+        "Homepage uptime/optimization claims were not independently validated; public government-code activity does not prove every server script is developed in-house.",
+        "Official banner host r2.fivemanage.com is outside the current image guard; omit banner instead of weakening validation."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T12:53:25.355Z",
+        "status": "online",
+        "players": 27,
+        "max": 120,
+        "observedAt": "2026-09-04T12:52:21.291Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Resilient Roleplay",
+        "guildId": "1420379377199218788",
+        "checkedAt": "2026-09-04T12:52:00Z",
+        "identityConfirmedBy": "Official homepage and Cfx both link /resilientrp; fixed invite endpoint agrees."
+      },
+      "imageReview": {
+        "checkedAt": "2026-09-04T12:52:15.727Z",
+        "logoNote": "Guarded static Cfx PNG fetch succeeded,7543bytes. Visually matches teal R community identity; no stock or unrelated artwork.",
+        "bannerNote": "Unsupported official host omitted."
       },
       "requiresStaffReview": true
     }

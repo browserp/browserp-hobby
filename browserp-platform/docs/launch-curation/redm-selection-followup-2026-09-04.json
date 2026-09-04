@@ -1,0 +1,1577 @@
+{
+  "reviewedAt": "2026-09-04T12:04:06.716Z",
+  "decision": "No unconditional publication-ready replacement; two priority conditional reviews.",
+  "historyMethod": "Public RedMMetrics embedded chart data, seven days ending Sep4~12:00UTC. Arithmetic sample mean; six complete UTC days Aug29-Sep3; repeated35 means at least3 samples/day. Third-party source gaps possible, no unique-user or staff-quality inference.",
+  "candidates": [
+    {
+      "platform": "redm",
+      "language": "English",
+      "region": "United States",
+      "regionEvidence": "Suggested from en-US locale; physical location not independently confirmed.",
+      "logoUrl": null,
+      "bannerUrl": null,
+      "players": null,
+      "capacity": null,
+      "publishReady": false,
+      "joinCode": "bpa6db",
+      "name": "Wanted RP: The Last Ride",
+      "description": "Create a character in Stillwater, an 1899 frontier setting with law, legal and medical roles, ranching, farming, active markets and business pathways built through roleplay. Join the official Discord to read the rules and complete the community's application process.",
+      "framework": "VORP",
+      "accessType": "allowlisted",
+      "applicationRequired": true,
+      "applicationEvidence": "Public https://apps.wantedroleplay.com/ renders an application system requiring Discord login to continue or check application status.",
+      "discordUrl": "https://discord.gg/wantedroleplaytlr",
+      "websiteUrl": "https://wantedroleplay.com/",
+      "joinUrl": "https://cfx.re/join/bpa6db",
+      "tags": [
+        "serious-rp",
+        "economy",
+        "civilian",
+        "law",
+        "medical",
+        "ranching"
+      ],
+      "keywords": [
+        "wanted",
+        "last ride",
+        "stillwater",
+        "1899"
+      ],
+      "proposedReplacementFor": "e66azka",
+      "publishBlockers": [
+        "Current rules/reporting/appeal procedures not read; governance comparison incomplete.",
+        "Direct Cfx response at 12:03 UTC still has fallback=true; do not publish an unavailable observation as live."
+      ],
+      "sources": [
+        "https://wantedroleplay.com/",
+        "https://apps.wantedroleplay.com/",
+        "https://wanted-rp-the-last-ride.tebex.io/",
+        "https://frontend.cfx-services.net/api/servers/single/bpa6db",
+        "https://redmmetrics.com/server/bpa6db?hours=168",
+        "https://fivemonitor.com/en/servers/bpa6db"
+      ]
+    },
+    {
+      "platform": "redm",
+      "language": "English",
+      "region": "United States",
+      "regionEvidence": "Suggested from en-US locale; physical location not independently confirmed.",
+      "logoUrl": null,
+      "bannerUrl": null,
+      "players": null,
+      "capacity": null,
+      "publishReady": false,
+      "joinCode": "lg53q5",
+      "name": "New Eden Roleplay",
+      "description": "A story-driven RedM community set in Providence 1894, with character-led roleplay, businesses, crafting and farming. Visit the official Discord for current rules and joining requirements.",
+      "framework": "RSG",
+      "accessType": "unknown",
+      "applicationRequired": null,
+      "applicationEvidence": "Cfx says to request allowlisting on Discord; a written application requirement is not established. Do not infer it from the Whitelisted title.",
+      "discordUrl": "https://discord.gg/newedenrp",
+      "websiteUrl": null,
+      "joinUrl": "https://cfx.re/join/lg53q5",
+      "tags": [
+        "serious-rp",
+        "character-driven",
+        "economy",
+        "crafting",
+        "farming"
+      ],
+      "keywords": [
+        "new eden",
+        "providence",
+        "1894"
+      ],
+      "proposedReplacementFor": "bdx8ak8",
+      "publishBlockers": [
+        "Current rules/reporting/appeal procedures not read; governance comparison incomplete.",
+        "Exact application-versus-request-to-join entry method remains unconfirmed."
+      ],
+      "sourceReadiness": "At 12:03 UTC current Cfx fallback=false; lastSeen12:01:21. Zero current players was reported in that sample, not manufactured. Seven-day history supports busy normal sessions.",
+      "sources": [
+        "https://discord.gg/newedenrp",
+        "https://frontend.cfx-services.net/api/servers/single/lg53q5",
+        "https://redmmetrics.com/server/lg53q5?hours=168",
+        "https://www.gtaboom.com/servers/lg53q5"
+      ]
+    }
+  ],
+  "history": [
+    {
+      "name": "Ranch Roleplay",
+      "code": "4ee6e8",
+      "url": "https://redmmetrics.com/server/4ee6e8?hours=168",
+      "fetchedAt": "2026-09-04T11:58:45.296Z",
+      "samples": 2744,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:45Z",
+      "mean": 99.4,
+      "peak": 240,
+      "atLeast35": 2330,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 230,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 415,
+          "max": 240,
+          "atLeast35": 390,
+          "p90": 238
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 342,
+          "max": 240,
+          "atLeast35": 309,
+          "p90": 238
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 349,
+          "max": 200,
+          "atLeast35": 287,
+          "p90": 180
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 321,
+          "max": 234,
+          "atLeast35": 312,
+          "p90": 212
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 393,
+          "max": 223,
+          "atLeast35": 314,
+          "p90": 208
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 473,
+          "max": 226,
+          "atLeast35": 367,
+          "p90": 187
+        }
+      ]
+    },
+    {
+      "name": "Syn County",
+      "code": "ae5mpk",
+      "url": "https://redmmetrics.com/server/ae5mpk?hours=168",
+      "fetchedAt": "2026-09-04T11:58:44.577Z",
+      "samples": 2746,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:44Z",
+      "mean": 252.6,
+      "peak": 468,
+      "atLeast35": 2711,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 442,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 416,
+          "max": 443,
+          "atLeast35": 412,
+          "p90": 398
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 341,
+          "max": 468,
+          "atLeast35": 330,
+          "p90": 420
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 346,
+          "max": 441,
+          "atLeast35": 345,
+          "p90": 419
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 322,
+          "max": 435,
+          "atLeast35": 316,
+          "p90": 377
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 397,
+          "max": 452,
+          "atLeast35": 393,
+          "p90": 412
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 481,
+          "max": 425,
+          "atLeast35": 477,
+          "p90": 400
+        }
+      ]
+    },
+    {
+      "name": "State of Deliverance",
+      "code": "q9yo3v",
+      "url": "https://redmmetrics.com/server/q9yo3v?hours=168",
+      "fetchedAt": "2026-09-04T11:58:45.496Z",
+      "samples": 2727,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:45Z",
+      "mean": 108.7,
+      "peak": 234,
+      "atLeast35": 2518,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 218.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 422,
+          "max": 210,
+          "atLeast35": 412,
+          "p90": 197
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 348,
+          "max": 220,
+          "atLeast35": 345,
+          "p90": 201
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 339,
+          "max": 234,
+          "atLeast35": 277,
+          "p90": 190
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 323,
+          "max": 229,
+          "atLeast35": 309,
+          "p90": 196
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 393,
+          "max": 217,
+          "atLeast35": 380,
+          "p90": 189
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 471,
+          "max": 217,
+          "atLeast35": 457,
+          "p90": 187
+        }
+      ]
+    },
+    {
+      "name": "Bright Falls RP",
+      "code": "lyy7rv",
+      "url": "https://redmmetrics.com/server/lyy7rv?hours=168",
+      "fetchedAt": "2026-09-04T11:58:45.579Z",
+      "samples": 2753,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:45Z",
+      "mean": 91.2,
+      "peak": 199,
+      "atLeast35": 2640,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 181,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 422,
+          "max": 177,
+          "atLeast35": 399,
+          "p90": 163
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 342,
+          "max": 185,
+          "atLeast35": 336,
+          "p90": 140
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 347,
+          "max": 199,
+          "atLeast35": 343,
+          "p90": 147
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 325,
+          "max": 168,
+          "atLeast35": 270,
+          "p90": 129
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 396,
+          "max": 194,
+          "atLeast35": 388,
+          "p90": 171
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 475,
+          "max": 172,
+          "atLeast35": 464,
+          "p90": 153
+        }
+      ]
+    },
+    {
+      "name": "Ebonridge",
+      "code": "jdvk44",
+      "url": "https://redmmetrics.com/server/jdvk44?hours=168",
+      "fetchedAt": "2026-09-04T11:58:46.814Z",
+      "samples": 2687,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:46Z",
+      "mean": 67.9,
+      "peak": 152,
+      "atLeast35": 1818,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 146,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 414,
+          "max": 142,
+          "atLeast35": 329,
+          "p90": 134
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 332,
+          "max": 147,
+          "atLeast35": 251,
+          "p90": 140
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 340,
+          "max": 145,
+          "atLeast35": 217,
+          "p90": 138
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 316,
+          "max": 150,
+          "atLeast35": 225,
+          "p90": 142
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 399,
+          "max": 152,
+          "atLeast35": 247,
+          "p90": 134
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 474,
+          "max": 138,
+          "atLeast35": 299,
+          "p90": 122
+        }
+      ]
+    },
+    {
+      "name": "The Frontier Roleplay",
+      "code": "zg38zd",
+      "url": "https://redmmetrics.com/server/zg38zd?hours=168",
+      "fetchedAt": "2026-09-04T11:58:46.451Z",
+      "samples": 2609,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:46Z",
+      "mean": 31.4,
+      "peak": 101,
+      "atLeast35": 885,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 77.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 395,
+          "max": 84,
+          "atLeast35": 137,
+          "p90": 57
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 327,
+          "max": 101,
+          "atLeast35": 141,
+          "p90": 76
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 318,
+          "max": 77,
+          "atLeast35": 64,
+          "p90": 64
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 304,
+          "max": 78,
+          "atLeast35": 121,
+          "p90": 67
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 386,
+          "max": 70,
+          "atLeast35": 140,
+          "p90": 64
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 445,
+          "max": 68,
+          "atLeast35": 179,
+          "p90": 61
+        }
+      ]
+    },
+    {
+      "name": "True Grit RP",
+      "code": "7agv9r",
+      "url": "https://redmmetrics.com/server/7agv9r?hours=168",
+      "fetchedAt": "2026-09-04T11:58:47.122Z",
+      "samples": 2564,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:46Z",
+      "mean": 42.3,
+      "peak": 120,
+      "atLeast35": 1123,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 115.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 401,
+          "max": 111,
+          "atLeast35": 215,
+          "p90": 101
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 335,
+          "max": 116,
+          "atLeast35": 193,
+          "p90": 106
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 302,
+          "max": 120,
+          "atLeast35": 87,
+          "p90": 92
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 309,
+          "max": 120,
+          "atLeast35": 115,
+          "p90": 112
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 379,
+          "max": 115,
+          "atLeast35": 161,
+          "p90": 94
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 437,
+          "max": 111,
+          "atLeast35": 195,
+          "p90": 94
+        }
+      ]
+    },
+    {
+      "name": "Medieval RP",
+      "code": "6o5kgd",
+      "url": "https://redmmetrics.com/server/6o5kgd?hours=168",
+      "fetchedAt": "2026-09-04T11:58:49.175Z",
+      "samples": 2322,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:48Z",
+      "mean": 20.3,
+      "peak": 54,
+      "atLeast35": 377,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 50.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 340,
+          "max": 54,
+          "atLeast35": 80,
+          "p90": 40
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 296,
+          "max": 51,
+          "atLeast35": 78,
+          "p90": 38
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 292,
+          "max": 49,
+          "atLeast35": 51,
+          "p90": 40
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 285,
+          "max": 50,
+          "atLeast35": 28,
+          "p90": 34
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 336,
+          "max": 51,
+          "atLeast35": 82,
+          "p90": 43
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 379,
+          "max": 39,
+          "atLeast35": 13,
+          "p90": 29
+        }
+      ]
+    },
+    {
+      "name": "RosalitaRP",
+      "code": "a4z8545",
+      "url": "https://redmmetrics.com/server/a4z8545?hours=168",
+      "fetchedAt": "2026-09-04T11:58:49.361Z",
+      "samples": 2297,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:48Z",
+      "mean": 29.4,
+      "peak": 87,
+      "atLeast35": 848,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 73.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 371,
+          "max": 69,
+          "atLeast35": 151,
+          "p90": 63
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 278,
+          "max": 69,
+          "atLeast35": 109,
+          "p90": 59
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 288,
+          "max": 76,
+          "atLeast35": 80,
+          "p90": 71
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 262,
+          "max": 80,
+          "atLeast35": 94,
+          "p90": 74
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 324,
+          "max": 71,
+          "atLeast35": 130,
+          "p90": 61
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 402,
+          "max": 87,
+          "atLeast35": 167,
+          "p90": 80
+        }
+      ]
+    },
+    {
+      "name": "Gilded Roleplay",
+      "code": "j33b84",
+      "url": "https://redmmetrics.com/server/j33b84?hours=168",
+      "fetchedAt": "2026-09-04T11:58:49.659Z",
+      "samples": 2256,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:49Z",
+      "mean": 22,
+      "peak": 79,
+      "atLeast35": 592,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 64,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 381,
+          "max": 54,
+          "atLeast35": 133,
+          "p90": 46
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 281,
+          "max": 66,
+          "atLeast35": 102,
+          "p90": 59
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 280,
+          "max": 65,
+          "atLeast35": 67,
+          "p90": 52
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 254,
+          "max": 79,
+          "atLeast35": 72,
+          "p90": 70
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 311,
+          "max": 63,
+          "atLeast35": 72,
+          "p90": 47
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 368,
+          "max": 54,
+          "atLeast35": 85,
+          "p90": 49
+        }
+      ]
+    },
+    {
+      "name": "Dust to Dreams RP",
+      "code": "jy9o9m",
+      "url": "https://redmmetrics.com/server/jy9o9m?hours=168",
+      "fetchedAt": "2026-09-04T11:58:50.375Z",
+      "samples": 2334,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:49Z",
+      "mean": 26.5,
+      "peak": 90,
+      "atLeast35": 683,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 69,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 357,
+          "max": 90,
+          "atLeast35": 107,
+          "p90": 75
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 290,
+          "max": 68,
+          "atLeast35": 94,
+          "p90": 61
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 274,
+          "max": 76,
+          "atLeast35": 58,
+          "p90": 59
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 287,
+          "max": 59,
+          "atLeast35": 89,
+          "p90": 55
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 350,
+          "max": 70,
+          "atLeast35": 108,
+          "p90": 62
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 389,
+          "max": 64,
+          "atLeast35": 91,
+          "p90": 52
+        }
+      ]
+    },
+    {
+      "name": "Still Water RP",
+      "code": "pgazkdm",
+      "url": "https://redmmetrics.com/server/pgazkdm?hours=168",
+      "fetchedAt": "2026-09-04T11:58:50.906Z",
+      "samples": 2604,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:50Z",
+      "mean": 36.9,
+      "peak": 90,
+      "atLeast35": 1335,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 73.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 388,
+          "max": 77,
+          "atLeast35": 233,
+          "p90": 71
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 320,
+          "max": 90,
+          "atLeast35": 177,
+          "p90": 75
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 297,
+          "max": 81,
+          "atLeast35": 161,
+          "p90": 75
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 313,
+          "max": 70,
+          "atLeast35": 128,
+          "p90": 60
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 387,
+          "max": 63,
+          "atLeast35": 171,
+          "p90": 57
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 460,
+          "max": 65,
+          "atLeast35": 229,
+          "p90": 58
+        }
+      ]
+    },
+    {
+      "name": "Souvenir Trails RP",
+      "code": "k5vp5a",
+      "url": "https://redmmetrics.com/server/k5vp5a?hours=168",
+      "fetchedAt": "2026-09-04T11:58:51.180Z",
+      "samples": 2201,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:50Z",
+      "mean": 15.4,
+      "peak": 48,
+      "atLeast35": 147,
+      "fullDays35": 4,
+      "fullDays": 6,
+      "medianDailyPeak": 39.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 341,
+          "max": 43,
+          "atLeast35": 71,
+          "p90": 39
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 287,
+          "max": 44,
+          "atLeast35": 36,
+          "p90": 37
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 254,
+          "max": 48,
+          "atLeast35": 36,
+          "p90": 36
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 263,
+          "max": 34,
+          "atLeast35": 0,
+          "p90": 29
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 328,
+          "max": 33,
+          "atLeast35": 0,
+          "p90": 27
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 387,
+          "max": 36,
+          "atLeast35": 4,
+          "p90": 28
+        }
+      ]
+    },
+    {
+      "name": "Everglade County RP",
+      "code": "boya5d",
+      "url": "https://redmmetrics.com/server/boya5d?hours=168",
+      "fetchedAt": "2026-09-04T11:58:51.788Z",
+      "samples": 2042,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:51Z",
+      "mean": 9.1,
+      "peak": 32,
+      "atLeast35": 0,
+      "fullDays35": 0,
+      "fullDays": 6,
+      "medianDailyPeak": 27.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 284,
+          "max": 21,
+          "atLeast35": 0,
+          "p90": 10
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 244,
+          "max": 25,
+          "atLeast35": 0,
+          "p90": 20
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 255,
+          "max": 26,
+          "atLeast35": 0,
+          "p90": 22
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 243,
+          "max": 30,
+          "atLeast35": 0,
+          "p90": 27
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 316,
+          "max": 29,
+          "atLeast35": 0,
+          "p90": 25
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 357,
+          "max": 32,
+          "atLeast35": 0,
+          "p90": 26
+        }
+      ]
+    },
+    {
+      "name": "Lemoyne: 1908",
+      "code": "bdx8ak8",
+      "url": "https://redmmetrics.com/server/bdx8ak8?hours=168",
+      "fetchedAt": "2026-09-04T11:58:52.007Z",
+      "samples": 1954,
+      "start": "2026-08-28T11:58:51Z",
+      "end": "2026-09-04T11:58:51Z",
+      "mean": 7.6,
+      "peak": 23,
+      "atLeast35": 0,
+      "fullDays35": 0,
+      "fullDays": 6,
+      "medianDailyPeak": 22.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 326,
+          "max": 23,
+          "atLeast35": 0,
+          "p90": 22
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 246,
+          "max": 23,
+          "atLeast35": 0,
+          "p90": 17
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 231,
+          "max": 22,
+          "atLeast35": 0,
+          "p90": 10
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 218,
+          "max": 17,
+          "atLeast35": 0,
+          "p90": 15
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 281,
+          "max": 23,
+          "atLeast35": 0,
+          "p90": 18
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 326,
+          "max": 17,
+          "atLeast35": 0,
+          "p90": 13
+        }
+      ]
+    },
+    {
+      "name": "Western Skies Roleplay",
+      "code": "xp6pze",
+      "url": "https://redmmetrics.com/server/xp6pze?hours=168",
+      "fetchedAt": "2026-09-04T11:58:53.350Z",
+      "samples": 2334,
+      "start": "2026-08-28T12:07:42Z",
+      "end": "2026-09-04T11:58:52Z",
+      "mean": 22,
+      "peak": 62,
+      "atLeast35": 479,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 52,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 370,
+          "max": 59,
+          "atLeast35": 135,
+          "p90": 49
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 286,
+          "max": 62,
+          "atLeast35": 98,
+          "p90": 56
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 283,
+          "max": 51,
+          "atLeast35": 54,
+          "p90": 44
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 273,
+          "max": 53,
+          "atLeast35": 41,
+          "p90": 37
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 343,
+          "max": 48,
+          "atLeast35": 17,
+          "p90": 32
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 403,
+          "max": 47,
+          "atLeast35": 41,
+          "p90": 34
+        }
+      ]
+    },
+    {
+      "name": "Highwater Roleplay 2.0",
+      "code": "xlz43kg",
+      "url": "https://redmmetrics.com/server/xlz43kg?hours=168",
+      "fetchedAt": "2026-09-04T11:58:53.614Z",
+      "samples": 2110,
+      "start": "2026-08-28T12:08:55Z",
+      "end": "2026-09-04T11:58:52Z",
+      "mean": 13,
+      "peak": 45,
+      "atLeast35": 136,
+      "fullDays35": 3,
+      "fullDays": 6,
+      "medianDailyPeak": 38,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 302,
+          "max": 29,
+          "atLeast35": 0,
+          "p90": 26
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 256,
+          "max": 37,
+          "atLeast35": 2,
+          "p90": 28
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 262,
+          "max": 35,
+          "atLeast35": 1,
+          "p90": 22
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 257,
+          "max": 39,
+          "atLeast35": 34,
+          "p90": 35
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 321,
+          "max": 42,
+          "atLeast35": 38,
+          "p90": 36
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 377,
+          "max": 41,
+          "atLeast35": 27,
+          "p90": 31
+        }
+      ]
+    },
+    {
+      "name": "Sanctuary & Sin",
+      "code": "e66azka",
+      "url": "https://redmmetrics.com/server/e66azka?hours=168",
+      "fetchedAt": "2026-09-04T11:58:53.478Z",
+      "samples": 2253,
+      "start": "2026-08-28T12:08:55Z",
+      "end": "2026-09-04T11:58:53Z",
+      "mean": 15.3,
+      "peak": 35,
+      "atLeast35": 1,
+      "fullDays35": 0,
+      "fullDays": 6,
+      "medianDailyPeak": 31,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 338,
+          "max": 26,
+          "atLeast35": 0,
+          "p90": 23
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 269,
+          "max": 30,
+          "atLeast35": 0,
+          "p90": 26
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 293,
+          "max": 34,
+          "atLeast35": 0,
+          "p90": 31
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 262,
+          "max": 28,
+          "atLeast35": 0,
+          "p90": 21
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 323,
+          "max": 32,
+          "atLeast35": 0,
+          "p90": 28
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 389,
+          "max": 35,
+          "atLeast35": 1,
+          "p90": 27
+        }
+      ]
+    },
+    {
+      "name": "Westhaven: The Hush RP",
+      "code": "bpjzpp",
+      "url": "https://redmmetrics.com/server/bpjzpp?hours=168",
+      "fetchedAt": "2026-09-04T11:58:55.427Z",
+      "samples": 2331,
+      "start": "2026-08-28T12:08:55Z",
+      "end": "2026-09-04T11:58:55Z",
+      "mean": 26.6,
+      "peak": 75,
+      "atLeast35": 786,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 67.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 372,
+          "max": 72,
+          "atLeast35": 149,
+          "p90": 59
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 285,
+          "max": 74,
+          "atLeast35": 104,
+          "p90": 60
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 282,
+          "max": 66,
+          "atLeast35": 78,
+          "p90": 58
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 289,
+          "max": 69,
+          "atLeast35": 89,
+          "p90": 57
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 332,
+          "max": 61,
+          "atLeast35": 127,
+          "p90": 54
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 393,
+          "max": 64,
+          "atLeast35": 122,
+          "p90": 58
+        }
+      ]
+    },
+    {
+      "name": "State of Fremont 1902",
+      "code": "m8rzj9",
+      "url": "https://redmmetrics.com/server/m8rzj9?hours=168",
+      "fetchedAt": "2026-09-04T11:58:55.749Z",
+      "samples": 2236,
+      "start": "2026-08-28T12:08:55Z",
+      "end": "2026-09-04T11:58:55Z",
+      "mean": 15.7,
+      "peak": 52,
+      "atLeast35": 168,
+      "fullDays35": 3,
+      "fullDays": 6,
+      "medianDailyPeak": 34.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 357,
+          "max": 52,
+          "atLeast35": 91,
+          "p90": 42
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 299,
+          "max": 49,
+          "atLeast35": 42,
+          "p90": 40
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 304,
+          "max": 40,
+          "atLeast35": 35,
+          "p90": 37
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 247,
+          "max": 29,
+          "atLeast35": 0,
+          "p90": 25
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 293,
+          "max": 24,
+          "atLeast35": 0,
+          "p90": 17
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 383,
+          "max": 29,
+          "atLeast35": 0,
+          "p90": 26
+        }
+      ]
+    },
+    {
+      "code": "earmya",
+      "name": "Wild West RP",
+      "url": "https://redmmetrics.com/server/earmya?hours=168",
+      "fetchedAt": "2026-09-04T11:58:56.109Z",
+      "samples": 1830,
+      "start": "2026-08-28T12:08:55Z",
+      "end": "2026-09-04T11:58:55Z",
+      "mean": 2.8,
+      "peak": 17,
+      "atLeast35": 0,
+      "fullDays35": 0,
+      "fullDays": 6,
+      "medianDailyPeak": 14,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 283,
+          "max": 13,
+          "atLeast35": 0,
+          "p90": 9
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 227,
+          "max": 16,
+          "atLeast35": 0,
+          "p90": 8
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 226,
+          "max": 17,
+          "atLeast35": 0,
+          "p90": 7
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 212,
+          "max": 10,
+          "atLeast35": 0,
+          "p90": 7
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 262,
+          "max": 12,
+          "atLeast35": 0,
+          "p90": 10
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 316,
+          "max": 15,
+          "atLeast35": 0,
+          "p90": 7
+        }
+      ]
+    },
+    {
+      "code": "epjxp3",
+      "name": "GoldRush",
+      "url": "https://redmmetrics.com/server/epjxp3?hours=168",
+      "fetchedAt": "2026-09-04T11:58:59.132Z",
+      "samples": 2233,
+      "start": "2026-08-28T12:07:22Z",
+      "end": "2026-09-04T11:58:59Z",
+      "mean": 14,
+      "peak": 35,
+      "atLeast35": 5,
+      "fullDays35": 1,
+      "fullDays": 6,
+      "medianDailyPeak": 28,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 356,
+          "max": 31,
+          "atLeast35": 0,
+          "p90": 25
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 304,
+          "max": 27,
+          "atLeast35": 0,
+          "p90": 24
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 296,
+          "max": 35,
+          "atLeast35": 5,
+          "p90": 19
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 275,
+          "max": 25,
+          "atLeast35": 0,
+          "p90": 19
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 299,
+          "max": 29,
+          "atLeast35": 0,
+          "p90": 19
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 372,
+          "max": 26,
+          "atLeast35": 0,
+          "p90": 18
+        }
+      ]
+    },
+    {
+      "code": "vxe5ve",
+      "name": "WildRP disputed realm",
+      "url": "https://redmmetrics.com/server/vxe5ve?hours=168",
+      "fetchedAt": "2026-09-04T11:58:59.001Z",
+      "samples": 2237,
+      "start": "2026-08-28T12:08:55Z",
+      "end": "2026-09-04T11:58:58Z",
+      "mean": 25.7,
+      "peak": 93,
+      "atLeast35": 705,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 87.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 331,
+          "max": 91,
+          "atLeast35": 109,
+          "p90": 81
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 262,
+          "max": 91,
+          "atLeast35": 81,
+          "p90": 81
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 271,
+          "max": 83,
+          "atLeast35": 74,
+          "p90": 73
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 278,
+          "max": 84,
+          "atLeast35": 94,
+          "p90": 65
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 331,
+          "max": 78,
+          "atLeast35": 102,
+          "p90": 67
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 391,
+          "max": 93,
+          "atLeast35": 137,
+          "p90": 72
+        }
+      ]
+    },
+    {
+      "code": "lg53q5",
+      "name": "New Eden",
+      "url": "https://redmmetrics.com/server/lg53q5?hours=168",
+      "fetchedAt": "2026-09-04T11:58:58.862Z",
+      "samples": 2718,
+      "start": "2026-08-28T12:06:15Z",
+      "end": "2026-09-04T11:58:58Z",
+      "mean": 35.4,
+      "peak": 80,
+      "atLeast35": 1185,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 65.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 410,
+          "max": 80,
+          "atLeast35": 210,
+          "p90": 69
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 340,
+          "max": 79,
+          "atLeast35": 195,
+          "p90": 63
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 333,
+          "max": 71,
+          "atLeast35": 116,
+          "p90": 48
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 321,
+          "max": 57,
+          "atLeast35": 138,
+          "p90": 47
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 392,
+          "max": 60,
+          "atLeast35": 162,
+          "p90": 54
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 480,
+          "max": 59,
+          "atLeast35": 176,
+          "p90": 54
+        }
+      ]
+    },
+    {
+      "code": "bpa6db",
+      "name": "Wanted: The Last Ride",
+      "url": "https://redmmetrics.com/server/bpa6db?hours=168",
+      "fetchedAt": "2026-09-04T11:59:02.410Z",
+      "samples": 2714,
+      "start": "2026-08-28T12:06:09Z",
+      "end": "2026-09-04T11:59:02Z",
+      "mean": 63.7,
+      "peak": 138,
+      "atLeast35": 1942,
+      "fullDays35": 6,
+      "fullDays": 6,
+      "medianDailyPeak": 129.5,
+      "days": [
+        {
+          "date": "2026-08-29",
+          "samples": 409,
+          "max": 125,
+          "atLeast35": 285,
+          "p90": 119
+        },
+        {
+          "date": "2026-08-30",
+          "samples": 341,
+          "max": 138,
+          "atLeast35": 238,
+          "p90": 130
+        },
+        {
+          "date": "2026-08-31",
+          "samples": 339,
+          "max": 134,
+          "atLeast35": 214,
+          "p90": 124
+        },
+        {
+          "date": "2026-09-01",
+          "samples": 312,
+          "max": 125,
+          "atLeast35": 265,
+          "p90": 115
+        },
+        {
+          "date": "2026-09-02",
+          "samples": 401,
+          "max": 134,
+          "atLeast35": 267,
+          "p90": 122
+        },
+        {
+          "date": "2026-09-03",
+          "samples": 470,
+          "max": 117,
+          "atLeast35": 347,
+          "p90": 103
+        }
+      ]
+    }
+  ]
+}
