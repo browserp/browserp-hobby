@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-04T01:51:39.741Z",
+  "generatedAt": "2026-09-04T11:46:46.374Z",
   "targetTotal": 40,
   "alreadyLive": [
     "CaliRP",
@@ -7,7 +7,7 @@
   ],
   "policy": "Research-only review suggestions. No automatic publication. One selected instance per community. Primary claims establish intended style, not a guarantee of actual player behaviour. All counts are historical Cfx observations, not website/Discord counts, and must never be copied into a live count field.",
   "candidateCount": 55,
-  "publishCount": 30,
+  "publishCount": 27,
   "candidates": [
     {
       "joinCode": "68oab8",
@@ -776,7 +776,7 @@
     {
       "joinCode": "e6ey97b",
       "platform": "fivem",
-      "status": "publish",
+      "status": "hold",
       "name": "West Coast Roleplay",
       "description": "A Los Santos community focused on serious character stories, civilian work and a player economy. Its newcomer guidance explains the city and introduces a staff conversation before players settle into their role.",
       "region": "United States",
@@ -814,6 +814,10 @@
         {
           "url": "https://westcoastrp.io/",
           "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://disboard.org/server/1512620973021593704",
+          "purpose": "Community-authored evidence for the September 2026 editorial launch hold; not an independent misconduct finding."
         }
       ],
       "inclusionReasons": [
@@ -822,7 +826,8 @@
       ],
       "conflicts": [
         "Current listing says WL OFF, while website onboarding describes staff review. Access stays unconfirmed.",
-        "The sampled server was reachable with zero players; do not describe it as busy or guaranteed active at all hours."
+        "The sampled server was reachable with zero players; do not describe it as busy or guaranteed active at all hours.",
+        "Editorial launch hold (4 September 2026): current recruitment describes a new community seeking staff and future leaders; established active operations are not yet sufficiently evidenced."
       ],
       "lastCheck": {
         "checkedAt": "2026-09-04T01:22:59.217Z",
@@ -840,7 +845,7 @@
     {
       "joinCode": "9x3aee",
       "platform": "fivem",
-      "status": "publish",
+      "status": "hold",
       "name": "Blaine County Network",
       "description": "A 16+ whitelisted vMenu community based in San Andreas. It offers structured police, fire and medical roles alongside civilian characters, with a community application process and a long-running development presence.",
       "region": "United States",
@@ -882,6 +887,10 @@
         {
           "url": "https://forum.cfx.re/t/blaine-county-network-16-vmenu-whitelisted-community/1856875",
           "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://forum.cfx.re/t/blaine-county-network-16-vmenu-whitelisted-community/1856875?page=4",
+          "purpose": "Community-authored evidence for the September 2026 editorial launch hold; not an independent misconduct finding."
         }
       ],
       "inclusionReasons": [
@@ -889,7 +898,8 @@
         "Adds a structured vMenu option instead of duplicating economy frameworks."
       ],
       "conflicts": [
-        "Sample was reachable with zero players, which is not proof of an empty patrol schedule; no activity guarantee is made."
+        "Sample was reachable with zero players, which is not proof of an empty patrol schedule; no activity guarantee is made.",
+        "Editorial launch hold (4 September 2026): the June 2026 operator update describes a new community, so the older forum topic does not prove current continuity; scheduled active operations require review."
       ],
       "lastCheck": {
         "checkedAt": "2026-09-04T01:23:59.553Z",
@@ -1539,7 +1549,7 @@
     {
       "joinCode": "8emq8am",
       "platform": "fivem",
-      "status": "publish",
+      "status": "hold",
       "name": "PeakRP",
       "description": "A public city offering serious roleplay without a general whitelist. Newcomers can start with civilian jobs, while police, medical and business roles use applications; the website links rules and job guides for getting established.",
       "region": "United States",
@@ -1587,6 +1597,10 @@
         {
           "url": "https://forum.cfx.re/t/peakrp-live-serious-roleplay-real-economy-no-whitelist-advanced-anticheat/5327542/48",
           "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://forum.cfx.re/t/na-peakrp-18-serious-rp-no-whitelist-no-pay-to-win-qbox-housing-tuner-shop-custom-mdt-own-anticheat-hiring-pd-ems/5327542/48",
+          "purpose": "Community-authored evidence for the September 2026 editorial launch hold; not an independent misconduct finding."
         }
       ],
       "inclusionReasons": [
@@ -1596,7 +1610,8 @@
       "conflicts": [
         "Website claims custom framework while current Cfx detection indicates Qbox; leave framework unconfirmed.",
         "Website /peak-rp invite is invalid. Use the Cfx-provided /peakrp invite, which resolves to Peak RP.",
-        "Only one player was observed in the research sample; no busy-city claim is made."
+        "Only one player was observed in the research sample; no busy-city claim is made.",
+        "Editorial launch hold (4 September 2026): good onboarding, but current first-crew/core-role recruitment and thin observed sessions do not yet support the established, active launch selection."
       ],
       "lastCheck": {
         "checkedAt": "2026-09-04T01:29:21.423Z",
@@ -1614,7 +1629,7 @@
     {
       "joinCode": "xq555m",
       "platform": "fivem",
-      "status": "publish",
+      "status": "hold",
       "name": "Lucid Heights RP",
       "description": "A newer semi-serious community welcoming founding members and players learning roleplay. Its recruitment post describes civilian businesses, police and medical roles, with community feedback helping shape the city as it develops.",
       "region": "United States",
@@ -1664,7 +1679,8 @@
       ],
       "conflicts": [
         "Newer community with a shorter track record; do not describe it as long-established.",
-        "No definitive current general-access requirement or separate official website was confirmed."
+        "No definitive current general-access requirement or separate official website was confirmed.",
+        "Editorial launch hold (4 September 2026): founding-member and leadership recruitment plus thin observed sessions do not meet the current established-community selection; not a finding of inactivity or misconduct."
       ],
       "lastCheck": {
         "checkedAt": "2026-09-04T01:23:11.702Z",
@@ -2205,26 +2221,40 @@
     {
       "joinCode": "bmp6dp",
       "platform": "fivem",
-      "status": "hold",
+      "status": "publish",
       "name": "Everfall",
-      "description": null,
-      "region": "United States",
+      "description": "An established 18+ city with detailed roleplay rules, practical newcomer guides and a range of civilian, emergency-service and criminal paths. Players can begin with contract work, join a business or apply to a public-service department, while the community provides reporting and support channels for problems.",
+      "region": null,
       "language": "English",
       "framework": "Qbox",
-      "accessType": "unknown",
-      "discordUrl": null,
-      "websiteUrl": null,
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/everfall",
+      "websiteUrl": "https://everfallcommunity.com/",
       "cfxJoinUrl": "https://cfx.re/join/bmp6dp",
-      "tags": [],
+      "tags": [
+        "Serious RP",
+        "Economy",
+        "Jobs",
+        "Businesses",
+        "Police",
+        "EMS",
+        "18+"
+      ],
       "keywords": [
-        "everfall"
+        "everfall",
+        "serious roleplay",
+        "economy",
+        "civilian jobs",
+        "businesses",
+        "emergency services",
+        "18+"
       ],
       "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/bmp6dp/137736726.png",
       "bannerUrl": null,
       "imageReview": {
-        "checkedAt": null,
-        "logoNote": null,
-        "bannerNote": null
+        "checkedAt": "2026-09-04T11:16:38.912Z",
+        "logoNote": "Official Cfx icon fetched through existing image guard; valid static PNG, 1219 bytes. Visually checked: simple white community glyph on transparent background.",
+        "bannerNote": "Unsupported external banner omitted; no generic or unrelated replacement."
       },
       "sources": [
         {
@@ -2234,24 +2264,71 @@
         {
           "url": "https://everfallcommunity.com/",
           "purpose": "Primary community identity, onboarding, rules or roleplay focus."
+        },
+        {
+          "url": "https://everfallcommunity.com/rules/general",
+          "purpose": "Current 18+ conduct, roleplay, reporting and membership rules."
+        },
+        {
+          "url": "https://everfallcommunity.com/guides",
+          "purpose": "Newcomer jobs, controls, businesses, emergency-service applications; official Discord channel links identify guild 1019003474098270328."
+        },
+        {
+          "url": "https://everfallcommunity.com/guides/faq",
+          "purpose": "Joining requirements and operational guidance."
+        },
+        {
+          "url": "https://discord.com/servers/everphone-1019003474098270328",
+          "purpose": "Official public guild profile explicitly identifies Everfall and creation September 2022 despite current EverPhone display name."
+        },
+        {
+          "url": "https://www.reddit.com/r/FiveMServers/comments/10s2ztg/",
+          "purpose": "Dated February 2023 community recruitment with same official invite; evidence of history, not independent endorsement."
+        },
+        {
+          "url": "https://www.reddit.com/r/FiveMServers/comments/1e1n6z8/",
+          "purpose": "Dated July 2024 community job-fair announcement; historical organised activity, not current staffing guarantee."
+        },
+        {
+          "url": "https://store.everfallcommunity.com/",
+          "purpose": "Official paid-content store exists; no unsupported no-pay-to-win promise."
         }
       ],
-      "inclusionReasons": [],
+      "inclusionReasons": [
+        "Current detailed rules and a practical newcomer route, with documented reporting/escalation.",
+        "Same community documented from 2022 through current operation, including dated events.",
+        "Two separated Cfx activity observations: 123/315 at 01:17 UTC and 15/315 at 11:16 UTC on 4 September 2026; not merely one morning count.",
+        "Exact official Discord channel guild ID matches fixed invite API, resolving the previous name-only identity hold."
+      ],
       "conflicts": [
-        "Strong official rules and job guides, but both the website and listing advertise /everfall, which currently resolves to the unrelated-looking EverPhone guild. Do not publish this Discord link or add the listing until identity is resolved."
+        "Discord display name is currently EverPhone; official description, direct channel links and guild ID confirm Everfall.",
+        "Store sells optional content. Product balance and actual daily staff enforcement have not been independently audited.",
+        "Available public feedback is sparse and some dated 2024 client-support reports mention issues; these do not establish current server-wide instability.",
+        "Region not independently confirmed: en-US is a locale declaration only, so leave region blank/Not confirmed."
       ],
       "lastCheck": {
-        "checkedAt": "2026-09-04T01:20:38.761Z",
+        "checkedAt": "2026-09-04T11:16:38.912Z",
         "status": "online",
-        "players": 123,
+        "players": 15,
         "max": 315,
-        "observedAt": "2026-09-04T01:17:13.244Z"
+        "observedAt": "2026-09-04T11:16:07.791Z"
       },
       "discordCheck": {
-        "status": "not_supplied",
-        "guildName": null
+        "status": "valid",
+        "guildName": "EverPhone",
+        "guildId": "1019003474098270328",
+        "identityConfirmedBy": "Exact guild ID in official website announcement/status/changelog links; guild public description explicitly identifies Everfall."
       },
-      "requiresStaffReview": true
+      "requiresStaffReview": true,
+      "previousChecks": [
+        {
+          "checkedAt": "2026-09-04T01:20:38.761Z",
+          "status": "online",
+          "players": 123,
+          "max": 315,
+          "observedAt": "2026-09-04T01:17:13.244Z"
+        }
+      ]
     },
     {
       "joinCode": "y7qa45",
