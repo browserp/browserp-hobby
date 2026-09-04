@@ -97,6 +97,7 @@
       image.loading = "lazy";
       image.src = logo;
       image.alt = "";
+      image.addEventListener("error", () => image.replaceWith(initial), { once: true });
       media.append(image);
     } else {
       media.append(initial);
@@ -120,7 +121,7 @@
 
     const bottom = element("div", "server-card-bottom");
     const playerText = server.online
-      ? `${Number(server.players || 0).toLocaleString()}${server.capacity ? ` / ${Number(server.capacity).toLocaleString()}` : ""} players`
+      ? `${Number(server.players || 0).toLocaleString()}${server.capacity ? ` / ${Number(server.capacity).toLocaleString()}` : ""} players${server.count_scope === "network" ? " across the network" : ""}`
       : "Player count unavailable";
     bottom.append(element("strong", "", playerText), element("span", "server-card-action", "View listing"));
     card.append(bottom);

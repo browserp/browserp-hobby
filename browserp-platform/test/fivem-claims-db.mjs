@@ -5,6 +5,8 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import test from 'node:test';
+import { minecraftCandidate } from '../lib/minecraft-workflow.js';
+import { parseMinecraftAddress } from '../lib/minecraft-import.js';
 import { normalizeFiveMServer } from '../lib/fivem-import.js';
 import { candidateForStorage } from '../lib/fivem-workflow.js';
 const { PGlite } = await import(process.env.PGLITE_MODULE ? pathToFileURL(process.env.PGLITE_MODULE).href : '@electric-sql/pglite');
@@ -70,11 +72,38 @@ test('FiveM imports and claim requests enforce real PostgreSQL trust boundaries'
  insert into public.platforms(id,name,short_name) values('fivem','FiveM','FiveM');
  `);
  await db.exec(fn(ops,'public.has_staff_permission'));
- try { await db.exec(migration); } catch (error) { console.error({position:error.position,detail:error.detail,where:error.where,context:migration.slice(Math.max(0,Number(error.position)-180),Number(error.position)+180)}); await db.close(); throw error; }
+ try { await db.exec(migration); } catch (error) { console.error({position:error.position,detail:error.detail,where:error.where,context:migration.slice(Math.max(0,Number(error.position)-180),Number(error.position)+180)});
+ await t.test('Minecraft review publishes distinct sources, safe media, exact metadata and fresh zero counts',async()=>{
+  const input=parseMinecraftAddress('play.example.com');
+  const data={...minecraftCandidate({...input,players:0,capacity:100,online:true,checkedAt:new Date().toISOString(),version:'1.21',motd:'Roleplay'}),name:'Reviewed Minecraft RP',description:'An English fantasy roleplay community with documented rules and a reviewed joining guide.',language:'English',framework:'Roleplay',accessType:'application',websiteUrl:'https://example.com',tags:['roleplay','java edition','fantasy rp']};
+  await login(member);await assert.rejects(rpc('public.staff_minecraft_candidates()'),/permission required/);await assert.rejects(db.query('select * from public.minecraft_import_sources'),/permission denied/);
+  await service();await assert.rejects(rpc('public.service_stage_minecraft_candidate($1::uuid,$2::jsonb,$3)',[member,JSON.stringify(data),request()]),/permission required/);
+  const c=await rpc('public.service_stage_minecraft_candidate($1::uuid,$2::jsonb,$3)',[owner,JSON.stringify(data),request()]);
+  await login(owner,'aal1');await assert.rejects(rpc('public.staff_publish_minecraft_candidate($1::uuid,$2::bigint,$3::jsonb,$4,$5)',[c.id,c.version,'{}','Reviewed public community evidence',request()]),/permission required/);
+  await login();
+  await assert.rejects(rpc('public.staff_publish_minecraft_candidate($1::uuid,$2::bigint,$3::jsonb,$4,$5)',[c.id,c.version,JSON.stringify({logoUrl:'https://evil.example/icon.png'}),'Reviewed public community evidence',request()]),/approved server media/);
+  const id=request();const args=[c.id,c.version,'{}','Reviewed public community evidence',id];
+  const result=await rpc('public.staff_publish_minecraft_candidate($1::uuid,$2::bigint,$3::jsonb,$4,$5)',args);assert.equal(result.status,'published');
+  assert.deepEqual(await rpc('public.staff_publish_minecraft_candidate($1::uuid,$2::bigint,$3::jsonb,$4,$5)',args),result);
+  await assert.rejects(rpc('public.staff_publish_minecraft_candidate($1::uuid,$2::bigint,$3::jsonb,$4,$5)',[...args.slice(0,4),request()]),/candidate changed/);
+  await db.exec('reset role');const row=(await db.query('select * from public.servers where id=$1',[result.serverId])).rows[0];assert.equal(row.platform_id,'minecraft');assert.equal(row.language,'English');assert.equal(row.framework,'Roleplay');assert.equal(row.cfx_join_url,null);
+  await db.exec('set role anon');let details=await rpc('public.public_minecraft_import_details($1::uuid[])',[[result.serverId]]);assert.equal(details[0].address,'play.example.com:25565');assert.equal(details[0].countScope,'network');assert.equal(details[0].websiteUrl,'https://example.com');
+  const results=await rpc('public.search_public_directory($1::jsonb)',[JSON.stringify({platform:'minecraft',query:'Reviewed Minecraft'})]);assert.equal(results.total,1);assert.equal(results.servers[0].players,0);assert.ok(results.facets.feature.some(v=>v.value==='java'&&v.count===1));
+  await db.exec('reset role');await db.query("update public.minecraft_import_sources set last_checked_at=now()-interval '6 minutes' where server_id=$1",[result.serverId]);
+  const stale=(await db.query('select * from private.effective_server_status where server_id=$1',[result.serverId])).rows[0];assert.equal(stale.players,null);assert.equal(stale.online,false);
+  await db.query('update public.servers set owner_id=$1 where id=$2',[member,result.serverId]);
+  await service();const again=await rpc('public.service_stage_minecraft_candidate($1::uuid,$2::jsonb,$3)',[owner,JSON.stringify(data),request()]);await login();await assert.rejects(rpc('public.staff_publish_minecraft_candidate($1::uuid,$2::bigint,$3::jsonb,$4,$5)',[again.id,again.version,'{}','Reviewed public community evidence',request()]),/already has an owner/);
+  await db.exec('reset role');await db.query("update public.servers set status='archived' where id=$1",[result.serverId]);await db.exec('set role anon');assert.deepEqual(await rpc('public.public_minecraft_import_details($1::uuid[])',[[result.serverId]]),[]);
+ });
+ await db.close(); throw error; }
  await db.exec(read('20260904003147_searchable_import_keywords.sql'));
  await db.exec(read(readdirSync(base).find(name => name.endsWith('_tailored_game_discovery_filters.sql'))));
  await db.exec(read('20260904005311_imported_server_unknown_access.sql'));
  await db.exec(read('20260904010316_public_import_website_link.sql'));
+ await db.exec(read(readdirSync(base).find(name => name.endsWith('_redm_reviewed_cfx_imports.sql'))));
+ await db.exec("insert into public.platforms(id,name,short_name) values('redm','RedM','RedM')");
+ await db.exec(read(readdirSync(base).find(name => name.endsWith('_minecraft_reviewed_imports.sql'))));
+ await db.exec("insert into public.platforms(id,name,short_name) values('minecraft','Minecraft','MC')");
  await db.exec(fn(ops,'public.attach_server_submission_metadata_server'));
  await db.exec('revoke all on function public.attach_server_submission_metadata_server(uuid,uuid,text[],text,text,text) from public;grant execute on function public.attach_server_submission_metadata_server(uuid,uuid,text[],text,text,text) to service_role');
 
@@ -194,6 +223,38 @@ test('FiveM imports and claim requests enforce real PostgreSQL trust boundaries'
   await db.exec('reset role');assert.equal((await db.query('select name,language,framework from public.servers where id=$1',[published.serverId])).rows[0].name,'North American Roleplay');
  });
 
+ await t.test('RedM imports stay separated from legacy FiveM routes and preserve unknown observations', async () => {
+  const data={...candidate('redm123'),platform:'redm',framework:'VORP',name:'Western stories',accessType:'unknown',players:null,capacity:null,online:null,checkedAt:null};
+  await login(member);
+  await assert.rejects(rpc("public.staff_cfx_candidates('redm')"),/permission required/);
+  await db.exec('reset role;set role service_role');
+  await assert.rejects(rpc('public.service_stage_fivem_candidate($1::uuid,$2::jsonb,$3)',[owner,JSON.stringify(data),request()]),/platform does not match/);
+  const redm=await rpc("public.service_stage_cfx_candidate('redm',$1::uuid,$2::jsonb,$3)",[owner,JSON.stringify(data),request()]);
+  await assert.rejects(rpc("public.service_stage_cfx_candidate('fivem',$1::uuid,$2::jsonb,$3)",[owner,JSON.stringify({...data,platform:'fivem'}),request()]),/different platform/);
+  await login();
+  assert.equal(await rpc('public.staff_fivem_candidate($1::uuid)',[redm.id]),null);
+  assert.equal((await rpc("public.staff_cfx_candidates('redm')")).total,1);
+  await assert.rejects(publish(redm),/Candidate not found/);
+  const result=await rpc("public.staff_publish_cfx_candidate('redm',$1::uuid,$2,$3::jsonb,$4,$5)",[redm.id,redm.version,JSON.stringify({}), 'Reviewed western roleplay evidence',request()]);
+  await db.exec('reset role');
+  const row=(await db.query('select platform_id,framework,access_type,owner_id,verified,theme_start from public.servers where id=$1',[result.serverId])).rows[0];
+  assert.deepEqual(row,{platform_id:'redm',framework:'VORP',access_type:'unknown',owner_id:null,verified:false,theme_start:'#9d3039'});
+  assert.equal((await db.query('select count(*)::int n from public.server_status_snapshots where server_id=$1',[result.serverId])).rows[0].n,0);
+  await db.exec('set role service_role');
+  assert.equal(await rpc('public.service_claim_fivem_refresh($1)',['redm123']),false);
+  assert.equal(await rpc("public.service_claim_cfx_refresh('redm',$1)",['redm123']),true);
+  await assert.rejects(rpc('public.service_refresh_fivem_snapshot($1,true,5,64,$2::timestamptz)',['redm123',new Date().toISOString()]),/Unknown published Cfx/);
+  const fresh=await rpc("public.service_refresh_cfx_snapshot('redm',$1,true,0,64,$2::timestamptz)",['redm123',new Date().toISOString()]);
+  assert.equal(fresh.players,0);
+  assert.ok((await rpc('public.service_cfx_sources(null,null,false,100)')).some(item=>item.joinCode==='redm123'&&item.platform==='redm'));
+  assert.ok(!(await rpc('public.service_fivem_sources(null,false,100)')).some(item=>item.joinCode==='redm123'));
+  await login();
+  const details=await rpc('public.public_server_import_details($1::uuid[])',[[result.serverId]]);
+  assert.equal(details[0].platform,'redm'); assert.equal(details[0].claimable,true);
+  await db.exec('reset role');
+  await db.query("update public.servers set status='archived' where id=$1",[result.serverId]);
+ });
+
  await t.test('unknown live counts stay unknown and duplicate existing owner listings cannot be republished', async () => {
   const unknown=await stage({...candidate('7bb4dpe'),players:null,capacity:null,online:null,checkedAt:null});
   await login();const next=await publish(unknown);
@@ -277,6 +338,29 @@ test('FiveM imports and claim requests enforce real PostgreSQL trust boundaries'
   await db.exec('reset role');await db.query("update public.servers set status='archived' where id=$1",[published.serverId]);
   await db.exec('set role anon');
   assert.deepEqual(await rpc('public.public_server_import_details($1::uuid[])',[[published.serverId]]),[]);
+ });
+
+ await t.test('Minecraft review publishes distinct sources, safe media, exact metadata and fresh zero counts',async()=>{
+  const input=parseMinecraftAddress('play.example.com');
+  const data={...minecraftCandidate({...input,players:0,capacity:100,online:true,checkedAt:new Date().toISOString(),version:'1.21',motd:'Roleplay'}),name:'Reviewed Minecraft RP',description:'An English fantasy roleplay community with documented rules and a reviewed joining guide.',language:'English',framework:'Roleplay',accessType:'application',websiteUrl:'https://example.com',tags:['roleplay','java edition','fantasy rp']};
+  await login(member);await assert.rejects(rpc('public.staff_minecraft_candidates()'),/permission required/);await assert.rejects(db.query('select * from public.minecraft_import_sources'),/permission denied/);
+  await service();await assert.rejects(rpc('public.service_stage_minecraft_candidate($1::uuid,$2::jsonb,$3)',[member,JSON.stringify(data),request()]),/permission required/);
+  const c=await rpc('public.service_stage_minecraft_candidate($1::uuid,$2::jsonb,$3)',[owner,JSON.stringify(data),request()]);
+  await login(owner,'aal1');await assert.rejects(rpc('public.staff_publish_minecraft_candidate($1::uuid,$2::bigint,$3::jsonb,$4,$5)',[c.id,c.version,'{}','Reviewed public community evidence',request()]),/permission required/);
+  await login();
+  await assert.rejects(rpc('public.staff_publish_minecraft_candidate($1::uuid,$2::bigint,$3::jsonb,$4,$5)',[c.id,c.version,JSON.stringify({logoUrl:'https://evil.example/icon.png'}),'Reviewed public community evidence',request()]),/approved server media/);
+  const id=request();const args=[c.id,c.version,'{}','Reviewed public community evidence',id];
+  const result=await rpc('public.staff_publish_minecraft_candidate($1::uuid,$2::bigint,$3::jsonb,$4,$5)',args);assert.equal(result.status,'published');
+  assert.deepEqual(await rpc('public.staff_publish_minecraft_candidate($1::uuid,$2::bigint,$3::jsonb,$4,$5)',args),result);
+  await assert.rejects(rpc('public.staff_publish_minecraft_candidate($1::uuid,$2::bigint,$3::jsonb,$4,$5)',[...args.slice(0,4),request()]),/candidate changed/);
+  await db.exec('reset role');const row=(await db.query('select * from public.servers where id=$1',[result.serverId])).rows[0];assert.equal(row.platform_id,'minecraft');assert.equal(row.language,'English');assert.equal(row.framework,'Roleplay');assert.equal(row.cfx_join_url,null);
+  await db.exec('set role anon');let details=await rpc('public.public_minecraft_import_details($1::uuid[])',[[result.serverId]]);assert.equal(details[0].address,'play.example.com:25565');assert.equal(details[0].countScope,'network');assert.equal(details[0].websiteUrl,'https://example.com');
+  const results=await rpc('public.search_public_directory($1::jsonb)',[JSON.stringify({platform:'minecraft',query:'Reviewed Minecraft'})]);assert.equal(results.total,1);assert.equal(results.servers[0].players,0);assert.ok(results.facets.feature.some(v=>v.value==='java'&&v.count===1));
+  await db.exec('reset role');await db.query("update public.minecraft_import_sources set last_checked_at=now()-interval '6 minutes' where server_id=$1",[result.serverId]);
+  const stale=(await db.query('select * from private.effective_server_status where server_id=$1',[result.serverId])).rows[0];assert.equal(stale.players,null);assert.equal(stale.online,false);
+  await db.query('update public.servers set owner_id=$1 where id=$2',[member,result.serverId]);
+  await service();const again=await rpc('public.service_stage_minecraft_candidate($1::uuid,$2::jsonb,$3)',[owner,JSON.stringify(data),request()]);await login();await assert.rejects(rpc('public.staff_publish_minecraft_candidate($1::uuid,$2::bigint,$3::jsonb,$4,$5)',[again.id,again.version,'{}','Reviewed public community evidence',request()]),/already has an owner/);
+  await db.exec('reset role');await db.query("update public.servers set status='archived' where id=$1",[result.serverId]);await db.exec('set role anon');assert.deepEqual(await rpc('public.public_minecraft_import_details($1::uuid[])',[[result.serverId]]),[]);
  });
  await db.close();
 });

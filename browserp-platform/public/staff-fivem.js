@@ -9,7 +9,7 @@
   }
   function parseInputs(value) {
     const inputs = [...new Set(String(value || "").trim().split(/[\s,]+/).filter(Boolean))];
-    if (!inputs.length || inputs.length > 10) throw new Error("Enter between 1 and 10 FiveM join codes or Cfx links.");
+    if (!inputs.length || inputs.length > 10) throw new Error("Enter between 1 and 10 Cfx join codes or Cfx links.");
     return inputs;
   }
   function confirmAction(title, text, action) {
@@ -25,18 +25,22 @@
     });
   }
 
-  async function init({ api, root, imageUrl } = {}) {
+  async function init({ api, root, imageUrl, platform = "fivem" } = {}) {
+    if (!["fivem", "redm"].includes(platform)) throw new Error("Choose FiveM or RedM.");
+    const platformName = platform === "redm" ? "RedM" : "FiveM";
+    const endpoint = `/api/admin/${platform}`;
     if (typeof root === "string") root = document.querySelector(root);
     if (!root || typeof api !== "function") return null;
+    root.dataset.platform = platform;
     root.classList.add("staff-fivem");
     let destroyed = false; let request = 0; let items = []; let current = null; let dirty = false; let busy = false; let canManage = false; let offset = 0; let total = 0;
-    const header = make("div", undefined, "fivem-heading"); const heading = make("div"); heading.append(make("span", "FiveM", "eyebrow-v3"), make("h2", "Import server details"), make("p", "Fetch public source information, review it, then choose what to publish. Missing details stay blank.", "fivem-help"));
+    const header = make("div", undefined, "fivem-heading"); const heading = make("div"); heading.append(make("span", platformName, "eyebrow-v3"), make("h2", "Import server details"), make("p", "Fetch public source information, review it, then choose what to publish. Missing details stay blank.", "fivem-help"));
     const reload = button("Reload imports"); header.append(heading, reload);
     const status = make("p", "Loading imports…", "fivem-status"); status.setAttribute("role", "status");
     const tools = make("section", undefined, "fivem-fetch"); tools.hidden = true;
     const fetchForm = make("form"); const sourceLabel = make("label", undefined, "field-v3"); const inputs = make("textarea"); inputs.name = "inputs"; inputs.rows = 3; inputs.maxLength = 3000; inputs.required = true; inputs.placeholder = "abc123\nhttps://cfx.re/join/xyz789";
-    sourceLabel.append(make("span", "FiveM join codes or Cfx links"), inputs, make("small", "Up to 10, separated by spaces, commas or new lines.", "fivem-help"));
-    const fetchActions = make("div", undefined, "fivem-actions"); const fetchButton = button("Fetch for review", true); fetchButton.type = "submit"; const featuredButton = button("Find featured servers"); fetchActions.append(fetchButton, featuredButton); fetchForm.append(sourceLabel, fetchActions);
+    sourceLabel.append(make("span", `${platformName} join codes or Cfx links`), inputs, make("small", "Up to 10, separated by spaces, commas or new lines.", "fivem-help"));
+    const fetchActions = make("div", undefined, "fivem-actions"); const fetchButton = button("Fetch for review", true); fetchButton.type = "submit"; const featuredButton = button("Find featured servers"); fetchActions.append(fetchButton); if (platform === "fivem") fetchActions.append(featuredButton); fetchForm.append(sourceLabel, fetchActions);
     const featured = make("div", undefined, "fivem-featured"); const fetchStatus = make("p", "", "fivem-status"); fetchStatus.setAttribute("role", "status"); tools.append(fetchForm, fetchStatus, featured);
     const errors = make("ul", undefined, "fivem-errors"); errors.hidden = true;
     const filterLabel = make("label", undefined, "fivem-filter"); const filter = make("select"); filter.setAttribute("aria-label", "Import status");
@@ -56,12 +60,12 @@
     }
     field("name", "Server name", { minLength: 3, maxLength: 80, wide: true });
     field("description", "Description", { type: "textarea", minLength: 40, maxLength: 3000, rows: 5, wide: true, help: "40–3,000 characters. Review source text before making it public." });
-    const platform = make("div", undefined, "fivem-platform"); platform.append(make("span", "Platform"), make("strong", "FiveM")); fields.append(platform);
+    const platformLabel = make("div", undefined, "fivem-platform"); platformLabel.append(make("span", "Platform"), make("strong", platformName)); fields.append(platformLabel);
     field("region", "Region", { minLength: 2, maxLength: 60, placeholder: "Not provided by source" });
     field("language", "Language", { minLength: 2, maxLength: 60, placeholder: "Not provided by source" });
     field("framework", "Framework / mode", { required: false, maxLength: 80, placeholder: "Unknown", help: "Leave blank if the source does not establish a framework." });
     field("accessType", "Access", { type: "select", choices: [["", "Choose access"], ["unknown", "Not confirmed"], ["public", "Public"], ["allowlisted", "Allowlisted"], ["application", "Application required"]], help: "Choose Not confirmed when source information is missing or conflicting." });
-    field("discordUrl", "Discord community URL", { type: "url", required: false, maxLength: 1000, help: "A Discord invite for the community. This is separate from the FiveM join link." });
+    field("discordUrl", "Discord community URL", { type: "url", required: false, maxLength: 1000, help: `A Discord invite for the community. This is separate from the ${platformName} join link.` });
     field("websiteUrl", "Community website URL", { type: "url", required: false, maxLength: 1000 });
     field("bannerUrl", "Banner image URL", { type: "url", required: false, maxLength: 1000 });
     field("logoUrl", "Server logo URL", { type: "url", required: false, maxLength: 1000 });
@@ -82,14 +86,14 @@
         const card = make("article", undefined, "fivem-item"); const copy = make("div"); const candidate = item.candidate || {};
         copy.append(make("strong", candidate.name || "Name not provided"), make("span", `cfx.re/join/${item.joinCode || candidate.joinCode || "Unknown"}`, "fivem-help"), make("small", `Source checked ${date(candidate.checkedAt)} · ${list(candidate.warnings).length} source warnings`, "fivem-help"));
         const actions = make("div", undefined, "fivem-actions"); const state = make("span", item.status || "Unknown", "fivem-state"); state.dataset.state = item.status;
-        const review = button(canManage ? "Review" : "View source"); review.setAttribute("aria-label", `Review FiveM import: ${candidate.name || item.joinCode}`); review.addEventListener("click", () => open(item)); actions.append(state, review); card.append(copy, actions); return card;
+        const review = button(canManage ? "Review" : "View source"); review.setAttribute("aria-label", `Review ${platformName} import: ${candidate.name || item.joinCode}`); review.addEventListener("click", () => open(item)); actions.append(state, review); card.append(copy, actions); return card;
       }));
       if (!selected.length) records.append(make("p", "No imports in this view.", "fivem-help"));
     }
     async function refresh() {
       const revision = ++request;
       try {
-        const payload = await api(`/api/admin/fivem?status=${encodeURIComponent(filter.value)}&offset=${offset}`); if (destroyed || revision !== request) return false;
+        const payload = await api(`${endpoint}?status=${encodeURIComponent(filter.value)}&offset=${offset}`); if (destroyed || revision !== request) return false;
         const workspace = payload.workspace; if (!workspace || !Array.isArray(workspace.items)) throw new Error("The import list could not be read. Please reload.");
         items = workspace.items; total = Number.isSafeInteger(workspace.total) ? workspace.total : items.length; canManage = workspace.canManage === true; tools.hidden = !canManage; renderRecords(); updatePagination();
         message(status, `${Number.isSafeInteger(workspace.total) ? workspace.total : items.length} import${workspace.total === 1 ? "" : "s"}${canManage ? " · Review source details before publishing" : " · Your role can view imports"}`); return true;
@@ -113,13 +117,15 @@
       }
     }
     async function discard() { return !dirty || await confirmAction("Discard unsaved review edits?", "These changes have not been published.", "Discard edits"); }
+    let curation = null;
     async function open(item) {
       if (busy || !await discard() || destroyed) return;
-      current = item; dirty = false; const candidate = item.candidate || {}; editorHeading.textContent = `Review ${candidate.name || item.joinCode || "FiveM import"}`;
+      current = item; dirty = false; const candidate = item.candidate || {}; editorHeading.textContent = `Review ${candidate.name || item.joinCode || `${platformName} import`}`;
       for (const [name, control] of Object.entries(controls)) control.value = name === "reason" ? "" : ["tags", "keywords"].includes(name) ? list(candidate[name]).join(", ") : candidate[name] ?? "";
       sourceSummary.textContent = `Imported snapshot from ${date(candidate.checkedAt)} · ${list(candidate.evidence).length} evidence fields · ${typeof candidate.players === "number" ? candidate.players : "Unknown"} players / ${typeof candidate.capacity === "number" ? candidate.capacity : "unknown capacity"} · ${candidate.online === true ? "Reported online" : candidate.online === false ? "Reported offline" : "Online status unknown"}. Published listings refresh their player counts separately.`;
-      join.replaceChildren(make("strong", "FiveM join link: ")); const url = secureUrl(candidate.joinUrl); if (url) { const link = make("a", url); link.href = url; link.target = "_blank"; link.rel = "noopener noreferrer"; join.append(link); } else join.append(make("span", "Not provided by source"));
+      join.replaceChildren(make("strong", `${platformName} join link: `)); const url = secureUrl(candidate.joinUrl); if (url) { const link = make("a", url); link.href = url; link.target = "_blank"; link.rel = "noopener noreferrer"; join.append(link); } else join.append(make("span", "Not provided by source"));
       showEvidence(candidate); renderMedia(); message(editorStatus, ""); editor.hidden = false;
+      curation?.show(candidate,controls,()=>{dirty=true;renderMedia();});
       for (const control of Object.values(controls)) control.disabled = !canManage;
       publish.hidden = !canManage; sourceRefresh.hidden = !canManage || !item.serverId; dismiss.hidden = !canManage || item.status === "dismissed"; publish.textContent = item.status === "published" ? "Publish reviewed update" : "Publish reviewed listing"; controls.name.focus();
     }
@@ -127,7 +133,7 @@
     async function mutate(action) {
       if (busy || !current || !canManage) return;
       if (action === "publish" ? !editor.reportValidity() : !controls.reason.reportValidity()) return;
-      const titles = { publish: "Publish these reviewed FiveM details?", archive: "Dismiss this import?", refresh: "Refresh this server’s live player count?" };
+      const titles = { publish: `Publish these reviewed ${platformName} details?`, archive: "Dismiss this import?", refresh: "Refresh this server’s live player count?" };
       const copy = { publish: "These details will be public. Community ownership still requires an approved claim.", archive: "The import will leave the review queue. Its review history is retained.", refresh: "Check the latest available player observation. Your listing review edits will stay here." };
       setBusy(true);
       if (!await confirmAction(titles[action], copy[action], action === "publish" ? "Publish listing" : action === "archive" ? "Dismiss import" : "Check player count")) { setBusy(false); return; }
@@ -135,12 +141,12 @@
       message(editorStatus, action === "refresh" ? "Checking live player information…" : "Saving reviewed import…");
       try {
         const id = current.id; const body = { action, id, expectedVersion: current.version, reason: controls.reason.value.trim() }; if (action === "publish") body.data = payload();
-        const response = await api("/api/admin/fivem", { method: "POST", body: JSON.stringify(body) }); if (destroyed) return;
+        const response = await api(endpoint, { method: "POST", body: JSON.stringify(body) }); if (destroyed) return;
         if (action === "refresh") {
           const live = response.result;
           const observation = Number.isInteger(live?.players) && Number.isInteger(live?.capacity)
-            ? `Latest FiveM observation: ${live.players} / ${live.capacity} players · ${date(live.checkedAt)}.`
-            : live?.unchanged ? `FiveM has no newer observation than ${date(live.checkedAt)}.`
+            ? `Latest ${platformName} observation: ${live.players} / ${live.capacity} players · ${date(live.checkedAt)}.`
+            : live?.unchanged ? `${platformName} has no newer observation than ${date(live.checkedAt)}.`
             : response.message || "Live player count checked.";
           message(editorStatus, `${observation} Your review edits are preserved.`); return;
         }
@@ -156,13 +162,13 @@
     fetchForm.addEventListener("submit", async (event) => {
       event.preventDefault(); if (busy || !canManage) return;
       let values; try { values = parseInputs(inputs.value); } catch (error) { message(fetchStatus, error.message, true); return; }
-      setBusy(true); message(fetchStatus, "Fetching public FiveM information…"); errors.replaceChildren(); errors.hidden = true;
+      setBusy(true); message(fetchStatus, `Fetching public ${platformName} information…`); errors.replaceChildren(); errors.hidden = true;
       try {
         const failed = []; let count = 0;
         for (let index = 0; index < values.length; index += 1) {
           if (destroyed) return;
           message(fetchStatus, `Fetching source ${index + 1} of ${values.length}… ${count} ready for review.`);
-          try { const payload = await api("/api/admin/fivem", { method: "POST", body: JSON.stringify({ action: "fetch", inputs: [values[index]] }) }); count += list(payload.candidates).length; failed.push(...list(payload.errors)); }
+          try { const payload = await api(endpoint, { method: "POST", body: JSON.stringify({ action: "fetch", inputs: [values[index]] }) }); count += list(payload.candidates).length; failed.push(...list(payload.errors)); }
           catch (error) { failed.push({ input: values[index], message: error.message }); if (error.status === 401 || error.status === 403 || error.status === 429) { for (const input of values.slice(index + 1)) failed.push({ input, message: "Not fetched. Retry after resolving the request error." }); break; } }
         }
         if (destroyed) return;
@@ -175,7 +181,7 @@
     featuredButton.addEventListener("click", async () => {
       if (busy || !canManage) return; setBusy(true); message(fetchStatus, "Loading featured source suggestions…");
       try {
-        const payload = await api("/api/admin/fivem", { method: "POST", body: JSON.stringify({ action: "featured" }) }); if (destroyed) return;
+        const payload = await api(endpoint, { method: "POST", body: JSON.stringify({ action: "featured" }) }); if (destroyed) return;
         featured.replaceChildren(make("p", "Choose a suggestion to add its join code, then fetch it for review.", "fivem-help"));
         const suggestions = list(payload.servers).slice(0, 30); for (const item of suggestions) { const choose = button(item.name || item.joinCode); choose.addEventListener("click", () => { const values = inputs.value.trim().split(/[\s,]+/).filter(Boolean); if (!values.includes(item.joinCode)) values.push(item.joinCode); if (values.length > 10) { message(fetchStatus, "Fetch the current 10 sources before adding another.", true); return; } inputs.value = values.join("\n"); inputs.focus(); }); featured.append(choose); }
         message(fetchStatus, suggestions.length ? `${suggestions.length} source suggestions. None have been imported or published.` : "No featured source suggestions are available.");
@@ -190,6 +196,7 @@
     previous.addEventListener("click", () => { if (!busy && offset) { offset = Math.max(0, offset - 25); void refresh(); } }); next.addEventListener("click", () => { if (!busy && offset + 25 < total) { offset += 25; void refresh(); } });
     const beforeUnload = (event) => { if (dirty) { event.preventDefault(); event.returnValue = ""; } }; window.addEventListener("beforeunload", beforeUnload);
     await refresh();
+    if (!destroyed && canManage && window.BrowseRPStaffCuration) { try { curation = await window.BrowseRPStaffCuration.init({api,root,platform,inputs}); } catch { /* Manual import remains available if research cannot load. */ } }
     return { refresh, destroy() { destroyed = true; request += 1; window.removeEventListener("beforeunload", beforeUnload); root.replaceChildren(); } };
   }
   window.BrowseRPStaffFiveM = Object.freeze({ init, parseInputs, secureUrl });

@@ -135,6 +135,7 @@
   function decision({ title, description = "", fields = [], submitLabel = "Confirm", danger = false, expiresInSeconds = 0 }) {
     return new Promise((resolve) => {
       const dialog = make("dialog", undefined, "staff-dialog-v3");
+      dialog.setAttribute("aria-label", title);
       const form = make("form", undefined, "staff-dialog-card-v3"); form.method = "dialog";
       form.append(make("span", "Recorded staff action", "eyebrow-v3"), make("h2", title));
       if (description) form.append(make("p", description, "staff-dialog-copy-v3"));
@@ -179,20 +180,57 @@
   function tableRows(target, rows) { target?.replaceChildren(...rows); }
 
   async function loadSession() {
-    try { state.session = await api("/api/auth/session"); state.csrf = state.session.csrfToken || ""; }
-    catch { state.session = { authenticated: false }; }
+    state.session = await api("/api/auth/session"); state.csrf = state.session.csrfToken || "";
     return state.session;
+  }
+
+  function mountAccessCard(card) {
+    const root = $("#staff-app-v3");
+    if (!root) return;
+    document.body.classList.remove("staff-menu-open");
+    const menu = $("#staff-menu-v3");
+    menu?.setAttribute("aria-expanded", "false");
+    menu?.setAttribute("aria-label", "Open staff navigation");
+    card.tabIndex = -1;
+    root.replaceChildren(card);
+  }
+
+  function accessActions(card) {
+    const actions = make("div", undefined, "staff-access-actions-v3");
+    const home = make("a", "Return to BrowseRP", "button-v3 button-quiet-v3"); home.href = "/"; actions.append(home);
+    if (state.session?.authenticated) {
+      const signOut = make("button", "Sign out", "button-v3 button-secondary-v3"); signOut.type = "button";
+      const feedback = make("p", "", "staff-form-status-v3"); feedback.setAttribute("role", "status");
+      signOut.addEventListener("click", async () => {
+        if (signOut.disabled) return;
+        signOut.disabled = true; feedback.textContent = "Signing out…";
+        try { await api("/api/auth/logout", { method: "POST", body: "{}" }); state.session = null; state.csrf = ""; showLogin(); }
+        catch (error) { feedback.textContent = error.message; signOut.disabled = false; }
+      });
+      actions.append(signOut); card.append(actions, feedback);
+    } else card.append(actions);
+  }
+
+  function showSessionUnavailable(error) {
+    const card = make("section", undefined, "staff-login-card-v3");
+    card.append(themeButton(), brand(), make("span", "Connection interrupted", "eyebrow-v3"), make("h1", "Staff access could not be checked"), make("p", "We couldn’t confirm your staff access. Try again in a moment, or return to BrowseRP."));
+    const feedback = make("p", error?.message || "The sign-in service could not be reached.", "staff-form-status-v3"); feedback.setAttribute("role", "status");
+    const retry = make("button", "Try again", "button-v3 button-primary-v3"); retry.type = "button"; retry.addEventListener("click", () => location.reload());
+    card.append(feedback, retry); accessActions(card); mountAccessCard(card);
   }
 
   function showLogin() {
     const root = $("#staff-app-v3");
     if (!root) return;
     const card = make("section", undefined, "staff-login-card-v3");
-    card.append(themeButton(), brand(), make("span", "Restricted operations", "eyebrow-v3"), make("h1", "Staff Panel"), make("p", "Continue with the Discord account assigned to your BrowseRP staff rank."));
-    const login = make("a", undefined, "button-v3 button-primary-v3 provider-button-v4 provider-discord-v4"); login.href = "/api/auth/discord?returnTo=%2Fstaffpanel%2Foverview";
+    card.append(themeButton(), brand(), make("span", "BrowseRP staff workspace", "eyebrow-v3"), make("h1", "Welcome to the staff panel"), make("p", "Continue with the Discord account assigned to your BrowseRP staff role."));
+    const authState = new URLSearchParams(location.search).get("auth");
+    if (authState) { const feedback = make("p", authState === "backend-not-configured" || authState === "provider-unavailable" ? "Discord sign-in is temporarily unavailable. Please try again later." : "Sign-in was not completed. Please try again with your staff Discord account.", "staff-form-status-v3"); feedback.setAttribute("role", "status"); card.append(feedback); }
+    const returnTo = /^\/staffpanel\/(overview|moderation|scrapers)$/.test(location.pathname) ? location.pathname : "/staffpanel/overview";
+    const login = make("a", undefined, "button-v3 button-primary-v3 provider-button-v4 provider-discord-v4"); login.href = `/api/auth/discord?returnTo=${encodeURIComponent(returnTo)}`;
     const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg"); icon.classList.add("provider-icon-v4"); icon.setAttribute("aria-hidden", "true");
     const use = document.createElementNS("http://www.w3.org/2000/svg", "use"); use.setAttribute("href", "/assets/provider-icons-v4.svg#provider-discord"); icon.append(use); login.append(icon, make("span", "Continue with Discord"));
-    card.append(login, make("p", "The address is intentionally absent from public navigation. The API still authorises every request.", "access-note")); root.replaceChildren(card);
+    card.append(login, make("p", "Staff access is available to approved team members. Your personal account settings stay on your profile.", "access-note")); accessActions(card); mountAccessCard(card);
   }
 
   function showDenied() {
@@ -200,29 +238,35 @@
     if (!root) return;
     const card = make("section", undefined, "staff-login-card-v3");
     card.append(themeButton(), brand(), make("span", "Access not assigned", "eyebrow-v3"), make("h1", "Staff access required"), make("p", "This Discord account does not have an active BrowseRP staff rank."));
-    card.append(make("a", "Return to BrowseRP", "button-v3 button-secondary-v3"));
-    card.lastChild.href = "/";
-    root.replaceChildren(card);
+    accessActions(card); mountAccessCard(card);
   }
 
   function showMfa() {
     const root = $("#staff-app-v3"); const factors = state.session?.mfa?.factors || []; const verified = factors.find((factor) => factor.status === "verified");
-    const card = make("section", undefined, "staff-login-card-v3"); card.append(themeButton(), make("span", "Second-factor verification", "eyebrow-v3"), make("h1", verified ? "Enter your authenticator code" : "Secure your staff account"), make("p", verified ? "Open Google Authenticator or another TOTP app and enter the current six-digit code." : "Staff accounts use Discord for identity and a separate authenticator app for access."));
+    const card = make("section", undefined, "staff-login-card-v3"); card.append(themeButton(), brand(), make("span", "Two-factor verification", "eyebrow-v3"), make("h1", verified ? "Enter your authenticator code" : "Secure your staff account"), make("p", verified ? "Open Google Authenticator or another authenticator app and enter the current six-digit code." : "Protect your staff account with an authenticator app. You’ll use its six-digit code after signing in with Discord."));
     if (!verified) { const enroll = make("button", "Set up authenticator", "button-v3 button-primary-v3"); enroll.type = "button"; enroll.addEventListener("click", enrollMfa); card.append(enroll); }
     else card.append(mfaVerifyForm(verified.id));
-    root.replaceChildren(card);
+    accessActions(card); mountAccessCard(card);
   }
 
   function mfaVerifyForm(factorId) {
     const form = make("form", undefined, "staff-form-v3");
     const label = make("label", undefined, "field-v3");
     const input = document.createElement("input");
-    input.name = "code"; input.inputMode = "numeric"; input.autocomplete = "one-time-code"; input.pattern = "[0-9]{6}"; input.required = true;
+    input.name = "code"; input.inputMode = "numeric"; input.autocomplete = "one-time-code"; input.pattern = "[0-9]{6}"; input.maxLength = 6; input.required = true;
     label.append(make("span", "Six-digit code"), input);
     const submit = make("button", "Verify and continue", "button-v3 button-primary-v3"); submit.type = "submit";
     const formStatus = make("p", "", "staff-form-status-v3"); formStatus.setAttribute("role", "status");
     form.append(label, submit, formStatus);
-    form.addEventListener("submit", async (event) => { event.preventDefault(); try { await api("/api/auth/mfa/verify", { method: "POST", body: JSON.stringify({ factorId, code: new FormData(form).get("code") }) }); location.reload(); } catch (error) { formStatus.textContent = error.message; formStatus.style.color = "#ff8192"; } });
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (submit.disabled || !form.reportValidity()) return;
+      const code = input.value;
+      input.disabled = true; submit.disabled = true; form.setAttribute("aria-busy", "true"); formStatus.textContent = "Verifying your code…";
+      try { await api("/api/auth/mfa/verify", { method: "POST", body: JSON.stringify({ factorId, code }) }); location.reload(); }
+      catch (error) { formStatus.textContent = error.message; formStatus.style.color = "#ff8192"; input.focus(); }
+      finally { input.disabled = false; submit.disabled = false; form.removeAttribute("aria-busy"); }
+    });
     return form;
   }
 
@@ -243,15 +287,23 @@
     card.append(mfaVerifyForm(factor.id));
   }
 
-  async function enrollMfa() {
+  async function enrollMfa(event) {
+    const button = event?.currentTarget;
+    if (button?.disabled) return;
+    const card = $(".staff-login-card-v3");
+    let feedback = $(".staff-enrollment-status-v3", card);
+    if (!feedback) { feedback = make("p", "", "staff-form-status-v3 staff-enrollment-status-v3"); feedback.setAttribute("role", "status"); card.append(feedback); }
+    if (button) button.disabled = true;
+    feedback.textContent = "Preparing your authenticator…";
     try {
       const { factor } = await api("/api/auth/mfa/enroll", { method: "POST", body: JSON.stringify({ friendlyName: "BrowseRP staff" }) });
-      const card = $(".staff-login-card-v3"); authenticatorSetup(card, factor);
-    } catch (error) { status(error.message, true); }
+      authenticatorSetup(card, factor);
+    } catch (error) { feedback.textContent = error.message; }
+    finally { if (button) button.disabled = false; }
   }
 
   async function ensureStaff() {
-    await loadSession();
+    try { await loadSession(); } catch (error) { showSessionUnavailable(error); return false; }
     if (!state.session.authenticated || state.session.provider !== "discord") { showLogin(); return false; }
     if (!state.session.staffAccess) { showDenied(); return false; }
     const verifiedFactor = state.session.mfa?.factors?.some((factor) => factor.status === "verified");
@@ -409,7 +461,7 @@
   function wireForms(){ $("#permission-form-v3")?.addEventListener("submit",savePermission); $("#mfa-activate-form-v3")?.addEventListener("submit",async(event)=>{event.preventDefault();try{await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"activate_mfa",reason:new FormData(event.currentTarget).get("reason")})});location.reload();}catch(error){status(error.message,true);}}); }
   function mobile(){
     const main=$(".staff-main-v3")||$(".staff-login-v3");
-    if(main){if(!main.id)main.id="staff-main-content";main.tabIndex=-1;const skip=make("a","Skip to staff content","skip-link");skip.href=`#${main.id}`;skip.addEventListener("click",event=>{event.preventDefault();main.focus();});document.body.prepend(skip);}
+    if(main){if(!main.id)main.id="staff-main-content";main.tabIndex=-1;const skip=make("a","Skip to staff content","skip-link");skip.href="#staff-app-v3";skip.addEventListener("click",event=>{event.preventDefault();const target=$(".staff-login-card-v3")||$(".staff-main-v3")||main;target.focus();});document.body.prepend(skip);}
     const button=$("#staff-menu-v3"); const sidebar=$(".staff-sidebar-v3");
     if(!button||!sidebar)return;
     const compact=window.matchMedia?.("(max-width: 760px)")||{matches:false};

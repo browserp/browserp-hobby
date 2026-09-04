@@ -1,3 +1,4 @@
+import { enrichMinecraftServers, refreshDueMinecraftServers } from "../lib/minecraft-workflow.js";
 import { endpoint, ok } from "../lib/api.js";
 import { servers as fallbackServers } from "../lib/catalog.js";
 import { developmentCatalogAllowed } from "../lib/config.js";
@@ -40,10 +41,10 @@ export default endpoint(["GET", "POST"], async (req, res) => {
     }, session.accessToken);
     return ok(res, { result }, 201);
   }
-  if (!slug) await refreshDueFiveMServers();
+  if (!slug) await Promise.all([refreshDueFiveMServers(),refreshDueMinecraftServers()]);
   if (filters.discover === "true" && !slug) {
     const result = await discoverServers(filters);
-    result.servers = await enrichImportedServers(result.servers);
+    result.servers = await enrichMinecraftServers(await enrichImportedServers(result.servers));
     return publicJson(res, result, 20);
   }
   let servers;
@@ -65,7 +66,7 @@ export default endpoint(["GET", "POST"], async (req, res) => {
   }
   if (!Array.isArray(servers)) servers = [];
   if (slug) servers = servers.filter((server) => String(server.slug || "").toLowerCase() === slug).slice(0, 1);
-  servers = await enrichImportedServers(servers, { refresh: Boolean(slug) });
+  servers = await enrichMinecraftServers(await enrichImportedServers(servers, { refresh: Boolean(slug) }), { refresh: Boolean(slug) });
   let engagement = null;
   if (slug && servers.length) {
     try { engagement = await rpc("public_server_engagement", { p_slug: slug }); }

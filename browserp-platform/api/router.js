@@ -1,3 +1,4 @@
+import { staffMinecraft } from "../lib/minecraft-workflow.js";
 import { createHash, randomBytes } from "node:crypto";
 import { endpoint, ok } from "../lib/api.js";
 import { appUrl, developmentCatalogAllowed, supabaseConfig } from "../lib/config.js";
@@ -7,16 +8,19 @@ import { assessDisplayName, sanitizePlainText } from "../lib/moderation.js";
 import { rateLimit } from "../lib/rate-limit.js";
 import { recordAccountActivity, unsealAddress } from "../lib/security.js";
 import { memberClaims, staffClaims } from "../lib/claim-workflow.js";
-import { staffFiveM } from "../lib/fivem-workflow.js";
+import { staffFiveM, staffCfx } from "../lib/fivem-workflow.js";
 import { fetchServerImage } from "../lib/server-media.js";
 import { moderationMutation, moderationQuery } from "../lib/staff-moderation.js";
 import {
   authCapabilities,
   beginOAuth,
+  beginIdentityLink,
   csrfTokenForRequest,
   enrollTotp,
   finishOAuth,
   getSession,
+  hasStaffMembership,
+  memberIdentityProviders,
   rest,
   rpc,
   signOut,
@@ -215,10 +219,10 @@ const routes = {
 
   "auth/callback": endpoint("GET", async (req, res, requestId) => {
     try {
-      const { returnTo, provider, user } = await finishOAuth(req, res);
+      const { returnTo, provider, user, linked } = await finishOAuth(req, res);
       await recordActivitySafely(req, res, {
         userId: user.id,
-        eventType: "auth.signed_in",
+        eventType: linked ? "auth.identity_linked" : "auth.signed_in",
         provider,
         requestId
       });
@@ -226,7 +230,8 @@ const routes = {
     } catch {
       const returnTo = safeReturnPath(cookieValue(parseCookies(req), "brp_auth_return"), "/dashboard");
       const destination = new URL(returnTo, appUrl(req));
-      destination.searchParams.set("auth", "failed");
+      if (new URL(req.url, appUrl(req)).searchParams.get("brp_link") === "1") destination.searchParams.set("connections", "failed");
+      else destination.searchParams.set("auth", "failed");
       return redirect(res, destination.toString());
     }
   }),
@@ -345,6 +350,23 @@ const routes = {
     return ok(res, { overview: await rpc("member_dashboard_overview", {}, session.accessToken) });
   }),
 
+  "me/connections": endpoint(["GET", "POST"], async (req, res) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    if (req.method === "GET") {
+      const session = await getSession(req, res, { required: true });
+      const [configured, staffAccount] = await Promise.all([authCapabilities(), hasStaffMembership(session.user.id)]);
+      const connected = memberIdentityProviders(session.user);
+      return ok(res, { connections: { canManage: !staffAccount, message: staffAccount ? "Staff accounts use a dedicated Discord sign-in. Additional connections are unavailable for this account." : "Connect another sign-in method to this BrowseRP profile.", providers: ["discord", "google"].map(provider => ({ provider, connected: connected.includes(provider), enabled: configured[provider] === true, canConnect: !staffAccount && configured[provider] === true && !connected.includes(provider) })) } });
+    }
+    await rateLimit(req, "account-connect", 6, 600);
+    const body = await readBody(req, 2048);
+    const provider = String(body.provider || "").toLowerCase();
+    const configured = await authCapabilities();
+    if (!["discord", "google"].includes(provider) || configured[provider] !== true) throw Object.assign(new Error("This sign-in provider is temporarily unavailable."), { status: 409 });
+    const authorizationUrl = await beginIdentityLink(req, res, provider, body.returnTo);
+    return ok(res, { authorizationUrl });
+  }),
+
   "me/profile": endpoint(["GET", "POST"], async (req, res) => {
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true });
@@ -388,6 +410,7 @@ const routes = {
     assertSameOrigin(req);
     const session = await getSession(req, res, { required: true });
     await rateLimit(req, "profile-avatar", 6, 3600);
+    // A 1 MiB PNG expands to approximately 1.4 MB in the JSON data URL.
     const body = await readBody(req, 1_500_000);
     const bytes = profilePictureBytes(body.imageData);
     const objectPath = `${session.user.id}/${Date.now()}-${randomBytes(12).toString("hex")}.png`;
@@ -846,7 +869,9 @@ const routes = {
     }
   }),
 
+  "admin/minecraft": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffMinecraft(req, res, id))),
   "admin/fivem": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffFiveM(req, res, id))),
+  "admin/redm": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffCfx(req, res, id, "redm"))),
   "server-claims": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await memberClaims(req, res, id))),
   "admin/server-claims": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffClaims(req, res, id))),
   "public/server-image": endpoint("GET", async (req, res) => {

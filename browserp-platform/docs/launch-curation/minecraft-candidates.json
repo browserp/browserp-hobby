@@ -1,0 +1,159 @@
+{
+  "generatedAt": "2026-09-04",
+  "targetTotal": 3,
+  "candidates": [
+    {
+      "joinCode": "5288e856934c",
+      "address": "mc.lotc.co",
+      "edition": "java",
+      "status": "publish",
+      "name": "Lord of the Craft",
+      "description": "Lord of the Craft is an English-speaking medieval fantasy roleplay community on Minecraft Java Edition. Players create original characters, join nations and develop stories within a shared setting. Its published roleplay standards cover character conduct and collaborative storytelling, and new players complete a whitelist application before joining. Read the current rules and application guide on the official website. The displayed player count covers the advertised Minecraft network, including any lobby and other worlds.",
+      "region": "International",
+      "language": "English",
+      "framework": "Roleplay",
+      "accessType": "application",
+      "discordUrl": "https://discord.gg/lotc",
+      "websiteUrl": "https://www.lordofthecraft.net/",
+      "tags": [
+        "roleplay",
+        "java edition",
+        "fantasy rp",
+        "medieval",
+        "custom worlds",
+        "economy"
+      ],
+      "keywords": [
+        "character creation",
+        "nations",
+        "whitelist",
+        "collaborative storytelling"
+      ],
+      "sources": [
+        {
+          "url": "https://www.lordofthecraft.net/",
+          "purpose": "Current address, edition, established since 2011 and recent community announcements"
+        },
+        {
+          "url": "https://www.lordofthecraft.net/apply/new/?d=9&do=form",
+          "purpose": "Application requirements and official Discord invite"
+        },
+        {
+          "url": "https://www.lordofthecraft.net/forums/topic/188960-roleplay-quality-standards/",
+          "purpose": "Published standards for collaborative roleplay"
+        }
+      ],
+      "inclusionReasons": [
+        "Long-running dedicated character roleplay community",
+        "Documented application process, rules and roleplay standards",
+        "Current forum activity and successful direct status observation"
+      ],
+      "conflicts": [
+        "Website and server status advertise different version ranges; players should follow the current official joining guide.",
+        "Network total, not the population of a particular nation or RP world."
+      ]
+    },
+    {
+      "joinCode": "348e9b5a5f47",
+      "address": "play.stoneworks.gg",
+      "edition": "java",
+      "status": "publish",
+      "name": "Stoneworks",
+      "description": "Stoneworks is an English-speaking Minecraft community built around player-created nations, diplomacy, warfare and worldbuilding. Players can establish governments, build settlements, trade and shape ongoing political stories. Its official introduction welcomes both casual and serious participants; PvP matters during wars, while professions, economy and roleplay offer other ways to take part. Follow the official website and Discord for current joining instructions and rules. The displayed count covers the advertised network, including its lobby and other worlds.",
+      "region": "International",
+      "language": "English",
+      "framework": "Nation RP",
+      "accessType": "public",
+      "discordUrl": "https://discord.com/invite/QhdhgbrF7F",
+      "websiteUrl": "https://stoneworks.gg/",
+      "tags": [
+        "roleplay",
+        "java edition",
+        "nation rp",
+        "economy",
+        "pvp",
+        "custom worlds",
+        "land claims"
+      ],
+      "keywords": [
+        "geopolitics",
+        "diplomacy",
+        "worldbuilding",
+        "nations",
+        "professions"
+      ],
+      "sources": [
+        {
+          "url": "https://stoneworks.gg/",
+          "purpose": "Official community identity, address, history, joining guide and FAQ"
+        },
+        {
+          "url": "https://discord.com/invite/QhdhgbrF7F",
+          "purpose": "Discord linked by the official website; verified guild Stoneworks MC"
+        }
+      ],
+      "inclusionReasons": [
+        "Distinct player-led geopolitical roleplay alongside character-focused selections",
+        "Clear joining instructions and current official community channels",
+        "Successful direct server status observation and matching server icon"
+      ],
+      "conflicts": [
+        "Total covers the network rather than any one nation or RP world.",
+        "RP intensity varies; the official FAQ welcomes casual participation."
+      ]
+    },
+    {
+      "joinCode": "ef4882f9ebfb",
+      "address": "massivecraft.com",
+      "edition": "java",
+      "status": "publish",
+      "name": "MassiveCraft",
+      "description": "MassiveCraft is an English-speaking Minecraft Java community combining fantasy roleplay with factions survival. Its setting supports player groups, settlements, trade and shared stories, with guidance available through the community Discord. The official store describes roleplay and factions as the server focus and publishes its support policies. Check the community website and Discord for current joining requirements and client versions. The displayed player count covers the advertised network and may include survival, lobby or other activity beyond a specific RP scene.",
+      "region": "International",
+      "language": "English",
+      "framework": "Factions",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/massivecraft",
+      "websiteUrl": "https://www.massivecraft.com/",
+      "tags": [
+        "roleplay",
+        "java edition",
+        "factions",
+        "fantasy rp",
+        "survival",
+        "economy",
+        "pvp"
+      ],
+      "keywords": [
+        "fantasy roleplay",
+        "factions survival",
+        "regalia",
+        "community stories"
+      ],
+      "sources": [
+        {
+          "url": "https://shop.massivecraft.com/",
+          "purpose": "Official operator description, advertised address and Discord invite"
+        },
+        {
+          "url": "https://discord.gg/massivecraft",
+          "purpose": "Official invite verified as MassiveCraft Community"
+        },
+        {
+          "url": "https://www.massivecraft.com/",
+          "purpose": "Community homepage; automated reader receives 403, so current onboarding details require human review"
+        }
+      ],
+      "inclusionReasons": [
+        "Established fantasy roleplay and factions community adds a different play style",
+        "Official operator and matching Discord identity can be corroborated",
+        "Direct status is active and supplies its own valid icon"
+      ],
+      "conflicts": [
+        "Current access requirements left Not confirmed rather than inferred from old directory advertisements.",
+        "Homepage blocks automated reading; official store and Discord provide identity corroboration.",
+        "Player count is network-wide, not isolated roleplay occupancy."
+      ]
+    }
+  ]
+}

@@ -21,6 +21,7 @@ const OAUTH_COOKIE_BASES = [
   "brp_auth_return",
   "brp_auth_provider",
   "brp_auth_claims",
+  "brp_link_user",
   "brp_oauth_state",
   "brp_oauth_nonce"
 ];
@@ -188,6 +189,31 @@ export function currentIdentityProvider(user) {
   return OAUTH_PROVIDERS.has(provider) ? provider : null;
 }
 
+// Member connections use verified Auth identities. Staff authorization keeps
+// currentIdentityProvider's separate, stricter single-Discord requirement.
+export function memberIdentityProviders(user) {
+  if (!Array.isArray(user?.identities)) return [];
+  return [...new Set(user.identities.map(identity => identity?.provider).filter(provider => OAUTH_PROVIDERS.has(provider)))];
+}
+
+export async function hasStaffMembership(userId) {
+  if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(String(userId || ""))) throw Object.assign(new Error("Sign in to manage account connections."), { status: 401 });
+  const memberships = await rest(`staff_memberships?select=user_id&user_id=eq.${encodeURIComponent(userId)}&limit=1`, { useSecret: true });
+  if (!Array.isArray(memberships)) throw Object.assign(new Error("Account connection permissions could not be checked."), { status: 503 });
+  return memberships.length > 0;
+}
+
+export function safeProviderAuthorizationUrl(value, provider) {
+  if (typeof value !== "string" || value.length > 12000 || /[\s\\]/.test(value)) return null;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || url.username || url.password || url.port || url.hash) return null;
+    const allowed = provider === "google" ? url.hostname === "accounts.google.com" && ["/o/oauth2/auth", "/o/oauth2/v2/auth"].includes(url.pathname)
+      : provider === "discord" && url.hostname === "discord.com" && ["/oauth2/authorize", "/api/oauth2/authorize"].includes(url.pathname);
+    return allowed ? url.href : null;
+  } catch { return null; }
+}
+
 export function accessTokenClaims(accessToken) {
   const part = String(accessToken || "").split(".")[1];
   if (!part) return {};
@@ -213,7 +239,12 @@ export async function getSession(req, res, { required = false, provider } = {}) 
       csrfToken = setSession(res, data, { csrfToken });
       accessToken = data.access_token;
       user = data.user;
-    } catch {
+    } catch (error) {
+      const code = error?.code || error?.payload?.error_code || error?.payload?.error;
+      const invalidSession = new Set(["refresh_token_not_found", "refresh_token_already_used", "session_not_found", "session_expired", "invalid_grant", "invalid_credentials", "user_not_found", "user_banned"]);
+      // An outage or rate limit does not invalidate a session. Preserve the
+      // existing cookies so a later request can retry without another sign-in.
+      if (!invalidSession.has(code) && ![401, 403].includes(error?.status)) throw error;
       clearSession(res);
     }
   }
@@ -295,6 +326,7 @@ export function beginOAuth(req, res, provider) {
     ...transitionCookies("brp_auth_return", returnTo, { maxAge: 600 }),
     ...transitionCookies("brp_auth_provider", normalizedProvider, { maxAge: 600 }),
     ...transitionCookies("brp_auth_claims", normalizedProvider === "discord" && requestUrl.searchParams.get("claimGuilds") === "1" ? "1" : "0", { maxAge: 600 }),
+    ...expiredCookies(["brp_link_user"]),
     ...transitionCookies("brp_oauth_state", state, { maxAge: 600 }),
     ...transitionCookies("brp_oauth_nonce", nonce, { maxAge: 600 })
   ]);
@@ -308,6 +340,29 @@ export function beginOAuth(req, res, provider) {
   return authorize.toString();
 }
 
+export async function beginIdentityLink(req, res, provider, returnTo = "/profile") {
+  if (!OAUTH_PROVIDERS.has(provider)) throw Object.assign(new Error("Choose Discord or Google."), { status: 400 });
+  const session = await getSession(req, res, { required: true });
+  if (await hasStaffMembership(session.user.id)) throw Object.assign(new Error("Additional connections are unavailable for staff accounts. Keep using your assigned Discord account."), { status: 403 });
+  if (memberIdentityProviders(session.user).includes(provider)) throw Object.assign(new Error("This provider is already connected to your account."), { status: 409 });
+  const destination = returnTo === "/dashboard" ? "/dashboard" : "/profile";
+  const authorize = new URL(beginOAuth({ ...req, url: `/api/auth/${provider}?returnTo=${encodeURIComponent(destination)}` }, res, provider));
+  const callback = new URL(authorize.searchParams.get("redirect_to")); callback.searchParams.set("brp_link", "1");
+  authorize.pathname = "/auth/v1/user/identities/authorize";
+  authorize.searchParams.set("redirect_to", callback.toString()); authorize.searchParams.set("skip_http_redirect", "true");
+  try {
+    const { data } = await supabaseRequest(`${authorize.pathname}${authorize.search}`, { accessToken: session.accessToken });
+    const url = safeProviderAuthorizationUrl(data?.url, provider);
+    if (!url) throw Object.assign(new Error("The provider did not return a valid connection page. Please try again later."), { status: 502 });
+    setCookies(res, transitionCookies("brp_link_user", session.user.id, { maxAge: 600 }));
+    return url;
+  } catch (error) {
+    clearOAuthState(res);
+    if (error?.code === "manual_linking_disabled" || error?.payload?.error_code === "manual_linking_disabled") throw Object.assign(new Error("Connecting another account is temporarily unavailable. Your current sign-in still works."), { status: 409, code: "MANUAL_LINKING_DISABLED" });
+    throw error;
+  }
+}
+
 export async function finishOAuth(req, res) {
   const url = new URL(req.url, appUrl(req));
   const code = url.searchParams.get("code");
@@ -319,12 +374,14 @@ export async function finishOAuth(req, res) {
   const expectedState = cookieValue(cookies, "brp_oauth_state");
   const nonce = cookieValue(cookies, "brp_oauth_nonce");
   const returnTo = safeReturnPath(cookieValue(cookies, "brp_auth_return"), "/dashboard");
+  const linking = url.searchParams.get("brp_link") === "1";
+  const linkUser = cookieValue(cookies, "brp_link_user");
   clearOAuthState(res);
 
   const expectedNonce = TOKEN_PATTERN.test(nonce)
     ? createHash("sha256").update(nonce).digest("base64url")
     : "";
-  if (!code || !verifier || !OAUTH_PROVIDERS.has(provider)
+  if (!code || !verifier || !OAUTH_PROVIDERS.has(provider) || linking !== Boolean(linkUser)
       || !TOKEN_PATTERN.test(expectedState) || !TOKEN_PATTERN.test(returnedState)
       || !secureEqual(expectedState, returnedState)
       || !TOKEN_PATTERN.test(expectedNonce) || !TOKEN_PATTERN.test(returnedNonce)
@@ -332,18 +389,26 @@ export async function finishOAuth(req, res) {
     throw Object.assign(new Error("The sign-in request expired. Please try again."), { status: 400 });
   }
 
+  if (linking) {
+    const current = await getSession(req, res, { required: true });
+    if (current.user.id !== linkUser || await hasStaffMembership(linkUser)) throw Object.assign(new Error("Sign in to the original member account before connecting a provider."), { status: 403 });
+  }
+
   const { data } = await supabaseRequest("auth/v1/token?grant_type=pkce", {
     method: "POST",
     body: { auth_code: code, code_verifier: verifier }
   });
-  if (currentIdentityProvider(data?.user) !== provider) {
+  const strictProvider = currentIdentityProvider(data?.user);
+  const requestedIdentity = memberIdentityProviders(data?.user).includes(provider);
+  if ((linking && data?.user?.id !== linkUser) || (!requestedIdentity && strictProvider !== provider)) {
     throw Object.assign(new Error("The sign-in provider did not match the request."), { status: 403 });
   }
+  if ((linking || strictProvider !== provider) && (/^\/staff(?:panel)?(?:\/|\?|$)/.test(returnTo) || await hasStaffMembership(data.user.id))) throw Object.assign(new Error("Staff sign-in requires the original Discord-only account."), { status: 403 });
   setSession(res, data);
   if (provider === "discord" && cookieValue(cookies, "brp_auth_claims") === "1") {
     try { setDiscordClaimToken(res, data); } catch { /* Claims can still be submitted for manual review. */ }
   }
-  return { returnTo, provider, user: data.user, accessToken: data.access_token };
+  return { returnTo: linking ? `${returnTo}${returnTo.includes("?") ? "&" : "?"}connections=linked` : returnTo, provider, user: data.user, accessToken: data.access_token, linked: linking };
 }
 
 export async function enrollTotp(accessToken, friendlyName = "BrowseRP staff") {

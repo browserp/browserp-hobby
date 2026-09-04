@@ -1,4 +1,4 @@
-import { csrfTokenForRequest, getSession, rest, rpc } from "./supabase.js";
+import { csrfTokenForRequest, getSession, memberIdentityProviders, rest, rpc } from "./supabase.js";
 import { discordClaimToken, verifyDiscordOwnership } from "./discord-claims.js";
 import { sanitizePlainText } from "./moderation.js";
 import { rateLimit } from "./rate-limit.js";
@@ -29,7 +29,7 @@ function contextFor(server, session) {
   return {
     serverId: server.id, serverName: server.name, communityUrl: server.community_url,
     claimable: !server.owner_id, isOwner: Boolean(session && server.owner_id === session.user.id),
-    authenticated: Boolean(session), provider: session?.provider || null,
+    authenticated: Boolean(session), provider: memberIdentityProviders(session?.user).includes("discord") ? "discord" : session?.provider || null,
     reconnectUrl: `/api/auth/discord?claimGuilds=1&returnTo=${encodeURIComponent(returnTo)}`
   };
 }
@@ -44,11 +44,13 @@ async function checkClaim(req, session, claim, server) {
 }
 export async function memberClaims(req, res, requestId) {
   if (req.method === "POST") assertSameOrigin(req);
-  const session = await getSession(req, res, { required: req.method === "POST", ...(req.method === "POST" ? { provider: "discord" } : {}) });
+  const session = await getSession(req, res, { required: req.method === "POST" });
+  const hasDiscord = memberIdentityProviders(session?.user).includes("discord");
+  if (req.method === "POST" && !hasDiscord) throw Object.assign(new Error("Connect Discord to request or verify a server claim."), { status: 403 });
   if (req.method === "GET") {
     const query = new URL(req.url, "https://browserp.local").searchParams;
     const server = await serverForClaim(query.get("serverId"));
-    const claims = session?.provider === "discord" ? await rpc("member_server_claims", { p_server_id: server.id }, session.accessToken) : { items: [] };
+    const claims = hasDiscord ? await rpc("member_server_claims", { p_server_id: server.id }, session.accessToken) : { items: [] };
     return { claims: claims.items || [], context: contextFor(server, session), csrfToken: session?.csrfToken || csrfTokenForRequest(req, res) };
   }
   await rateLimit(req, "server-claims", 10, 300);

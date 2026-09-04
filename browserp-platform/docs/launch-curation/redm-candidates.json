@@ -1,0 +1,2048 @@
+{
+  "generatedAt": "2026-09-04T01:42:42.997933+00:00",
+  "targetTotal": 20,
+  "publicationMeaning": "status=publish is an editorial shortlist for the explicit staff review/publish flow. This manifest does not authorize automation to skip review, create ownership, mark communities verified or reuse historical counts as live.",
+  "method": "Each selected code was fetched individually from the fixed official Cfx server endpoint and required gamename rdr3. English metadata was checked against community-authored descriptions and public rules where available. Public Discord invites were resolved to matching guild names. Logos and supported banners were fetched through the restricted image guard; known placeholders were visually rejected. Selection considers distinct roleplay styles, public community information and usable onboarding links rather than sorting solely by player count. No private Discord channels, server IP endpoints, player identifiers or accounts were collected.",
+  "limits": [
+    "No firsthand in-game moderation or roleplay-quality audit was performed. Public server metadata and community descriptions remain self-reported.",
+    "A fresh count is a snapshot of the advertised Cfx server, not a promise of roleplay activity or capacity throughout the day. Refresh before publishing.",
+    "Region is not inferred from en-US. Unproven access gates remain unknown.",
+    "Framework detection uses known exposed resource names; it does not prove the server is an unmodified distribution.",
+    "Unsupported, expired and region-blocked artwork is omitted. Existing official source media is not an ownership verification."
+  ],
+  "candidates": [
+    {
+      "joinCode": "4ee6e8",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Ranch Roleplay",
+      "description": "Ranch Roleplay is an English-speaking western roleplay community set in the State of Monroe around the start of the twentieth century. Its official introduction describes a custom framework, player-run businesses, properties and factions built around continuing character stories. New players complete a whitelist application and follow the community’s voice setup instructions before joining. Read the current application guide and rules on the official website.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "Custom",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/ranch",
+      "websiteUrl": "https://ranchroleplay.com/",
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "economy",
+        "player businesses",
+        "factions",
+        "housing"
+      ],
+      "keywords": [
+        "state of monroe",
+        "character stories",
+        "whitelist application",
+        "frontier careers",
+        "custom framework"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/4ee6e8/681445226.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/4ee6e8",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/4ee6e8",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/ranch",
+          "purpose": "Invite checked against the public Discord API; resolves to Ranch Roleplay"
+        },
+        {
+          "url": "https://ranchroleplay.com/wiki/index.php?title=Main_Page",
+          "purpose": "Official introduction and application steps; custom framework, factions and business roleplay"
+        }
+      ],
+      "inclusionReasons": [
+        "Documented whitelist and joining process",
+        "Character and faction roleplay with a published custom-world concept"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "Custom framework is stated by the community website; no recognized framework resource was exposed by Cfx.",
+        "Website counters are client-rendered and appeared as zero in indexed HTML; they were not used as membership or activity evidence.",
+        "The Cfx snapshot had zero connected players; this is an observed count, not evidence that the server is permanently inactive."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:27:56.813Z",
+        "lastSeen": "2026-09-04T01:26:06.371Z",
+        "players": 0,
+        "capacity": 240,
+        "status": "online",
+        "observedAt": "2026-09-04T01:26:06.371Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": []
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:07.062Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Ranch Roleplay"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 17019,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/4ee6e8/681445226.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "ae5mpk",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Syn County",
+      "description": "Syn County is an English-speaking RedM community for adults, with western roleplay and a player economy. The current listing identifies public access and integrated voice, while the community’s developers describe their work on the VORP framework. Join the verified Syn County Discord for the current rules and onboarding instructions before creating a character.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/syncounty",
+      "websiteUrl": null,
+      "tags": [
+        "roleplay",
+        "western",
+        "economy",
+        "public access"
+      ],
+      "keywords": [
+        "syn county",
+        "adult community",
+        "frontier roleplay",
+        "vorp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/ae5mpk/367668062.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/ae5mpk",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/ae5mpk",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/syncounty",
+          "purpose": "Invite checked against the public Discord API; resolves to Syn County"
+        },
+        {
+          "url": "https://www.synscripts.co/",
+          "purpose": "Developer’s own site identifies its creators as the Syn County team and describes VORP-based work"
+        }
+      ],
+      "inclusionReasons": [
+        "Established community identity corroborated by its developer’s site",
+        "Clear western roleplay focus and current public-access source flag"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "Full community rules were not publicly reviewed; the verified Discord is the onboarding destination.",
+        "Syn Scripts is a developer storefront rather than the community homepage, so it is cited as evidence instead of used as websiteUrl.",
+        "The source banner did not pass the current image fetch; only the Cfx icon is retained."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:27:56.852Z",
+        "lastSeen": "2026-09-04T01:26:52.855Z",
+        "players": 239,
+        "capacity": 510,
+        "status": "online",
+        "observedAt": "2026-09-04T01:26:52.855Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:07.460Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Syn County"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 338496,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/ae5mpk/367668062.png"
+        },
+        "bannerUrl": {
+          "status": "unavailable",
+          "message": "The server image is unavailable or larger than 2 MB.",
+          "url": "https://cdn.discordapp.com/attachments/1029398658506031145/1125211577604382760/SynBannerSkinnyAnimated.gif"
+        }
+      }
+    },
+    {
+      "joinCode": "q9yo3v",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "State of Deliverance",
+      "description": "State of Deliverance is an English-speaking, adult RedM community focused on serious western character roleplay. Its current listing describes storyteller-led events, law and outlaw paths, jobs and a player economy, with an invitation for new roleplayers. The official Discord describes the same emphasis on roleplay. Read its current rules and ask about joining requirements there before connecting.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/RkfhhpAgbW",
+      "websiteUrl": null,
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "economy",
+        "events",
+        "beginner friendly",
+        "law",
+        "outlaws"
+      ],
+      "keywords": [
+        "storytelling",
+        "character development",
+        "community events",
+        "frontier",
+        "jobs"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/q9yo3v/1693712048.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/q9yo3v",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/q9yo3v",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/RkfhhpAgbW",
+          "purpose": "Invite checked against the public Discord API; resolves to State of Deliverance"
+        },
+        {
+          "url": "https://forum.cfx.re/t/paid-redm-vorp-deliverance-ranch-co-op-player-owned-ranching-syn-ranch-replacement/5422755",
+          "purpose": "Developer’s August 2026 post identifies State of Deliverance as the live community using its ranching work"
+        }
+      ],
+      "inclusionReasons": [
+        "Current community description emphasizes character roleplay and live events",
+        "Roleplay focus corroborated by matching public Discord description"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "Access is not conclusively declared by the current listing; leave Not confirmed.",
+        "Event frequency, recruitment openings and no-pay-to-win claims are self-reported, not independently audited.",
+        "Source banner uses an unsupported CDN, so no banner is proposed."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:27:56.895Z",
+        "lastSeen": "2026-09-04T01:25:38.479Z",
+        "players": 190,
+        "capacity": 250,
+        "status": "online",
+        "observedAt": "2026-09-04T01:25:38.479Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:07.921Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "State of Deliverance"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 16502,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/q9yo3v/1693712048.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "lyy7rv",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Bright Falls RP",
+      "description": "Bright Falls RP is an English-speaking RedM community for adult western roleplay. The community’s own site describes character stories alongside housing, ranching, trading and an economy with player businesses. Its current RedM listing matches the same community Discord. Review the rules and joining requirements there; the linked website also contains a store for optional in-game items.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/brightfalls",
+      "websiteUrl": "https://www.dawmecorp.com/",
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "ranching",
+        "economy",
+        "player businesses",
+        "housing"
+      ],
+      "keywords": [
+        "bright falls",
+        "character stories",
+        "trading",
+        "frontier careers"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/lyy7rv/1189560029.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/lyy7rv",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/lyy7rv",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/brightfalls",
+          "purpose": "Invite checked against the public Discord API; resolves to Bright Falls"
+        },
+        {
+          "url": "https://www.dawmecorp.com/",
+          "purpose": "Community’s own introduction describes roleplay, housing, ranch life and economy; includes purchase terms"
+        }
+      ],
+      "inclusionReasons": [
+        "Specific published roleplay setting and community systems",
+        "Official site, live RedM record and Discord identity agree"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "Full rules and the current access gate were not publicly verified; access remains Not confirmed.",
+        "The official site sells in-game assets; this is not a claim that joining or all features are free.",
+        "An unsupported source banner is omitted; the Cfx logo is retained."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:28:35.840Z",
+        "lastSeen": "2026-09-04T01:26:28.980Z",
+        "players": 163,
+        "capacity": 200,
+        "status": "online",
+        "observedAt": "2026-09-04T01:26:28.980Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:08.213Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Bright Falls"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 22087,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/lyy7rv/1189560029.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "jdvk44",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Ebonridge",
+      "description": "Ebonridge is an English-speaking RedM community for adults that combines frontier life with supernatural character stories. Cfx’s July 2026 community feature describes a world of humans and hidden supernatural identities, supported by player events and continuing stories. Its current listing confirms a serious supernatural roleplay focus. Join the verified community Discord to review the lore, rules and current application requirements.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/ebonridge",
+      "websiteUrl": null,
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "supernatural",
+        "fantasy rp",
+        "western",
+        "events"
+      ],
+      "keywords": [
+        "vampires",
+        "werewolves",
+        "witches",
+        "character stories",
+        "ebonridge"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/jdvk44/699525708.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/jdvk44",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/jdvk44",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/ebonridge",
+          "purpose": "Invite checked against the public Discord API; resolves to Ebonridge"
+        },
+        {
+          "url": "https://forum.cfx.re/t/community-spotlight-july-2026/5417027/1",
+          "purpose": "Official Cfx feature discusses Ebonridge’s supernatural setting and player-led events"
+        }
+      ],
+      "inclusionReasons": [
+        "Distinct supernatural roleplay option",
+        "Community’s storytelling and events discussed in an official Cfx feature"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "Current access requirements need confirmation in Discord.",
+        "The community has designated conflict activities; the recommendation is for its roleplay setting, not a promise of a combat-free server.",
+        "The advertised banner failed retrieval and is omitted."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:28:35.882Z",
+        "lastSeen": "2026-09-04T01:24:17.985Z",
+        "players": 104,
+        "capacity": 155,
+        "status": "online",
+        "observedAt": "2026-09-04T01:24:17.985Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:08.477Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Ebonridge"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 17553,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/jdvk44/699525708.png"
+        },
+        "bannerUrl": {
+          "status": "unavailable",
+          "message": "The server image is unavailable or larger than 2 MB.",
+          "url": "https://i.postimg.cc/nh4PPbXv/banner.png"
+        }
+      }
+    },
+    {
+      "joinCode": "zg38zd",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "The Frontier Roleplay",
+      "description": "The Frontier Roleplay is an English-speaking, allowlisted RedM community for adults set in 1913. Its public listing describes western character roleplay across frontier communities, and the matching Discord identifies it as a serious roleplay server. Review the community’s current rules, character expectations and allowlist process in Discord before joining.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/thefrontier",
+      "websiteUrl": null,
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "allowlisted"
+      ],
+      "keywords": [
+        "1913",
+        "frontier",
+        "character roleplay",
+        "adult community"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/zg38zd/-932443479.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/zg38zd",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/zg38zd",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/thefrontier",
+          "purpose": "Invite checked against the public Discord API; resolves to The Frontier Roleplay"
+        }
+      ],
+      "inclusionReasons": [
+        "Explicit period setting and serious roleplay focus",
+        "Current allowlist flag and community description agree"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "Detailed rules and application steps are available through Discord and were not publicly inspected.",
+        "This is the 1913 community attached to code zg38zd, not a similarly named 1874 text-roleplay project.",
+        "The external banner host is unsupported and omitted."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:28:35.943Z",
+        "lastSeen": "2026-09-04T01:25:57.975Z",
+        "players": 43,
+        "capacity": 150,
+        "status": "online",
+        "observedAt": "2026-09-04T01:25:57.975Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:09.495Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "The Frontier Roleplay"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 6685,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/zg38zd/-932443479.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "7agv9r",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "True Grit RP",
+      "description": "True Grit RP is an English-speaking RedM community for adults, built around western character stories and an economy. The team’s official introduction describes an Ozark County setting, paths for civilian and outlaw characters, and help for new roleplayers. The current listing also advertises community events. Check the verified Discord for today’s rules and joining instructions.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/truegrit",
+      "websiteUrl": null,
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "economy",
+        "beginner friendly",
+        "events"
+      ],
+      "keywords": [
+        "ozark county",
+        "civilian stories",
+        "outlaw stories",
+        "true grit"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/7agv9r/286281120.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/7agv9r",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/7agv9r",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/truegrit",
+          "purpose": "Invite checked against the public Discord API; resolves to True Grit RP"
+        },
+        {
+          "url": "https://forum.cfx.re/t/true-grit-rp-serious-rp-18-realistic-economy-active-staff-in-house-scripts/5294989",
+          "purpose": "Community-authored introduction explains the setting, roleplay expectations and beginner support"
+        }
+      ],
+      "inclusionReasons": [
+        "Documented roleplay expectations and support for beginners",
+        "Character-focused civilian and criminal options"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "An older announcement discussed future whitelisting; the current Cfx flag says public. Recheck joining instructions before publication.",
+        "The 1895 setting is from the older introduction and is not hard-coded into the current description.",
+        "The source banner is on an unsupported host and is omitted."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:28:35.984Z",
+        "lastSeen": "2026-09-04T01:27:45.975Z",
+        "players": 114,
+        "capacity": 120,
+        "status": "online",
+        "observedAt": "2026-09-04T01:27:45.975Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:09.780Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "True Grit RP"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 15472,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/7agv9r/286281120.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "6o5kgd",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Medieval RP",
+      "description": "Medieval RP uses RedM for a medieval setting where players build characters around social standing, ambition and consequences. The community’s published rules describe serious roleplay for adults, with voice interaction and an emphasis on story before conflict. This offers a different setting from the usual western frontier. Read the current rules and joining instructions through the official community links.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/YhgEt4McyK",
+      "websiteUrl": "https://medievalonline.tebex.io/",
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "medieval",
+        "fantasy rp",
+        "voice rp"
+      ],
+      "keywords": [
+        "medieval realm",
+        "character progression",
+        "royalty",
+        "peasants",
+        "consequences"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/6o5kgd/1704598229.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/6o5kgd",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/6o5kgd",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/YhgEt4McyK",
+          "purpose": "Invite checked against the public Discord API; resolves to Medieval RP"
+        },
+        {
+          "url": "https://medievalonline.tebex.io/",
+          "purpose": "Official community storefront and introduction"
+        },
+        {
+          "url": "https://medievalonline.tebex.io/rules",
+          "purpose": "Published adult roleplay rules, voice expectations and conflict standards"
+        }
+      ],
+      "inclusionReasons": [
+        "Published roleplay rules and a distinct medieval setting",
+        "Adds a different style of character roleplay to the western shortlist"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "The public rules do not establish the current access gate; leave Not confirmed.",
+        "Official website is also a storefront. No price or free-access claim is made.",
+        "The advertised banner failed retrieval and is omitted."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:28:36.133Z",
+        "lastSeen": "2026-09-04T01:24:18.501Z",
+        "players": 28,
+        "capacity": 64,
+        "status": "online",
+        "observedAt": "2026-09-04T01:24:18.501Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:10.003Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Medieval RP"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 19594,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/6o5kgd/1704598229.png"
+        },
+        "bannerUrl": {
+          "status": "unavailable",
+          "message": "The server image is unavailable or larger than 2 MB.",
+          "url": "https://i.postimg.cc/SsH0MP4T/serverbanner.png"
+        }
+      }
+    },
+    {
+      "joinCode": "a4z8545",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "RosalitaRP",
+      "description": "RosalitaRP is an English-speaking western roleplay community for adults set in 1899. Its public rules require whitelisting and focus on believable character choices, consent boundaries and an economy shaped by players. The community also describes permadeath mechanics, so prospective players should read the full rules before applying. Its current RedM record exposes the RSG framework.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "RSG",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/X723WWVhrH",
+      "websiteUrl": "https://rosalitarp.com/",
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "economy",
+        "allowlisted"
+      ],
+      "keywords": [
+        "1899",
+        "character stories",
+        "permadeath",
+        "player economy",
+        "rsg"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/a4z8545/-740444724.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/a4z8545",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/a4z8545",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/X723WWVhrH",
+          "purpose": "Invite checked against the public Discord API; resolves to RosalitaRP | RedM"
+        },
+        {
+          "url": "https://rosalitarp.com/rules",
+          "purpose": "Current official rules explicitly address English language, adult access, whitelist, setting and character consequences"
+        }
+      ],
+      "inclusionReasons": [
+        "Clear published rules and explicit English-language requirement",
+        "Distinct focus on character consequences and immersive roleplay"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "The precise consequences and consent requirements should be read in the full rules, not inferred from a tag.",
+        "The Imgur banner returned a region-unavailable placeholder despite HTTP 200; it is deliberately omitted."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:28:36.185Z",
+        "lastSeen": "2026-09-04T01:27:29.005Z",
+        "players": 72,
+        "capacity": 128,
+        "status": "online",
+        "observedAt": "2026-09-04T01:27:29.005Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.rsg-core",
+            "value": "RSG",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:10.296Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "RosalitaRP | RedM"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 18436,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/a4z8545/-740444724.png"
+        },
+        "bannerUrl": {
+          "status": "rejected_placeholder",
+          "type": "image/png",
+          "bytes": 34641,
+          "url": "https://i.imgur.com/PtTW0sn.jpeg",
+          "reason": "Visually inspected: region-unavailable placeholder, not community artwork",
+          "sha256": "faa24ec881e6040655c187a681d6dc496eb8aa41e1bd0652a180b3a40b457187"
+        }
+      }
+    },
+    {
+      "joinCode": "j33b84",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Gilded Roleplay",
+      "description": "Gilded Roleplay is an English-speaking RedM community for adults with a serious western setting. Its current listing describes a 1904 world with criminal story opportunities, while the official website provides rules and a detailed getting-started guide. The guide covers Discord roles, a whitelist application and TeamSpeak with SaltyChat. Follow the current community instructions before joining.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/gildedrp",
+      "websiteUrl": "https://www.gildedroleplay.com/",
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "crime",
+        "economy"
+      ],
+      "keywords": [
+        "1904",
+        "character stories",
+        "gang territory",
+        "gilded",
+        "saltychat"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/j33b84/-1847219872.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/j33b84",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/j33b84",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/gildedrp",
+          "purpose": "Invite checked against the public Discord API; resolves to Gilded RP"
+        },
+        {
+          "url": "https://www.gildedroleplay.com/getting-started",
+          "purpose": "Official onboarding describes Discord roles, application and voice setup"
+        },
+        {
+          "url": "https://www.gildedroleplay.com/rules",
+          "purpose": "Official rules destination"
+        }
+      ],
+      "inclusionReasons": [
+        "Detailed official onboarding and rules links",
+        "Established roleplay identity with current matching Cfx and Discord records"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "The getting-started guide says “when the whitelist is on” and the current Cfx record has no reliable access flag. Leave Not confirmed.",
+        "The Imgur banner returned a region-unavailable placeholder and is omitted."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:28:36.231Z",
+        "lastSeen": "2026-09-04T01:28:03.076Z",
+        "players": 58,
+        "capacity": 128,
+        "status": "online",
+        "observedAt": "2026-09-04T01:28:03.076Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:10.764Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Gilded RP"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 20900,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/j33b84/-1847219872.png"
+        },
+        "bannerUrl": {
+          "status": "rejected_placeholder",
+          "type": "image/png",
+          "bytes": 34641,
+          "url": "https://i.imgur.com/OAgxrzI.png",
+          "reason": "Visually inspected: region-unavailable placeholder, not community artwork",
+          "sha256": "faa24ec881e6040655c187a681d6dc496eb8aa41e1bd0652a180b3a40b457187"
+        }
+      }
+    },
+    {
+      "joinCode": "jy9o9m",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Dust to Dreams RP",
+      "description": "Dust to Dreams RP is an English-speaking RedM community for adults focused on serious western roleplay. Its current community listing describes civilian businesses and jobs alongside law and medical characters, and explicitly directs new players to apply through Discord. The verified Discord identifies the same western roleplay community. Read its current rules and application guidance before joining.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/d2drp",
+      "websiteUrl": null,
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "economy",
+        "player businesses",
+        "law",
+        "medical rp"
+      ],
+      "keywords": [
+        "dust to dreams",
+        "civilian jobs",
+        "character stories",
+        "whitelist"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/jy9o9m/2087569580.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/jy9o9m",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/jy9o9m",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/d2drp",
+          "purpose": "Invite checked against the public Discord API; resolves to ~Dust to Dreams RP~"
+        }
+      ],
+      "inclusionReasons": [
+        "Current community description provides clear roleplay paths and an application destination",
+        "Current allowlist flag agrees with the published joining instruction"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "No separately accessible official rules website was established; use the verified Discord.",
+        "Do not confuse this community with the differently named Dust & Dreams RP V2 forum project.",
+        "The source Discord attachment banner was expired or unavailable and is omitted."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:28:36.268Z",
+        "lastSeen": "2026-09-04T01:27:35.960Z",
+        "players": 52,
+        "capacity": 128,
+        "status": "online",
+        "observedAt": "2026-09-04T01:27:35.960Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:11.081Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "~Dust to Dreams RP~"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 14211,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/jy9o9m/2087569580.png"
+        },
+        "bannerUrl": {
+          "status": "unavailable",
+          "message": "The server image is unavailable or larger than 2 MB.",
+          "url": "https://cdn.discordapp.com/attachments/1403897218838302791/1440752525237162045/serverbanner.png?ex=691f4cd9&is=691dfb59&hm=ee21fbfdab32d73155d42644fb76b8f7ed5fa8300a7ecca5aa36142ad5ab5a93&"
+        }
+      }
+    },
+    {
+      "joinCode": "pgazkdm",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Still Water RP",
+      "description": "Still Water RP is an English-speaking RedM community for adults that describes itself as community-led and focused on continuing stories. Its current listing includes law, medicine, native roleplay and an economy with frontier occupations. The Cfx listing links to the verified Still Water County Discord. Review the community’s rules and current joining requirements there before creating a character.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/stillwater",
+      "websiteUrl": null,
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "economy",
+        "law",
+        "medical rp",
+        "ranching"
+      ],
+      "keywords": [
+        "still water county",
+        "character stories",
+        "frontier occupations",
+        "community led"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/pgazkdm/216964704.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/pgazkdm",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/pgazkdm",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/stillwater",
+          "purpose": "Invite checked against the public Discord API; resolves to Still Water County"
+        }
+      ],
+      "inclusionReasons": [
+        "Clear character and community roleplay focus",
+        "Specific civilian and professional roleplay paths rather than a freeroam listing"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "Detailed rules, cultural-roleplay guidance and the current access gate were not publicly inspected; access remains Not confirmed.",
+        "Still Water County is the matching Discord name; this is not the Stillwater setting used by WantedRP."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:28:36.307Z",
+        "lastSeen": "2026-09-04T01:25:56.505Z",
+        "players": 68,
+        "capacity": 100,
+        "status": "online",
+        "observedAt": "2026-09-04T01:25:56.505Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:11.384Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Still Water County"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 25991,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/pgazkdm/216964704.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "k5vp5a",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Souvenir Trails RP",
+      "description": "Souvenir Trails RP is an English-speaking RedM community whose official introduction emphasizes beginner support and community-driven western stories. It describes player homes, camps, businesses and medical and law roles, with partial controller support and integrated voice. A later community post announced the server opening. Join its verified Discord for the current allowlist steps and rules.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/souvenir-trails",
+      "websiteUrl": null,
+      "tags": [
+        "roleplay",
+        "western",
+        "beginner friendly",
+        "controller friendly",
+        "player businesses",
+        "housing",
+        "law"
+      ],
+      "keywords": [
+        "player camps",
+        "medical roleplay",
+        "character stories",
+        "souvenir trails"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/k5vp5a/-793529082.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/k5vp5a",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/k5vp5a",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/souvenir-trails",
+          "purpose": "Invite checked against the public Discord API; resolves to Souvenir Trails ™"
+        },
+        {
+          "url": "https://forum.cfx.re/t/souvenir-trails-rp-closing-in-on-final-launch/5302461",
+          "purpose": "Community’s official introduction, beginner/controller support details and December 2025 opening update"
+        }
+      ],
+      "inclusionReasons": [
+        "Explicit support for new roleplayers",
+        "Community-authored development and opening history with specific RP activities"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "Controller compatibility was described as partial; this is not a claim that every interaction works on a controller.",
+        "The forum thread title still references launch preparations, but its later update announces opening and the current Cfx record is active.",
+        "Current access flag is allowlisted; obtain the current process from Discord."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:28:36.350Z",
+        "lastSeen": "2026-09-04T01:27:41.107Z",
+        "players": 23,
+        "capacity": 128,
+        "status": "online",
+        "observedAt": "2026-09-04T01:27:41.107Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:11.640Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Souvenir Trails ™"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 6311,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/k5vp5a/-793529082.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "boya5d",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Everglade County RP",
+      "description": "Everglade County RP is an English-speaking RedM community for adults set in an 1899 bayou frontier. Its official site provides rules, laws, public records and an onboarding guide, with character paths in law, medicine, justice, railways, business and ranching. The guide sends players through Discord whitelist steps and links the same server code. Read the current rules before joining.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/evergladecountyrp",
+      "websiteUrl": "https://evergladecountyrp.com/",
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "law",
+        "medical rp",
+        "economy",
+        "player businesses"
+      ],
+      "keywords": [
+        "1899",
+        "bayou",
+        "railways",
+        "judicial roleplay",
+        "ranching"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/boya5d/-1367781202.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/boya5d",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/boya5d",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/evergladecountyrp",
+          "purpose": "Invite checked against the public Discord API; resolves to Everglade County RP"
+        },
+        {
+          "url": "https://evergladecountyrp.com/",
+          "purpose": "Official community identity and matching Cfx connect link"
+        },
+        {
+          "url": "https://evergladecountyrp.com/getting-started.php",
+          "purpose": "Official whitelist/onboarding steps and character paths"
+        },
+        {
+          "url": "https://evergladecountyrp.com/rules.php",
+          "purpose": "Published community rules"
+        }
+      ],
+      "inclusionReasons": [
+        "Clear official onboarding, rules and matching canonical join link",
+        "Published support for multiple professional and civilian roleplay paths"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "This RedM Everglade community is distinct from similarly named FiveM communities."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:29:39.450Z",
+        "lastSeen": "2026-09-04T01:28:19.199Z",
+        "players": 28,
+        "capacity": 100,
+        "status": "online",
+        "observedAt": "2026-09-04T01:28:19.199Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:11.974Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Everglade County RP"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 18518,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/boya5d/-1367781202.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "bdx8ak8",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Lemoyne: 1908",
+      "description": "Lemoyne: 1908 is an English-speaking RedM community centered on heavy text roleplay and character interaction during the early twentieth century. Its official site and current listing describe a setting shaped by industrial change. This is a text-focused alternative to the usual voice-led frontier server. Join the verified Discord and read the official forums for current rules and joining requirements.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/lemoyneroleplay",
+      "websiteUrl": "https://lemoyneroleplay.com/",
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "text rp",
+        "historical",
+        "western"
+      ],
+      "keywords": [
+        "1908",
+        "industrialization",
+        "character development",
+        "lemoyne"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/bdx8ak8/-799599018.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/bdx8ak8",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/bdx8ak8",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/lemoyneroleplay",
+          "purpose": "Invite checked against the public Discord API; resolves to LEMOYNE 1908: Roleplay"
+        },
+        {
+          "url": "https://lemoyneroleplay.com/",
+          "purpose": "Official community introduction and links to its Discord and forums"
+        },
+        {
+          "url": "https://forums.lemoyneroleplay.com/",
+          "purpose": "Official community forums linked from the website"
+        }
+      ],
+      "inclusionReasons": [
+        "Distinct text-focused roleplay option",
+        "Published setting emphasizes character interaction and historical change"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "The current name and description explicitly say no whitelist, while the upstream allowlist flag is true. Access must remain Not confirmed until the community resolves the conflict."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:36:59.105Z",
+        "lastSeen": "2026-09-04T01:36:25.464Z",
+        "players": 17,
+        "capacity": 48,
+        "status": "online",
+        "observedAt": "2026-09-04T01:36:25.464Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:12.247Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "LEMOYNE 1908: Roleplay"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 20528,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/bdx8ak8/-799599018.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "xp6pze",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Western Skies Roleplay",
+      "description": "Western Skies Roleplay is an English-speaking RedM community for adults set in 1901. Its detailed player handbook explains a character-driven economy, player businesses, frontier work and law and medical roles. The guide requires a microphone and tells newcomers to unlock access through the community Discord before joining. Read the current handbook and full rules to prepare a character.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/westernrp",
+      "websiteUrl": "https://western-rp.com/",
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "economy",
+        "player businesses",
+        "ranching",
+        "law"
+      ],
+      "keywords": [
+        "1901",
+        "frontier work",
+        "player handbook",
+        "medical roleplay",
+        "character stories"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/xp6pze/314396262.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/xp6pze",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/xp6pze",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/westernrp",
+          "purpose": "Invite checked against the public Discord API; resolves to Western Skies Roleplay"
+        },
+        {
+          "url": "https://western-rp.com/starterguide",
+          "purpose": "Official handbook explains the setting, adult/microphone requirements and Discord access steps"
+        }
+      ],
+      "inclusionReasons": [
+        "Extensive official onboarding for new players",
+        "Clear roleplay rules and detailed player-economy guidance"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "The handbook calls the gate whitelisting but describes a Discord reaction/role step rather than a reviewed written application.",
+        "Handbook prices and live shop totals were not copied into the description because they can change."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:29:39.556Z",
+        "lastSeen": "2026-09-04T01:28:24.476Z",
+        "players": 49,
+        "capacity": 148,
+        "status": "online",
+        "observedAt": "2026-09-04T01:28:24.476Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:12.506Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Western Skies Roleplay"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 20670,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/xp6pze/314396262.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "xlz43kg",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Highwater Roleplay 2.0",
+      "description": "Highwater Roleplay 2.0 is an English-speaking RedM community for adults with a focus on character-led western stories. The community’s own introduction describes serious roleplay, while the current listing highlights economy and crime as parts of the setting. Its current Cfx record exposes RSG. Use the verified Highwater Discord for the latest rules and joining instructions.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "RSG",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/highwaterrp",
+      "websiteUrl": null,
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "economy",
+        "crime"
+      ],
+      "keywords": [
+        "highwater",
+        "character stories",
+        "rsg",
+        "adult community"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/xlz43kg/2050856186.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/xlz43kg",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/xlz43kg",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/highwaterrp",
+          "purpose": "Invite checked against the public Discord API; resolves to Highwater Roleplay"
+        },
+        {
+          "url": "https://ko-fi.com/highwaterrp",
+          "purpose": "Community’s own support-page introduction describes adult, character-driven RedM roleplay"
+        }
+      ],
+      "inclusionReasons": [
+        "Consistent character-roleplay identity across community introduction and current source",
+        "Adds another RSG-based community to the selection"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "Full rules and the current access gate were not publicly verified.",
+        "The Ko-fi page is a support destination, so it is cited as evidence rather than promoted as the main website."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:31:06.830Z",
+        "lastSeen": "2026-09-04T01:28:55.575Z",
+        "players": 37,
+        "capacity": 128,
+        "status": "online",
+        "observedAt": "2026-09-04T01:28:55.575Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.rsg-core",
+            "value": "RSG",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:12.945Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Highwater Roleplay"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 14294,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/xlz43kg/2050856186.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "e66azka",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Sanctuary & Sin",
+      "description": "Sanctuary & Sin is an English-speaking RedM community set in 1899. Its public Discord description emphasizes character stories, frontier survival and consequences, with law and crime shaping player conflict. The current Cfx listing describes serious roleplay and confirms the same community invite. As a recently opened community, players should read the current rules and joining instructions in Discord before taking part.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/tVUdnQYCRJ",
+      "websiteUrl": null,
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "law",
+        "crime",
+        "economy"
+      ],
+      "keywords": [
+        "1899",
+        "character development",
+        "frontier survival",
+        "player consequences"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/e66azka/-1969232191.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/e66azka",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/e66azka",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/tVUdnQYCRJ",
+          "purpose": "Invite checked against the public Discord API; resolves to Sanctuary and Sin: 1899"
+        }
+      ],
+      "inclusionReasons": [
+        "Explicit character-story and consequence focus in the matching official Discord description",
+        "A newer community option with a current, valid RedM record"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "The current listing says it opened on 8 August 2026; long-term operations and moderation quality are not established by this research.",
+        "A whitelist tag appears, but there is no conclusive access flag or publicly inspected joining guide; leave Not confirmed.",
+        "No external public rules website was established."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:31:06.892Z",
+        "lastSeen": "2026-09-04T01:30:39.102Z",
+        "players": 26,
+        "capacity": 64,
+        "status": "online",
+        "observedAt": "2026-09-04T01:30:39.102Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:13.230Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Sanctuary and Sin: 1899",
+          "checkedAt": "2026-09-04T01:37:12.623Z"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 20131,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/e66azka/-1969232191.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "bpjzpp",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "Westhaven: The Hush RP",
+      "description": "Westhaven: The Hush RP is an English-speaking, allowlisted RedM community for players aged 21 and over. Its official lore describes a supernatural frontier where hidden identities, magic and the aftermath of the rising dead shape character stories. Published worldbuilding covers human and supernatural paths, law and medicine. Read the current lore and community rules before applying through Discord.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/dspvFue8Sr",
+      "websiteUrl": "https://www.westhavenrp.com/",
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "supernatural",
+        "fantasy rp",
+        "western",
+        "allowlisted"
+      ],
+      "keywords": [
+        "the hush",
+        "magic",
+        "character stories",
+        "vampires",
+        "werewolves",
+        "1898"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/bpjzpp/-1539167677.png",
+      "bannerUrl": "https://i.postimg.cc/jqy9zbdg/westhavenbanner.png",
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/bpjzpp",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/bpjzpp",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/dspvFue8Sr",
+          "purpose": "Invite checked against the public Discord API; resolves to Westhaven: The Hush RP"
+        },
+        {
+          "url": "https://www.westhavenrp.com/",
+          "purpose": "Official description of its low-fantasy supernatural roleplay setting"
+        },
+        {
+          "url": "https://www.westhavenrp.com/history",
+          "purpose": "Published world history places the setting in 1898"
+        },
+        {
+          "url": "https://forum.cfx.re/t/community-spotlight-december-2025/5373133",
+          "purpose": "Official Cfx feature discusses an artist’s work for Westhaven"
+        }
+      ],
+      "inclusionReasons": [
+        "Extensive published worldbuilding and distinct supernatural character paths",
+        "Community artwork has been discussed in an official Cfx feature"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "The age floor is 21, higher than most shortlisted adult communities.",
+        "Full operational rules and the current application process must be checked in Discord.",
+        "The static banner was fetched and visually confirmed as Westhaven branding."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:31:06.934Z",
+        "lastSeen": "2026-09-04T01:29:20.996Z",
+        "players": 58,
+        "capacity": 128,
+        "status": "online",
+        "observedAt": "2026-09-04T01:29:20.996Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:13.395Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Westhaven: The Hush RP",
+          "checkedAt": "2026-09-04T01:37:12.915Z"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 27077,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/bpjzpp/-1539167677.png"
+        },
+        "bannerUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 162444,
+          "url": "https://i.postimg.cc/jqy9zbdg/westhavenbanner.png",
+          "visualReview": "Westhaven: The Hush branding, static fantasy banner; no placeholder"
+        }
+      }
+    },
+    {
+      "joinCode": "m8rzj9",
+      "platform": "redm",
+      "status": "publish",
+      "reviewStatus": "reviewed_public_sources",
+      "name": "State of Fremont 1902",
+      "description": "State of Fremont 1902 is an English-speaking RedM community for adults that welcomes new roleplayers. Its verified Discord describes a setting shaped by character decisions, law and ongoing stories. The current listing includes civilian businesses, housing and ranching alongside courts and outlaw roles. Review its current rules and joining requirements in the official Discord before creating a character.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/stateoffremont",
+      "websiteUrl": null,
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "western",
+        "beginner friendly",
+        "economy",
+        "law",
+        "player businesses"
+      ],
+      "keywords": [
+        "1902",
+        "character stories",
+        "courts",
+        "ranching",
+        "fremont"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/m8rzj9/-1756011187.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://servers.redm.net/servers/detail/m8rzj9",
+          "purpose": "Official RedM listing and canonical Cfx join code"
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/m8rzj9",
+          "purpose": "Current rdr3 identity, English locale, framework resources and timestamped player observation"
+        },
+        {
+          "url": "https://discord.gg/stateoffremont",
+          "purpose": "Invite checked against the public Discord API; resolves to State of Fremont"
+        }
+      ],
+      "inclusionReasons": [
+        "Explicit beginner support with a defined historical roleplay setting",
+        "Matching current Discord description emphasizes character decisions and stories"
+      ],
+      "conflicts": [
+        "English is supported by the self-reported Cfx locale and English community material. Actual server location is not established by the locale; region stays Not confirmed.",
+        "No external public rules website or conclusive access gate was established; leave Not confirmed.",
+        "The Imgur banner returned a region-unavailable placeholder and is omitted."
+      ],
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:31:06.980Z",
+        "lastSeen": "2026-09-04T01:30:05.739Z",
+        "players": 22,
+        "capacity": 128,
+        "status": "online",
+        "observedAt": "2026-09-04T01:30:05.739Z",
+        "platform": "rdr3",
+        "locale": "en-US",
+        "frameworkEvidence": [
+          {
+            "field": "framework",
+            "source": "resources.vorp_core",
+            "value": "VORP",
+            "confidence": "medium"
+          }
+        ]
+      },
+      "mediaAndInviteChecks": {
+        "checkedAt": "2026-09-04T01:31:13.719Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "State of Fremont",
+          "checkedAt": "2026-09-04T01:37:13.149Z"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 7863,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/m8rzj9/-1756011187.png"
+        },
+        "bannerUrl": {
+          "status": "rejected_placeholder",
+          "type": "image/png",
+          "bytes": 34641,
+          "url": "https://i.imgur.com/xJvjsDb.png",
+          "reason": "Visually inspected: region-unavailable placeholder, not community artwork",
+          "sha256": "faa24ec881e6040655c187a681d6dc496eb8aa41e1bd0652a180b3a40b457187"
+        }
+      }
+    }
+  ],
+  "reserves": [
+    {
+      "joinCode": "bpa6db",
+      "platform": "redm",
+      "status": "hold",
+      "name": "WantedRP: The Last Ride",
+      "reason": "Strong official website and valid community invite, but two current Cfx checks marked the record as fallback/offline. Its raw count is not reliable enough to call live. Reserve until a fresh non-fallback observation; do not substitute an aggregator count.",
+      "sourceUrl": "https://frontend.cfx-services.net/api/servers/single/bpa6db",
+      "listingUrl": "https://servers.redm.net/servers/detail/bpa6db",
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:36:59.042Z",
+        "lastSeen": "2026-09-04T01:36:22.854Z",
+        "players": null,
+        "capacity": 300,
+        "status": "offline"
+      },
+      "discordUrl": "https://discord.gg/wantedroleplaytlr",
+      "websiteUrl": "https://wantedroleplay.com/",
+      "mediaAndInviteChecks": {
+        "joinCode": "bpa6db",
+        "checkedAt": "2026-09-04T01:31:09.221Z",
+        "discord": {
+          "status": "valid",
+          "guildName": "Wanted RP :TLR"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 16216,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/bpa6db/1881853052.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "vxe5ve",
+      "platform": "redm",
+      "status": "hold",
+      "name": "WildRP Test Realm",
+      "reason": "The current canonical Cfx record explicitly identifies a test realm. Older discovery pages called it a main realm; do not publish this code as the public community.",
+      "sourceUrl": "https://frontend.cfx-services.net/api/servers/single/vxe5ve",
+      "listingUrl": "https://servers.redm.net/servers/detail/vxe5ve",
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:28:36.006Z",
+        "lastSeen": "2026-09-04T01:24:15.595Z",
+        "players": null,
+        "capacity": 192,
+        "status": "offline"
+      },
+      "discordUrl": "https://discord.gg/wildrp",
+      "websiteUrl": null,
+      "mediaAndInviteChecks": null
+    },
+    {
+      "joinCode": "k7zj3a",
+      "platform": "redm",
+      "status": "hold",
+      "name": "Moonlight Valley",
+      "reason": "Current English RedM roleplay record, but no matching current official Discord or onboarding destination was established.",
+      "sourceUrl": "https://frontend.cfx-services.net/api/servers/single/k7zj3a",
+      "listingUrl": "https://servers.redm.net/servers/detail/k7zj3a",
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:28:36.404Z",
+        "lastSeen": "2026-09-04T01:27:56.515Z",
+        "players": 3,
+        "capacity": 80,
+        "status": "online"
+      },
+      "discordUrl": null,
+      "websiteUrl": null,
+      "mediaAndInviteChecks": {
+        "joinCode": "k7zj3a",
+        "checkedAt": "2026-09-04T01:31:11.918Z",
+        "discord": {
+          "status": "missing"
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 21596,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/k7zj3a/-8464355.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    },
+    {
+      "joinCode": "47rla5",
+      "platform": "redm",
+      "status": "hold",
+      "name": "Huntsman State",
+      "reason": "Good public roleplay website with matching Cfx code, but the official Discord invite returned invalid. Reserve until a working invite is supplied or confirmed.",
+      "sourceUrl": "https://frontend.cfx-services.net/api/servers/single/47rla5",
+      "listingUrl": "https://servers.redm.net/servers/detail/47rla5",
+      "sourceObservation": {
+        "fetchedAt": "2026-09-04T01:30:42.136Z",
+        "lastSeen": "2026-09-04T01:27:26.471Z",
+        "players": 0,
+        "capacity": 48,
+        "status": "online"
+      },
+      "discordUrl": "https://discord.gg/huntsman-state",
+      "websiteUrl": "https://www.huntsmanstate.com/",
+      "mediaAndInviteChecks": {
+        "joinCode": "47rla5",
+        "checkedAt": "2026-09-04T01:31:12.765Z",
+        "discord": {
+          "status": "invalid",
+          "guildName": null
+        },
+        "logoUrl": {
+          "status": "valid",
+          "type": "image/png",
+          "bytes": 18385,
+          "url": "https://frontend.cfx-services.net/api/servers/icon/47rla5/1584590509.png"
+        },
+        "bannerUrl": {
+          "status": "missing"
+        }
+      }
+    }
+  ],
+  "additionalExcludedDiscovery": [
+    {
+      "name": "Last Frontier",
+      "joinCode": "jj3m64",
+      "reason": "Old public code returned 404."
+    },
+    {
+      "name": "Outlaws / Ironhand",
+      "joinCode": "d4qjp3",
+      "reason": "Official-site-linked code returned 404."
+    },
+    {
+      "name": "Dakota River Bend",
+      "joinCode": "9eem6y",
+      "reason": "Old code returned 404."
+    },
+    {
+      "name": "New Dakota",
+      "joinCode": "969koe",
+      "reason": "Old code returned 404."
+    },
+    {
+      "name": "Providence",
+      "joinCode": "z8a459",
+      "reason": "Old code returned 404."
+    },
+    {
+      "name": "Northstar / Goldrush",
+      "reason": "Public community material found but no current canonical Cfx code corroborated; not guessed."
+    },
+    {
+      "name": "Broken Branch",
+      "reason": "Recent launch announcement without a confirmed current canonical code; not added to fill the target."
+    }
+  ]
+}

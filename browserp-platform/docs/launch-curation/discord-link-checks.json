@@ -1,0 +1,77 @@
+{
+  "https://discord.gg/igniterp": {
+    "status": "valid",
+    "guildName": "Ignite Roleplay",
+    "checkedAt": "2026-09-04T01:32:52.935Z"
+  },
+  "https://discord.gg/liquidrp": {
+    "status": "valid",
+    "guildName": "LiquidRP",
+    "checkedAt": "2026-09-04T01:32:54.306Z"
+  },
+  "https://discord.gg/circuit": {
+    "status": "valid",
+    "guildName": "Circuit RP",
+    "checkedAt": "2026-09-04T01:32:55.675Z"
+  },
+  "https://discord.com/invite/cmg": {
+    "status": "valid",
+    "guildName": "CMG",
+    "checkedAt": "2026-09-04T01:32:56.982Z"
+  },
+  "https://discord.gg/SWXSKma58e": {
+    "status": "valid",
+    "guildName": "Royalty Roleplay",
+    "checkedAt": "2026-09-04T01:32:58.451Z"
+  },
+  "https://discord.gg/peak-rp": {
+    "status": "invalid",
+    "guildName": null,
+    "checkedAt": "2026-09-04T01:32:59.784Z"
+  },
+  "https://discord.gg/bigcityrp": {
+    "status": "invalid",
+    "guildName": null,
+    "checkedAt": "2026-09-04T01:33:01.081Z"
+  },
+  "https://discord.gg/Mq6BN9Rftr": {
+    "status": "valid",
+    "guildName": "New Day RP",
+    "checkedAt": "2026-09-04T01:33:02.417Z"
+  },
+  "https://discord.gg/nopixel": {
+    "status": "valid",
+    "guildName": "nopixel",
+    "checkedAt": "2026-09-04T01:33:03.785Z"
+  },
+  "https://discord.gg/7Xvr4HfEcu": {
+    "status": "valid",
+    "guildName": "Station Red Roleplay",
+    "checkedAt": "2026-09-04T01:33:05.174Z"
+  },
+  "https://discord.com/invite/4PznPVw": {
+    "status": "invalid",
+    "guildName": null,
+    "checkedAt": "2026-09-04T01:33:45.225Z"
+  },
+  "https://discord.gg/lucidcity": {
+    "status": "valid",
+    "guildName": "LGN | Lucid City RP 3.0",
+    "checkedAt": "2026-09-04T01:40:33.286Z"
+  },
+  "https://discord.gg/vPTsJxYmGn": {
+    "status": "valid",
+    "guildName": "MidwestRP® Fan Server",
+    "checkedAt": "2026-09-04T01:43:15.398Z"
+  },
+  "https://discord.gg/dayv": {
+    "status": "valid",
+    "guildName": "Day V | GTA 5 Zombie RP",
+    "checkedAt": "2026-09-04T01:43:16.747Z"
+  },
+  "https://discord.gg/wildhavenroleplayd": {
+    "status": "invalid",
+    "guildName": null,
+    "checkedAt": "2026-09-04T01:43:18.017Z"
+  }
+}
