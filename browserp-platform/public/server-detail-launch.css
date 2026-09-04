@@ -1,0 +1,123 @@
+.detail-banner-v3:not(.has-server-artwork-v3) {
+  min-height: 0;
+}
+
+.detail-title-v3.detail-title-launch-v6 {
+  display: block;
+  width: 100%;
+  padding: clamp(22px, 3vw, 30px);
+}
+
+.detail-heading-launch-v6 {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+
+.detail-heading-copy-launch-v6 {
+  min-width: 0;
+}
+
+.detail-title-launch-v6 .detail-logo-v3 {
+  flex: 0 0 auto;
+}
+
+.detail-title-launch-v6 .detail-meta-v3 {
+  margin-top: 18px;
+  row-gap: 9px;
+}
+
+.detail-title-launch-v6 .server-checked-v3 {
+  margin: 14px 0 0;
+}
+
+.detail-title-launch-v6 .detail-actions-v3 {
+  margin-top: 18px;
+}
+
+@media (max-width: 760px) {
+  .detail-hero-v3 {
+    padding: 20px 0 24px;
+  }
+
+  .detail-title-v3.detail-title-launch-v6 {
+    padding: 18px;
+  }
+
+  .detail-heading-launch-v6 {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .detail-title-launch-v6 .detail-logo-v3 {
+    width: 66px;
+    height: 66px;
+    border-radius: 15px;
+  }
+
+  .detail-title-launch-v6 h1 {
+    margin-top: 4px;
+    font-size: clamp(29px, 8vw, 40px);
+    line-height: 1.04;
+  }
+
+  .detail-title-launch-v6 .eyebrow-v3 {
+    font-size: 11px;
+    letter-spacing: .13em;
+  }
+
+  .detail-title-launch-v6 .detail-meta-v3 {
+    margin-top: 15px;
+    gap: 8px 13px;
+    line-height: 1.45;
+  }
+
+  .detail-title-launch-v6 .detail-actions-v3 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .detail-title-launch-v6 .detail-actions-v3 .button-v3 {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .detail-title-launch-v6 .detail-actions-v3 .button-primary-v3:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .detail-grid-v3 {
+    padding-top: 30px;
+  }
+}
+
+@media (max-width: 460px) {
+  .detail-title-v3.detail-title-launch-v6 {
+    padding: 16px;
+  }
+
+  .detail-heading-launch-v6 {
+    gap: 12px;
+  }
+
+  .detail-title-launch-v6 .detail-logo-v3 {
+    width: 58px;
+    height: 58px;
+    border-radius: 13px;
+  }
+
+  .detail-title-launch-v6 h1 {
+    font-size: clamp(27px, 9vw, 34px);
+  }
+
+  .detail-title-launch-v6 .detail-actions-v3 {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-title-launch-v6 .detail-actions-v3 .button-primary-v3:first-child {
+    grid-column: auto;
+  }
+}
