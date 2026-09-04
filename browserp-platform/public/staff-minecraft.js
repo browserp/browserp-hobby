@@ -25,9 +25,8 @@
     });
   }
 
-  async function init({ api, root } = {}) {
+  async function init({ api, root, imageUrl } = {}) {
     const platform="minecraft", platformName="Minecraft";
-    const imageUrl=(url)=>secureUrl(url);
     const endpoint = `/api/admin/${platform}`;
     if (typeof root === "string") root = document.querySelector(root);
     if (!root || typeof api !== "function") return null;
