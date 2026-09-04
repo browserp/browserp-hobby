@@ -166,7 +166,8 @@ export function normalizeFiveMServer(raw, { joinCode: requested, now = new Date(
   const bannerUrl = banners[0]?.url || null;
   if (bannerUrl) record("images.bannerUrl", banners[0].source, bannerUrl, "medium");
   const logos = imageEntries.filter((entry) => entry.trusted && /logo|icon/i.test(entry.source));
-  const iconVersion = Number.isSafeInteger(data.iconVersion) && data.iconVersion >= 0 ? data.iconVersion : null;
+  const parsedIconVersion = typeof data.iconVersion === "string" && /^\d{1,16}$/.test(data.iconVersion.trim()) ? Number(data.iconVersion.trim()) : data.iconVersion;
+  const iconVersion = Number.isSafeInteger(parsedIconVersion) && parsedIconVersion >= 0 ? parsedIconVersion : null;
   const logoUrl = iconVersion !== null ? `${API}/icon/${joinCode}/${iconVersion}.png` : unique(logos.map((entry) => entry.url)).length === 1 ? logos[0].url : null;
   if (logoUrl) record("images.logoUrl", iconVersion !== null ? "iconVersion" : logos[0].source, logoUrl, "medium");
   for (const field of fields.filter((entry) => /banner|logo|icon/i.test(entry.source))) if (field.value && !candidates.some((entry) => entry.source === field.source && entry.type === "image")) issue("invalid_image", field.source, "An image field did not contain a supported image URL; it was excluded.");
