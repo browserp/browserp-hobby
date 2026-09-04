@@ -1,4 +1,5 @@
 import { staffMinecraft } from "../lib/minecraft-workflow.js";
+import { scheduledStatusRefresh } from "../lib/status-refresh-workflow.js";
 import { createHash, randomBytes } from "node:crypto";
 import { endpoint, ok } from "../lib/api.js";
 import { appUrl, developmentCatalogAllowed, supabaseConfig } from "../lib/config.js";
@@ -869,6 +870,7 @@ const routes = {
     }
   }),
 
+  "internal/server-status": endpoint("POST", async (req, res) => ok(res, await scheduledStatusRefresh(req))),
   "admin/minecraft": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffMinecraft(req, res, id))),
   "admin/fivem": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffFiveM(req, res, id))),
   "admin/redm": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffCfx(req, res, id, "redm"))),

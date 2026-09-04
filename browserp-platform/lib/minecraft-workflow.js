@@ -63,15 +63,16 @@ export async function staffMinecraft(req,res,requestId,{fetchServer=fetchMinecra
   }
   return{result};
 }
-const saveObservation=(code,source)=>rpc("service_refresh_minecraft_snapshot",{p_join_code:code,p_online:true,p_players:source.players,p_capacity:source.capacity,p_observed_at:source.checkedAt},undefined,{useSecret:true});
-export async function refreshMinecraftCode(code,{serverId,strict=false,fetchServer=fetchMinecraftServer}={}){
+const saveObservation=(code,source,signal)=>rpc("service_refresh_minecraft_snapshot",{p_join_code:code,p_online:true,p_players:source.players,p_capacity:source.capacity,p_observed_at:source.checkedAt},undefined,{useSecret:true,signal});
+export async function refreshMinecraftCode(code,{serverId,strict=false,fetchServer=fetchMinecraftServer,signal}={}){
+  signal?.throwIfAborted();
   if(!/^[a-f0-9]{12}$/.test(code))throw Object.assign(new Error("Invalid Minecraft source."),{status:400});
   recordId(serverId);
-  const sources=await rpc("service_minecraft_sources",{p_server_id:serverId,p_due_only:false,p_limit:1},undefined,{useSecret:true});const item=(sources||[]).find(s=>s.serverId===serverId&&s.joinCode===code);
+  const sources=await rpc("service_minecraft_sources",{p_server_id:serverId,p_due_only:false,p_limit:1},undefined,{useSecret:true,signal});const item=(sources||[]).find(s=>s.serverId===serverId&&s.joinCode===code);
   if(!item)throw Object.assign(new Error("This published Minecraft source is unavailable."),{status:404});
-  if(!await rpc("service_claim_minecraft_refresh",{p_join_code:code},undefined,{useSecret:true}))return{serverId,skipped:true,reason:"recent_or_in_progress",checkedAt:item.lastCheckedAt||null};
-  try{return await saveObservation(code,await fetchServer(item.address,{edition:item.edition}));}
-  catch(e){await rpc("service_mark_minecraft_unavailable",{p_join_code:code},undefined,{useSecret:true});if(strict)throw e;return{players:null,capacity:null,online:false,unavailable:true};}
+  if(!await rpc("service_claim_minecraft_refresh",{p_join_code:code},undefined,{useSecret:true,signal}))return{serverId,skipped:true,reason:"recent_or_in_progress",checkedAt:item.lastCheckedAt||null};
+  try{return await saveObservation(code,await fetchServer(item.address,{edition:item.edition,signal}),signal);}
+  catch(e){signal?.throwIfAborted();await rpc("service_mark_minecraft_unavailable",{p_join_code:code},undefined,{useSecret:true,signal});if(strict)throw e;return{players:null,capacity:null,online:false,unavailable:true};}
 }
 export async function refreshDueMinecraftServers(){
   if(!supabaseConfig().privileged)return[];

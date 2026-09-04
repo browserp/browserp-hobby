@@ -97,17 +97,19 @@ export async function staffCfx(req, res, requestId, platform = "fivem") {
   return { result };
 }
 export function refreshFiveMCode(joinCode, options = {}) { return refreshCfxCode(joinCode, { ...options, platform: "fivem" }); }
-export async function refreshCfxCode(joinCode, { platform = "fivem", strict = false } = {}) {
+export async function refreshCfxCode(joinCode, { platform = "fivem", strict = false, signal } = {}) {
+  signal?.throwIfAborted();
   if (!["fivem", "redm"].includes(platform)) throw Object.assign(new Error("Unsupported Cfx platform."), { status: 400 });
   const code = parseFiveMJoinCode(joinCode);
-  const lease = await rpc("service_claim_cfx_refresh", { p_platform: platform, p_join_code: code }, undefined, { useSecret: true });
+  const lease = await rpc("service_claim_cfx_refresh", { p_platform: platform, p_join_code: code }, undefined, { useSecret: true, signal });
   if (!lease) return null;
   try {
-    const source = await fetchCfxServer(code, { platform });
+    const source = await fetchCfxServer(code, { platform, signal });
     if (source.players.status !== "online" || source.players.online === null || source.players.max === null || !source.players.observedAt) throw new Error("Cfx has no current player observation for this server.");
-    return await rpc("service_refresh_cfx_snapshot", { p_platform: platform, p_join_code: code, p_online: true, p_players: source.players.online, p_capacity: source.players.max, p_observed_at: source.players.observedAt }, undefined, { useSecret: true });
+    return await rpc("service_refresh_cfx_snapshot", { p_platform: platform, p_join_code: code, p_online: true, p_players: source.players.online, p_capacity: source.players.max, p_observed_at: source.players.observedAt }, undefined, { useSecret: true, signal });
   } catch (error) {
-    await rpc("service_mark_cfx_unavailable", { p_platform: platform, p_join_code: code }, undefined, { useSecret: true });
+    signal?.throwIfAborted();
+    await rpc("service_mark_cfx_unavailable", { p_platform: platform, p_join_code: code }, undefined, { useSecret: true, signal });
     if (strict) throw error;
     return { online: false, players: null, capacity: null, unavailable: true };
   }

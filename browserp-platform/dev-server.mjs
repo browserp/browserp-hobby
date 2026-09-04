@@ -43,6 +43,7 @@ const apiRoutes = new Map([
   ["POST /api/me/favorites", ["api/router.js", "me/favorites"]],
   ["POST /api/me/notifications/read", ["api/router.js", "me/notifications/read"]],
   ["GET /api/admin/overview", ["api/router.js", "admin/overview"]],
+  ["POST /api/internal/server-status", ["api/router.js", "internal/server-status"]],
   ["GET /api/admin/redm", ["api/router.js", "admin/redm"]],
   ["POST /api/admin/redm", ["api/router.js", "admin/redm"]],
   ["GET /api/admin/minecraft", ["api/router.js", "admin/minecraft"]],

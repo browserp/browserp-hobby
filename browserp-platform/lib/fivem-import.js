@@ -209,11 +209,13 @@ export function normalizeCfxServer(raw, { platform = "fivem", joinCode: requeste
   return { joinCode, platform, name, description, links: { cfxJoinUrl, communityUrl, websiteUrl }, players, images: { logoUrl, bannerUrl }, tags, keywords, locale, language, region, framework, access, evidence, issues, confidence: issues.some((entry) => entry.severity === "error") ? "low" : issues.some((entry) => entry.severity === "warning") ? "medium" : "high", source: { provider: "cfx", url: `${API}/single/${joinCode}`, listingUrl: `${game.listing}/servers/detail/${joinCode}`, fetchedAt, lastSeen }, requiresReview: true };
 }
 
-async function readJson(url, { fetchImpl = globalThis.fetch, timeoutMs = 5_000, maxBytes = MAX_BODY } = {}) {
+async function readJson(url, { fetchImpl = globalThis.fetch, timeoutMs = 5_000, maxBytes = MAX_BODY, signal } = {}) {
+  signal?.throwIfAborted();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), Math.min(Math.max(timeoutMs, 1), 5_000));
+  const requestSignal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
   try {
-    const response = await fetchImpl(url, { method: "GET", headers: { accept: "application/json", "user-agent": "BrowseRP/1.0 (+https://www.browserp.com)" }, redirect: "error", signal: controller.signal, cache: "no-store" });
+    const response = await fetchImpl(url, { method: "GET", headers: { accept: "application/json", "user-agent": "BrowseRP/1.0 (+https://www.browserp.com)" }, redirect: "error", signal: requestSignal, cache: "no-store" });
     if (!response.ok) {
       await response.body?.cancel();
       const code = response.status === 404 ? "not_found" : response.status === 429 ? "upstream_rate_limited" : [401, 403].includes(response.status) ? "upstream_unavailable" : "upstream_error";
@@ -230,18 +232,20 @@ async function readJson(url, { fetchImpl = globalThis.fetch, timeoutMs = 5_000, 
       if (size > maxBytes) { await reader.cancel(); throw new FiveMImportError("response_too_large", "The Cfx record is too large to safely import."); }
       chunks.push(value);
     }
+    signal?.throwIfAborted();
     try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); } catch { throw new FiveMImportError("invalid_response", "Cfx returned an invalid response."); }
   } catch (error) {
+    signal?.throwIfAborted();
     if (error instanceof FiveMImportError) throw error;
     throw new FiveMImportError(controller.signal.aborted ? "upstream_timeout" : "upstream_unavailable", controller.signal.aborted ? "Cfx took too long to respond. Try again later." : "The Cfx list could not be reached. No existing data was changed.");
   } finally { clearTimeout(timer); }
 }
 
 export function normalizeFiveMServer(raw, options = {}) { return normalizeCfxServer(raw, { ...options, platform: "fivem" }); }
-export async function fetchCfxServer(input, { platform = "fivem", fetchImpl, now, timeoutMs } = {}) {
+export async function fetchCfxServer(input, { platform = "fivem", fetchImpl, now, timeoutMs, signal } = {}) {
   cfxPlatform(platform);
   const joinCode = parseFiveMJoinCode(input);
-  const raw = await readJson(`${API}/single/${joinCode}`, { fetchImpl, timeoutMs });
+  const raw = await readJson(`${API}/single/${joinCode}`, { fetchImpl, timeoutMs, signal });
   return normalizeCfxServer(raw, { platform, joinCode, now });
 }
 
