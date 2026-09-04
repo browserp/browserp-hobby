@@ -6,6 +6,9 @@ import { assertSameOrigin, cookieValue, parseCookies, publicJson, readBody, redi
 import { assessDisplayName, sanitizePlainText } from "../lib/moderation.js";
 import { rateLimit } from "../lib/rate-limit.js";
 import { recordAccountActivity, unsealAddress } from "../lib/security.js";
+import { memberClaims, staffClaims } from "../lib/claim-workflow.js";
+import { staffFiveM } from "../lib/fivem-workflow.js";
+import { fetchServerImage } from "../lib/server-media.js";
 import { moderationMutation, moderationQuery } from "../lib/staff-moderation.js";
 import {
   authCapabilities,
@@ -841,6 +844,21 @@ const routes = {
       if (!developmentCatalogAllowed()) throw error;
       return publicJson(res, { categories: categoriesFromServers() }, 60);
     }
+  }),
+
+  "admin/fivem": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffFiveM(req, res, id))),
+  "server-claims": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await memberClaims(req, res, id))),
+  "admin/server-claims": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffClaims(req, res, id))),
+  "public/server-image": endpoint("GET", async (req, res) => {
+    const url = new URL(req.url || "/api/public/server-image", appUrl(req)).searchParams.get("url");
+    await rateLimit(req, "server-image", 120, 300);
+    const image = await fetchServerImage(url);
+    res.statusCode = 200;
+    res.setHeader("Content-Type", image.type);
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=86400");
+    res.setHeader("Content-Length", image.bytes.length);
+    return res.end(image.bytes);
   }),
 
   "public/overview": endpoint("GET", async (_req, res) => {

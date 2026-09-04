@@ -413,6 +413,100 @@
     }
   }
 
+  function serverImageSource(value) {
+    if (typeof value !== "string" || !value || value.length > 1_600 || /[\s\\]/.test(value)) return "";
+    try {
+      const url = new URL(value, location.origin);
+      if (url.username || url.password || url.port || url.hash) return "";
+      const stored = url.origin === "https://kywabzfgjoqiznnxygbq.supabase.co" && /^\/storage\/v1\/object\/public\/server-media\/[a-z0-9][a-z0-9_.\/-]*\.(?:png|jpe?g|webp|gif)$/i.test(url.pathname) && !url.pathname.includes("..") && !url.search;
+      if (stored) return url.href;
+      if (url.origin === location.origin && url.pathname === "/api/public/server-image" && [...url.searchParams.keys()].length === 1 && url.searchParams.has("url")) {
+        const nested = url.searchParams.get("url");
+        if (!/^https:\/\//i.test(nested || "")) return "";
+        return serverImageSource(nested);
+      }
+      if (url.protocol !== "https:") return "";
+      const cfx = url.hostname === "frontend.cfx-services.net" && /^\/api\/servers\/icon\/[a-z0-9]{6,12}\/\d{1,16}\.png$/.test(url.pathname) && !url.search;
+      const cdn = ["cdn.discordapp.com", "media.discordapp.net", "i.imgur.com", "i.postimg.cc", "res.cloudinary.com"].includes(url.hostname) && (/\.(?:png|jpe?g|webp|gif)$/i.test(url.pathname) || url.hostname === "res.cloudinary.com" && /\/image\/upload\//.test(url.pathname));
+      return cfx || cdn ? `/api/public/server-image?url=${encodeURIComponent(url.href)}` : "";
+    } catch { return ""; }
+  }
+
+  function renderServerArtwork(server) {
+    const banner = $(".detail-banner-v3", $("#server-detail-v3"));
+    const logo = $("#server-initials-v3");
+    const logoUrl = serverImageSource(server.logo_url);
+    const bannerUrl = serverImageSource(server.banner_url);
+    if (bannerUrl) {
+      const image = node("img", "server-import-banner-v3");
+      image.alt = ""; image.decoding = "async"; image.referrerPolicy = "no-referrer";
+      image.addEventListener("error", () => { image.remove(); banner.classList.remove("has-server-artwork-v3"); }, { once: true });
+      image.src = bannerUrl; banner.prepend(image); banner.classList.add("has-server-artwork-v3");
+    }
+    if (logoUrl) {
+      const image = node("img", "server-import-logo-v3");
+      image.alt = ""; image.decoding = "async"; image.referrerPolicy = "no-referrer";
+      image.addEventListener("error", () => logo.replaceChildren(document.createTextNode(initials(server.name))), { once: true });
+      image.src = logoUrl; logo.replaceChildren(image);
+    }
+  }
+
+  function serverPlayerStatus(server) {
+    const checked = typeof server.checked_at === "string" && Number.isFinite(Date.parse(server.checked_at)) ? new Date(server.checked_at) : null;
+    const age = checked ? Date.now() - checked.getTime() : null;
+    const stale = server.imported === true && (age === null || age > 5 * 60_000 || age < -60_000);
+    const count = Number.isInteger(server.players) && server.players >= 0 ? server.players : null;
+    const rawCapacity = server.max_players ?? server.capacity;
+    const capacity = Number.isInteger(rawCapacity) && rawCapacity > 0 ? rawCapacity : null;
+    const available = !stale && server.online === true && count !== null && (capacity === null || count <= capacity);
+    return { text: available ? `${count.toLocaleString()} / ${capacity === null ? "?" : capacity.toLocaleString()} online` : "Player count unavailable", checked, stale };
+  }
+
+  function updateServerPlayers(server, { failed = false } = {}) {
+    const status = serverPlayerStatus(server);
+    const text = failed ? "Player count unavailable" : status.text;
+    $("#server-status-v3").textContent = text;
+    const fact = $("#server-info-v5 .server-info-card-v5:last-child dd");
+    if (fact) fact.textContent = text;
+    const checked = $("#server-checked-v3");
+    if (!checked) return;
+    checked.hidden = server.imported !== true;
+    if (checked.hidden) return;
+    checked.replaceChildren();
+    if (status.checked) {
+      const time = node("time", "", new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "medium" }).format(status.checked));
+      time.dateTime = status.checked.toISOString();
+      checked.append(document.createTextNode(failed ? "Last checked " : "Checked "), time);
+      if (failed || status.stale) checked.append(document.createTextNode(" · Waiting for a fresh FiveM update"));
+    } else checked.textContent = "Waiting for a fresh FiveM update";
+  }
+
+  function refreshServerPlayers(server, slug) {
+    if (server.imported !== true) return;
+    let current = server, pending = false, closed = false;
+    async function refresh() {
+      if (pending || closed || document.visibilityState !== "visible") return;
+      pending = true;
+      updateServerPlayers(current);
+      try {
+        const payload = await api(`/api/servers?slug=${encodeURIComponent(slug)}`, { cache: "no-store" });
+        const latest = payload.servers?.[0];
+        if (!latest || latest.id !== server.id) throw new Error("Server status unavailable");
+        current = latest;
+        if (!closed) updateServerPlayers(current);
+      } catch { if (!closed) updateServerPlayers(current, { failed: true }); }
+      finally { pending = false; }
+    }
+    let timer = window.setInterval(refresh, 60_000);
+    const visible = () => { if (document.visibilityState === "visible") refresh(); };
+    document.addEventListener("visibilitychange", visible);
+    window.addEventListener("pagehide", () => { closed = true; window.clearInterval(timer); document.removeEventListener("visibilitychange", visible); });
+    window.addEventListener("pageshow", (event) => {
+      if (!event.persisted || !closed) return;
+      closed = false; timer = window.setInterval(refresh, 60_000); document.addEventListener("visibilitychange", visible); refresh();
+    });
+  }
+
   async function serverDetail() {
     const root = $("#server-detail-v3");
     if (!root) return;
@@ -435,17 +529,20 @@
       $("#server-meta-v3").replaceChildren(window.BrowseRPPlatforms.metadata(server, engagement));
       $("#server-info-v5").replaceChildren(window.BrowseRPPlatforms.facts(server, engagement));
       $("#server-votes-v3").textContent = `${Number(engagement.voteCount || 0).toLocaleString()} votes`;
-      $("#server-status-v3").textContent = server.online ? `${server.players || 0} / ${server.capacity || "?"} online` : "Status unavailable";
       $("#server-initials-v3").textContent = String(server.name || "RP").split(/\s+/).slice(0,2).map((part) => part[0]).join("").toUpperCase();
+      renderServerArtwork(server);
+      updateServerPlayers(server);
       const tags = $("#server-tags-v3");
       tags.replaceChildren(...(Array.isArray(server.tags) ? server.tags : []).map((tag) => node("span", "tag-v3", tag)));
       const join = $("#server-join-v3");
-      const destination = safeDestination(server.community_url);
+      const destination = server.community_url ? safeDestination(server.community_url) : "";
       join.hidden = !destination;
       if (destination) { join.href = destination; join.rel = "noopener noreferrer"; }
       const connect = $("#server-connect-v3");
-      connect.hidden = !engagement.cfxJoinUrl;
-      if (engagement.cfxJoinUrl) { connect.href = engagement.cfxJoinUrl; connect.rel = "noopener noreferrer"; connect.textContent = "Connect via Cfx"; }
+      const connectUrl = engagement.cfxJoinUrl || server.cfx_join_url;
+      const validConnect = typeof connectUrl === "string" && /^https:\/\/cfx\.re\/join\/[a-z0-9]{6,12}\/?$/i.test(connectUrl);
+      connect.hidden = !validConnect;
+      if (validConnect) { connect.href = connectUrl; connect.rel = "noopener noreferrer"; connect.textContent = "Connect via Cfx"; }
       $("#vote-server-v3").dataset.serverId = server.id;
       $("#comment-form-v3").dataset.serverId = server.id;
       $("#report-form-v3").dataset.serverId = server.id;
@@ -457,6 +554,12 @@
       }));
       $("#comments-empty-v3").hidden = (engagement.comments || []).length > 0;
       document.title = `${server.name} — ${platform} roleplay | BrowseRP`;
+      const claimRoot = $("#server-claim-panel");
+      if (claimRoot && window.BrowseRPServerClaims?.init) {
+        try { await window.BrowseRPServerClaims.init({ server, root: claimRoot }); }
+        catch { claimRoot.replaceChildren(node("p", "", "Claim requests are unavailable right now. Refresh the page to try again.")); claimRoot.hidden = false; }
+      }
+      refreshServerPlayers(server, slug);
     } catch {
       const empty = node("section", "empty-v3 server-missing-v3");
       empty.append(

@@ -20,14 +20,14 @@
     image.height = 512;
     return image;
   }
-  function init() {
+  function init({ api } = {}) {
     const nav = document.querySelector(".staff-nav-v3");
     if (!nav || nav.querySelector(".staff-scrapers-menu")) return;
     const isPage = document.body.dataset.staffPage === "scrapers";
     const menu = make("details", undefined, "staff-scrapers-menu");
     menu.open = isPage;
     const summary = make("summary");
-    summary.append(make("span", "Scrapers"), make("span", "Soon", "staff-scrapers-soon"));
+    summary.append(make("span", "Scrapers"));
     const links = make("div", undefined, "staff-scrapers-links");
     let focusSection = false;
     for (const game of games) {
@@ -55,7 +55,9 @@
       document.querySelector("#scrapers-title")?.focus();
       focusSection = false;
     }
-    function render() {
+    let scraper = null; let generation = 0;
+    async function render() {
+      const revision = ++generation; scraper?.destroy(); scraper = null;
       const selected = games.find((game) => location.hash === `#${game.id}`);
       const title = document.querySelector("#scrapers-title");
       title.textContent = selected ? `${selected.name} scraper` : "Scrapers";
@@ -65,7 +67,10 @@
         else link.removeAttribute("aria-current");
       }
       root.replaceChildren();
-      if (selected) {
+      let mount = null;
+      if (selected?.id === "fivem") {
+        mount = make("section"); root.append(mount);
+      } else if (selected) {
         const panel = make("section", undefined, "staff-scraper-preview");
         panel.dataset.platform = selected.id;
         const copy = make("div", undefined, "staff-scraper-copy");
@@ -81,16 +86,23 @@
         link.dataset.platform = game.id;
         if (selected?.id === game.id) link.setAttribute("aria-current", "page");
         const copy = make("span");
-        copy.append(make("strong", game.name), make("small", "Coming soon"));
+        copy.append(make("strong", game.name), make("small", game.id === "fivem" ? "Import servers" : "Coming soon"));
         link.append(artwork(game, "staff-scrapers-thumb"), copy);
         link.addEventListener("click", () => { focusSection = true; if (location.hash === link.hash) focusHeading(); });
         grid.append(link);
       }
       root.append(grid);
       focusHeading();
+      if (mount) {
+        try {
+          const controller = await window.BrowseRPStaffFiveM.init({ api, root: mount, imageUrl: (url) => `/api/public/server-image?url=${encodeURIComponent(url)}` });
+          if (revision !== generation) controller?.destroy(); else scraper = controller;
+        } catch (error) { if (revision === generation) mount.append(make("p", error.message || "The importer could not load. Please refresh.")); }
+      }
     }
     window.addEventListener("hashchange", render);
-    render();
+    void render();
+    window.addEventListener("pagehide", () => { generation += 1; scraper?.destroy(); });
   }
   window.BrowseRPStaffScrapers = Object.freeze({ init });
 })();

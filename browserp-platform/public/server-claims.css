@@ -1,0 +1,12 @@
+.server-claims { border: 1px solid var(--line); border-radius: 14px; padding: 26px; background: var(--panel); margin-top: 26px; min-width: 0; }
+.claims-heading h2 { margin: 6px 0 12px; font-size: 24px; }.claims-heading .eyebrow-v3 { font-size: 11px; }
+.claims-copy,.claims-message { color: var(--copy); font-size: 14px; line-height: 1.75; overflow-wrap: anywhere; }.claims-message { white-space: pre-wrap; }
+.claims-help { display: block; color: var(--muted); font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.claims-status { font-size: 13px; color: var(--copy); overflow-wrap: anywhere; }.claims-status:empty { display: none; }.claims-status[data-error="true"] { color: #ffadbd; }
+.claims-entry { margin: 18px 0; }.claims-form { display: grid; gap: 16px; margin-top: 24px; }.claims-form > button { justify-self: start; }.claims-form textarea { resize: vertical; }
+.claims-history { display: grid; gap: 14px; margin-top: 24px; }.claims-history h3 { margin: 0; font-size: 18px; }
+.claims-item { border: 1px solid var(--line); border-radius: 10px; padding: 18px; background: var(--bg-soft); }.claims-item-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.claims-proof { display: inline-flex; padding: 5px 10px; border-radius: 99px; border: 1px solid var(--line); font-size: 12px; color: var(--copy); }.claims-proof[data-verified="true"] { background: #12352b; color: #a4ebcb; border-color: #28654e; }
+.claims-item details { margin: 14px 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; }.claims-item summary { cursor: pointer; }.claims-item details a { color: var(--focus); text-decoration: underline; }
+.claims-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }.server-claims :disabled { opacity: .62; cursor: wait; }
+@media(max-width:650px) { .server-claims { padding: 18px; }.claims-item { padding: 15px; }.claims-item-heading { align-items: flex-start; flex-direction: column; }.claims-actions > * { flex: 1 1 180px; }.claims-form > button { width: 100%; } }
