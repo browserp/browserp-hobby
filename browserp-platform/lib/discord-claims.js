@@ -55,17 +55,34 @@ export function discordIdentity(user) {
   const id = String(identity?.provider_id || identity?.identity_data?.provider_id || identity?.identity_data?.sub || "");
   return /^[0-9]{17,20}$/.test(id) ? id : null;
 }
-async function discordJson(path, token, fetchImpl) {
+async function discordJson(path, token, fetchImpl, { maxBytes = 2_000_000 } = {}) {
   const response = await fetchImpl(`https://discord.com/api/v10/${path}`, {
     headers: { Accept: "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     redirect: "error", signal: AbortSignal.timeout(5000)
   });
-  if (!response.ok) throw Object.assign(new Error("Discord could not verify ownership."), { status: response.status });
-  if (Number(response.headers.get("content-length")) > 2_000_000) throw new Error("Discord response too large.");
+  if (!response.ok) { await response.body?.cancel(); throw Object.assign(new Error("Discord could not complete the check."), { status: response.status }); }
+  if (Number(response.headers.get("content-length")) > maxBytes) { await response.body?.cancel(); throw new Error("Discord response too large."); }
+  if (!response.body) throw new Error("Discord returned an empty response.");
   const chunks = []; let size = 0;
-  for await (const chunk of response.body) { size += chunk.length; if (size > 2_000_000) throw new Error("Discord response too large."); chunks.push(chunk); }
+  for await (const chunk of response.body) { size += chunk.length; if (size > maxBytes) throw new Error("Discord response too large."); chunks.push(chunk); }
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
+// Resolves only a public guild invite. This establishes link validity, never ownership.
+export async function validatePublicDiscordInvite(value, { fetchImpl = fetch } = {}) {
+  const invite = discordInvite(value);
+  if (!invite) return { status: "invalid", guildName: null };
+  try {
+    const invitation = await discordJson(`invites/${encodeURIComponent(invite.code)}`, null, fetchImpl, { maxBytes: 128 * 1024 });
+    const guildId = String(invitation?.guild?.id || "");
+    if (invitation?.code === 10006 || (invitation?.type !== undefined && invitation.type !== 0)) return { status: "invalid", guildName: null };
+    if (!/^[0-9]{17,20}$/.test(guildId)) return { status: "unavailable", guildName: null };
+    const guildName = String(invitation.guild.name || "Discord community").replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, 100);
+    return { status: "valid", guildName };
+  } catch (error) {
+    return { status: error?.status === 404 ? "invalid" : "unavailable", guildName: null };
+  }
+}
+
 export async function verifyDiscordOwnership({ user, communityUrl, token, fetchImpl = fetch, now = Date.now() }) {
   const discordUserId = discordIdentity(user);
   const base = { discordUserId, communityUrl, guildId: null, guildName: null, isOwner: null, checkedAt: new Date(now).toISOString() };

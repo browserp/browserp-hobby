@@ -160,7 +160,7 @@
         }
         if (destroyed) return;
         errors.hidden = !failed.length; for (const error of failed) errors.append(make("li", `${error.input || error.joinCode || "Source"}: ${error.message || error.error || "Could not fetch details"}`));
-        message(fetchStatus, `${count} source${count === 1 ? "" : "s"} fetched for review${failed.length ? `; ${failed.length} could not be fetched` : ""}. Nothing has been published.`);
+        message(fetchStatus, `${count} source${count === 1 ? "" : "s"} fetched for review${failed.length ? `; ${failed.length} could not be fetched` : ""}. Fetching does not publish listings.`);
         filter.value = "pending"; offset = 0; await refresh();
       } catch (error) { message(fetchStatus, error.message, true); }
       finally { setBusy(false); }

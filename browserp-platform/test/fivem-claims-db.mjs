@@ -71,6 +71,7 @@ test('FiveM imports and claim requests enforce real PostgreSQL trust boundaries'
  `);
  await db.exec(fn(ops,'public.has_staff_permission'));
  try { await db.exec(migration); } catch (error) { console.error({position:error.position,detail:error.detail,where:error.where,context:migration.slice(Math.max(0,Number(error.position)-180),Number(error.position)+180)}); await db.close(); throw error; }
+ await db.exec(read('20260904003147_searchable_import_keywords.sql'));
 
  await t.test('anonymous users, ordinary members, insufficient MFA and direct proof forgery are denied', async () => {
   await db.exec('set role anon');
@@ -108,7 +109,7 @@ test('FiveM imports and claim requests enforce real PostgreSQL trust boundaries'
   await assert.rejects(publish(staged,{language:null}),/Review the name/);
   await assert.rejects(publish(staged,{ownerId:member}),/Unexpected reviewed field/);
   const id=request();
-  published=await publish(staged,{language:'French',framework:'ESX',logoUrl:'https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/6myr996/abcdef0123456789.png'},id);
+  published=await publish(staged,{language:'French',framework:'ESX',keywords:['economy','custom cars','moonquartz'],logoUrl:'https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/6myr996/abcdef0123456789.png'},id);
   assert.equal(published.status,'published');assert.ok(published.slug.endsWith('6myr996'));
   assert.deepEqual(await publish(staged,{},id),published);
   await assert.rejects(publish(staged),/candidate changed/);
@@ -214,6 +215,19 @@ test('FiveM imports and claim requests enforce real PostgreSQL trust boundaries'
   await db.exec('set role anon');assert.equal((await rpc('public.public_overview()')).players,33);
   await service();await rpc('public.service_mark_fivem_unavailable($1)',['6myr996']);
   await db.exec('set role anon');assert.equal((await rpc('public.public_overview()')).players,3);
+ });
+
+ await t.test('reviewed import keywords participate in both public searches without bypassing filters', async () => {
+  await db.exec('set role anon');
+  const smart=await rpc('public.search_public_directory($1::jsonb)',[JSON.stringify({query:'moonquartz',platform:'fivem',language:'French'})]);
+  assert.equal(smart.total,1);assert.equal(smart.servers[0].id,published.serverId);
+  assert.equal(/moonquartz/i.test([smart.servers[0].name,smart.servers[0].description,...smart.servers[0].tags].join(' ')),false);
+  assert.equal((await rpc('public.search_public_directory($1::jsonb)',[JSON.stringify({query:'moonquartz',platform:'minecraft'})])).total,0);
+  assert.equal((await rpc('public.search_public_directory($1::jsonb)',[JSON.stringify({query:'moonquartz',language:'English'})])).total,0);
+  const legacy=await rpc('public.search_server_directory($1,$2,$3,$4,false,false,false,$5,30)',[null,'moonquartz','fivem','all','recommended']);
+  assert.equal(legacy.length,1);assert.equal(legacy[0].id,published.serverId);
+  const excluded=await rpc('public.search_server_directory($1,$2,$3,$4,false,false,false,$5,30)',[null,'moonquartz','minecraft','all','recommended']);assert.equal(excluded.length,0);
+  assert.equal(Object.hasOwn(legacy[0],'owner_id'),false);assert.equal(Object.hasOwn(smart.servers[0],'candidate'),false);
  });
 
  await t.test('dismissal is audited, permission changes take effect and private source tables stay inaccessible', async () => {
