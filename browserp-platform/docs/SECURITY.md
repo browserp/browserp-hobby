@@ -12,7 +12,7 @@ Security is enforced at several independent boundaries. A hidden URL, disabled b
 
 ## Browser policy
 
-The Content Security Policy allows scripts, styles, fonts and connections only from BrowseRP. Images may additionally come from Discord's avatar CDN. Inline script/style execution, frames, objects, media and workers are blocked. The site also sends `nosniff`, `DENY` framing, strict-origin referrers, restrictive browser permissions and same-origin opener/resource policies.
+The Content Security Policy allows scripts, styles, fonts and connections only from BrowseRP. Images may additionally come from the approved Discord and Google avatar hosts, data URLs used by the image cropper, and the exact public advertisement, profile-media and server-media paths in BrowseRP's Supabase project. Inline script/style execution, frames, objects, media and workers are blocked. The site also sends `nosniff`, `DENY` framing, strict-origin referrers, restrictive browser permissions and same-origin opener/resource policies.
 
 `/staff` and `/dashboard` are private/no-store and `noindex`. CSS and JavaScript use immediate revalidation to avoid mixed-release caching across Vercel and Cloudflare.
 
@@ -24,13 +24,21 @@ The Content Security Policy allows scripts, styles, fonts and connections only f
 - State-changing JSON requests require a synchroniser CSRF header plus same-origin validation.
 - Staff-owner access is Discord-only. Linked, duplicate or inconsistent identities fail closed.
 - The private Discord owner allowlist and active membership are checked in addition to permission-specific database functions.
-- Google, if enabled later, is member-only and cannot confer staff ownership.
+- Google is enabled for members and cannot confer staff ownership.
+- Staff permissions and authenticator enrollment require the JWT's session ID to match a current session for the same account. Revoking a session removes access without waiting for its signed token to expire. Identity-trigger staff provisioning remains independent of session creation.
+- All seven member mutation RPCs and five private member read RPCs require a current session and a non-deleted, non-anonymous account without an active account ban. Staff authorization also checks account bans, including when a restricted account receives a new OAuth token. Public published-content reads remain anonymous.
+- Ban-check failures deny the authenticated request. A transient backend error preserves credentials for a later retry; a confirmed restriction clears the application session.
+- Staff MFA is mandatory in the production configuration verified on 4 September 2026. The owner has a verified authenticator; initial owner verification automatically activated enforcement, and authenticated staff access was checked afterwards. Keep recovery access documented and require authenticator verification for future staff sessions.
 
 ## HTTP and input handling
 
 Functions reject unsupported methods, non-JSON writes, oversized bodies and malformed JSON. Reads and writes use bounded fields. Listing descriptions are plain text; community links are canonical public HTTPS URLs with credentials, fragments, custom ports, local/reserved hosts and common shorteners rejected.
 
-Rate-limit identifiers use a keyed hash of Vercel's trusted client-address signal. Raw network addresses are not written to application records or logs, and production fails closed if the privacy secret is absent.
+Rate-limit identifiers use a keyed hash of the trusted client-address signal. Plain network addresses are not written to ordinary application records or logs. Protected network evidence is separately encrypted and access-controlled, with retention and an audited approval process for revealing it. Production fails closed if required privacy or evidence keys are absent.
+
+Network evidence and rate limits share one address resolver. On Vercel it uses the platform's authoritative address; a Cloudflare client-IP override additionally requires an ingress address in the reviewed official Cloudflare edge ranges. Host and Ray headers alone never establish trust. Outside Vercel, forwarded headers cannot replace the socket peer. IPv6 and mapped IPv4 addresses are normalized before hashing. Review the pinned Cloudflare ranges when the provider changes them.
+
+Direct member database calls also have per-account request limits. Existing daily claim and boost allowances remain in place. Device restrictions match an HttpOnly browser identifier; they are not hardware identification and can be evaded by clearing browser data or changing browsers, so they supplement account restrictions rather than replace them.
 
 Internal request IDs are generated server-side. Listing idempotency keys are stored as hashes and bound to a fingerprint of the accepted payload. Staff decisions and content mutations require explicit reasons and version/request identifiers.
 

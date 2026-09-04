@@ -197,7 +197,12 @@
     const beforeUnload = (event) => { if (dirty) { event.preventDefault(); event.returnValue = ""; } }; window.addEventListener("beforeunload", beforeUnload);
     await refresh();
     if (!destroyed && canManage && window.BrowseRPStaffCuration) { try { curation = await window.BrowseRPStaffCuration.init({api,root,platform,inputs}); } catch { /* Manual import remains available if research cannot load. */ } }
-    return { refresh, destroy() { destroyed = true; request += 1; window.removeEventListener("beforeunload", beforeUnload); root.replaceChildren(); } };
+    return { refresh, async canLeave() {
+      if (busy) { message(status, "Wait for the current import action to finish before switching games."); return false; }
+      const allowed = await discard();
+      if (!allowed && !editor.hidden) controls.name.focus();
+      return allowed;
+    }, destroy() { destroyed = true; request += 1; window.removeEventListener("beforeunload", beforeUnload); root.replaceChildren(); } };
   }
   window.BrowseRPStaffFiveM = Object.freeze({ init, parseInputs, secureUrl });
 })();

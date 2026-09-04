@@ -65,6 +65,43 @@ test("successful refresh rotates credentials and keeps the current CSRF token", 
   });
 });
 
+test("authenticated access fails closed when the security-ban lookup cannot complete", async () => {
+  for (const [status, code, message] of [
+    [403, "42501", "permission denied for function check_security_ban_server"],
+    [500, "XX000", "check_security_ban_server could not read security_bans"],
+    [404, "PGRST202", "Could not find the function public.check_security_ban_server in the schema cache"],
+    [503, "unexpected_failure", "Temporary database failure"]
+  ]) {
+    await isolated(async value => {
+      const url = new URL(value);
+      if (url.pathname === "/auth/v1/user") return response(user);
+      if (url.pathname.endsWith("/rpc/check_security_ban_server")) return response({ code, message }, status);
+      throw new Error(`Unexpected test endpoint ${url.pathname}`);
+    }, async () => {
+      const res = output();
+      await assert.rejects(getSession(request(`brp_access=${access}; brp_csrf=${csrf}`), res, { required: true }), error => error.code === code && error.status === status);
+      assert.doesNotMatch(cookies(res), /brp_(?:access|refresh)=[^\n]*Max-Age=0/, "a failed check must not invalidate otherwise valid credentials");
+    }, { SUPABASE_SECRET_KEY: "sb_secret_fixture", PRIVACY_HASH_SECRET: "fixture-private-hash" });
+  }
+});
+
+test("security-ban lookup allows a confirmed clear account and rejects an active restriction", async () => {
+  for (const restricted of [false, true]) {
+    await isolated(async value => {
+      const url = new URL(value);
+      if (url.pathname === "/auth/v1/user") return response(user);
+      if (url.pathname.endsWith("/rpc/check_security_ban_server")) return response(restricted ? { reference: "BRP-1234567890" } : null);
+      throw new Error(`Unexpected test endpoint ${url.pathname}`);
+    }, async () => {
+      const res = output(); const req = request(`brp_access=${access}; brp_csrf=${csrf}`);
+      if (restricted) {
+        await assert.rejects(getSession(req, res, { required: true }), { status: 403, code: "ACCOUNT_RESTRICTED" });
+        assert.match(cookies(res), /brp_access=;[^\n]*Max-Age=0/);
+      } else assert.equal((await getSession(req, res, { required: true })).user.id, user.id);
+    }, { SUPABASE_SECRET_KEY: "sb_secret_fixture", PRIVACY_HASH_SECRET: "fixture-private-hash" });
+  }
+});
+
 test("OAuth callback state and nonce fail before token exchange, and linked identities cannot gain staff sign-in", async () => isolated(async () => { throw new Error("Token exchange must not run"); }, async () => {
   const start = output(); const login = { ...request(""), url: "/api/auth/discord?returnTo=%2Fstaffpanel%2Fmoderation" };
   const url = new URL(beginOAuth(login, start, "discord")); const callback = new URL(url.searchParams.get("redirect_to")); callback.searchParams.set("code", "fixture-code");

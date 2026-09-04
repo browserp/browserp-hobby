@@ -76,14 +76,16 @@
       link.href = `/staffpanel/scrapers#${game.id}`;
       link.dataset.platform = game.id;
       link.append(artwork(game, "staff-scrapers-thumb"), make("span", game.name));
-      link.addEventListener("click", () => {
+      link.addEventListener("click", (event) => {
         if (!isPage) return;
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
         focusSection = true;
         document.body.classList.remove("staff-menu-open");
         const button = document.querySelector("#staff-menu-v3");
         button?.setAttribute("aria-expanded", "false");
         button?.setAttribute("aria-label", "Open staff navigation");
-        if (location.hash === `#${game.id}`) focusHeading();
+        void navigate(`#${game.id}`);
       });
       links.append(link);
     }
@@ -97,6 +99,19 @@
       focusSection = false;
     }
     let scraper = null; let generation = 0;
+    let activeHash = location.hash; let navigationPending = false;
+    const pageUrl = (hash) => `${location.pathname}${location.search}${hash}`;
+    async function navigate(hash, replace = false) {
+      if (navigationPending) return;
+      if (hash === activeHash) { focusHeading(); return; }
+      navigationPending = true;
+      try {
+        if (scraper?.canLeave && !await scraper.canLeave()) { focusSection = false; return; }
+        history[replace ? "replaceState" : "pushState"](history.state, "", pageUrl(hash));
+        activeHash = hash;
+        await render();
+      } finally { navigationPending = false; }
+    }
     async function render() {
       const revision = ++generation; scraper?.destroy(); scraper = null;
       const selected = games.find((game) => location.hash === `#${game.id}`);
@@ -130,7 +145,10 @@
         const copy = make("span");
         copy.append(make("strong", game.name), make("small", ["fivem", "redm", "minecraft"].includes(game.id) ? "Import servers" : "Coming soon"));
         link.append(artwork(game, "staff-scrapers-thumb"), copy);
-        link.addEventListener("click", () => { focusSection = true; if (location.hash === link.hash) focusHeading(); });
+        link.addEventListener("click", (event) => {
+          if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          event.preventDefault(); focusSection = true; void navigate(link.hash);
+        });
         grid.append(link);
       }
       root.append(grid);
@@ -143,7 +161,14 @@
         } catch (error) { if (revision === generation) mount.append(make("p", error.message || "The importer could not load. Please refresh.")); }
       }
     }
-    window.addEventListener("hashchange", render);
+    window.addEventListener("hashchange", () => {
+      const hash = location.hash;
+      if (hash === activeHash) return;
+      // Back/forward and direct hash changes must keep the current editor until
+      // its unsaved changes have been explicitly discarded.
+      history.replaceState(history.state, "", pageUrl(activeHash));
+      void navigate(hash, true);
+    });
     void render();
     window.addEventListener("pagehide", () => { generation += 1; scraper?.destroy(); });
   }

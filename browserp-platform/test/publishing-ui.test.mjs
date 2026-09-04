@@ -16,7 +16,7 @@ class Element {
 }
 const source = (name) => readFileSync(new URL(`../public/${name}`, import.meta.url), "utf8");
 function contentRuntime() {
-  const window = {};
+  const window = { addEventListener() {} };
   const document = { createElement: (tag) => new Element(tag), createDocumentFragment: () => new Element("fragment") };
   vm.runInNewContext(source("publishing-content.js"), { window, document });
   return { window, document, content: window.BrowseRPContent };

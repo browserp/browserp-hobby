@@ -82,6 +82,9 @@
     const formStatus = make("p", "", "adverts-status"); formStatus.setAttribute("role", "status");
     form.append(editorTitle, activeNotice, fields, preview, actions, formStatus); root.append(loadStatus, retry, list, form);
     let items = []; let current = null; let dirty = false; let busy = false; let previewSource = "";
+    window.addEventListener("beforeunload", (event) => {
+      if (dirty && form.isConnected) { event.preventDefault(); event.returnValue = ""; }
+    });
     const status = (text, error = false) => { formStatus.textContent = text; formStatus.dataset.error = String(error); };
     const setBusy = (value) => { busy = value; root.setAttribute("aria-busy", String(value)); root.querySelectorAll("button,input,textarea,select").forEach((element) => { element.disabled = value; }); };
     function updateActions() { const active = current?.status === "active"; activeNotice.hidden = !active; save.textContent = active ? "Move to draft" : "Save draft"; pause.hidden = !active; archive.hidden = !current || current.status === "completed"; }

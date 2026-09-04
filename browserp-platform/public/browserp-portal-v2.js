@@ -282,9 +282,9 @@
   }
 
   function dashboardListings(servers) {
-    const section = panel("listings", "Your published listings", "Open the public page for any server already approved and published.", link("/list-server", "small-button small-button-primary", "List another server"));
+    const section = panel("listings", "Your listings", "Recent listings attached to your account, including archived entries.", link("/list-server", "small-button small-button-primary", "List another server"));
     if (!servers.length) {
-      section.append(emptyState("No published listings yet", "Submit your roleplay community and its progress will appear below.", link("/list-server", "button button-primary", "Create a listing")));
+      section.append(emptyState("No listings yet", "Submit your roleplay community and its progress will appear below.", link("/list-server", "button button-primary", "Create a listing")));
       return section;
     }
     const list = make("ul", "portal-list");
@@ -533,7 +533,7 @@
       const metrics = make("section", "metric-grid-v2");
       metrics.setAttribute("aria-label", "Account summary");
       append(metrics,
-        metric(servers.length, "Published listings", "Live in the public directory"),
+        metric(servers.filter((server) => server.status === "published").length, "Published listings", "From your recent listings"),
         metric(submissions.length, "Submissions", "Recent review records"),
         metric(favorites.length, "Saved servers", "Communities kept for later"),
         metric(unread, "Unread updates", "Account notifications")

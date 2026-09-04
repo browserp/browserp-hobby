@@ -2,6 +2,7 @@ import { createCipheriv, createDecipheriv, createHmac, randomBytes } from "node:
 import { isIP } from "node:net";
 import { env, isProductionRuntime } from "./config.js";
 import { cookie, cookieName, cookieValue, parseCookies, setCookies } from "./http.js";
+import { requestAddress } from "./request-address.js";
 import { rpc } from "./supabase.js";
 
 const DEVICE_TOKEN = /^[A-Za-z0-9_-]{43,128}$/;
@@ -36,29 +37,6 @@ function evidenceKey() {
     });
   }
   return key;
-}
-
-function requestAddress(req) {
-  const candidates = [];
-  const forwardedHost = String(req.headers?.["x-forwarded-host"] || req.headers?.host || "")
-    .split(",")[0].trim().toLowerCase().replace(/:\d+$/, "");
-  const cloudflareRay = String(req.headers?.["cf-ray"] || "").trim();
-  if (env("CLOUDFLARE_PROXY_ENABLED") === "1"
-    && ["browserp.com", "www.browserp.com"].includes(forwardedHost)
-    && /^[a-f0-9]{16,32}(?:-[a-z]{3})?$/i.test(cloudflareRay)) {
-    candidates.push(String(req.headers?.["cf-connecting-ip"] || "").trim());
-  }
-  if (process.env.VERCEL === "1") {
-    candidates.push(String(req.headers?.["x-vercel-forwarded-for"] || "").split(",")[0].trim());
-    candidates.push(String(req.headers?.["x-forwarded-for"] || "").split(",")[0].trim());
-  }
-  candidates.push(String(req.headers?.["x-real-ip"] || "").trim());
-  candidates.push(String(req.socket?.remoteAddress || "").trim());
-  for (let candidate of candidates) {
-    if (candidate.startsWith("::ffff:")) candidate = candidate.slice(7);
-    if (isIP(candidate)) return candidate.toLowerCase();
-  }
-  return "unknown";
 }
 
 function maskedAddress(address) {
