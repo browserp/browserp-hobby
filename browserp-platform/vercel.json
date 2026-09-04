@@ -22,6 +22,10 @@
   },
   "rewrites": [
     {
+      "source": "/api/internal/server-status",
+      "destination": "/api/router?_route=internal/server-status"
+    },
+    {
       "source": "/api/admin/redm",
       "destination": "/api/router?_route=admin/redm"
     },

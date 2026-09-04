@@ -59,7 +59,8 @@ function apiHeaders({ accessToken, useSecret = false } = {}) {
   return headers;
 }
 
-export async function supabaseRequest(path, { method = "GET", body, accessToken, useSecret = false, headers = {} } = {}) {
+export async function supabaseRequest(path, { method = "GET", body, accessToken, useSecret = false, headers = {}, signal } = {}) {
+  signal?.throwIfAborted();
   const config = supabaseConfig();
   if (!config.url || (!useSecret && !config.publishableKey) || (useSecret && !config.secretKey)) {
     throw Object.assign(new Error(useSecret
@@ -70,15 +71,20 @@ export async function supabaseRequest(path, { method = "GET", body, accessToken,
     });
   }
 
-  let response;
+  const requestTimeout = AbortSignal.timeout(timeoutMs());
+  const requestSignal = signal ? AbortSignal.any([signal, requestTimeout]) : requestTimeout;
+  let response, text;
   try {
     response = await fetch(`${config.url}/${String(path).replace(/^\//, "")}`, {
       method,
       headers: { ...apiHeaders({ accessToken, useSecret }), ...headers },
       body: body === undefined ? undefined : JSON.stringify(body),
-      signal: AbortSignal.timeout(timeoutMs())
+      signal: requestSignal
     });
+    text = await response.text();
+    signal?.throwIfAborted();
   } catch (error) {
+    signal?.throwIfAborted();
     if (error?.name === "AbortError" || error?.name === "TimeoutError") {
       throw Object.assign(new Error("The backend did not respond in time."), {
         status: 504,
@@ -92,7 +98,6 @@ export async function supabaseRequest(path, { method = "GET", body, accessToken,
     });
   }
 
-  const text = await response.text();
   let payload = null;
   if (text) {
     try { payload = JSON.parse(text); } catch { payload = text; }
@@ -455,7 +460,8 @@ export async function rpc(name, body, accessToken, options = {}) {
     method: "POST",
     body,
     accessToken,
-    useSecret: Boolean(options.useSecret)
+    useSecret: Boolean(options.useSecret),
+    signal: options.signal
   })).data;
 }
 
