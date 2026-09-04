@@ -201,7 +201,7 @@ export function secureEqual(left, right) {
 }
 
 export function handleError(res, error, id = randomUUID()) {
-  const status = Number(error?.status) || 500;
+  const status = ["40001", "23505"].includes(error?.code) ? 409 : Number(error?.status) || 500;
   if (status >= 500) console.error(JSON.stringify({ requestId: id, message: error?.message, stack: error?.stack }));
   return json(res, status, {
     error: status >= 500 ? "An unexpected error occurred." : error.message,

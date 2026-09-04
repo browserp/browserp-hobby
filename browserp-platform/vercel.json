@@ -9,11 +9,33 @@
     "dub1"
   ],
   "functions": {
+    "api/router.js": {
+      "maxDuration": 60
+    },
+    "api/servers.js": {
+      "maxDuration": 30
+    },
     "api/**/*.js": {
       "maxDuration": 15
     }
   },
   "rewrites": [
+    {
+      "source": "/api/admin/fivem",
+      "destination": "/api/router?_route=admin/fivem"
+    },
+    {
+      "source": "/api/server-claims",
+      "destination": "/api/router?_route=server-claims"
+    },
+    {
+      "source": "/api/admin/server-claims",
+      "destination": "/api/router?_route=admin/server-claims"
+    },
+    {
+      "source": "/api/public/server-image",
+      "destination": "/api/router?_route=public/server-image"
+    },
     {
       "source": "/api/admin/moderation",
       "destination": "/api/router?_route=admin/moderation"
@@ -305,7 +327,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; base-uri 'none'; connect-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' data: https://cdn.discordapp.com https://lh3.googleusercontent.com https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/; manifest-src 'self'; media-src 'none'; object-src 'none'; script-src 'self'; style-src 'self'; worker-src 'none'; upgrade-insecure-requests"
+          "value": "default-src 'self'; base-uri 'none'; connect-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' data: https://cdn.discordapp.com https://lh3.googleusercontent.com https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/; manifest-src 'self'; media-src 'none'; object-src 'none'; script-src 'self'; style-src 'self'; worker-src 'none'; upgrade-insecure-requests"
         },
         {
           "key": "Strict-Transport-Security",

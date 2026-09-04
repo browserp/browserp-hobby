@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { appUrl, supabaseConfig } from "./config.js";
+import { setDiscordClaimToken } from "./discord-claims.js";
 import {
   assertCsrf,
   cookie,
@@ -14,11 +15,12 @@ import {
 
 const OAUTH_PROVIDERS = new Set(["discord", "google"]);
 const CSRF_REQUEST_TOKEN = Symbol("browserpCsrfToken");
-const SESSION_COOKIE_BASES = ["brp_access", "brp_refresh", "brp_csrf"];
+const SESSION_COOKIE_BASES = ["brp_access", "brp_refresh", "brp_csrf", "brp_discord_claim"];
 const OAUTH_COOKIE_BASES = [
   "brp_pkce",
   "brp_auth_return",
   "brp_auth_provider",
+  "brp_auth_claims",
   "brp_oauth_state",
   "brp_oauth_nonce"
 ];
@@ -292,6 +294,7 @@ export function beginOAuth(req, res, provider) {
     ...transitionCookies("brp_pkce", verifier, { maxAge: 600 }),
     ...transitionCookies("brp_auth_return", returnTo, { maxAge: 600 }),
     ...transitionCookies("brp_auth_provider", normalizedProvider, { maxAge: 600 }),
+    ...transitionCookies("brp_auth_claims", normalizedProvider === "discord" && requestUrl.searchParams.get("claimGuilds") === "1" ? "1" : "0", { maxAge: 600 }),
     ...transitionCookies("brp_oauth_state", state, { maxAge: 600 }),
     ...transitionCookies("brp_oauth_nonce", nonce, { maxAge: 600 })
   ]);
@@ -301,6 +304,7 @@ export function beginOAuth(req, res, provider) {
   authorize.searchParams.set("redirect_to", callback.toString());
   authorize.searchParams.set("code_challenge", challenge);
   authorize.searchParams.set("code_challenge_method", "s256");
+  if (normalizedProvider === "discord" && requestUrl.searchParams.get("claimGuilds") === "1") authorize.searchParams.set("scopes", "identify email guilds");
   return authorize.toString();
 }
 
@@ -336,6 +340,9 @@ export async function finishOAuth(req, res) {
     throw Object.assign(new Error("The sign-in provider did not match the request."), { status: 403 });
   }
   setSession(res, data);
+  if (provider === "discord" && cookieValue(cookies, "brp_auth_claims") === "1") {
+    try { setDiscordClaimToken(res, data); } catch { /* Claims can still be submitted for manual review. */ }
+  }
   return { returnTo, provider, user: data.user, accessToken: data.access_token };
 }
 

@@ -1,6 +1,7 @@
 import { endpoint, ok } from "../lib/api.js";
 import { servers as fallbackServers } from "../lib/catalog.js";
 import { developmentCatalogAllowed } from "../lib/config.js";
+import { enrichImportedServers, refreshDueFiveMServers } from "../lib/fivem-workflow.js";
 import { discoverServers } from "../lib/discovery.js";
 import { filterServers } from "../lib/directory.js";
 import { assertSameOrigin, publicJson, readBody } from "../lib/http.js";
@@ -39,7 +40,12 @@ export default endpoint(["GET", "POST"], async (req, res) => {
     }, session.accessToken);
     return ok(res, { result }, 201);
   }
-  if (filters.discover === "true" && !slug) return publicJson(res, await discoverServers(filters), 20);
+  if (!slug) await refreshDueFiveMServers();
+  if (filters.discover === "true" && !slug) {
+    const result = await discoverServers(filters);
+    result.servers = await enrichImportedServers(result.servers);
+    return publicJson(res, result, 20);
+  }
   let servers;
   try {
     servers = await rpc("search_server_directory", {
@@ -59,6 +65,7 @@ export default endpoint(["GET", "POST"], async (req, res) => {
   }
   if (!Array.isArray(servers)) servers = [];
   if (slug) servers = servers.filter((server) => String(server.slug || "").toLowerCase() === slug).slice(0, 1);
+  servers = await enrichImportedServers(servers, { refresh: Boolean(slug) });
   let engagement = null;
   if (slug && servers.length) {
     try { engagement = await rpc("public_server_engagement", { p_slug: slug }); }

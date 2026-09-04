@@ -1,0 +1,19 @@
+.detail-banner-v3 { position: relative; isolation: isolate; }
+.detail-banner-v3.has-server-artwork-v3 { min-height: 360px; }
+.server-import-banner-v3 { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; object-fit: cover; opacity: .78; }
+.has-server-artwork-v3 .detail-title-v3 { position: relative; padding-top: 96px; background: linear-gradient(180deg,rgba(8,6,12,.3),rgba(8,6,12,.93) 45%,rgba(8,6,12,.98)); }
+.server-import-logo-v3 { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
+.detail-logo-v3:has(.server-import-logo-v3) { overflow: hidden; background: #100c16; }
+.server-checked-v3 { display: block; margin-top: 10px; color: #c8bfce; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.server-checked-v3[hidden] { display: none; }
+#server-claim-panel { min-width: 0; }
+@media (max-width: 760px) {
+  .detail-banner-v3.has-server-artwork-v3 { min-height: 320px; }
+  .has-server-artwork-v3 .detail-title-v3 { padding-top: 72px; }
+  .server-checked-v3 { font-size: 12px; }
+}
+@media (forced-colors: active) {
+  .server-import-banner-v3 { display: none; }
+  .has-server-artwork-v3 .detail-title-v3 { background: Canvas; }
+  .server-checked-v3 { color: CanvasText; }
+}

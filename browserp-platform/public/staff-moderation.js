@@ -11,6 +11,7 @@
     summary: ["Summary", "An overview of the records and decisions available to your role.", null, null],
     members: ["Members", "Find registered accounts, inspect their profile and update approved account details.", "readMembers", "members"],
     servers: ["Servers", "Find and manage listings using their game, location, language and community features.", "readServers", "servers"],
+    claims: ["Server claims", "Review ownership requests and filter verified Discord community owners.", "reviewClaims", null],
     reports: ["Reports", "Review active reports and their history. Deleted reports remain recoverable and audited.", "readReports", "reports"],
     queue: ["Listing reviews", "Review submitted server listings and record a decision.", "readListings", "listings"],
     content: ["Content reviews", "Review content and comments flagged for a moderation decision.", "readQueue", "queue"],
@@ -47,9 +48,10 @@
     const state = { ...initial, summary: null, permissions: {}, keys: [], workspace: null, cursors: [null], request: 0, destroyed: false, busy: false, debounce: null, mountedStaff: false };
     const root = $("#moderation-content");
     const removers = [];
+    let claimsController = null;
     const listen = (node, event, callback) => { node.addEventListener(event, callback); removers.push(() => node.removeEventListener(event, callback)); };
     const key = (name) => state.keys.includes(name);
-    const allowed = (view) => view === "summary" || (view === "staff" ? state.permissions.manageStaff || state.permissions.manageRoles : view === "queue" ? state.permissions.readListings || key("servers.review") : state.permissions[META[view]?.[2]]) === true;
+    const allowed = (view) => view === "summary" || (view === "claims" ? key("servers.claims.review") || state.summary?.permissions?.isOwner === true : view === "staff" ? state.permissions.manageStaff || state.permissions.manageRoles : view === "queue" ? state.permissions.readListings || key("servers.review") : state.permissions[META[view]?.[2]]) === true;
     const status = (message, error = false) => { const target = $("#moderation-live-status"); target.textContent = message; target.dataset.error = String(error); };
     const busy = (value) => { state.busy = value; root.setAttribute("aria-busy", String(value)); $("#moderation-refresh").disabled = value; };
     const empty = (title, description) => { const box = make("div", undefined, "moderation-empty"); box.append(make("h3", title), make("p", description)); return box; };
@@ -64,9 +66,9 @@
     function summary() {
       root.replaceChildren(heading("summary"));
       const cards = make("div", undefined, "moderation-summary-grid");
-      for (const view of ["reports", "members", "servers", "queue", "content", "profiles", "activity", "staff", "appeals", "logs"].filter(allowed)) {
+      for (const view of ["reports", "members", "servers", "claims", "queue", "content", "profiles", "activity", "staff", "appeals", "logs"].filter(allowed)) {
         const card = make("a", undefined, "moderation-summary-card"); card.href = F.serialize(view); const count = state.summary?.counts?.[META[view][3]];
-        card.append(make("span", META[view][0]), make("strong", hasCount(count) ? number.format(count) : "—"), make("p", META[view][1])); cards.append(card);
+        card.append(make("span", META[view][0]), make("strong", hasCount(count) ? number.format(count) : view === "claims" ? "Review" : "—"), make("p", META[view][1])); cards.append(card);
       }
       if (cards.childElementCount) root.append(cards); else root.append(empty("No moderation access assigned", "Your account can open this workspace, but has not been assigned any record permissions."));
       if (allowed("security") || allowed("bans")) {
@@ -289,9 +291,20 @@
     async function loadRecords() {
       if (state.destroyed) return null;
       const request = ++state.request; const view = state.view; busy(true);
+      if (view !== "claims") { claimsController?.destroy(); claimsController = null; }
       if (!allowed(view)) { root.replaceChildren(empty("Access not assigned", "Your current role does not have permission to view this section.")); busy(false); status("Choose an available section to continue."); return null; }
       try {
         if (view === "summary") { summary(); status(`Updated ${date(state.summary.generatedAt)}`); return state.summary; }
+        if (view === "claims") {
+          if (claimsController) await claimsController.refresh();
+          else {
+            const mount = make("section"); root.replaceChildren(mount);
+            const controller = await window.BrowseRPStaffClaims.init({ api, root: mount });
+            if (state.destroyed || request !== state.request || state.view !== view) { controller?.destroy(); return null; }
+            claimsController = controller;
+          }
+          status("Review requests by status and Discord ownership evidence."); return null;
+        }
         if (view === "staff") { await renderStaff(); status("Staff tools ready. Changes are checked by the server."); return null; }
         const payload = await api(F.query(view, state.filters, state.cursors.at(-1)));
         if (state.destroyed || request !== state.request || state.view !== view) return null;
@@ -324,7 +337,7 @@
         status(error.message || "The workspace could not load. Please refresh.", true); root.replaceChildren(empty("Workspace unavailable", "Your current records could not be loaded. Use Refresh to try again.")); return null;
       } finally { if (!state.destroyed) busy(false); }
     }
-    const controller = { refresh, destroy() { state.destroyed = true; state.request += 1; clearTimeout(state.debounce); removers.forEach((remove) => remove()); if (active === controller) active = null; } };
+    const controller = { refresh, destroy() { state.destroyed = true; claimsController?.destroy(); claimsController = null; state.request += 1; clearTimeout(state.debounce); removers.forEach((remove) => remove()); if (active === controller) active = null; } };
     active = controller;
     listen(window, "hashchange", () => { clearTimeout(state.debounce); const next = F.parse(location.hash); state.view = next.view; state.filters = next.filters; state.cursors = [null]; state.workspace = null; state.mountedStaff = false; renderTabs(); void loadRecords(); });
     listen(window, "pagehide", () => controller.destroy());

@@ -38,6 +38,13 @@ const apiRoutes = new Map([
   ["POST /api/me/favorites", ["api/router.js", "me/favorites"]],
   ["POST /api/me/notifications/read", ["api/router.js", "me/notifications/read"]],
   ["GET /api/admin/overview", ["api/router.js", "admin/overview"]],
+  ["GET /api/admin/fivem", ["api/router.js", "admin/fivem"]],
+  ["POST /api/admin/fivem", ["api/router.js", "admin/fivem"]],
+  ["GET /api/server-claims", ["api/router.js", "server-claims"]],
+  ["POST /api/server-claims", ["api/router.js", "server-claims"]],
+  ["GET /api/admin/server-claims", ["api/router.js", "admin/server-claims"]],
+  ["POST /api/admin/server-claims", ["api/router.js", "admin/server-claims"]],
+  ["GET /api/public/server-image", ["api/router.js", "public/server-image"]],
   ["GET /api/admin/moderation", ["api/router.js", "admin/moderation"]],
   ["POST /api/admin/moderation", ["api/router.js", "admin/moderation"]],
   ["GET /api/admin/roles", ["api/router.js", "admin/roles"]],
@@ -82,7 +89,7 @@ function securityHeaders(res) {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("Content-Security-Policy", "default-src 'self'; img-src 'self' data: https://cdn.discordapp.com https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/; style-src 'self'; script-src 'self' 'sha256-mjT0FPG3NQWnJyjqoM1ha+xDb2mlOSS3l/dtDWVxA8c='; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+  res.setHeader("Content-Security-Policy", "default-src 'self'; img-src 'self' data: https://cdn.discordapp.com https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/; style-src 'self'; script-src 'self' 'sha256-mjT0FPG3NQWnJyjqoM1ha+xDb2mlOSS3l/dtDWVxA8c='; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), browsing-topics=()");
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
