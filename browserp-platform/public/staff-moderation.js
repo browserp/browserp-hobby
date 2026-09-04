@@ -228,7 +228,7 @@
           add("Region", "region", { required: true, minLength: 2, maxLength: 60 });
           add("Language", "language", { required: true, minLength: 2, maxLength: 60 });
           add("Framework / mode", "framework", { maxLength: 80 });
-          add("Access", "access", { type: "select", required: true, options: [{ value: "public", label: "Public" }, { value: "allowlisted", label: "Allowlisted" }, { value: "application", label: "Application" }] });
+          add("Access", "access", { type: "select", required: true, options: [{ value: "public", label: "Public" }, { value: "allowlisted", label: "Allowlisted" }, { value: "application", label: "Application" }, { value: "unknown", label: "Not confirmed" }] });
           add("Listing status", "status", { type: "select", required: true, options: FALLBACKS.servers.map((value) => ({ value, label: human(value) })) });
           add("Description", "description", { type: "textarea", required: true, minLength: 40, maxLength: 3000, wide: true });
           add("Community URL", "communityUrl", { type: "url", maxLength: 500 });

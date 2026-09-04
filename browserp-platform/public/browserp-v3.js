@@ -426,7 +426,7 @@
         return serverImageSource(nested);
       }
       if (url.protocol !== "https:") return "";
-      const cfx = url.hostname === "frontend.cfx-services.net" && /^\/api\/servers\/icon\/[a-z0-9]{6,12}\/\d{1,16}\.png$/.test(url.pathname) && !url.search;
+      const cfx = url.hostname === "frontend.cfx-services.net" && /^\/api\/servers\/icon\/[a-z0-9]{6,12}\/-?\d{1,10}\.png$/.test(url.pathname) && !url.search;
       const cdn = ["cdn.discordapp.com", "media.discordapp.net", "i.imgur.com", "i.postimg.cc", "res.cloudinary.com"].includes(url.hostname) && (/\.(?:png|jpe?g|webp|gif)$/i.test(url.pathname) || url.hostname === "res.cloudinary.com" && /\/image\/upload\//.test(url.pathname));
       return cfx || cdn ? `/api/public/server-image?url=${encodeURIComponent(url.href)}` : "";
     } catch { return ""; }

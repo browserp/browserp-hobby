@@ -71,9 +71,10 @@ test("signed-in navigation uses a permission-backed avatar menu and dark-only th
 test("public search uses shared contextual choices and clear wording", () => {
   const search = read("public/smart-search.js");
   const model = read("public/discovery-model.js");
-  assert.match(search, /facets\[key\]/);
+  assert.match(search, /M\.options\(key, facets, filters\)/);
   assert.match(search, /choice.key, choice.value/);
-  assert.doesNotMatch(model, /"Framework"|"Tag"/);
+  assert.match(search, /M\.label\(key, filters\.platform\)/);
+  assert.doesNotMatch(model, /modeLabel: "Tag"/);
   for (const page of ["index", "servers", "game"]) assert.match(read(`public/${page}.html`), /smart-search.js/);
 });
 

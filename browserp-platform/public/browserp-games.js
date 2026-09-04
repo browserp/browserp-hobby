@@ -20,7 +20,6 @@
   const ARTWORK_GAME_IDS = new Set([...AVAILABLE_GAME_IDS, "forza"]);
   const AVAILABLE_GAMES = GAMES.filter((game) => AVAILABLE_GAME_IDS.has(game.id));
   const UPCOMING_GAMES = GAMES.filter((game) => !AVAILABLE_GAME_IDS.has(game.id));
-  const FIVEM_SHOWCASE = Object.freeze({ slug: "san-andreas-county-roleplay-showcase", showcase_url: "/server/san-andreas-county-roleplay-showcase", name: "San Andreas County Roleplay", platform_id: "fivem", platform_name: "FiveM", language: "English", region: "United States", framework: "vMenu", description: "A complete BrowseRP showcase for a public-safety focused county community.", logo_url: "/assets/san-andreas-county-rp-mark-v4.svg", showcase: true });
 
   const $ = (selector) => document.querySelector(selector);
   const node = (tag, className, text) => { const item = document.createElement(tag); if (className) item.className = className; if (text !== undefined) item.textContent = text; return item; };
@@ -47,15 +46,15 @@
   }
 
   function serverCard(server) {
-    const link = node("a", "server-card"); link.href = server.showcase_url || `/server/${encodeURIComponent(server.slug || "")}`;
+    const link = node("a", "server-card"); link.href = `/server/${encodeURIComponent(server.slug || "")}`;
     window.BrowseRPPlatforms.theme(link, window.BrowseRPPlatforms.idFor(server));
     const media = node("div", "server-card-media");
     const imageUrl = String(server.logo_url || server.banner_url || "");
     if (/^https?:\/\/|^\//i.test(imageUrl)) { const image = new Image(); image.src = imageUrl; image.alt = ""; image.loading = "lazy"; image.className = "server-card-media-image"; media.append(image); }
     else media.append(node("span", "server-initials", String(server.name || "RP").split(/\s+/).slice(0,2).map((part) => part[0]).join("").toUpperCase()));
-    const top = node("div", "server-card-top"); top.append(media, node("span", `status${server.online ? " online" : ""}${server.showcase ? " showcase" : ""}`, server.showcase ? "BrowseRP showcase" : server.online ? "Online now" : "Status unavailable"));
+    const top = node("div", "server-card-top"); top.append(media, node("span", `status${server.online ? " online" : ""}`, server.online ? "Online now" : "Status unavailable"));
     link.append(top, node("h3", "", server.name || "Roleplay server"), window.BrowseRPPlatforms.metadata(server), node("p", "server-description", server.description || "Open the listing to learn more."));
-    const bottom = node("div", "server-card-bottom"); bottom.append(node("strong", "", server.online ? `${Number(server.players || 0).toLocaleString()} players` : server.showcase ? "Complete demo listing" : "Player count unavailable"), node("span", "server-card-action", "View listing")); link.append(bottom);
+    const bottom = node("div", "server-card-bottom"); bottom.append(node("strong", "", server.online ? `${Number(server.players || 0).toLocaleString()} players` : "Player count unavailable"), node("span", "server-card-action", "View listing")); link.append(bottom);
     return link;
   }
 

@@ -35,7 +35,7 @@
   // Preserve this public metadata order: platform, region, language, framework, access.
   function entries(server, engagement = {}) {
     const access = engagement.accessType || server.access_type;
-    const accessLabel = ({ public: "Open to everyone", allowlisted: "Approval required", application: "Application required" })[access] || access;
+    const accessLabel = ({ public: "Open to everyone", allowlisted: "Approval required", application: "Application required", unknown: "Not confirmed" })[access] || access;
     return [
       ["Game", server.platform_name || names[idFor(server)] || server.platform_short || "Roleplay"],
       ["Region", server.region], ["Language", server.language], ["Server setup", server.framework],

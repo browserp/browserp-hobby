@@ -54,13 +54,11 @@ test("all game accents are distinct and meet AA contrast on info cards and badge
   assert.equal(accents.size, Object.keys(platforms.names).length);
 });
 
-test("theme helper loads before consumers and showcase facts have the same order", () => {
-  for (const page of ["index", "servers", "game", "server", "example-server", "list-server"]) {
+test("theme helper loads before consumers on every directory and detail page", () => {
+  for (const page of ["index", "servers", "game", "server", "list-server"]) {
     const html = read(`public/${page}.html`);
     assert.ok(html.indexOf("browserp-platforms.js") < html.indexOf("browserp-v3.js"), `${page} loads helper first`);
   }
-  const labels = [...read("public/example-server.html").matchAll(/<dt>(.*?)<\/dt>/g)].map((match) => match[1]);
-  assert.deepEqual(labels, ["Game", "Region", "Language", "Server setup", "Access", "Player status"]);
 });
 
 test("suggestions stay open for keyboard focus and close only after focus leaves the widget", () => {

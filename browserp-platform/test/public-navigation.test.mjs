@@ -5,8 +5,8 @@ import { JSDOM } from "jsdom";
 
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const source = read("public/navigation.js");
-const publicPages = ["index", "servers", "game", "server", "example-server", "list-server", "about", "blog", "blog-post", "advertise", "legal", "appeal", "coins", "dashboard", "profile"];
-const routes = { index: "/", game: "/games", server: "/server/community", "example-server": "/server/san-andreas-county-roleplay-showcase", "blog-post": "/blog/community-guide" };
+const publicPages = ["index", "servers", "game", "server", "list-server", "about", "blog", "blog-post", "advertise", "legal", "appeal", "coins", "dashboard", "profile"];
+const routes = { index: "/", game: "/games", server: "/server/community", "blog-post": "/blog/community-guide" };
 const primaryRoutes = ["/servers", "/games", "/blog", "/about"];
 
 function harness({ page = "index", pathname = routes[page] || `/${page}`, html = read(`public/${page}.html`), compact = false, reduced = false, overflow = "" } = {}) {
@@ -113,7 +113,7 @@ const member = {
   user: { profile: { display_name: "Alex Rivers", avatar_review_status: "approved", avatar_url: "https://cdn.discordapp.com/avatar.png" } }
 };
 
-test("all 15 public pages expose the same complete header and dialog navigation", async t => {
+test("all 14 public pages expose the same complete header and dialog navigation", async t => {
   for (const page of publicPages) await t.test(page, () => {
     const h = harness({ page });
     try {

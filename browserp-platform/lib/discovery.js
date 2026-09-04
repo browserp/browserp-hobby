@@ -19,11 +19,10 @@ export async function discoverServers(input) {
     if (!developmentCatalogAllowed()) throw error;
     result = localDiscovery(fallbackServers, filters);
   }
-  const demoMatches = model.matches(model.showcase, filters);
   return {
-    servers: [...(demoMatches && !filters.offset ? [model.showcase] : []), ...(result.servers || [])],
-    total: Number(result.total || 0) + Number(demoMatches),
-    facets: model.mergeFacets(result.facets, model.facets([model.showcase], filters)),
+    servers: result.servers || [],
+    total: Number(result.total || 0),
+    facets: result.facets || {},
     nextOffset: filters.offset + filters.limit < Number(result.total || 0) ? filters.offset + filters.limit : null
   };
 }

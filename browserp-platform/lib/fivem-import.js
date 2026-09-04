@@ -8,6 +8,9 @@ const FEATURED = "https://gss.cfx-services.net/v1/public/featured-servers/fivem"
 const MAX_BODY = 1_048_576;
 const STALE_AFTER_MS = 5 * 60_000;
 const IMAGE_HOSTS = new Set(["cdn.discordapp.com", "media.discordapp.net", "i.imgur.com", "i.postimg.cc", "res.cloudinary.com"]);
+// Individually reviewed community assets. Approval does not extend to other
+// paths, query strings or hosts; downloads still pass server-media validation.
+const REVIEWED_IMAGE_URLS = new Set(["https://cdn.calirp.gg/logos/calirpfivembannerdeferral.png"]);
 const SECRET_KEY = /(?:password|secret|token|license|webhook|credential|rcon|api.?key|steam.?key)/i;
 const URL_PATTERN = /(?:https?:\/\/|(?:www\.)?(?:discord\.gg\/|discord(?:app)?\.com\/invite\/|cfx\.re\/join\/))[^\s<>"'`|,;]+/gi;
 const plain = (value, max = 500) => typeof value === "string" ? value.normalize("NFKC").replace(/\^[0-9]/g, "").replace(/<[^>]*>/g, "").replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/g, " ").replace(/\s+/g, " ").trim().slice(0, max) : "";
@@ -51,14 +54,14 @@ function classifyUrl(value) {
   }
   if (!IMAGE_HOSTS.has(host) && /(?:^|\.)discord(?:app)?\.(?:com|gg|gift)$/.test(host)) return null;
   const image = /\.(?:png|jpe?g|webp|gif)$/i.test(url.pathname) || host === "res.cloudinary.com" && /\/image\/upload\//.test(url.pathname);
-  if (image) return { type: "image", url: url.href, trusted: IMAGE_HOSTS.has(host) };
+  if (image) return { type: "image", url: url.href, trusted: IMAGE_HOSTS.has(host) || REVIEWED_IMAGE_URLS.has(url.href) };
   return { type: "website", url: url.href };
 }
 
 export function safeFiveMImageUrl(value) {
   const url = safeUrl(value);
   if (!url) return null;
-  if (url.hostname === "frontend.cfx-services.net" && /^\/api\/servers\/icon\/[a-z0-9]{6,12}\/\d{1,16}\.png$/.test(url.pathname) && !url.search) return url.href;
+  if (url.hostname === "frontend.cfx-services.net" && /^\/api\/servers\/icon\/[a-z0-9]{6,12}\/-?\d{1,10}\.png$/.test(url.pathname) && !url.search) return url.href;
   const result = classifyUrl(value);
   return result?.type === "image" && result.trusted ? result.url : null;
 }
@@ -98,7 +101,11 @@ export function normalizeFiveMServer(raw, { joinCode: requested, now = new Date(
   function choose(type, field, preferred) {
     const matches = candidates.filter((entry) => entry.type === type).sort((a, b) => Number(preferred.test(b.source)) - Number(preferred.test(a.source)));
     const urls = unique(matches.map((entry) => entry.url));
-    if (urls.length > 1) { issue("conflicting_links", field, "Several different links were found. Choose the correct one during review."); return null; }
+    if (urls.length > 1) {
+      issue("conflicting_links", field, "Several different links were found. Choose the correct one during review.");
+      for (const url of urls.slice(0, 10)) record(field, matches.find((entry) => entry.url === url).source, url, "low");
+      return null;
+    }
     const selected = matches[0];
     if (!selected) return null;
     record(field, selected.source, selected.url, preferred.test(selected.source) ? "high" : "medium");
@@ -166,7 +173,8 @@ export function normalizeFiveMServer(raw, { joinCode: requested, now = new Date(
   const bannerUrl = banners[0]?.url || null;
   if (bannerUrl) record("images.bannerUrl", banners[0].source, bannerUrl, "medium");
   const logos = imageEntries.filter((entry) => entry.trusted && /logo|icon/i.test(entry.source));
-  const iconVersion = Number.isSafeInteger(data.iconVersion) && data.iconVersion >= 0 ? data.iconVersion : null;
+  // Cfx icon hashes may be serialized as signed 32-bit integers.
+  const iconVersion = Number.isInteger(data.iconVersion) && data.iconVersion >= -2_147_483_648 && data.iconVersion <= 4_294_967_295 ? data.iconVersion : null;
   const logoUrl = iconVersion !== null ? `${API}/icon/${joinCode}/${iconVersion}.png` : unique(logos.map((entry) => entry.url)).length === 1 ? logos[0].url : null;
   if (logoUrl) record("images.logoUrl", iconVersion !== null ? "iconVersion" : logos[0].source, logoUrl, "medium");
   for (const field of fields.filter((entry) => /banner|logo|icon/i.test(entry.source))) if (field.value && !candidates.some((entry) => entry.source === field.source && entry.type === "image")) issue("invalid_image", field.source, "An image field did not contain a supported image URL; it was excluded.");

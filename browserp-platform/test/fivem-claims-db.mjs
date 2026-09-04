@@ -1,7 +1,7 @@
 // Disposable PostgreSQL coverage. No production connection, users or claims.
 // Run: node --test test/fivem-claims-db.mjs (or set PGLITE_MODULE to the installed module).
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import test from 'node:test';
@@ -54,7 +54,7 @@ test('FiveM imports and claim requests enforce real PostgreSQL trust boundaries'
  `);
  for (const name of ['platforms','profiles','staff_roles','permissions','staff_role_permissions','staff_memberships','servers','server_tags','server_status_snapshots','staff_audit_events','boosts','tool_events']) await db.exec(core.match(new RegExp(`create table public\\.${name} \\([\\s\\S]*?\\n\\);`))[0]);
  await db.exec(ops.match(/create table if not exists public\.security_bans \([\s\S]*?\n\);/)[0]);
- await db.exec(`alter table public.servers add access_type text default 'public',add cfx_join_url text,add moderation_version bigint not null default 1;
+ await db.exec(`alter table public.servers add access_type text not null default 'public' constraint servers_access_type_check check(access_type in ('public','allowlisted','application')),add cfx_join_url text,add moderation_version bigint not null default 1;
  create function private.bump_moderation_version() returns trigger language plpgsql as $$begin new.moderation_version:=old.moderation_version+1;return new;end$$;
  create trigger servers_moderation_version before update on public.servers for each row execute function private.bump_moderation_version();
  create table public.staff_permission_overrides(user_id uuid,permission_key text,allowed boolean);
@@ -72,6 +72,10 @@ test('FiveM imports and claim requests enforce real PostgreSQL trust boundaries'
  await db.exec(fn(ops,'public.has_staff_permission'));
  try { await db.exec(migration); } catch (error) { console.error({position:error.position,detail:error.detail,where:error.where,context:migration.slice(Math.max(0,Number(error.position)-180),Number(error.position)+180)}); await db.close(); throw error; }
  await db.exec(read('20260904003147_searchable_import_keywords.sql'));
+ await db.exec(read(readdirSync(base).find(name => name.endsWith('_tailored_game_discovery_filters.sql'))));
+ await db.exec(read('20260904005311_imported_server_unknown_access.sql'));
+ await db.exec(fn(ops,'public.attach_server_submission_metadata_server'));
+ await db.exec('revoke all on function public.attach_server_submission_metadata_server(uuid,uuid,text[],text,text,text) from public;grant execute on function public.attach_server_submission_metadata_server(uuid,uuid,text[],text,text,text) to service_role');
 
  await t.test('anonymous users, ordinary members, insufficient MFA and direct proof forgery are denied', async () => {
   await db.exec('set role anon');
@@ -228,6 +232,28 @@ test('FiveM imports and claim requests enforce real PostgreSQL trust boundaries'
   assert.equal(legacy.length,1);assert.equal(legacy[0].id,published.serverId);
   const excluded=await rpc('public.search_server_directory($1,$2,$3,$4,false,false,false,$5,30)',[null,'moonquartz','minecraft','all','recommended']);assert.equal(excluded.length,0);
   assert.equal(Object.hasOwn(legacy[0],'owner_id'),false);assert.equal(Object.hasOwn(smart.servers[0],'candidate'),false);
+ });
+
+ await t.test('unconfirmed imported access is explicit, searchable and never matches known access filters', async () => {
+  const unresolved = await stage({...candidate('unkn0wn'),name:'Unresolved access roleplay',accessType:'unknown',players:null,capacity:null,online:null,checkedAt:null});
+  await login();
+  const result = await publish(unresolved);
+  await db.exec('reset role');
+  assert.equal((await db.query('select access_type from public.servers where id=$1',[result.serverId])).rows[0].access_type,'unknown');
+  await assert.rejects(db.query('update public.servers set access_type=null where id=$1',[result.serverId]),/not-null constraint/);
+  await assert.rejects(db.query("update public.servers set access_type='unrestricted' where id=$1",[result.serverId]),/servers_access_type_check/);
+  await db.exec('set role anon');
+  const search = access => rpc('public.search_public_directory($1::jsonb)',[JSON.stringify({query:'Unresolved access roleplay',platform:'fivem',access})]);
+  const found = await search('all');
+  assert.equal(found.total,1);assert.equal(found.servers[0].id,result.serverId);assert.equal(found.servers[0].access_type,'unknown');
+  assert.ok(found.facets.access.some(item=>item.value==='unknown'&&item.count===1));
+  assert.equal((await search('unknown')).total,1);
+  for (const access of ['public','allowlisted','application']) assert.equal((await search(access)).total,0);
+  await assert.rejects(stage({...candidate('badacc3'),accessType:'unrestricted'}),/Invalid access type/);
+  const missing = await stage({...candidate('noacc33'),accessType:null});
+  await login();await assert.rejects(publish(missing),/Review the name, description, region, language and access/);
+  await service();
+  await assert.rejects(rpc('public.attach_server_submission_metadata_server($1::uuid,$2::uuid,$3::text[],$4,$5,$6)',[member,request(),[],'unknown',null,'a'.repeat(64)]),/Invalid access type/);
  });
 
  await t.test('dismissal is audited, permission changes take effect and private source tables stay inaccessible', async () => {

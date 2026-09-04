@@ -86,11 +86,12 @@ test("FiveM status and page controls request server-side pages instead of filter
 
 test("published live-count checks preserve unsaved listing edits and do not publish them", async t => {
   const h = harness("staff-fivem"); t.after(() => h.dom.window.close()); const posts = [];
-  await h.w.BrowseRPStaffFiveM.init({ root: h.root, api: async (_path, options = {}) => { if (options.body) { posts.push(JSON.parse(options.body)); return { message: "Current player observation checked." }; } return { workspace: { items: [record({ status: "published", serverId: "server-fixture" })], total: 1, canManage: true } }; } });
+  await h.w.BrowseRPStaffFiveM.init({ root: h.root, api: async (_path, options = {}) => { if (options.body) { posts.push(JSON.parse(options.body)); return { result: { players: 0, capacity: 64, checkedAt: "2026-09-04T00:45:00Z" } }; } return { workspace: { items: [record({ status: "published", serverId: "server-fixture" })], total: 1, canManage: true } }; } });
   h.click("Review"); await tick(); h.$('[name="name"]').value = "Unsaved review"; h.$('[name="reason"]').value = "Check current player count";
   h.click("Refresh live player count"); await tick(); h.submit("dialog form"); await tick();
   assert.equal(posts[0].action, "refresh"); assert.equal(posts[0].data, undefined); assert.equal(h.$('[name="name"]').value, "Unsaved review"); assert.equal(h.$('[name="reason"]').value, "Check current player count");
-  assert.match(h.$(".fivem-editor .fivem-status").textContent, /observation checked/);
+  assert.match(h.$(".fivem-editor .fivem-status").textContent, /Latest FiveM observation: 0 \/ 64 players.*4 Sept 2026, 00:45 UTC/);
+  assert.match(h.$(".fivem-editor > .fivem-help").textContent, /Imported snapshot/);
 });
 
 test("ownership forms use the supplied CSRF token and keep a failed request editable", async t => {

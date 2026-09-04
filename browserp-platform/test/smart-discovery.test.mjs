@@ -7,7 +7,7 @@ import "../public/discovery-model.js";
 const M = globalThis.BrowseRPDiscovery;
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
-const sample = (slug, extra = {}) => ({ ...M.showcase, slug, name: slug, showcase: false, ...extra });
+const sample = (slug, extra = {}) => ({ slug, name: slug, platform_id: "fivem", platform_name: "FiveM", region: "United States", framework: "vMenu", language: "English", access_type: "public", verified: true, beginner_friendly: true, online: false, tags: [], ...extra });
 const rows = [sample("city", { framework: "QBCore", region: "Europe", online: true, tags: ["custom-cars", "economy"] }), sample("blocks", { platform_id: "minecraft", platform_name: "Minecraft", framework: "Towny", region: "Europe", tags: ["survival"] }), sample("frontier", { platform_id: "redm", platform_name: "RedM", framework: "VORP", region: "United States", tags: ["economy"] })];
 function payload(filters = {}) {
   const matches = rows.filter(row => M.matches(row, filters));
@@ -27,11 +27,11 @@ function harness({ url = "https://browserp.test/servers", fetcher, fixedGame } =
 
 test("full dataset facets follow game and region, and literal multiword search normalizes feature names", () => {
   const facets = M.facets(rows, { platform: "minecraft", region: "Europe" });
-  assert.deepEqual(facets.mode, [{ value: "Towny", count: 1 }]);
+  assert.deepEqual(facets.mode, [{ value: "survival", count: 1 }, { value: "towny", count: 1 }]);
   assert.deepEqual(facets.feature, [{ value: "survival", count: 1 }]);
   assert.equal(M.matches(rows[0], { query: "QBCore custom cars" }), true);
   assert.equal(M.matches(rows[0], { query: "%" }), false);
-  assert.equal(M.matches(M.showcase, { online: true }), false);
+  assert.equal(M.matches(sample("offline"), { online: true }), false);
   const state = M.normalize({ platform: "forza", sort: "invalid", region: "Unknown", offset: -20 });
   assert.equal(state.platform, "all"); assert.equal(state.sort, "recommended"); assert.equal(state.region, "Unknown"); assert.equal(state.offset, 0);
 });
@@ -45,7 +45,7 @@ test("game suggestions apply structured filters, keyboard selection keeps focus,
   search.dispatchEvent(new h.w.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
   await pause(20);
   assert.equal(h.api.getFilters().platform, "minecraft"); assert.equal(search.value, "");
-  assert.match(h.$("#list").textContent, /blocks/); assert.equal(h.$("#mode-filter").options.length, 2);
+  assert.match(h.$("#list").textContent, /blocks/); assert.ok([...h.$("#mode-filter").options].some(item => item.value === "towny" && !item.disabled)); assert.ok([...h.$("#mode-filter").options].some(item => item.value === "skyblock" && item.disabled));
   assert.equal(h.$("#region-filter").options[1].value, "Europe");
   assert.match(h.w.location.search, /platform=minecraft/); assert.doesNotMatch(h.w.location.search, /q=/);
   search.focus(); search.dispatchEvent(new h.w.Event("focus")); search.dispatchEvent(new h.w.KeyboardEvent("keydown", { key: "Escape" })); assert.equal(search.getAttribute("aria-expanded"), "false");
@@ -73,9 +73,9 @@ test("unknown selected regions remain visible and removable; back navigation res
 test("game pages lock the game and carry refinements into the full directory", async () => {
   const h = harness({ url: "https://browserp.test/games/minecraft?region=Europe", fixedGame: "minecraft" }); await pause(10);
   assert.equal(h.$("#platform-filter").parentElement.hidden, true);
-  h.change("#mode-filter", "Towny"); await pause(10);
+  h.change("#mode-filter", "towny"); await pause(10);
   const link = new URL(h.$("#game-directory-link-v4").href);
-  assert.equal(link.searchParams.get("platform"), "minecraft"); assert.equal(link.searchParams.get("mode"), "Towny"); assert.equal(link.searchParams.get("region"), "Europe"); h.dom.window.close();
+  assert.equal(link.searchParams.get("platform"), "minecraft"); assert.equal(link.searchParams.get("mode"), "towny"); assert.equal(link.searchParams.get("region"), "Europe"); h.dom.window.close();
 });
 
 test("API failure preserves selected filters, exposes retry and clears busy state", async () => {
@@ -87,28 +87,49 @@ test("API failure preserves selected filters, exposes retry and clears busy stat
 test("database discovery counts beyond page size and excludes private, adult and disabled listings", async () => {
   const db = new PGlite();
   try {
-    await db.exec(`create role anon; create role authenticated;
+    await db.exec(`create role anon; create role authenticated; create role service_role; create schema private;
       create table public.platforms(id text primary key,name text,short_name text,enabled boolean);
       create table public.servers(id uuid primary key,name text,slug text,platform_id text,description text,region text,language text,framework text,access_type text,verified boolean,beginner_friendly boolean,community_url text,quality_score numeric,engagement_score numeric,theme_start text,theme_end text,created_at timestamptz,status text,age_rating text);
-      create table public.server_status_snapshots(server_id uuid,online boolean,players integer,capacity integer,checked_at timestamptz);
+      create table public.server_status_snapshots(id bigint generated always as identity,server_id uuid,online boolean,players integer,capacity integer,checked_at timestamptz,provider_status text);
+      create table public.server_import_sources(server_id uuid primary key,keywords text[],last_checked_at timestamptz,last_error_at timestamptz);
       create table public.boosts(server_id uuid,amount integer,created_at timestamptz);
       create table public.server_tags(server_id uuid,tag text,relevance_score integer);
       insert into public.platforms values('fivem','FiveM','5M',true),('minecraft','Minecraft','MC',true),('redm','RedM','RM',false);
       insert into public.servers select md5(i::text)::uuid,'Community '||i,'community-'||i,'fivem','City roleplay community with custom cars and jobs','Europe','English','QBCore','public',true,true,'https://example.com',50,50,'#000000','#ffffff',now(),'published','general' from generate_series(1,125) i;
       insert into public.server_tags select id,'custom-cars',80 from public.servers;
+      update public.servers set framework='QB-Core' where name like 'Community 1%';
+      insert into public.server_tags select id,'CUSTOM_VEHICLES',60 from public.servers where name='Community 1';
       insert into public.servers select md5('private')::uuid,'Private','private','fivem','Private data','Europe','English','Hidden setup','public',true,true,null,50,50,null,null,now(),'draft','general';
       insert into public.servers select md5('adult')::uuid,'Adult','adult','fivem','Adult data','Europe','English','Hidden setup','public',true,true,null,50,50,null,null,now(),'published','adult';
       insert into public.servers select md5('disabled')::uuid,'Disabled','disabled','redm','Disabled game','Europe','English','Hidden setup','public',true,true,null,50,50,null,null,now(),'published','general';`);
-    const migration = readdirSync(new URL("../supabase/migrations", import.meta.url)).find(name => name.endsWith("_smart_public_directory.sql"));
-    await db.exec(read(`supabase/migrations/${migration}`));
+    const migrations = readdirSync(new URL("../supabase/migrations", import.meta.url));
+    const importSQL = read(`supabase/migrations/${migrations.find(name => name.endsWith("_fivem_imports_and_server_claims.sql"))}`);
+    await db.exec(importSQL.match(/create or replace view private\.effective_server_status[\s\S]*?revoke all on private\.effective_server_status[^;]*;/)[0]);
+    for (const suffix of ["_searchable_import_keywords.sql", "_tailored_game_discovery_filters.sql"]) await db.exec(read(`supabase/migrations/${migrations.find(name => name.endsWith(suffix))}`));
     const query = async filters => (await db.query("select public.search_public_directory($1::jsonb) as result", [JSON.stringify(filters)])).rows[0].result;
     const first = await query({ platform: "fivem", feature: "custom cars", limit: 24 });
-    assert.equal(first.total, 125); assert.equal(first.servers.length, 24); assert.deepEqual(first.facets.mode, [{ value: "QBCore", count: 125 }]);
+    assert.equal(first.total, 125); assert.equal(first.servers.length, 24); assert.deepEqual(first.facets.mode, [{ value: "qbcore", count: 125 }]);
     const second = await query({ platform: "fivem", limit: 24, offset: 24 }); assert.equal(new Set([...first.servers, ...second.servers].map(row => row.id)).size, 48);
     assert.equal((await query({ query: "%" })).total, 0); assert.equal((await query({ query: "QBCore custom cars" })).total, 125);
     assert.equal((await query({ platform: "minecraft" })).total, 0);
+    assert.equal((await query({ platform: "fivem", mode: "QB-Core", feature: "CUSTOM_VEHICLES" })).total, 125);
+    assert.equal(first.facets.feature.find(item => item.value === "custom cars").count, 125);
+    assert.equal((await query({ query: "qb core custom vehicles" })).total, 125);
     assert.ok(first.servers.every(row => !Object.hasOwn(row, "mismatches") && !Object.hasOwn(row, "owner_id")));
     const acl = (await db.query("select has_function_privilege('anon','public.search_public_directory(jsonb)','execute') as allowed")).rows[0]; assert.equal(acl.allowed, true);
+    await db.exec(`insert into public.platforms values('roblox','Roblox','RB',true);
+      insert into public.servers select md5('minecraft-mode')::uuid,'Block stories','block-stories','minecraft','A roleplay world','Europe','English',null,'public',false,false,null,50,50,null,null,now(),'published','general';
+      insert into public.server_tags values(md5('minecraft-mode')::uuid,'Sky Block',60),(md5('minecraft-mode')::uuid,'skyblock',50),(md5('minecraft-mode')::uuid,'Java Edition',50);
+      insert into public.servers select md5('roblox-mode')::uuid,'School stories','school-stories','roblox','A school roleplay experience','Europe','English',null,'public',false,false,null,50,50,null,null,now(),'published','general';
+      insert into public.server_tags values(md5('roblox-mode')::uuid,'School Roleplay',60);
+      insert into public.servers select md5('vmenu-mode')::uuid,'County stories','county-stories','fivem','A county roleplay community','Europe','English','vMenu','public',false,false,null,50,50,null,null,now(),'published','general';`);
+    const minecraft = await query({ platform: 'minecraft', mode: 'sky_block', feature: 'java' });
+    assert.equal(minecraft.total,1);assert.deepEqual(minecraft.facets.mode,[{value:'skyblock',count:1}]);
+    assert.equal((await query({platform:'roblox',mode:'school rp'})).total,1);
+    assert.equal((await query({platform:'minecraft',mode:'school rp'})).total,0);
+    const popular = await query({platform:'fivem'});assert.deepEqual(popular.facets.mode,[{value:'qbcore',count:125},{value:'vmenu',count:1}]);
+    assert.ok(popular.servers.every(row=>!Object.hasOwn(row,'mode_values')&&!Object.hasOwn(row,'feature_values')));
+    await db.exec('set role anon');assert.equal((await query({platform:'fivem',mode:'QBCore'})).total,125);
   } finally { await db.close(); }
 });
 
@@ -136,4 +157,43 @@ test("homepage game and region selectors share live facets and upcoming games st
   game.value = "minecraft"; game.dispatchEvent(new w.Event("change")); await pause(10);
   assert.deepEqual([...region.options].map(item => item.value), ["all", "Europe"]);
   dom.window.close();
+});
+
+
+test("launch-game taxonomy deduplicates aliases per server and ranks real usage without showcase inflation", () => {
+  const fixtures = [
+    sample("qb-one", { framework: "QB-Core", tags: ["CUSTOM_VEHICLES", "custom-cars", "SeriousRoleplay"] }),
+    sample("qb-two", { framework: "qbcore", tags: ["custom cars", "serious-rp"] }),
+    sample("menu", { framework: "vMenu", tags: ["racing"] }), sample("excluded-demo", { showcase: true })
+  ];
+  const facets = M.facets(fixtures, { platform: "fivem" });
+  assert.deepEqual(facets.mode, [{ value: "qbcore", count: 2 }, { value: "vmenu", count: 1 }]);
+  assert.equal(facets.feature.find(item => item.value === "custom cars").count, 2);
+  assert.equal(M.matches(fixtures[0], { platform: "fivem", mode: "QBCore", feature: "custom_cars" }), true);
+  assert.equal(M.matches(fixtures[0], { query: "qb core custom vehicles" }), true);
+  assert.equal(facets.feature.find(item => item.value === "serious rp").count, 2);
+  assert.equal(M.display("access", "unknown"), "Not confirmed");
+  assert.equal(M.canonical("mode", "QBX_CORE", "fivem"), "qbox");
+  assert.equal(M.canonical("mode", "RedEM:RP", "redm"), "redem rp");
+  assert.equal(M.matches(sample("school", { platform_id: "roblox", framework: null, tags: ["School Roleplay"] }), { platform: "roblox", mode: "school rp" }), true);
+  assert.equal(M.matches(sample("sky", { platform_id: "minecraft", framework: null, tags: ["Sky Block"] }), { platform: "minecraft", mode: "skyblock" }), true);
+});
+
+test("public game controls show tailored options sorted by usage without visible count labels", async () => {
+  const fixtures = [sample("qb-one", { framework: "QB-Core" }), sample("qb-two", { framework: "QBCore" }), sample("menu", { framework: "vMenu" })];
+  const h = harness({ url: "https://browserp.test/servers?platform=fivem", fetcher: async () => ({ ok: true, json: async () => ({ servers: fixtures, total: fixtures.length, facets: M.facets(fixtures, { platform: "fivem" }), nextOffset: null }) }) });
+  await pause(10);
+  const mode = h.$("#mode-filter");
+  assert.equal(mode.parentElement.querySelector("span").textContent, "Framework");
+  assert.deepEqual([...mode.options].slice(1, 3).map(item => item.textContent), ["QBCore", "vMenu"]);
+  assert.equal([...mode.options].find(item => item.value === "vorp"), undefined);
+  assert.equal([...mode.options].find(item => item.value === "esx").disabled, true);
+  assert.ok([...h.$("#controls").querySelectorAll("option,.smart-checks span")].every(item => !/\(\d+\)/.test(item.textContent)));
+  assert.equal(h.$("#count").textContent, "3 servers");
+  h.dom.window.close();
+  for (const [game, expected, option] of [["redm", "Framework", "vorp"], ["minecraft", "Game mode", "skyblock"], ["roblox", "Experience style", "school rp"]]) {
+    const page = harness({ url: `https://browserp.test/games/${game}`, fixedGame: game }); await pause(10);
+    assert.equal(page.$("#mode-filter").parentElement.querySelector("span").textContent, expected);
+    assert.ok([...page.$("#mode-filter").options].some(item => item.value === option));page.dom.window.close();
+  }
 });
