@@ -61,6 +61,8 @@
 
     function createObserver() {
       if (observer || prefersReduced()) return;
+      // A results section can be many viewports tall after its cards load.
+      // Reveal when it enters the viewport; a percentage may never be reached.
       observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
@@ -68,7 +70,7 @@
           node.classList.add("is-revealed");
           observer.unobserve(node);
         });
-      }, { threshold: 0.12, rootMargin: "0px 0px -12% 0px" });
+      }, { threshold: 0, rootMargin: "0px 0px -12% 0px" });
       pending.forEach((node) => observer.observe(node));
     }
 
@@ -81,7 +83,7 @@
         if (observer) observer.unobserve(node);
         return;
       }
-      if (prefersReduced()) {
+      if (prefersReduced() || typeof IntersectionObserver !== "function") {
         node.classList.add("is-revealed");
         return;
       }
