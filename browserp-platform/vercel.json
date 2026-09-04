@@ -154,6 +154,10 @@
       "destination": "/api/router?_route=admin/overview"
     },
     {
+      "source": "/api/admin/refresh-health",
+      "destination": "/api/router?_route=admin/refresh-health"
+    },
+    {
       "source": "/api/admin/staff",
       "destination": "/api/router?_route=admin/staff"
     },

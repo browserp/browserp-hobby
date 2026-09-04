@@ -1,0 +1,33 @@
+.staff-v3 .refresh-health { margin: 24px 0; padding: clamp(18px,3vw,28px); border: 1px solid var(--line,#32273b); border-radius: 18px; background: var(--panel,#100d15); min-width: 0; }
+.refresh-health-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.refresh-health-heading h2 { margin: 6px 0 8px; font-size: clamp(22px,3vw,30px); line-height: 1.2; }
+.refresh-health-heading p,.refresh-health-stamp,.refresh-health-metric p,.refresh-health-game small { color: var(--copy,#aaa0b4); }
+.refresh-health-heading p { margin: 0; max-width: 70ch; }
+.refresh-health-heading button { flex-shrink: 0; }
+.refresh-health-state { width: fit-content; max-width: 100%; padding: 9px 13px; border: 1px solid #70647e; border-radius: 9px; margin: 20px 0 8px; font-weight: 650; }
+.refresh-health-state[data-tone="healthy"] { color: #a0ebcd; border-color: #3f8d70; background: #14352b; }
+.refresh-health-state[data-tone="warning"] { color: #ffe0a1; border-color: #937137; background: #332916; }
+.refresh-health-state[data-tone="error"] { color: #ffc0cf; border-color: #98475c; background: #3a1b27; }
+.refresh-health-stamp { margin: 0 0 18px; font-size: 12px; line-height: 1.65; }
+.refresh-health-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 0; }
+.refresh-health-metric { min-width: 0; padding: 17px; border: 1px solid var(--line,#32273b); border-radius: 12px; background: var(--bg,#09070d); }
+.refresh-health-metric dt { font-size: 12px; font-weight: 650; }
+.refresh-health-metric dd { margin: 10px 0; font-size: 29px; line-height: 1.2; font-weight: 750; font-variant-numeric: tabular-nums; }
+.refresh-health-time dd { font-size: 17px; line-height: 1.45; }
+.refresh-health-metric p { font-size: 12px; line-height: 1.6; margin: 0; }
+.refresh-health-games { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(180px,100%),1fr)); gap: 12px; margin-top: 16px; }
+.refresh-health-game { display: grid; gap: 5px; padding: 12px 15px; border-left: 3px solid #b884f2; background: var(--bg,#09070d); border-radius: 0 8px 8px 0; }
+.refresh-health-game[data-platform="fivem"] { border-color: #ff9c5a; }.refresh-health-game[data-platform="redm"] { border-color: #ff7d88; }.refresh-health-game[data-platform="minecraft"] { border-color: #82dca3; }.refresh-health-game[data-platform="roblox"] { border-color: #e0e4ee; }
+.refresh-health-game span,.refresh-health-game small { font-size: 12px; }
+.refresh-health-details { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line,#32273b); }
+.refresh-health-details summary { cursor: pointer; font-weight: 650; padding: 7px 0; }
+.refresh-health-details > p { color: var(--copy,#aaa0b4); font-size: 13px; line-height: 1.7; }
+.refresh-health-facts { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 15px 0; }
+.refresh-health-facts dt { color: var(--copy,#aaa0b4); font-size: 12px; }.refresh-health-facts dd { margin: 5px 0 0; font-size: 13px; overflow-wrap: anywhere; }
+.refresh-health-history { overflow-x: auto; border: 1px solid var(--line,#32273b); border-radius: 10px; max-width: 100%; }
+.refresh-health-history table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+.refresh-health-history caption { text-align: left; padding: 12px; color: var(--copy,#aaa0b4); }
+.refresh-health-history th,.refresh-health-history td { text-align: left; white-space: nowrap; padding: 11px 12px; border-top: 1px solid var(--line,#32273b); }
+.refresh-health :is(button,summary,.refresh-health-history):focus-visible { outline: 2px solid #d6acff; outline-offset: 4px; }
+@media(max-width:1000px) { .refresh-health-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:540px) { .refresh-health-heading { flex-direction: column; gap: 14px; }.refresh-health-heading button { align-self: stretch; }.refresh-health-metrics,.refresh-health-facts { grid-template-columns: 1fr; }.refresh-health-metric dd { font-size: 26px; }.refresh-health-time dd { font-size: 17px; } }

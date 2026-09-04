@@ -1,0 +1,105 @@
+{
+  "reviewedAt": "2026-09-04T11:17:33.477210+00:00",
+  "status": "Editorial candidate only; no staging or publication performed.",
+  "candidates": [
+    {
+      "joinCode": "bmp6dp",
+      "platform": "fivem",
+      "status": "review_ready",
+      "name": "Everfall",
+      "description": "An established 18+ city with detailed roleplay rules, practical newcomer guides and a range of civilian, emergency-service and criminal paths. Players can begin with contract work, join a business or apply to a public-service department, while the community provides reporting and support channels for problems.",
+      "region": null,
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/everfall",
+      "websiteUrl": "https://everfallcommunity.com/",
+      "cfxJoinUrl": "https://cfx.re/join/bmp6dp",
+      "tags": [
+        "Serious RP",
+        "Economy",
+        "Jobs",
+        "Businesses",
+        "Police",
+        "EMS",
+        "18+"
+      ],
+      "keywords": [
+        "everfall",
+        "serious roleplay",
+        "economy",
+        "civilian jobs",
+        "businesses",
+        "emergency services",
+        "18+"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/bmp6dp/137736726.png",
+      "bannerUrl": null,
+      "imageReview": {
+        "checkedAt": "2026-09-04T11:16:38.912Z",
+        "logoNote": "Official Cfx icon fetched through existing image guard; valid static PNG, 1219 bytes. Visually checked: simple white community glyph on transparent background.",
+        "bannerNote": "Unsupported external banner omitted; no generic or unrelated replacement."
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/bmp6dp",
+          "purpose": "Current gta5 identity, English locale, Qbox resources, public flag, timestamped source count and official icon."
+        },
+        {
+          "url": "https://everfallcommunity.com/rules/general",
+          "purpose": "Current 18+ conduct, roleplay, reporting and membership rules."
+        },
+        {
+          "url": "https://everfallcommunity.com/guides",
+          "purpose": "Newcomer jobs, controls, businesses, emergency-service applications; official Discord channel links identify guild 1019003474098270328."
+        },
+        {
+          "url": "https://everfallcommunity.com/guides/faq",
+          "purpose": "Joining requirements and operational guidance."
+        },
+        {
+          "url": "https://discord.com/servers/everphone-1019003474098270328",
+          "purpose": "Official public guild profile explicitly identifies Everfall and creation September 2022 despite current EverPhone display name."
+        },
+        {
+          "url": "https://www.reddit.com/r/FiveMServers/comments/10s2ztg/",
+          "purpose": "Dated February 2023 community recruitment with same official invite; evidence of history, not independent endorsement."
+        },
+        {
+          "url": "https://www.reddit.com/r/FiveMServers/comments/1e1n6z8/",
+          "purpose": "Dated July 2024 community job-fair announcement; historical organised activity, not current staffing guarantee."
+        },
+        {
+          "url": "https://store.everfallcommunity.com/",
+          "purpose": "Official paid-content store exists; no unsupported no-pay-to-win promise."
+        }
+      ],
+      "inclusionReasons": [
+        "Current detailed rules and a practical newcomer route, with documented reporting/escalation.",
+        "Same community documented from 2022 through current operation, including dated events.",
+        "Two separated Cfx activity observations: 123/315 at 01:17 UTC and 15/315 at 11:16 UTC on 4 September 2026; not merely one morning count.",
+        "Exact official Discord channel guild ID matches fixed invite API, resolving the previous name-only identity hold."
+      ],
+      "conflicts": [
+        "Discord display name is currently EverPhone; official description, direct channel links and guild ID confirm Everfall.",
+        "Store sells optional content. Product balance and actual daily staff enforcement have not been independently audited.",
+        "Available public feedback is sparse and some dated 2024 client-support reports mention issues; these do not establish current server-wide instability.",
+        "Region not independently confirmed: en-US is a locale declaration only, so leave region blank/Not confirmed."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-04T11:16:38.912Z",
+        "status": "online",
+        "players": 15,
+        "max": 315,
+        "observedAt": "2026-09-04T11:16:07.791Z"
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "EverPhone",
+        "guildId": "1019003474098270328",
+        "identityConfirmedBy": "Exact guild ID in official website announcement/status/changelog links; guild public description explicitly identifies Everfall."
+      },
+      "requiresStaffReview": true
+    }
+  ]
+}

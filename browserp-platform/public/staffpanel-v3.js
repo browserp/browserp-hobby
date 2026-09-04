@@ -494,7 +494,7 @@
     if (legacy[pageKey]) { location.replace(`/staffpanel/moderation#${legacy[pageKey]}`); return; }
     if (pageKey === "content") { location.replace("/staffpanel/overview#overview-adverts"); return; }
     if (pageKey === "overview" && location.hash === "#overview-roles") { location.replace("/staffpanel/moderation#staff"); return; }
-    mobile();const top=$(".staff-top-v3");if(top){top.append(themeButton());applyTheme(document.documentElement.dataset.theme||preferredTheme());}if(!await ensureStaff())return;window.BrowseRPStaffScrapers?.init({api});try{const page=document.body.dataset.staffPage;if(page==="overview") {
+    mobile();const top=$(".staff-top-v3");if(top){top.append(themeButton());applyTheme(document.documentElement.dataset.theme||preferredTheme());}if(!await ensureStaff())return;void window.BrowseRPStaffRefreshHealth?.init({api});window.BrowseRPStaffScrapers?.init({api});try{const page=document.body.dataset.staffPage;if(page==="overview") {
       let toolsMounted = false;
       await window.BrowseRPStaffOverview.init({ api, onAuthFailure: showLogin, onLoad: async (website) => {
         if (toolsMounted) return;

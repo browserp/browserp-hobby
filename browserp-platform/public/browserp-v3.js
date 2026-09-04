@@ -263,6 +263,14 @@
     let copy = $("[data-ad-copy]", root);
     let image;
     let dots;
+    let markArtworkUnavailable;
+    let imageSource = "";
+    const failedImages = new Set();
+    const listeners = [];
+    const listen = (type, handler) => {
+      root.addEventListener(type, handler);
+      listeners.push(() => root.removeEventListener(type, handler));
+    };
     if (visual) {
       root.setAttribute("role", "region");
       root.setAttribute("aria-roledescription", "carousel");
@@ -274,10 +282,28 @@
       image.className = "side-ad-image-v3";
       image.alt = "";
       image.loading = "eager";
+      const imageNotice = node("p", "side-ad-image-notice-v3", "Artwork unavailable.");
+      imageNotice.hidden = true;
+      const finishImage = (unavailable) => {
+        image.classList.remove("is-changing");
+        root.classList.toggle("artwork-unavailable", unavailable);
+        imageNotice.hidden = !unavailable;
+      };
+      // Keep the advert readable when a browser blocks its artwork. Do not
+      // retry blocked addresses or override a content blocker's image styles.
+      markArtworkUnavailable = () => { failedImages.add(imageSource); finishImage(true); };
+      image.onerror = () => {
+        if (image.getAttribute("src") === imageSource) markArtworkUnavailable();
+      };
+      image.onload = () => {
+        if (image.getAttribute("src") !== imageSource) return;
+        if (!image.naturalWidth || getComputedStyle(image).display === "none") markArtworkUnavailable();
+        else finishImage(false);
+      };
       const shade = node("div", "side-ad-shade-v3");
       copy = node("div", "side-ad-copy-v3");
       copy.dataset.adCopy = "";
-      stage.append(image, shade, copy);
+      stage.append(image, shade, copy, imageNotice);
       if (list.length > 1) {
         const previous = node("button", "ad-arrow-v3 ad-arrow-previous-v3", "‹");
         previous.type = "button"; previous.dataset.adDirection = "previous"; previous.setAttribute("aria-label", "Previous advert");
@@ -299,9 +325,16 @@
       const advert = list[index];
       if (!copy) return;
       if (image) {
-        image.classList.add("is-changing");
-        image.src = safeAdvertImage(advert.imageUrl, index);
-        image.addEventListener("load", () => image.classList.remove("is-changing"), { once: true });
+        imageSource = safeAdvertImage(advert.imageUrl, index);
+        if (failedImages.has(imageSource)) markArtworkUnavailable();
+        else {
+          image.classList.add("is-changing");
+          image.src = imageSource;
+          if (image.complete) {
+            if (image.naturalWidth) image.onload();
+            else image.onerror();
+          }
+        }
       }
       const strong = node("strong", "", advert.headline || advert.name || "BrowseRP advert");
       const body = node("span", "", advert.body || "");
@@ -320,7 +353,11 @@
     let timer;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     function stop() { window.clearInterval(timer); }
-    root._browserpAdvertCleanup = stop;
+    root._browserpAdvertCleanup = () => {
+      stop();
+      listeners.forEach((remove) => remove());
+      if (image) { image.onload = null; image.onerror = null; }
+    };
     function restart() {
       stop();
       if (visual && list.length > 1 && !reducedMotion.matches) {
@@ -332,11 +369,11 @@
       draw(); restart();
     }));
     if (visual) {
-      root.addEventListener("mouseenter", stop);
-      root.addEventListener("mouseleave", restart);
-      root.addEventListener("focusin", stop);
-      root.addEventListener("focusout", restart);
-      root.addEventListener("keydown", (event) => {
+      listen("mouseenter", stop);
+      listen("mouseleave", restart);
+      listen("focusin", stop);
+      listen("focusout", restart);
+      listen("keydown", (event) => {
         if (!['ArrowLeft','ArrowRight'].includes(event.key)) return;
         event.preventDefault();
         index = (index + (event.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length;

@@ -222,6 +222,13 @@ img { display: block; max-width: 100%; }
 .side-ad-stage-v3 .ad-arrow-v3 { position: absolute; top: 50%; z-index: 3; display: grid; place-items: center; width: 44px; height: 44px; margin-top: -22px; border: 1px solid rgba(255,255,255,.35); border-radius: 50%; background: rgba(5,7,11,.72); color: #fff; backdrop-filter: blur(8px); }
 .side-ad-stage-v3 .ad-arrow-previous-v3 { left: 14px; }
 .side-ad-stage-v3 .ad-arrow-next-v3 { right: 14px; }
+.side-ad-v3.artwork-unavailable .side-ad-stage-v3 { min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 24px; }
+.side-ad-v3.artwork-unavailable .side-ad-image-v3,.side-ad-v3.artwork-unavailable .side-ad-shade-v3 { visibility: hidden; }
+.side-ad-v3.artwork-unavailable .side-ad-copy-v3 { position: static; grid-column: 1 / -1; padding: 0; }
+.side-ad-v3.artwork-unavailable .side-ad-copy-v3 strong { max-width: none; }
+.side-ad-image-notice-v3 { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 13px; }
+.side-ad-v3.artwork-unavailable .ad-arrow-v3 { position: static; margin: 0; }
+.side-ad-v3.artwork-unavailable .ad-arrow-next-v3 { justify-self: end; }
 .ad-dots-v3 { display: flex; justify-content: center; gap: 8px; padding: 13px; background: var(--panel); }
 .ad-dot-v3 { width: 28px; height: 4px; padding: 0; border: 0; border-radius: 10px; background: var(--line); cursor: pointer; }
 .ad-dot-v3[aria-current="true"] { background: linear-gradient(90deg,var(--pink),var(--violet)); }

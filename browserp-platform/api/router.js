@@ -483,6 +483,11 @@ const routes = {
     return ok(res, { overview });
   }),
 
+  "admin/refresh-health": endpoint("GET", async (req, res) => {
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    return ok(res, { health: await rpc("staff_refresh_health", {}, session.accessToken) });
+  }),
+
   "admin/moderation": endpoint(["GET", "POST"], async (req, res, id) => {
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true, provider: "discord" });
