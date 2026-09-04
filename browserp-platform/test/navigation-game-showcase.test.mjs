@@ -39,19 +39,16 @@ test("search supports typed choices with keyboard navigation", () => {
   assert.match(search, /choose\(choice\)/);
 });
 
-test("the county showcase is honest, fully routed and uses an original local logo", () => {
+test("launch discovery contains only real server listings", () => {
   const home = read("public/index.html");
-  const example = read("public/example-server.html");
   const directory = read("public/browserp-directory.js");
-  const logo = read("public/assets/san-andreas-county-rp-mark-v4.svg");
   const routes = read("vercel.json");
-  for (const content of [home, example, directory]) assert.match(content, /San Andreas County Roleplay/);
-  assert.match(example, /not affiliated with SACRP/i);
-  assert.match(example, /showcase does not represent a live community/i);
-  assert.match(directory, /showcase_url: "\/server\/san-andreas-county-roleplay-showcase"/);
-  assert.match(routes, /"source": "\/server\/san-andreas-county-roleplay-showcase"/);
-  assert.match(logo, /<svg/);
-  assert.match(logo, /COUNTY RP/);
+  for (const content of [home, directory, routes]) {
+    assert.doesNotMatch(content, /San Andreas County Roleplay/);
+    assert.doesNotMatch(content, /san-andreas-county-roleplay-showcase/);
+  }
+  assert.doesNotMatch(directory, /SHOWCASE_SERVER|Complete demo listing|showcase_url/);
+  assert.doesNotMatch(routes, /example-server/);
 });
 
 test("Discord and Google sign-in buttons retain real OAuth routes and branded icons", () => {
