@@ -23,9 +23,9 @@
       steps: ["Choose 3–5 public or owner-submitted communities and confirm Java or Bedrock, address, version and RP style.", "Check player counts and server status only at reviewed addresses. Confirm whether each total belongs to a network or a specific world.", "Use a server-control challenge for claims. Request an owner integration later if a roleplay world needs its own accurate count."]
     },
     roblox: {
-      summary: "Roblox needs two kinds of listing: the experience itself and an independent RP community within it. Their owners, join instructions and player counts are different.",
+      summary: "The proposed Roblox section starts with community applications. Each application identifies its Roblox experience, community owners, joining requirements and evidence of control; experience-wide player totals stay separate.",
       sources: [["Roblox discovery", "https://www.roblox.com/charts", "Find experiences, then verify their official creator and community pages."], ["Emergency Response: Liberty County", "https://erlc.gg/", "A potential first pilot for independent RP communities."], ["ER:LC owner integration", "https://apidocs.erlc.gg/", "Official API for consenting private-server owners; feasibility must be agreed first."], ["Roblox server-list changes", "https://devforum.roblox.com/t/test-updates-to-server-list-page/3966648", "Why a complete public-instance scraper is not a dependable source."]],
-      steps: ["Begin with a few reviewed RP experiences and label any player total as experience-wide.", "Add independent communities through owner submissions. Never copy the experience’s total into a community’s count.", "Assess an owner-approved ER:LC integration for exact community counts and control proof. Other Roblox games need their own documented integration or manual submission."]
+      steps: ["Design an applications-led section for independent RP communities, with experience links and owner-control evidence.", "Review submitted communities and any available source data. Never copy the experience’s total into a community’s count.", "Assess an owner-approved ER:LC integration for exact community counts and control proof. Other Roblox games need their own documented integration or manual submission."]
     }
   };
   const make = (tag, text, className = "") => {

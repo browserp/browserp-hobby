@@ -129,7 +129,7 @@ export async function enrichImportedServers(servers, { refresh = false } = {}) {
     const checkedAt = live?.checkedAt || info.lastCheckedAt;
     const fresh = info.imported && checkedAt && Date.now() - Date.parse(checkedAt) <= 5 * 60_000 && (live ? !live.unavailable : !info.statusUnavailable);
     return {
-      ...server, imported: info.imported, claimable: info.claimable, keywords: info.keywords || [],
+      ...server, imported: info.imported, claimable: info.claimable, keywords: info.keywords || [], website_url: info.websiteUrl ?? server.website_url ?? null,
       ...(info.imported ? { logo_url: info.logoUrl, banner_url: info.bannerUrl, checked_at: checkedAt,
         online: fresh ? (live?.online ?? server.online) : false,
         players: fresh ? (live?.players ?? server.players) : null,

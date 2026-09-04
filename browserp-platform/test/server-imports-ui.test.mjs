@@ -40,6 +40,8 @@ test("Imported server details keep metadata order, display real zero and isolate
     assert.ok(h.$("#server-checked-v3 time").dateTime);
     assert.equal(h.$("#server-join-v3").hidden, true, "A missing community link must not become a link to the homepage");
     assert.equal(h.$("#server-connect-v3").href, "https://cfx.re/join/abc123");
+    assert.equal(h.$("#server-website-v3").hidden, true, "An absent website must not become a homepage link");
+    assert.equal(h.$("#server-website-v3").hasAttribute("href"), false);
     for (const image of h.w.document.querySelectorAll(".server-import-logo-v3,.server-import-banner-v3")) { assert.ok(image.getAttribute("src").startsWith("/api/public/server-image?url=")); assert.equal(image.referrerPolicy, "no-referrer"); }
     assert.equal(h.claims.length, 1); assert.equal(h.$("#server-claim-panel").hidden, false);
   } finally { h.dom.window.close(); }
@@ -82,4 +84,30 @@ test("Untrusted media and Discord links disguised as game connect links are not 
   const h = await harness([{ ...fixture(), logo_url: "/api/public/server-image?url=https%3A%2F%2F127.0.0.1%2Fprivate.png", banner_url: "https://evil.example/track.png", cfx_join_url: "https://discord.gg/not-a-join-link" }]);
   try { assert.equal(h.$(".server-import-logo-v3"), null); assert.equal(h.$(".server-import-banner-v3"), null); assert.equal(h.$("#server-connect-v3").hidden, true); assert.equal(h.$("#server-initials-v3").textContent, "FC"); }
   finally { h.dom.window.close(); }
+});
+
+test("A reviewed official website remains separate from Discord and the Cfx game connection", async () => {
+  const h = await harness([{ ...fixture(), website_url: "https://community.example/apply?from=directory#requirements", community_url: "https://discord.gg/community" }]);
+  try {
+    const website = h.$("#server-website-v3");
+    assert.equal(website.hidden, false);
+    assert.equal(website.textContent, "Official website");
+    assert.equal(website.href, "https://community.example/apply?from=directory#requirements");
+    assert.equal(website.target, "_blank");
+    assert.equal(website.rel, "noopener noreferrer");
+    assert.equal(h.$("#server-join-v3").href, "https://discord.gg/community");
+    assert.equal(h.$("#server-connect-v3").href, "https://cfx.re/join/abc123");
+    assert.deepEqual([...h.w.document.querySelectorAll("#server-info-v5 dt")].slice(0, 5).map(element => element.textContent), ["Game", "Region", "Language", "Server setup", "Access"]);
+  } finally { h.dom.window.close(); }
+});
+
+test("Missing, executable, credential-bearing and malformed website URLs never become public links", async () => {
+  for (const website_url of [null, "", "javascript:alert(1)", "data:text/html,hello", "http://community.example", "//community.example", "/community", "https:community.example", "https://user:password@community.example", "https://user@community.example", "https://community.example/a b", "https://community.example/\napply", "https:\\community.example", { url: "https://community.example" }]) {
+    const h = await harness([{ ...fixture(), website_url }]);
+    try {
+      assert.equal(h.$("#server-website-v3").hidden, true, JSON.stringify(website_url));
+      assert.equal(h.$("#server-website-v3").hasAttribute("href"), false, JSON.stringify(website_url));
+      assert.equal(h.$("#server-connect-v3").hidden, false, "An invalid website must not hide the valid game connection");
+    } finally { h.dom.window.close(); }
+  }
 });

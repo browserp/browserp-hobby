@@ -4,6 +4,8 @@ Researched 4 September 2026. Research only: no new scraper implementation, datab
 
 ## Recommended direction
 
+The site owner's next-phase preference is an applications-led Roblox section, approximately **3 well-known Minecraft RP communities**, **20 RedM communities**, and **40 strong FiveM communities**. These are later rollout targets, not instructions to bulk-import now. Selection should consider sustained activity, clear community identity, working links, RP relevance and accessible joining information. The current delivery adds only CaliRP and fixes existing launch listings. Roblox applications should gather the experience, community identity, owner-control evidence and joining details; optional integrations can then validate the submitted information.
+
 Use one review workflow with a different source adapter for each platform. Keep **community**, **game/experience**, **server endpoint**, and **running instance** distinct. Staff should see evidence and conflicts before publication; owners can subsequently prove control and correct their listing. Store the observation time and source for every count. Display “unavailable” when freshness expires; a successful observation of zero remains zero.
 
 | Platform | Best first discovery sources | Useful live data | Main limitation |
@@ -65,7 +67,7 @@ Other Roblox games need their own documented community/private-server integratio
 ## Shared review and rollout
 
 1. **References now:** show the official directories/docs above in each staff scraper section; leave unfinished adapters visibly planned.
-2. **Small pilots:** retain reviewed FiveM import; validate 3–5 RedM join codes; 3–5 owner-submitted Minecraft endpoints; 3–5 Roblox experiences. Import candidates, never auto-publish solely because “RP” appears in tags.
+2. **Small pilots before expansion:** retain reviewed FiveM import; validate a few RedM join codes and approximately 3 well-known Minecraft communities before scaling to the agreed later targets. Roblox starts with applications from independent RP communities, linking each application to its experience. Experience metadata supports these applications; a separate experience catalog can be considered later. Import candidates, never auto-publish solely because “RP” appears in tags.
 3. **Evidence review:** classify each link by destination and platform, separate keywords from URLs, canonicalize IDs, validate approved image delivery, reject unsafe inputs, flag conflicts and duplicate communities. Keep platform, region, language, framework, access in that order. Store source URL, observed time, confidence and manual corrections.
 4. **Claims:** distinguish “Discord control confirmed” from “game/server control confirmed.” Verify the correct Roblox user/group or ER:LC private-server owner; use Minecraft endpoint-control proof. Staff approves disputed or ambiguous cases.
 5. **Live refresh:** refresh known records with backoff, request coalescing and circuit breakers. Show source, checked time and correct metric scope. Separate metadata edits from automatic count refresh. Missing or stale data remains unknown; no invented counts.

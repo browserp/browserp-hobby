@@ -74,6 +74,7 @@ test('FiveM imports and claim requests enforce real PostgreSQL trust boundaries'
  await db.exec(read('20260904003147_searchable_import_keywords.sql'));
  await db.exec(read(readdirSync(base).find(name => name.endsWith('_tailored_game_discovery_filters.sql'))));
  await db.exec(read('20260904005311_imported_server_unknown_access.sql'));
+ await db.exec(read('20260904010316_public_import_website_link.sql'));
  await db.exec(fn(ops,'public.attach_server_submission_metadata_server'));
  await db.exec('revoke all on function public.attach_server_submission_metadata_server(uuid,uuid,text[],text,text,text) from public;grant execute on function public.attach_server_submission_metadata_server(uuid,uuid,text[],text,text,text) to service_role');
 
@@ -265,6 +266,17 @@ test('FiveM imports and claim requests enforce real PostgreSQL trust boundaries'
   await assert.rejects(stage(candidate('abcdef7'),admin),/permission required/);
   await login(member);await assert.rejects(db.query('select * from public.server_import_sources'),/permission denied/);await assert.rejects(db.query('select * from public.server_claim_requests'),/permission denied/);
   await db.exec('reset role');assert.ok((await db.query("select count(*) n from public.staff_audit_events where action like 'fivem.import.%' or action like 'server.claim.%'")).rows[0].n>=4);
+ });
+ await t.test('public import details expose reviewed websites only for published listings', async () => {
+  await db.exec('reset role');
+  await db.query('update public.servers set website_url=$1 where id=$2',['https://community.example.org/',published.serverId]);
+  await db.exec('set role anon');
+  const details=await rpc('public.public_server_import_details($1::uuid[])',[[published.serverId]]);
+  assert.equal(details[0].websiteUrl,'https://community.example.org/');
+  assert.equal(Object.hasOwn(details[0],'candidate'),false);
+  await db.exec('reset role');await db.query("update public.servers set status='archived' where id=$1",[published.serverId]);
+  await db.exec('set role anon');
+  assert.deepEqual(await rpc('public.public_server_import_details($1::uuid[])',[[published.serverId]]),[]);
  });
  await db.close();
 });
