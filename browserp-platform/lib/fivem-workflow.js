@@ -95,7 +95,19 @@ export async function refreshFiveMCode(joinCode, { strict = false } = {}) {
   try {
     const source = await fetchFiveMServer(code);
     if (source.players.status !== "online" || source.players.online === null || source.players.max === null || !source.players.observedAt) throw new Error("FiveM has no current player observation for this server.");
-    return await rpc("service_refresh_fivem_snapshot", { p_join_code: code, p_online: true, p_players: source.players.online, p_capacity: source.players.max, p_observed_at: source.players.observedAt }, undefined, { useSecret: true });
+    const [logoUrl, bannerUrl] = await Promise.all([
+      source.images.logoUrl ? persistServerImage(source.images.logoUrl, code).catch(() => null) : null,
+      source.images.bannerUrl ? persistServerImage(source.images.bannerUrl, code).catch(() => null) : null
+    ]);
+    return await rpc("service_refresh_fivem_source", {
+      p_join_code: code,
+      p_online: true,
+      p_players: source.players.online,
+      p_capacity: source.players.max,
+      p_observed_at: source.players.observedAt,
+      p_logo_url: logoUrl,
+      p_banner_url: bannerUrl
+    }, undefined, { useSecret: true });
   } catch (error) {
     await rpc("service_mark_fivem_unavailable", { p_join_code: code }, undefined, { useSecret: true });
     if (strict) throw error;
