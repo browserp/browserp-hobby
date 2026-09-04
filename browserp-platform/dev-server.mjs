@@ -131,7 +131,6 @@ function staticRoute(pathname) {
   if (pathname === "/staffpanel") return "staffpanel.html";
   const staffPage = pathname.match(/^\/staffpanel\/(overview|moderation|scrapers|profiles|accounts|staff|security|content)$/i);
   if (staffPage) return `staffpanel-${staffPage[1].toLowerCase()}.html`;
-  if (pathname === "/server/san-andreas-county-roleplay-showcase") return "example-server.html";
   if (/^\/server\/[a-z0-9-]+$/i.test(pathname)) return "server.html";
   return pathname.replace(/^\//, "");
 }

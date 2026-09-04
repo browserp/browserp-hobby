@@ -16,14 +16,15 @@
       const choices = [];
       for (const [key, label] of Object.entries(M.labels)) {
         if (["online", "verified", "beginner"].includes(key)) continue;
-        const options = key === "platform" ? Object.keys(M.games).map(value => ({ value })) : facets[key] || [];
+        const options = M.options(key, facets, filters).filter(item => key === "platform" || item.count > 0);
         for (const item of options) {
           if (filters[key] !== "all" && key === "platform") continue;
-          const text = M.display(key, item.value);
+          const text = M.display(key, item.value, filters.platform);
           if (term && !M.normal(text).includes(term)) continue;
-          choices.push({ key, value: item.value, label, text });
+          choices.push({ key, value: item.value, label: M.label(key, filters.platform), text, count: item.count });
         }
       }
+      choices.sort((a, b) => b.count - a.count || a.text.localeCompare(b.text));
       active = -1; input.removeAttribute("aria-activedescendant");
       list.replaceChildren(...choices.slice(0, 8).map((choice, index) => {
         const button = node("button", "search-suggestion-v3"); button.type = "button"; button.id = `${list.id}-${index}`; button.tabIndex = -1;
@@ -52,15 +53,15 @@
     return { render, close: () => close(input, list) };
   }
   function selectOptions(select, key, facets, filters) {
-    const rows = facets[key] || [];
     const current = filters[key];
-    const names = { platform: "All games", region: "All regions", mode: "Any game mode", feature: "Any feature", access: "Any joining option", language: "Any language" };
-    const choices = key === "platform" ? Object.keys(M.games).map(value => ({ value, count: rows.find(row => row.value === value)?.count || 0 })) : [...rows];
-    if (current !== "all" && !choices.some(row => row.value === current)) choices.push({ value: current, count: 0 });
-    select.replaceChildren(option("all", names[key]), ...choices.map(item => option(item.value, `${M.display(key, item.value)} (${item.count})`)));
+    const names = { platform: "All games", region: "All regions", mode: M.taxonomy[filters.platform]?.modeAny || "Any framework or game mode", feature: "Any feature", access: "Any joining option", language: "Any language" };
+    const choices = M.options(key, facets, filters);
+    select.replaceChildren(option("all", names[key]), ...choices.map(item => option(item.value, M.display(key, item.value, filters.platform))));
     select.value = current;
-    // Zero-result launch games remain navigable; unavailable refinements stay visible when selected.
+    // Popularity orders options; public controls never display usage counts.
+    // Keep known zero-result refinements visible but unavailable, and let users clear selected ones.
     for (const item of select.options) if (key !== "platform" && item.value !== "all" && item.value !== current) item.disabled = !choices.find(row => row.value === item.value)?.count;
+    const title = select.parentElement.querySelector("span"); if (title) title.textContent = M.label(key, filters.platform);
     if (key === "platform") window.BrowseRPPlatforms.theme(select, current);
   }
   function resetChildren(filters, key) {
@@ -109,11 +110,11 @@
     function sync() {
       search.value = filters.query; sort.value = filters.sort;
       for (const [key, select] of Object.entries(selects)) selectOptions(select, key, facets, filters);
-      for (const [key, control] of Object.entries(toggles)) { control.input.checked = filters[key]; control.text.textContent = `${M.labels[key]} (${facets[key]?.find(item => item.value === "true")?.count || 0})`; }
+      for (const [key, control] of Object.entries(toggles)) { control.input.checked = filters[key]; control.text.textContent = M.labels[key]; }
       chips.replaceChildren();
       for (const key of ["query", ...Object.keys(M.labels)]) {
         if ((fixedGame && key === "platform") || filters[key] === M.defaults[key]) continue;
-        const text = key === "query" ? `Search: ${filters.query}` : typeof filters[key] === "boolean" ? M.labels[key] : `${M.labels[key]}: ${M.display(key, filters[key])}`;
+        const text = key === "query" ? `Search: ${filters.query}` : typeof filters[key] === "boolean" ? M.labels[key] : `${M.label(key, filters.platform)}: ${M.display(key, filters[key], filters.platform)}`;
         const chip = node("button", "smart-filter-chip", `${text} ×`); chip.type = "button"; chip.setAttribute("aria-label", `Remove ${text}`);
         chip.addEventListener("click", () => change(key, M.defaults[key])); chips.append(chip);
       }

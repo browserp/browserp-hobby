@@ -60,7 +60,7 @@
     field("region", "Region", { minLength: 2, maxLength: 60, placeholder: "Not provided by source" });
     field("language", "Language", { minLength: 2, maxLength: 60, placeholder: "Not provided by source" });
     field("framework", "Framework / mode", { required: false, maxLength: 80, placeholder: "Unknown", help: "Leave blank if the source does not establish a framework." });
-    field("accessType", "Access", { type: "select", choices: [["", "Choose access"], ["public", "Public"], ["allowlisted", "Allowlisted"], ["application", "Application required"]] });
+    field("accessType", "Access", { type: "select", choices: [["", "Choose access"], ["unknown", "Not confirmed"], ["public", "Public"], ["allowlisted", "Allowlisted"], ["application", "Application required"]], help: "Choose Not confirmed when source information is missing or conflicting." });
     field("discordUrl", "Discord community URL", { type: "url", required: false, maxLength: 1000, help: "A Discord invite for the community. This is separate from the FiveM join link." });
     field("websiteUrl", "Community website URL", { type: "url", required: false, maxLength: 1000 });
     field("bannerUrl", "Banner image URL", { type: "url", required: false, maxLength: 1000 });
@@ -117,7 +117,7 @@
       if (busy || !await discard() || destroyed) return;
       current = item; dirty = false; const candidate = item.candidate || {}; editorHeading.textContent = `Review ${candidate.name || item.joinCode || "FiveM import"}`;
       for (const [name, control] of Object.entries(controls)) control.value = name === "reason" ? "" : ["tags", "keywords"].includes(name) ? list(candidate[name]).join(", ") : candidate[name] ?? "";
-      sourceSummary.textContent = `Source checked ${date(candidate.checkedAt)} · ${list(candidate.evidence).length} evidence fields · ${typeof candidate.players === "number" ? candidate.players : "Unknown"} players / ${typeof candidate.capacity === "number" ? candidate.capacity : "unknown capacity"} · ${candidate.online === true ? "Reported online" : candidate.online === false ? "Reported offline" : "Online status unknown"}`;
+      sourceSummary.textContent = `Imported snapshot from ${date(candidate.checkedAt)} · ${list(candidate.evidence).length} evidence fields · ${typeof candidate.players === "number" ? candidate.players : "Unknown"} players / ${typeof candidate.capacity === "number" ? candidate.capacity : "unknown capacity"} · ${candidate.online === true ? "Reported online" : candidate.online === false ? "Reported offline" : "Online status unknown"}. Published listings refresh their player counts separately.`;
       join.replaceChildren(make("strong", "FiveM join link: ")); const url = secureUrl(candidate.joinUrl); if (url) { const link = make("a", url); link.href = url; link.target = "_blank"; link.rel = "noopener noreferrer"; join.append(link); } else join.append(make("span", "Not provided by source"));
       showEvidence(candidate); renderMedia(); message(editorStatus, ""); editor.hidden = false;
       for (const control of Object.values(controls)) control.disabled = !canManage;
@@ -136,7 +136,14 @@
       try {
         const id = current.id; const body = { action, id, expectedVersion: current.version, reason: controls.reason.value.trim() }; if (action === "publish") body.data = payload();
         const response = await api("/api/admin/fivem", { method: "POST", body: JSON.stringify(body) }); if (destroyed) return;
-        if (action === "refresh") { message(editorStatus, response.message || "Live player count checked. Your review edits are preserved."); return; }
+        if (action === "refresh") {
+          const live = response.result;
+          const observation = Number.isInteger(live?.players) && Number.isInteger(live?.capacity)
+            ? `Latest FiveM observation: ${live.players} / ${live.capacity} players · ${date(live.checkedAt)}.`
+            : live?.unchanged ? `FiveM has no newer observation than ${date(live.checkedAt)}.`
+            : response.message || "Live player count checked.";
+          message(editorStatus, `${observation} Your review edits are preserved.`); return;
+        }
         dirty = false; if (action === "publish") { filter.value = "published"; offset = 0; } const loaded = await refresh(); const updated = items.find((item) => item.id === id);
         if (loaded && updated) current = updated; else if (response.result?.version) current = { ...current, version: response.result.version };
         controls.reason.value = "";

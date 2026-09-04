@@ -205,10 +205,6 @@
       "destination": "/game?game=:slug"
     },
     {
-      "source": "/server/san-andreas-county-roleplay-showcase",
-      "destination": "/example-server"
-    },
-    {
       "source": "/blog",
       "destination": "/blog.html"
     },

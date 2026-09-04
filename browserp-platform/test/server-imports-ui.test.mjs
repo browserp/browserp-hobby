@@ -45,6 +45,14 @@ test("Imported server details keep metadata order, display real zero and isolate
   } finally { h.dom.window.close(); }
 });
 
+test("Signed Cfx icon versions render a reviewed logo and unknown access stays explicitly unconfirmed", async () => {
+  const h = await harness([{ ...fixture(), logo_url: "https://frontend.cfx-services.net/api/servers/icon/abc123/-580691816.png", access_type: "unknown" }]);
+  try {
+    assert.equal(h.$(".server-import-logo-v3").getAttribute("src"), "/api/public/server-image?url=https%3A%2F%2Ffrontend.cfx-services.net%2Fapi%2Fservers%2Ficon%2Fabc123%2F-580691816.png");
+    assert.equal(h.$("#server-info-v5 .server-info-card-v5:nth-child(5) dd").textContent, "Not confirmed");
+  } finally { h.dom.window.close(); }
+});
+
 test("Player refresh changes only status, pauses while hidden, and preserves an unfinished claim", async () => {
   const initial = fixture(), later = { ...initial, players: 17, checked_at: new Date().toISOString() };
   const h = await harness([initial, later, new Error("Upstream unavailable")]);

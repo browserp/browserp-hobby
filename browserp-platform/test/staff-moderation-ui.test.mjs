@@ -109,6 +109,21 @@ test("server editor preserves platform, region, language, framework and access o
   assert.equal(writes[0].kind, "server"); assert.equal(writes[0].expectedVersion, 8); assert.equal(writes[0].data.language, "French"); assert.equal(writes[0].data.framework, "QBCore"); controller.destroy();
 });
 
+test("server editor keeps Not confirmed selected and sends unknown when another field changes", async () => {
+  const writes = [];
+  const app = harness(async (url, options) => { if (options?.method === "POST") { writes.push(JSON.parse(options.body)); return { result: { ok: true } }; } return url.includes("view=summary") ? { summary: summary() } : { workspace: workspace([{ ...server, access: "unknown" }]) }; });
+  const controller = await app.init();const editing = app.button("Edit server").emit("click");await flush();
+  const dialog = app.document.querySelector("dialog");
+  const access = dialog.querySelector('[name="access"]');
+  assert.equal(access.value, "unknown");
+  assert.equal(access.children.find(option => option.value === "unknown")?.textContent, "Not confirmed");
+  dialog.querySelector('[name="name"]').value = "Corrected community name";
+  dialog.querySelector('[name="reason"]').value = "Correct the name while access remains unresolved.";
+  await dialog.querySelector("form").emit("submit");await editing;
+  assert.equal(writes[0].data.access, "unknown");assert.equal(writes[0].data.name, "Corrected community name");
+  assert.equal(writes[0].expectedVersion, server.version);controller.destroy();
+});
+
 test("deleted report restore is audited and conflicts keep edited text without silent overwrite", async () => {
   const writes = [];
   const report = { id: "report-1", category: "Incorrect server details", status: "open", deletedAt: "2026-09-03T00:00:00Z", deletedReason: "Duplicate report", version: 3 };

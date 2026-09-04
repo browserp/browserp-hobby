@@ -408,10 +408,33 @@
 
   function wireForms(){ $("#permission-form-v3")?.addEventListener("submit",savePermission); $("#mfa-activate-form-v3")?.addEventListener("submit",async(event)=>{event.preventDefault();try{await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"activate_mfa",reason:new FormData(event.currentTarget).get("reason")})});location.reload();}catch(error){status(error.message,true);}}); }
   function mobile(){
+    const main=$(".staff-main-v3")||$(".staff-login-v3");
+    if(main){if(!main.id)main.id="staff-main-content";main.tabIndex=-1;const skip=make("a","Skip to staff content","skip-link");skip.href=`#${main.id}`;skip.addEventListener("click",event=>{event.preventDefault();main.focus();});document.body.prepend(skip);}
     const button=$("#staff-menu-v3"); const sidebar=$(".staff-sidebar-v3");
     if(!button||!sidebar)return;
-    sidebar.id="staff-sidebar-v3"; button.setAttribute("aria-controls",sidebar.id); button.setAttribute("aria-expanded","false"); button.setAttribute("aria-label","Open staff navigation");
-    button.addEventListener("click",()=>{const open=document.body.classList.toggle("staff-menu-open");button.setAttribute("aria-expanded",String(open));button.setAttribute("aria-label",open?"Close staff navigation":"Open staff navigation");});
+    const compact=window.matchMedia?.("(max-width: 760px)")||{matches:false};
+    sidebar.id="staff-sidebar-v3";button.setAttribute("aria-controls",sidebar.id);
+    function setOpen(value,restoreFocus=false){
+      const open=compact.matches&&value;
+      document.body.classList.toggle("staff-menu-open",open);
+      button.setAttribute("aria-expanded",String(open));button.setAttribute("aria-label",open?"Close staff navigation":"Open staff navigation");
+      sidebar.inert=compact.matches&&!open;
+      if(compact.matches&&!open)sidebar.setAttribute("aria-hidden","true");else sidebar.removeAttribute("aria-hidden");
+      if(main)main.inert=open;
+      if(restoreFocus)button.focus();
+    }
+    button.addEventListener("click",()=>setOpen(!document.body.classList.contains("staff-menu-open")));
+    sidebar.addEventListener("click",event=>{if(event.target.closest("a")&&compact.matches)setOpen(false);});
+    document.addEventListener("keydown",event=>{
+      if(!compact.matches||!document.body.classList.contains("staff-menu-open"))return;
+      if(event.key==="Escape"){event.preventDefault();setOpen(false,true);return;}
+      if(event.key!=="Tab")return;
+      const targets=[button,...$$('a[href],button,summary,[tabindex="0"]',sidebar).filter(item=>!item.disabled&&item.getClientRects().length)];
+      const first=targets[0],last=targets.at(-1);
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+    });
+    compact.addEventListener?.("change",()=>setOpen(false));setOpen(false);
   }
   async function init(){
     const legacy = { profiles: "profiles", accounts: "activity", staff: "staff", security: "bans" };

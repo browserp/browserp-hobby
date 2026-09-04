@@ -51,7 +51,7 @@ test("unified moderation executes against real PostgreSQL permissions, data and 
   }
   await db.exec(`
     alter table public.profiles add avatar_review_status text default 'not_set',add bio_review_status text default 'pending_review',add approved_bio text default '';
-    alter table public.servers add source_submission_id uuid,add access_type text default 'public',add cfx_join_url text;
+    alter table public.servers add source_submission_id uuid,add access_type text not null default 'public' constraint servers_access_type_check check(access_type in ('public','allowlisted','application')),add cfx_join_url text;
     alter table public.server_submissions add access_type text default 'public',add cfx_join_url text;
     create table public.staff_permission_overrides(user_id uuid,permission_key text,allowed boolean);
     create table private.discord_owner_allowlist(discord_user_id text primary key,role_key text,enabled boolean);
@@ -84,6 +84,8 @@ test("unified moderation executes against real PostgreSQL permissions, data and 
   await db.exec(sqlFunction(read("20260820023114_profile_avatar_immediate_name_filter.sql"), "private.profile_display_name_allowed"));
   await db.exec(sqlFunction(read("202608180005_staff_workspace.sql"), "public.staff_resolve_queue_item"));
   await db.exec(workspace);
+  await db.exec(read("20260904005311_imported_server_unknown_access.sql"));
+  await db.exec(read("20260904005312_staff_server_unknown_access.sql"));
 
   await t.test("anonymous, ordinary-member and insufficient-MFA requests are denied", async () => {
     await db.exec("set role anon");
@@ -192,6 +194,26 @@ test("unified moderation executes against real PostgreSQL permissions, data and 
     const item = (await records("servers", { q: "Updated FiveM" })).items[0];
     assert.equal(item.language, "French"); assert.equal(item.framework, "QBCore"); assert.equal(item.access, "application");
     await assert.rejects(mutate("server", server, editServer), /record changed/);
+  });
+
+  await t.test("staff can preserve unconfirmed access without weakening edit permissions or validation", async () => {
+    const unresolved = await mutate("server", server, { ...editServer, access: "unknown" }, 2);
+    assert.equal(unresolved.access, "unknown");assert.equal(unresolved.version, 3);
+    const updated = await mutate("server", server, { ...editServer, name: "Corrected unresolved community", access: "unknown" }, 3);
+    assert.equal(updated.access, "unknown");assert.equal(updated.version, 4);
+    const listed = (await records("servers", { q: "Corrected unresolved", access: "unknown" })).items[0];
+    assert.equal(listed.id, server);assert.equal(listed.access, "unknown");
+    assert.equal((await records("servers", { q: "Corrected unresolved", access: "public" })).total, 0);
+    assert.equal((await records("servers", { q: "Corrected unresolved", access: "allowlisted" })).total, 0);
+    for (const access of [null, "", "unrestricted"]) await assert.rejects(mutate("server", server, { ...editServer, access }, 4), /metadata/);
+    await assert.rejects(mutate("server", server, { ...editServer, access: "unknown" }, 3), /record changed/);
+    await login(reader);
+    await assert.rejects(mutate("server", server, { ...editServer, access: "unknown" }, 4), /permission required/);
+    await login();
+    await db.exec("reset role");
+    const audited = await db.query("select after_state->>'access' access from public.staff_audit_events where target_type='server' and target_id=$1 and after_state->>'version'='4'", [server]);
+    assert.equal(audited.rows[0].access, "unknown");
+    await login();
   });
 
   await t.test("reports soft-delete and restore with history, legacy protection and retention", async () => {

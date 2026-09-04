@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
+import { JSDOM } from "jsdom";
+import { discoverServers } from "../lib/discovery.js";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -39,19 +41,53 @@ test("search supports typed choices with keyboard navigation", () => {
   assert.match(search, /choose\(choice\)/);
 });
 
-test("the county showcase is honest, fully routed and uses an original local logo", () => {
-  const home = read("public/index.html");
-  const example = read("public/example-server.html");
-  const directory = read("public/browserp-directory.js");
-  const logo = read("public/assets/san-andreas-county-rp-mark-v4.svg");
-  const routes = read("vercel.json");
-  for (const content of [home, example, directory]) assert.match(content, /San Andreas County Roleplay/);
-  assert.match(example, /not affiliated with SACRP/i);
-  assert.match(example, /showcase does not represent a live community/i);
-  assert.match(directory, /showcase_url: "\/server\/san-andreas-county-roleplay-showcase"/);
-  assert.match(routes, /"source": "\/server\/san-andreas-county-roleplay-showcase"/);
-  assert.match(logo, /<svg/);
-  assert.match(logo, /COUNTY RP/);
+test("the retired demo has no public promotion, data, artwork or dedicated route", () => {
+  for (const file of ["public/index.html", "public/browserp-directory.js", "public/browserp-games.js", "public/discovery-model.js", "lib/discovery.js", "dev-server.mjs", "vercel.json"]) {
+    assert.doesNotMatch(read(file), /san-andreas-county-roleplay-showcase|San Andreas County Roleplay|SHOWCASE_SERVER|FIVEM_SHOWCASE|model\.showcase/, file);
+  }
+  assert.equal(existsSync(join(root, "public/example-server.html")), false);
+  assert.equal(existsSync(join(root, "public/assets/san-andreas-county-rp-mark-v4.svg")), false);
+});
+
+test("public discovery preserves real server totals and paging without adding demo results", async () => {
+  const before = { SUPABASE_URL: process.env.SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY };
+  const originalFetch = globalThis.fetch;
+  process.env.SUPABASE_URL = "https://fixture.supabase.co";
+  process.env.SUPABASE_PUBLISHABLE_KEY = "fixture-public-key";
+  try {
+    for (const result of [{ servers: [], total: 0, facets: {} }, { servers: [{ slug: "real-community", platform_id: "fivem" }], total: 30, facets: { platform: [{ value: "fivem", count: 30 }] } }]) {
+      globalThis.fetch = async (url, options) => {
+        assert.equal(new URL(url).pathname, "/rest/v1/rpc/search_public_directory");
+        assert.equal(JSON.parse(options.body).p_filters.platform, "fivem");
+        return new Response(JSON.stringify(result), { status: 200 });
+      };
+      const response = await discoverServers({ platform: "fivem" });
+      assert.deepEqual(response.servers, result.servers);
+      assert.equal(response.total, result.total);
+      assert.deepEqual(response.facets, result.facets);
+      assert.equal(response.nextOffset, result.total ? 24 : null);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+    for (const [key, value] of Object.entries(before)) value === undefined ? delete process.env[key] : process.env[key] = value;
+  }
+});
+
+test("homepage featured listings render only the backend response and show the real empty state", async () => {
+  for (const servers of [[], [{ slug: "real-community", name: "Real community", platform_id: "fivem", online: true, players: 12 }]]) {
+    const dom = new JSDOM('<body data-page="home"><div id="featured-server-list"></div><div id="featured-empty"><h3></h3><p></p></div></body>', { url: "https://browserp.test/", runScripts: "outside-only" });
+    const w = dom.window;
+    w.BrowseRPSearch = { home() {} };
+    w.eval(read("public/browserp-platforms.js"));
+    w.fetch = async () => ({ ok: true, json: async () => ({ servers }) });
+    try {
+      w.eval(read("public/browserp-directory.js"));
+      await new Promise(resolve => setTimeout(resolve, 10));
+      assert.equal(w.document.querySelectorAll(".server-card").length, servers.length);
+      assert.equal(w.document.querySelector("#featured-empty").hidden, servers.length > 0);
+      if (servers.length) assert.equal(w.document.querySelector(".server-card").getAttribute("href"), "/server/real-community");
+    } finally { dom.window.close(); }
+  }
 });
 
 test("Discord and Google sign-in buttons retain real OAuth routes and branded icons", () => {

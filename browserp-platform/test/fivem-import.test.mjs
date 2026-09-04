@@ -34,6 +34,7 @@ test("Conflicting, deceptive, mismatching and non-invite Discord links are not s
   assert.equal(result.links.websiteUrl, "https://community.example.org/about");
   assert.ok(result.issues.some((entry) => entry.code === "different_join_link" && entry.severity === "error"));
   assert.ok(result.issues.some((entry) => entry.code === "conflicting_links"));
+  assert.deepEqual(result.evidence.filter((entry) => entry.field === "links.communityUrl").map((entry) => [entry.value, entry.confidence]), [["https://discord.gg/alpha", "low"], ["https://discord.gg/beta", "low"]]);
   assert.equal(result.confidence, "low");
   assert.throws(() => normalizeFiveMServer(make(), { joinCode: "xyz789", now }), { code: "mismatched_server" });
   assert.throws(() => normalize(make({}, { gamename: "rdr3" })), { code: "wrong_platform" });
@@ -68,6 +69,23 @@ test("Image candidates use only approved image sources and exclude private, unsa
   assert.equal(safeFiveMImageUrl(result.images.logoUrl), result.images.logoUrl);
   assert.equal(safeFiveMImageUrl(result.images.bannerUrl), result.images.bannerUrl);
   for (const url of ["https://127.0.0.1/file.png", "https://arbitrary.example.org/file.png", "https://frontend.cfx-services.net/redirect/test.png", "https://i.imgur.com/file.svg", "https://discord.gg/notanimage"]) assert.equal(safeFiveMImageUrl(url), null);
+});
+
+test("Cfx signed icon hashes import correctly without accepting arbitrary icon paths", () => {
+  const url = "https://frontend.cfx-services.net/api/servers/icon/abc123/-580691816.png";
+  assert.equal(normalize(make({ iconVersion: -580691816 })).images.logoUrl, url);
+  assert.equal(safeFiveMImageUrl(url), url);
+  for (const version of ["-580691816", -2147483649, 4294967296, 1.5]) assert.equal(normalize(make({ iconVersion: version })).images.logoUrl, null);
+  for (const invalid of [url.replace("-580691816", "--580691816"), url.replace("-580691816", "-1/580691816"), url + "?redirect=1"]) assert.equal(safeFiveMImageUrl(invalid), null);
+});
+
+test("A reviewed community banner permits only the verified static asset and falls back from the unsupported animated banner", () => {
+  const banner = "https://cdn.calirp.gg/logos/calirpfivembannerdeferral.png";
+  assert.equal(safeFiveMImageUrl(banner), banner);
+  const result = normalize(make({}, { banner_detail: "https://cdn.calirp.gg/logos/calirpfivembanner.gif", banner_connecting: banner }));
+  assert.equal(result.images.bannerUrl, banner);
+  assert.ok(result.evidence.some((item) => item.field === "images.bannerUrl" && item.source === "vars.banner_connecting"));
+  for (const rejected of [banner + "?redirect=1", banner.replace("cdn.calirp.gg", "cdn.calirp.gg.evil.com"), banner.replace("cdn.calirp.gg", "www.cdn.calirp.gg"), banner.replace("logos/", "private/"), banner.replace("deferral.png", ".gif"), banner.replace("deferral.png", "different.png")]) assert.equal(safeFiveMImageUrl(rejected), null);
 });
 
 test("Normalization exposes bounded review evidence without copying private source fields or inferring absent metadata", () => {
