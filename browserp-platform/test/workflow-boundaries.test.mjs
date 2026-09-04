@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { beginOAuth } from '../lib/supabase.js';
-import { sealDiscordToken, openDiscordToken, verifyDiscordOwnership } from '../lib/discord-claims.js';
+import { sealDiscordToken, openDiscordToken, verifyDiscordOwnership, validatePublicDiscordInvite } from '../lib/discord-claims.js';
 import { memberClaims, staffClaims } from '../lib/claim-workflow.js';
 import { staffFiveM, refreshDueFiveMServers, enrichImportedServers } from '../lib/fivem-workflow.js';
 import { fetchServerImage, rasterType, storedServerImage } from '../lib/server-media.js';
@@ -134,3 +134,41 @@ test('server media rejects non-images, oversized canvases, arbitrary hosts and o
  await assert.rejects(fetchServerImage('https://i.imgur.com/image.png',{fetchImpl:async()=>new Response(png,{headers:{'content-length':String(2*1024*1024+1)}})}),{status:422});
  const image=await fetchServerImage('https://i.imgur.com/image.png',{fetchImpl:async(url,options)=>{assert.equal(options.redirect,'error');return new Response(png);}});assert.equal(image.type,'image/png');
 }));
+
+
+test('public Discord invite validation uses a fixed unauthenticated endpoint and distinguishes invalid from unavailable',async()=>{
+ const attempts=[];
+ const fetcher=(payload,status=200)=>async(url,options)=>{attempts.push({url,options});return response(payload,status);};
+ const valid=await validatePublicDiscordInvite('https://discord.gg/real_invite',{fetchImpl:fetcher({type:0,guild:{id:guildId,name:'A real community'}})});
+ assert.deepEqual(valid,{status:'valid',guildName:'A real community'});
+ assert.equal(attempts[0].url,'https://discord.com/api/v10/invites/real_invite');
+ assert.equal(attempts[0].options.headers.Authorization,undefined);assert.equal(attempts[0].options.redirect,'error');assert.ok(attempts[0].options.signal instanceof AbortSignal);
+ assert.equal((await validatePublicDiscordInvite('https://discord.gg/expired',{fetchImpl:fetcher({code:10006},404)})).status,'invalid');
+ assert.equal((await validatePublicDiscordInvite('https://discord.gg/retry',{fetchImpl:fetcher({retry_after:3},429)})).status,'unavailable');
+ assert.equal((await validatePublicDiscordInvite('https://discord.gg/retry',{fetchImpl:async()=>{throw new DOMException('timeout','TimeoutError');}})).status,'unavailable');
+ assert.equal((await validatePublicDiscordInvite('https://discord.gg/group',{fetchImpl:fetcher({type:1})})).status,'invalid');
+ assert.equal((await validatePublicDiscordInvite('https://discord.gg/malformed',{fetchImpl:fetcher({unexpected:'shape'})})).status,'unavailable');
+ let fetched=false;
+ for(const url of ['https://discord.gg.evil.example/path','https://discord.gg/invite?url=http://127.0.0.1','https://discord.gg/%2f..%2fusers','https://evil.example/@discord.gg/fixture']){
+  assert.equal((await validatePublicDiscordInvite(url,{fetchImpl:async()=>{fetched=true;}})).status,'invalid');
+ }
+ assert.equal(fetched,false);
+ assert.equal((await validatePublicDiscordInvite('https://discord.gg/oversized',{fetchImpl:async()=>new Response('{}',{headers:{'content-length':String(128*1024+1)}})})).status,'unavailable');
+});
+
+test('staff fetch removes dead Discord invites but retains inconclusive links for review',async()=>{
+ for(const status of [404,200,429])await backend(({url,body,options})=>{
+  if(url.pathname.endsWith('/rpc/staff_fivem_candidates'))return response({items:[],total:0});
+  if(url.hostname==='frontend.cfx-services.net'){const fixture=source();fixture.Data.vars.discord='https://discord.gg/fixture';return response(fixture);}
+  if(url.hostname==='discord.com'){assert.equal(url.pathname,'/api/v10/invites/fixture');assert.equal(options.headers.Authorization,undefined);return response(status===200?{type:0,guild:{id:guildId,name:'Fixture guild'}}:{code:10006},status);}
+  if(url.pathname.endsWith('/rpc/service_stage_fivem_candidate')){
+   const candidate=body.p_candidate;
+   assert.equal(candidate.discordUrl,status===404?null:'https://discord.gg/fixture');
+   if(status===200){assert.equal(candidate.evidence.find(item=>item.field==='links.communityGuildName').value,'Fixture guild');assert.equal(Object.hasOwn(candidate,'verificationStatus'),false);}
+   else assert.ok(candidate.warnings.some(item=>item.code===(status===404?'invalid_discord_invite':'unverified_discord_invite')));
+   return response({id:candidateId,candidate});
+  }
+ },async()=>{
+  const result=await staffFiveM(req('POST',{action:'fetch',inputs:['6myr996']}),res(),'request-fixture');assert.equal(result.candidates.length,1);assert.deepEqual(result.errors,[]);
+ });
+});

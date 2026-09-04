@@ -1,6 +1,7 @@
 import { getSession, rpc } from "./supabase.js";
 import { fetchFiveMServer, fetchFiveMFeatured, parseFiveMJoinCode } from "./fivem-import.js";
 import { persistServerImage } from "./server-media.js";
+import { validatePublicDiscordInvite } from "./discord-claims.js";
 import { assertSameOrigin, readBody } from "./http.js";
 import { rateLimit } from "./rate-limit.js";
 import { assessContent } from "./moderation.js";
@@ -21,6 +22,26 @@ export function candidateForStorage(source) {
     evidence: source.evidence, sourceUrl: source.source.url
   };
 }
+export async function checkCandidateDiscordInvite(source) {
+  if (!source.links.communityUrl) return source;
+  const check = await validatePublicDiscordInvite(source.links.communityUrl);
+  if (check.status === "valid") return {
+    ...source,
+    evidence: [...source.evidence, { field: "links.communityGuildName", source: "Discord public invite API", value: check.guildName, confidence: "high" }].slice(-80)
+  };
+  return {
+    ...source,
+    links: { ...source.links, ...(check.status === "invalid" ? { communityUrl: null } : {}) },
+    issues: [...source.issues, {
+      code: check.status === "invalid" ? "invalid_discord_invite" : "unverified_discord_invite",
+      field: "links.communityUrl", severity: "warning",
+      message: check.status === "invalid"
+        ? "Discord says this invite is invalid or no longer available. It was removed; add a working server invite during review."
+        : "Discord could not check this invite right now. Confirm it during review before publishing."
+    }].slice(-80)
+  };
+}
+
 const EDIT_FIELDS = ["name", "description", "region", "language", "framework", "accessType", "discordUrl", "websiteUrl", "bannerUrl", "logoUrl", "tags", "keywords"];
 export async function staffFiveM(req, res, requestId) {
   if (req.method === "POST") assertSameOrigin(req);
@@ -40,7 +61,7 @@ export async function staffFiveM(req, res, requestId) {
     if (!Array.isArray(body.inputs) || !body.inputs.length || body.inputs.length > 3) throw Object.assign(new Error("Fetch up to three FiveM codes per request."), { status: 400 });
     const codes = [...new Set(body.inputs.map(parseFiveMJoinCode))];
     const results = await Promise.allSettled(codes.map(async (code) => {
-      const source = await fetchFiveMServer(code);
+      const source = await checkCandidateDiscordInvite(await fetchFiveMServer(code));
       return rpc("service_stage_fivem_candidate", { p_actor_id: session.user.id, p_candidate: candidateForStorage(source), p_request_id: `${requestId}:${code}` }, undefined, { useSecret: true });
     }));
     return { candidates: results.filter(r => r.status === "fulfilled").map(r => r.value), errors: results.flatMap((r, index) => r.status === "rejected" ? [{ joinCode: codes[index], message: r.reason?.message || "The server could not be fetched." }] : []) };
