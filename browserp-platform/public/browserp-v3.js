@@ -202,6 +202,14 @@
     return "";
   }
 
+  function safeWebsiteUrl(value) {
+    if (typeof value !== "string" || value.length > 1000 || !/^https:\/\//i.test(value) || /[\s\\\u0000-\u001f\u007f]/.test(value)) return "";
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" && !url.username && !url.password ? url.href : "";
+    } catch { return ""; }
+  }
+
   const ADVERT_ARTWORK = Object.freeze([
     "/assets/adverts/serious-roleplay.jpg",
     "/assets/adverts/custom-cars.jpg",
@@ -543,6 +551,13 @@
       const validConnect = typeof connectUrl === "string" && /^https:\/\/cfx\.re\/join\/[a-z0-9]{6,12}\/?$/i.test(connectUrl);
       connect.hidden = !validConnect;
       if (validConnect) { connect.href = connectUrl; connect.rel = "noopener noreferrer"; connect.textContent = "Connect via Cfx"; }
+      const website = $("#server-website-v3");
+      const websiteUrl = safeWebsiteUrl(server.website_url);
+      if (website) {
+        website.hidden = !websiteUrl;
+        if (websiteUrl) { website.href = websiteUrl; website.rel = "noopener noreferrer"; }
+        else website.removeAttribute("href");
+      }
       $("#vote-server-v3").dataset.serverId = server.id;
       $("#comment-form-v3").dataset.serverId = server.id;
       $("#report-form-v3").dataset.serverId = server.id;

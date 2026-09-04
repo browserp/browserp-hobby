@@ -115,10 +115,11 @@ test('due refresh reads only stored sources, takes a lease and persists current 
 }));
 
 test('unavailable imported observations remain unknown when enriching cached directory results',async()=>backend(({url})=>{
- if(url.pathname.endsWith('/rpc/public_server_import_details'))return response([{serverId,imported:true,claimable:true,joinCode:'6myr996',lastCheckedAt:new Date().toISOString(),statusUnavailable:true,keywords:[]}]);
+ if(url.pathname.endsWith('/rpc/public_server_import_details'))return response([{serverId,imported:true,claimable:true,joinCode:'6myr996',websiteUrl:'https://community.example.org/',lastCheckedAt:new Date().toISOString(),statusUnavailable:true,keywords:[]}]);
 },async()=>{
  const result=await enrichImportedServers([{id:serverId,online:true,players:25,capacity:64}]);
  assert.equal(result[0].online,false);assert.equal(result[0].players,null);assert.equal(result[0].capacity,null);
+ assert.equal(result[0].website_url,'https://community.example.org/');
 }));
 
 test('server media rejects non-images, oversized canvases, arbitrary hosts and oversized downloads',async()=>backend(()=>{},async()=>{
