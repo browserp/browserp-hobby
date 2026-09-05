@@ -139,19 +139,35 @@ test('equal current observations recover transient errors without duplicate or n
    for (const source of sources) {
     const table=sourceTable(source);
     const expired=()=>db.query(`update public.${table} set next_refresh_at=now()-interval '1 second' where server_id=$1`,[source.id]);
-    const assertCooldown=async()=>{
-     await reset();
-     const seconds=await value(`extract(epoch from next_refresh_at-clock_timestamp())::double precision from public.${table} where server_id=$1`,[source.id]);
-     assert.ok(seconds>54&&seconds<=55,`Expected 55-second cooldown, got ${seconds}`);
+    const assertCooldown=async action=>{
+     // Check the assigned interval against the same transaction's stable clock,
+     // so scheduling delays between queries cannot shorten the measured lease.
+     await db.exec('begin');
+     try {
+      await expired();await db.exec('set role service_role');
+      await action();
+      await reset();
+      const seconds=await value(`extract(epoch from next_refresh_at-now())::double precision from public.${table} where server_id=$1`,[source.id]);
+      assert.equal(seconds,55,'Expected an exactly 55-second cooldown');
+      await db.exec('commit');
+     } catch(error) {
+      await db.exec('rollback');
+      throw error;
+     }
     };
-    await expired();await db.exec('set role service_role');
-    assert.equal(await claim(source),true);
-    assert.equal(await claim(source),false);
-    await assertCooldown();
-    await expired();await db.exec('set role service_role');await fail(source);await assertCooldown();
-    await expired();await db.exec('set role service_role');await refresh(source,new Date().toISOString());await assertCooldown();
+    await assertCooldown(async()=>{
+     assert.equal(await claim(source),true);
+     assert.equal(await claim(source),false);
+    });
+    await assertCooldown(async()=>assert.equal(await fail(source),true));
+    const newer=new Date((await state(source)).last_checked_at.getTime()+1000).toISOString();
+    await assertCooldown(async()=>{
+     const result=await refresh(source,newer);
+     assert.equal(result.players,source.players);
+     assert.equal(result.unchanged,undefined);
+    });
     const seen=(await state(source)).last_checked_at.toISOString();
-    await expired();await db.exec('set role service_role');await refresh(source,seen);await assertCooldown();
+    await assertCooldown(async()=>assert.equal((await refresh(source,seen)).unchanged,true));
     await db.query(`update public.${table} set next_refresh_at=now()+interval '2 minutes' where server_id=$1`,[source.id]);
     const longer=(await state(source)).next_refresh_at;
     await db.exec('set role service_role');assert.equal(await claim(source),false);

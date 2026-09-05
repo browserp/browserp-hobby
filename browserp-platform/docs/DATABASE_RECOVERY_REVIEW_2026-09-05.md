@@ -1,0 +1,58 @@
+# BrowseRP database transport and recovery review
+
+Reviewed 5 September 2026. Read-only: no live setting changes, password handling, secret-file reads or restores. The owner/root is handling the password reset and backup capture separately.
+
+## Decision
+
+Enable incoming database SSL after the replacement password and encrypted capture have been verified, in a short planned maintenance window. There is no evidence that BrowseRP requires unencrypted external Postgres access. Do not combine this change with IP restrictions, application deployment or another password rotation.
+
+The supported Supabase setting targets external Postgres/pooler connections. Managed local non-SSL sessions are not, by themselves, a reason to leave it off. Expect a database restart and temporary API errors; do not promise zero downtime. The official page gives both “a few seconds” and “a few minutes,” so allow minutes. Disabling it again also restarts the database. [SSL enforcement](https://supabase.com/docs/guides/platform/ssl-enforcement), [CLI external-connection scope](https://supabase.com/docs/reference/cli/supabase-ssl-enforcement-update).
+
+## Evidence and boundary
+
+- Root's current inspection: enforcement off; non-SSL sessions classified as local loopback; the remote management connection encrypted. Root verified the official CA and session-pooler hostname. This review did not repeat credentialed connection tests.
+- Independent live metadata check: PostgreSQL 17.6, TLS support `ssl=on`; installed extensions are pg_cron 1.6.4, pg_net 0.20.4, pg_stat_statements 1.11, pgcrypto 1.3, plpgsql 1.0, supabase_vault 0.3.1 and uuid-ossp 1.1. TLS support being on does **not** mean unencrypted connections are rejected.
+- Supabase's published Postgres configuration has separate Unix-socket/loopback rules before external rules. This supports the expected local-service distinction. It does not prove this project's generated enforcement configuration: read-only access to `pg_hba_file_rules` was denied, and I did not bypass that restriction. [Pinned primary template, lines 81–97](https://github.com/supabase/postgres/blob/ad9cfaa31c64bbae7f752180efc92ff54ff27b95/ansible/files/postgresql_config/pg_hba.conf.j2#L81).
+- `browserp-platform/lib/config.js:64` takes the Supabase URL and HTTP API keys; `lib/supabase.js:71` calls those APIs with fetch. No Postgres client dependency exists in package.json. Root separately checked Vercel variable names. API traffic remains HTTPS independently of this database toggle.
+- `lib/supabase.js:318` preserves session cookies on transient refresh outages; protected operations fail closed on an unavailable backend. Users may need to retry after the restart. These existing controls do not remove the need for the post-change checks.
+
+## Precise preflight, change check and rollback
+
+1. Finish the password reset through the supported dashboard flow. Save the replacement privately. Authenticate once through the **session pooler on 5432** with `verify-full` and the downloaded official CA. A TLS handshake alone proves the certificate, not that the new password works. Keep an authenticated dashboard/management recovery session available independently of database credentials.
+2. Finish and independently authenticate the encrypted database capture; review encrypted diagnostics. Confirm required schema/data entries and password-free role definitions. Record that media, root-key recovery and full restore are still separate until proved. Save a pre-change site/staff read-only health baseline and last successful scheduled refresh.
+3. Recheck external connection dependencies, including any dormant operator tool or scheduled job. A snapshot of current clients cannot establish that a dormant client is compatible. Do not print credentials, SQL text or client IPs. Keep all external clients on certificate-verifying TLS. Avoid starting imports, identity changes, uploads or migrations during the restart.
+4. Enable only the supported incoming-SSL setting. Wait for the project to become healthy and read back the effective setting. Do not rapidly toggle during normal reboot time.
+5. Verify a new credentialed `verify-full` connection succeeds. Make one **credential-free** PostgreSQL startup probe with SSL disabled: rejection before authentication is the expected negative result. Do not send a password or any real query over plaintext merely to test rejection. If the pooler defers the enforcement check, classify that probe as inconclusive and use supported configuration/readback rather than exposing credentials.
+6. Check public directory/search/counts, an existing signed-in profile and staff overview, Auth provider settings and a public Storage image. Confirm the next scheduled refresh completes and fresh database/API reads recover. A true remote SSL session is useful evidence; local non-SSL rows may legitimately remain.
+7. If expected recovery does not occur, preserve error/status evidence and identify whether the failed client is using plaintext or a bad CA. Fix that client where possible. If the setting causes a sustained outage, disable **only** incoming SSL via the still-authenticated dashboard/management API, expect another restart, then repeat baseline checks. Do not rotate credentials again or restore a database to undo this setting. If the project fails to recover even after the configuration rollback, use Supabase support/status, not repeated resets.
+
+IP restrictions are a separate remaining hardening option. They restrict direct/pooler access, not HTTP APIs; changing them can break direct Edge Function access and operator access. Do not guess an IP allowlist or add one during the SSL change. [Network restrictions](https://supabase.com/docs/guides/platform/network-restrictions).
+
+## What the current capture does and does not prove
+
+Reviewed only source: `/Users/georgemacdonald/BrowseRP Recovery/backup.py` and `Start encrypted backup.command`.
+
+- The launcher passes the supplied CA. The helper checks STARTTLS/hostname before asking for passwords, uses hidden terminal input and a temporary mode-0600 password file, forces `verify-full`/read-only sessions, streams a custom-format pg_dump into authenticated encryption, separately captures roles without role passwords, checks required table-data entries and authenticates the files. It correctly records `database_restore_tested=false` and `media_files_included=false` (lines 278–304).
+- `pg_restore --list` verifies archive structure and critical entries; it does not replay all data, constraints, policies, functions or managed services. A successful unfiltered dump may still require managed-extension/configuration treatment on restore. Warnings must remain visible as unfinished review.
+- There is no Storage-byte capture in this helper. Database backups contain Storage metadata, not the image bytes. The encrypted backup must also have a separately stored, recoverable passphrase and a protected off-device copy. Those operational facts are not proved by encryption code. [Supabase backups](https://supabase.com/docs/guides/platform/backups).
+
+## Smallest honest restore check without Docker
+
+Native Homebrew `initdb`, postgres, pg_dump and pg_restore **17.11** are installed. Docker is absent. The smallest useful next proof is a **partial restore of an actual captured table**, not another synthetic encryption round trip:
+
+1. Owner decrypts the authenticated capture into a mode-0700 directory on an encrypted local volume. Do not inspect private rows in chat. Use a fresh native PostgreSQL17 cluster in that directory, a private Unix socket and `listen_addresses=''`; clear inherited `PG*` settings and use explicit local destinations for every command. Do not start a system-wide Homebrew service or expose a TCP port.
+2. First read the entire custom archive through pg_restore to a private/discarded SQL output, failing on decompression/parse errors. This is additional archive validation, still not restoration.
+3. Use an explicit reviewed archive TOC allowlist for `public.platforms` TABLE, TABLE DATA and its primary/unique/check constraints. It is an actual extension-independent table in this schema (`202608180001_browserp_core.sql:32`). Include only its dependencies. Exclude policies, triggers, ACLs and owner assignments for this first bounded check and explicitly record those omissions. `pg_restore -t` alone does not automatically restore every subsidiary object/dependency.
+4. Restore with fail-fast/single-transaction behavior into a brand-new local database. Check table shape, row count, primary/unique/check constraints, and deterministic row digest against the same capture's independently extracted data or a coordinated source snapshot. Validate the four launch-game records. Stop and clean up only this uniquely named test cluster afterwards.
+
+This proves real archive-to-Postgres **partial data recovery**. It does not prove recovery of accounts, identities/MFA, permissions/RLS, scheduled jobs, encrypted secrets, server listings or files. No actual restore was performed in this review. [PostgreSQL pg_restore](https://www.postgresql.org/docs/17/app-pgrestore.html), [initdb](https://www.postgresql.org/docs/17/app-initdb.html).
+
+## Full recovery still needed
+
+Use a separately provisioned isolated Supabase project, or an equivalent isolated Supabase stack with its real managed components, for the full exercise. A bare native PostgreSQL installation plus mocked Auth/Vault functions is not equivalent.
+
+- BrowseRP **uses Vault** for `browserp_server_status_refresh`; `20260904022929_scheduled_server_status_refresh.sql:125` decrypts it and then sends to the fixed production URL. Logical dumps do not contain the project's encryption root key. Securely preserve/copy that key using the supported procedure, or document and test deliberate credential recreation/rotation. Never print it. Do not enable the copied cron jobs or permit the restored environment to contact production endpoints. [Manual backup and restore](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore).
+- A new hosted target needs the supported role/schema/data restore, the project's custom Auth/Storage policies and triggers, migration history, extensions, settings, provider callbacks/API keys, and separately copied Storage bytes. Reconfigure outbound jobs and callbacks to isolation before enabling anything. Test Auth, staff MFA and permissions, ownership, imports, private requests, media retrieval and scheduled refresh against that target. Keep all assertions and row/hash comparisons private and aggregate in the report. [Restore-to-new-project scope](https://supabase.com/docs/guides/platform/clone-project).
+- Current Supabase changes matter: restores reapply current provider database credentials after physical restoration; logical role dumps deliberately omit passwords. Extension-version requests may now select the provider's default version rather than an old pinned version. Realtime managed objects cannot be blindly recreated by the ordinary postgres role. Do not treat these expected managed differences as permission problems to bypass. [Credential resync](https://supabase.com/changelog/restore-credential-resync), [extension versions](https://supabase.com/changelog/extension-version-pinning-ignored), [Realtime protection](https://supabase.com/changelog/realtime-schema-locked-down-against-modification).
+
+Completion should require a successful isolated restore, verified Storage-file hashes, working core journeys and a recorded elapsed recovery time. Until then, report capture/partial-restore/full-recovery as separate states.

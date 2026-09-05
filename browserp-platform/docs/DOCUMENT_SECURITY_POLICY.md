@@ -31,3 +31,7 @@ An artificially constructed request carrying the static file's ETag can still re
 The supported Node middleware counts toward the actual Hobby function limit. The unchanged health handler now runs through the existing router at the same `/api/health` URL, leaving 11 API functions plus one Node middleware. The deployment checker counts both. No hosting plan upgrade or feature removal is required.
 
 The final release still requires its full preview checks and observation of the actual Cloudflare-injected scripts on the production hostname. Hosted reload evidence: `/tmp/browserp-normal-reload.json`; synthetic conditional-request evidence: `/tmp/browserp-etag-csp-preview.json` (local audit artifacts, not repository data).
+
+### Actual production integration verified — 5 September, approximately 22:20 UTC
+
+Release 0fe82e5 is live behind Cloudflare. Chromium, Firefox and WebKit each received a document nonce, observed it on the real outer injected script and both scripts in the blank child frame, and completed the provider challenge request with HTTP200. No CSP violation was recorded. The unchanged strict policy is effective; no iframe-origin allowance or inline bypass was added. All 12 checked public/account/signed-out-staff pages loaded with no application errors. This proves the observed provider integration, not universal attack prevention. Evidence: /tmp/browserp-menu-production-check.json.

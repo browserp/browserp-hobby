@@ -37,3 +37,7 @@ Vercel reports Cloudflare proxy detected and active system mitigations. No custo
 ## Database transport follow-up — approximately 22:00 UTC
 
 Supabase incoming database SSL enforcement is off and database network restrictions allow all IP addresses. HTTP API traffic uses HTTPS separately. An aggregate client inspection found the non-SSL connections were local loopback connections; the remote management connection used SSL. No client IP addresses or credentials are recorded here. Enabling incoming SSL enforcement requires a brief managed restart, so it remains a deliberate follow-up after backup/recovery preparation and connection dependency checks. No transport setting was changed in this inspection.
+
+### Post-release application/provider checks — approximately 22:20 UTC
+
+Actual browser challenge integration now passes in Chromium, Firefox and WebKit. Outer and inner scripts receive the document nonce; the provider request returns200 and no CSP violations occur. Signed-out PATCH /api/submissions reaches the application and returns JSON401, as do private data-request endpoints. No firewall protection was weakened. The remaining normal-use shared-IP rate-limit check is separate from this result.
