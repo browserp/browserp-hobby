@@ -74,18 +74,11 @@ test("the middleware helper version is exact and agrees with the installed lockf
   assert.equal(config.runtime, "nodejs");
 });
 
-test("document revalidation removes old validators upstream without exposing session headers", () => {
-  const response = middleware(new Request("https://browserp.test/profile", { headers: {
-    "if-none-match": '"old-page"', "if-modified-since": "Sat, 05 Sep 2026 20:00:00 GMT",
-    cookie: "session=fixture", accept: "text/html"
-  } }));
-  assert.equal(response.headers.get("x-middleware-request-if-none-match"), null);
-  assert.equal(response.headers.get("x-middleware-request-if-modified-since"), null);
-  assert.doesNotMatch(response.headers.get("x-middleware-override-headers"), /if-none-match|if-modified-since/);
-  assert.equal(response.headers.get("x-middleware-request-cookie"), "session=fixture");
-  assert.equal(response.headers.get("cookie"), null);
-  assert.equal(response.headers.get("x-middleware-request-accept"), "text/html");
-  assert.ok(nonceFrom(response.headers.get("content-security-policy")));
-  const api = middleware(new Request("https://browserp.test/api/servers", { headers: { "if-none-match": '"api-cache"' } }));
-  assert.equal(api.headers.get("x-middleware-override-headers"), null);
+test("document validators identify the fresh policy and do not reuse static HTML validators", () => {
+  const first = documentSecurityHeaders(), second = documentSecurityHeaders();
+  assert.equal(first.ETag, `"brp-document-${nonceFrom(first["Content-Security-Policy"])}"`);
+  assert.notEqual(first.ETag, second.ETag);
+  const response = middleware(new Request("https://browserp.test/profile", {headers: {"if-none-match": first.ETag}}));
+  assert.notEqual(response.headers.get("etag"), first.ETag);
+  assert.equal(response.headers.get("x-middleware-override-headers"), null);
 });
