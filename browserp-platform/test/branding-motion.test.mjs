@@ -69,7 +69,10 @@ test("launch-facing copy and submission choices name the four live games", () =>
   const home = read("public/index.html");
   const listing = read("public/list-server.html");
   const sitemap = read("public/sitemap.xml");
+  const homeDocument = new JSDOM(home).window.document;
   for (const game of ["FiveM", "RedM", "Roblox", "Minecraft"]) assert.match(home, new RegExp(game));
+  assert.equal(homeDocument.querySelectorAll(".game-grid-v3 .game-art-v3").length, 5, "every Browse by game option keeps its artwork");
+  assert.equal(homeDocument.querySelectorAll(".game-grid-v3 .game-art-v3 .game-mark-v4").length, 0, "game symbols must not cover artwork that already identifies the game");
   assert.doesNotMatch(home, /across every game|driving simulators and more/i);
   assert.doesNotMatch(listing, /<option value="(?:forza|gmod|arma|vrchat|dayz|project-zomboid|ets2|assetto-corsa|beamng)"/i);
   assert.doesNotMatch(sitemap, /\/games\/(?:forza|gmod|arma|vrchat|dayz|project-zomboid|ets2|assetto-corsa|beamng)/i);
