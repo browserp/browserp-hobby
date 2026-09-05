@@ -25,8 +25,10 @@ for (const file of files) {
 console.log(`Syntax checked ${files.length} JavaScript files.`);
 
 const apiFunctionCount = files.filter((file) => file.startsWith(join(root, "api")) && extname(file) === ".js").length;
-if (apiFunctionCount > 12) {
-  console.error(`Vercel Hobby supports at most 12 functions; found ${apiFunctionCount}.`);
+const nodeMiddlewareCount = /runtime:\s*["']nodejs["']/.test(readFileSync(join(root, "middleware.js"), "utf8")) ? 1 : 0;
+const totalFunctionCount = apiFunctionCount + nodeMiddlewareCount;
+if (totalFunctionCount > 12) {
+  console.error(`Vercel Hobby supports at most 12 functions; found ${totalFunctionCount} including middleware.`);
   process.exit(1);
 }
 const vercel = JSON.parse(readFileSync(join(root, "vercel.json"), "utf8"));
@@ -34,4 +36,4 @@ if (vercel.outputDirectory !== "public") {
   console.error("Vercel outputDirectory must remain public.");
   process.exit(1);
 }
-console.log(`Vercel deployment checks passed with ${apiFunctionCount} functions.`);
+console.log(`Vercel deployment checks passed with ${apiFunctionCount} API functions and ${nodeMiddlewareCount} Node middleware (${totalFunctionCount} total).`);

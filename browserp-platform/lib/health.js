@@ -1,6 +1,6 @@
-import { endpoint, ok } from "../lib/api.js";
-import { buildSha, env, RELEASE_VERSION, stripeConfig } from "../lib/config.js";
-import { authCapabilities, rest } from "../lib/supabase.js";
+import { endpoint, ok } from "./api.js";
+import { buildSha, env, RELEASE_VERSION, stripeConfig } from "./config.js";
+import { authCapabilities, rest } from "./supabase.js";
 
 export default endpoint("GET", async (_req, res) => {
   const stripe = stripeConfig();

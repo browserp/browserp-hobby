@@ -10,7 +10,7 @@ const migration = readFileSync(join(root, "supabase", "migrations", "20260819192
 const interactionAcl = readFileSync(join(root, "supabase", "migrations", "20260819204725_member_interaction_acl.sql"), "utf8");
 const router = readFileSync(join(root, "api", "router.js"), "utf8");
 const staff = readFileSync(join(root, "public", "staffpanel-v3.js"), "utf8");
-const health = readFileSync(join(root, "api", "health.js"), "utf8");
+const health = readFileSync(join(root, "lib", "health.js"), "utf8");
 
 function response() {
   const headers = new Map();

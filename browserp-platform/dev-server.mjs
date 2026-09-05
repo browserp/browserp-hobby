@@ -7,7 +7,7 @@ const root = fileURLToPath(new URL(".", import.meta.url));
 const publicDir = join(root, "public");
 
 const apiRoutes = new Map([
-  ["GET /api/health", "api/health.js"],
+  ["GET /api/health", ["api/router.js", "health"]],
   ["GET /api/platforms", ["api/router.js", "platforms"]],
   ["GET /api/categories", ["api/router.js", "categories"]],
   ["GET /api/servers", "api/servers.js"],

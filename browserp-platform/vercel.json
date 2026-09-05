@@ -22,6 +22,10 @@
   },
   "rewrites": [
     {
+      "source": "/api/health",
+      "destination": "/api/router?_route=health"
+    },
+    {
       "source": "/api/internal/server-status",
       "destination": "/api/router?_route=internal/server-status"
     },

@@ -1,3 +1,4 @@
+import health from "../lib/health.js";
 import { staffMinecraft } from "../lib/minecraft-workflow.js";
 import { scheduledStatusRefresh } from "../lib/status-refresh-workflow.js";
 import { createHash, randomBytes } from "node:crypto";
@@ -217,6 +218,7 @@ function providerRoute(provider) {
 }
 
 const routes = {
+  health,
   "auth/providers": endpoint("GET", async (_req, res) => {
     try {
       return ok(res, { configured: true, providers: await authCapabilities() });

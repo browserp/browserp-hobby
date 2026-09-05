@@ -21,3 +21,7 @@ After the reviewed deployment crosses the Cloudflare-proxied hostname, observe t
 ## Privacy wording
 
 BrowseRP’s own account device identifier is random. Cloudflare’s separate essential security checks can use browser/request signals and security cookies, so the public Privacy/Legal copy no longer promises that no upstream security provider ever uses browser fingerprinting. It distinguishes those security checks from BrowseRP’s identifier and advertising, and links to Cloudflare’s [privacy policy](https://www.cloudflare.com/policies/privacy/) and [cookie documentation](https://developers.cloudflare.com/fundamentals/reference/policies-compliances/cloudflare-cookies/).
+
+### Hosted findings and correction
+
+The first preview preserved all directives and produced distinct nonces, but an explicit conditional request still returned 304. The middleware now removes old document validators before forwarding to static hosting. A subsequent Node middleware build hit the actual Hobby limit because middleware counts as a Node function. The unchanged health handler now runs through the existing router at the same /api/health URL, leaving 11 API functions plus one Node middleware. The deployment checker counts both. This retains the supported runtime without buying a plan or dropping a feature. A replacement hosted check is required before promotion.
