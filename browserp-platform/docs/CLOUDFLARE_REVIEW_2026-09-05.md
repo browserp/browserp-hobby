@@ -29,3 +29,11 @@ Validate the fresh document CSP nonce through the actual Cloudflare-injected bro
 
 - Cache Rules and Cache Response Rules both have zero active rules. Default caching is Standard; browser TTL respects existing origin headers. Always Online and Development Mode are off.
 - Security Events were inspected, rather than treating all mitigations as attacks. The sampled block at 18:45:01 UTC was a Firefox GET to `/api/public/adverts?placement=side`, matching the shared-IP API rate rule during browser verification. Other nearby rate events clustered in the same verification interval. Recent method-rule blocks matched the deliberate no-account negative probes. Bot Fight Mode also recorded managed challenges. These samples do not establish that all blocks were malicious or that no legitimate visitor was affected. The rate threshold remains unchanged pending a bounded normal-use/shared-IP check. No visitor IP addresses are copied into this report.
+
+## Hosting-side firewall inspection — approximately 21:45 UTC
+
+Vercel reports Cloudflare proxy detected and active system mitigations. No custom rules, bypass rules or manual IP blocks are configured. Vercel Bot Protection and Attack Mode are off; AI bots are allowed. The displayed last-day overview recorded 12.7k allowed requests and four DDoS mitigations, with no active alert. These are dashboard observations, not proof of attack resistance or an unreachable origin. No hosting firewall setting was changed. App authentication, authorisation and request limits continue to apply to direct deployment aliases.
+
+## Database transport follow-up — approximately 22:00 UTC
+
+Supabase incoming database SSL enforcement is off and database network restrictions allow all IP addresses. HTTP API traffic uses HTTPS separately. An aggregate client inspection found the non-SSL connections were local loopback connections; the remote management connection used SSL. No client IP addresses or credentials are recorded here. Enabling incoming SSL enforcement requires a brief managed restart, so it remains a deliberate follow-up after backup/recovery preparation and connection dependency checks. No transport setting was changed in this inspection.
