@@ -14,6 +14,7 @@ import { fetchServerImage } from "../lib/server-media.js";
 import { moderationMutation, moderationQuery } from "../lib/staff-moderation.js";
 import { staffAuthenticators } from "../lib/staff-authenticators.js";
 import { prepareInitialStaffAuthenticator, verifyInitialStaffAuthenticator } from "../lib/staff-initial-authenticator.js";
+import { memberPrivacyRequests, staffPrivacyRequests } from "../lib/privacy-requests.js";
 import { staffAdvertMedia } from "../lib/staff-advert-media.js";
 import {
   authCapabilities,
@@ -410,6 +411,9 @@ const routes = {
     return ok(res, { authorizationUrl });
   }),
 
+  "me/data-requests": endpoint(["GET", "POST"], async (req, res) => ok(res, await memberPrivacyRequests(req, res))),
+  "admin/data-requests": endpoint(["GET", "POST"], async (req, res) => ok(res, await staffPrivacyRequests(req, res))),
+
   "me/profile": endpoint(["GET", "POST"], async (req, res) => {
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true });
@@ -561,7 +565,9 @@ const routes = {
     const kind = sanitizePlainText(requestUrl.searchParams.get("kind"), 20);
     const itemId = sanitizePlainText(requestUrl.searchParams.get("id"), 80);
     if (!kind || !itemId) throw Object.assign(new Error("Choose a queue item."), { status: 400 });
-    const item = kind === "comment"
+    const item = kind === "listing"
+      ? await rpc("staff_server_submission_review", { p_submission_id: uuid(itemId, "Choose a valid listing review.") }, session.accessToken)
+      : kind === "comment"
       ? await rpc("staff_comment_review_item", { p_queue_id: uuid(itemId, "Choose a valid comment review.") }, session.accessToken)
       : await rpc("staff_review_item", { p_kind: kind, p_item_id: itemId }, session.accessToken);
     if (!item) throw Object.assign(new Error("Queue item was not found or is no longer visible."), { status: 404 });
@@ -579,6 +585,19 @@ const routes = {
     const reason = sanitizePlainText(body.reason, 1_000);
     if (!kind || !itemId || !action || reason.length < 5) {
       throw Object.assign(new Error("A queue item, action and reason of at least five characters are required."), { status: 400 });
+    }
+    if (kind === "listing") {
+      if (!Number.isSafeInteger(body.expectedVersion) || body.expectedVersion < 1 || body.expectedVersion > 2147483647 || !Number.isSafeInteger(body.expectedQueueVersion) || body.expectedQueueVersion < 0 || body.expectedQueueVersion > 2147483647) {
+        throw Object.assign(new Error("Reopen this listing to review its latest details before making a decision."), { status: 409 });
+      }
+      return ok(res, { result: await rpc("staff_review_server_submission", {
+        p_submission_id: uuid(itemId, "Choose a valid listing review."),
+        p_expected_version: body.expectedVersion,
+        p_expected_queue_version: body.expectedQueueVersion,
+        p_action: action,
+        p_reason: reason,
+        p_request_id: id
+      }, session.accessToken) });
     }
     const result = kind === "comment"
       ? await rpc("staff_resolve_comment_review", {

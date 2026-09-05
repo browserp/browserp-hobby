@@ -134,6 +134,14 @@
       "destination": "/api/router?_route=me/connections"
     },
     {
+      "source": "/api/me/data-requests",
+      "destination": "/api/router?_route=me/data-requests"
+    },
+    {
+      "source": "/api/admin/data-requests",
+      "destination": "/api/router?_route=admin/data-requests"
+    },
+    {
       "source": "/api/me/profile",
       "destination": "/api/router?_route=me/profile"
     },

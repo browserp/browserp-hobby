@@ -21,6 +21,7 @@
     bans: ["Bans", "Review account, IP and browser/device restrictions. Handle security signals in Website risks.", "manageBans", "bans"],
     appeals: ["Appeals", "Review requests to restore access and record your decision.", "reviewAppeals", "appeals"],
     security: ["Website risks", "Investigate recorded site-wide security signals, MFA controls and protected evidence requests.", "readSecurity", "security"],
+    "data-requests": ["Data requests", "Review private requests for a copy, correction or deletion of account data.", null, null],
     logs: ["Logs", "Search recorded staff audit events. Account activity and security signals have their own sections.", "readAudit", "audit"]
   };
   const ACTIVE_VIEWS = ["reports", "queue", "content", "profiles", "bans", "appeals", "security"];
@@ -40,7 +41,7 @@
   }
   function safeLink(value) { try { const url = new URL(value, location.origin); return ["https:", "http:"].includes(url.protocol) ? url.href : null; } catch { return null; } }
 
-  async function init({ api, onAuthFailure, actions = {} } = {}) {
+  async function init({ api, accountId, onAuthFailure, actions = {} } = {}) {
     if (typeof api !== "function" || !F) throw new Error("The authorised moderation API is required.");
     if (!$("#moderation-workspace")) return null;
     active?.destroy();
@@ -48,10 +49,12 @@
     const state = { ...initial, summary: null, permissions: {}, keys: [], workspace: null, cursors: [null], request: 0, destroyed: false, busy: false, debounce: null, mountedStaff: false };
     const root = $("#moderation-content");
     const removers = [];
-    let claimsController = null;
+    let claimsController = null, privacyController = null, refreshGeneration = 0;
+    const privacyApi = (path, options = {}) => api(path, { ...options, headers: { ...(options.headers || {}), "X-BrowseRP-Account": accountId || "" } });
+    function clearPrivateRequests() { privacyController?.destroy(); privacyController = null; }
     const listen = (node, event, callback) => { node.addEventListener(event, callback); removers.push(() => node.removeEventListener(event, callback)); };
     const key = (name) => state.keys.includes(name);
-    const allowed = (view) => view === "summary" || (view === "claims" ? key("servers.claims.review") || state.summary?.permissions?.isOwner === true : view === "staff" ? state.permissions.manageStaff || state.permissions.manageRoles : view === "queue" ? state.permissions.readListings || key("servers.review") : state.permissions[META[view]?.[2]]) === true;
+    const allowed = (view) => view === "summary" || (view === "data-requests" ? state.canReviewData : view === "claims" ? key("servers.claims.review") || state.summary?.permissions?.isOwner === true : view === "staff" ? state.permissions.manageStaff || state.permissions.manageRoles : view === "queue" ? state.permissions.readListings || key("servers.review") : state.permissions[META[view]?.[2]]) === true;
     const status = (message, error = false) => { const target = $("#moderation-live-status"); target.textContent = message; target.dataset.error = String(error); };
     const busy = (value) => { state.busy = value; root.setAttribute("aria-busy", String(value)); $("#moderation-refresh").disabled = value; };
     const empty = (title, description) => { const box = make("div", undefined, "moderation-empty"); box.append(make("h3", title), make("p", description)); return box; };
@@ -66,9 +69,9 @@
     function summary() {
       root.replaceChildren(heading("summary"));
       const cards = make("div", undefined, "moderation-summary-grid");
-      for (const view of ["reports", "members", "servers", "claims", "queue", "content", "profiles", "activity", "staff", "appeals", "logs"].filter(allowed)) {
+      for (const view of ["reports", "members", "servers", "claims", "queue", "content", "profiles", "activity", "staff", "appeals", "data-requests", "logs"].filter(allowed)) {
         const card = make("a", undefined, "moderation-summary-card"); card.href = F.serialize(view); const count = state.summary?.counts?.[META[view][3]];
-        card.append(make("span", META[view][0]), make("strong", hasCount(count) ? number.format(count) : view === "claims" ? "Review" : "—"), make("p", META[view][1])); cards.append(card);
+        card.append(make("span", META[view][0]), make("strong", hasCount(count) ? number.format(count) : ["claims", "data-requests"].includes(view) ? "Review" : "—"), make("p", META[view][1])); cards.append(card);
       }
       if (cards.childElementCount) root.append(cards); else root.append(empty("No moderation access assigned", "Your account can open this workspace, but has not been assigned any record permissions."));
       if (allowed("security") || allowed("bans")) {
@@ -300,9 +303,20 @@
       if (state.destroyed) return null;
       const request = ++state.request; const view = state.view; busy(true);
       if (view !== "claims") { claimsController?.destroy(); claimsController = null; }
+      clearPrivateRequests();
       if (!allowed(view)) { root.replaceChildren(empty("Access not assigned", "Your current role does not have permission to view this section.")); busy(false); status("Choose an available section to continue."); return null; }
       try {
         if (view === "summary") { summary(); status(`Updated ${date(state.summary.generatedAt)}`); return state.summary; }
+        if (view === "data-requests") {
+          const mount = make("section"); root.replaceChildren(heading(view), mount);
+          privacyController = window.BrowseRPPrivacyRequests.initStaff({ api, accountId, root: mount, allowed: true, onAuthFailure: error => {
+            if (state.destroyed) return;
+            clearPrivateRequests(); state.canReviewData = false; renderTabs();
+            root.replaceChildren(empty("Private requests unavailable", "Your account or permission has changed. Sign in again or choose another available section."));
+            if (error.status === 401) { controller.destroy(); onAuthFailure?.(error); }
+          } });
+          status("Requests are reviewed privately. Account changes need a separate verified action."); return null;
+        }
         if (view === "claims") {
           if (claimsController) await claimsController.refresh();
           else {
@@ -333,22 +347,33 @@
     async function refresh() {
       if (state.destroyed) return null;
       busy(true);
+      const refreshRequest = ++refreshGeneration;
+      clearPrivateRequests(); state.canReviewData = false; renderTabs();
       try {
-        const { summary: value } = await api("/api/admin/moderation?view=summary");
-        if (state.destroyed) return null;
+        const [{ summary: value }, access] = await Promise.all([
+          api("/api/admin/moderation?view=summary"),
+          window.BrowseRPPrivacyRequests && accountId ? privacyApi("/api/admin/data-requests?access=1").catch(error => { if (error.status === 401) throw error; return { canReview: false }; }) : { canReview: false }
+        ]);
+        if (state.destroyed || refreshRequest !== refreshGeneration) return null;
+        state.canReviewData = access.canReview === true && Boolean(window.BrowseRPPrivacyRequests);
         if (!value || !value.capabilities || !value.counts) throw new Error("The moderation summary is unavailable.");
         state.summary = value; state.permissions = value.capabilities; state.keys = Array.isArray(value.permissions) ? value.permissions : value.permissions?.keys || [];
         renderTabs(); return await loadRecords();
       } catch (error) {
-        if (state.destroyed) return null;
+        if (state.destroyed || refreshRequest !== refreshGeneration) return null;
         if ([401, 403].includes(error.status)) { controller.destroy(); onAuthFailure?.(error); return null; }
         status(error.message || "The workspace could not load. Please refresh.", true); root.replaceChildren(empty("Workspace unavailable", "Your current records could not be loaded. Use Refresh to try again.")); return null;
-      } finally { if (!state.destroyed) busy(false); }
+      } finally { if (!state.destroyed && refreshRequest === refreshGeneration) busy(false); }
     }
-    const controller = { refresh, destroy() { state.destroyed = true; claimsController?.destroy(); claimsController = null; state.request += 1; clearTimeout(state.debounce); removers.forEach((remove) => remove()); if (active === controller) active = null; } };
+    const controller = { refresh, destroy() { state.destroyed = true; refreshGeneration++; clearPrivateRequests(); claimsController?.destroy(); claimsController = null; state.request += 1; clearTimeout(state.debounce); removers.forEach((remove) => remove()); if (active === controller) active = null; } };
     active = controller;
     listen(window, "hashchange", () => { clearTimeout(state.debounce); const next = F.parse(location.hash); state.view = next.view; state.filters = next.filters; state.cursors = [null]; state.workspace = null; state.mountedStaff = false; renderTabs(); void loadRecords(); });
-    listen(window, "pagehide", () => controller.destroy());
+    listen(window, "browserp:session-ended", () => { controller.destroy(); root.replaceChildren(empty("Sign in again", "Your staff session has ended.")); });
+    listen(window, "pagehide", () => {
+      controller.destroy();
+      const resume = event => { window.removeEventListener("pageshow", resume); if (event.persisted) location.reload(); };
+      window.addEventListener("pageshow", resume);
+    });
     listen($("#moderation-refresh"), "click", () => { clearTimeout(state.debounce); state.cursors = [null]; void refresh(); });
     await refresh(); return controller;
   }

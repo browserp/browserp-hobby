@@ -1,5 +1,7 @@
 # Concrete UI follow-up — 5 September 2026
 
+**Update, 5 September:** The owner correction loop identified below is now implemented locally, including staff submission/queue version checks. See [SUBMISSION_CORRECTIONS.md](SUBMISSION_CORRECTIONS.md) for behavior, verification and deployment order. The original findings below describe the pre-fix state.
+
 This is a bounded audit of real friction, not a request to flatten BrowseRP's character or reduce useful staff controls. Keep the established public design, grouped staff controls, clear status badges and meaningful game imagery. Root is integrating the shared header and menu fixes separately.
 
 ## Implemented in this batch; awaiting integrated release verification

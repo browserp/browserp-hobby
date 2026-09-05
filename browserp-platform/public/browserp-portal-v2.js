@@ -92,6 +92,11 @@
     }
   }
 
+  let profileRequest = 0;
+  let privacyController = null;
+  function clearPrivacyRequests() { privacyController?.destroy(); privacyController = null; }
+  window.addEventListener("browserp:session-ended", () => { profileRequest++; clearPrivacyRequests(); });
+
   let toastTimer;
   function toast(message, tone = "") {
     const element = document.querySelector("#site-toast");
@@ -181,6 +186,7 @@
 
   function setRoot(content, { accessGate = false } = {}) {
     if (state.sessionEnded && !accessGate) return;
+    clearPrivacyRequests();
     root.className = "";
     root.setAttribute("aria-busy", "false");
     root.replaceChildren(content);
@@ -217,7 +223,7 @@
     } catch { /* A clear unavailable state is shown below if no provider works. */ }
     if (remainingProviders) providers = Object.fromEntries(["discord", "google"].map(provider => [provider, providers[provider] === true && remainingProviders.includes(provider)]));
     const requestedReturn = new URLSearchParams(location.search).get("returnTo") || "";
-    const returnTo = staffOnly ? "/staff" : ["/profile", "/dashboard"].includes(accountReturn) ? accountReturn : /^\/server\/[a-z0-9-]+\/?$/i.test(requestedReturn) ? requestedReturn : "/dashboard";
+    const returnTo = staffOnly ? "/staff" : ["/profile", "/profile?section=your-data", "/dashboard"].includes(accountReturn) ? accountReturn : /^\/server\/[a-z0-9-]+\/?$/i.test(requestedReturn) ? requestedReturn : "/dashboard";
     if (providers.discord) actions.append(providerButton(`/api/auth/discord?returnTo=${encodeURIComponent(returnTo)}`, "button button-primary", "Continue with Discord", "discord"));
     if (!staffOnly && providers.google) actions.append(providerButton(`/api/auth/google?returnTo=${encodeURIComponent(returnTo)}`, "button button-secondary", "Continue with Google", "google"));
     if (actions.childElementCount === 0) actions.append(make("p", "portal-status error", "Sign-in is temporarily unavailable. Please try again later."));
@@ -357,6 +363,7 @@
         }[status];
         const actions = ["changes_requested", "rejected"].includes(status)
           ? [link("/legal#standards", "small-button", "Read listing standards")] : [];
+        if (status === "changes_requested") actions.unshift(link(`/list-server?submission=${encodeURIComponent(submission.id)}`, "small-button", "Correct submission"));
         const item = listItem(submission.name || "Server submission", `Submitted ${dateLabel(submission.created_at)}`, actions, { status });
         const main = item.querySelector(".portal-item-main");
         if (typeof submission.review_note === "string" && submission.review_note.trim()) {
@@ -641,12 +648,15 @@
   }
 
   async function profilePage(session) {
+    const request = ++profileRequest;
+    clearPrivacyRequests();
     if (!session?.authenticated) {
-      await signInGate({ title: "Your BrowseRP profile", description: "Sign in to manage your community identity, profile picture and bio." });
+      await signInGate({ title: "Your BrowseRP profile", description: "Sign in to manage your community identity, profile picture and bio.", returnTo: location.hash === "#your-data" || new URLSearchParams(location.search).get("section") === "your-data" ? "/profile?section=your-data" : "/profile" });
       return;
     }
     try {
       const [profilePayload, overviewPayload] = await Promise.all([api("/api/me/profile"), api("/api/me/overview")]);
+      if (state.sessionEnded || session !== state.session || request !== profileRequest) return;
       const profile = profilePayload.profile || overviewPayload.overview?.profile || {};
       const content = make("div", "dashboard-view profile-page-v3");
       const name = profile.display_name || profile.displayName || "BrowseRP member";
@@ -655,10 +665,21 @@
       content.append(heading.head);
       const stack = make("div", "portal-stack");
       const refresh = async () => profilePage(state.session);
-      stack.append(dashboardProfile(profile, refresh), dashboardRecent());
+      const data = make("details", "portal-panel-v2"); data.id = "your-data";
+      const dataBody = make("div"); dataBody.dataset.privacyRequestsContent = "";
+      data.append(make("summary", "", "Your data"), dataBody);
+      if (location.hash === "#your-data" || new URLSearchParams(location.search).get("section") === "your-data") data.open = true;
+      stack.append(dashboardProfile(profile, refresh), data, dashboardRecent());
       content.append(stack);
       setRoot(content);
+      privacyController = window.BrowseRPPrivacyRequests?.initMember({ api, accountId: session.user.id, root: data, onAuthFailure: () => {
+        if (request !== profileRequest) return;
+        clearPrivacyRequests();
+        void signInGate({ title: "Sign in again", description: "Your account or access has changed. Sign in again to view private requests.", returnTo: "/profile" });
+      } });
+      if (data.open) data.scrollIntoView?.({ block: "start" });
     } catch (error) {
+      if (state.sessionEnded || session !== state.session || request !== profileRequest) return;
       setRoot(emptyState("Your profile could not be loaded", error.message, link("/profile", "button button-primary", "Try again")));
     }
   }
@@ -879,10 +900,12 @@
     reason.required = actions.length > 0;
     form.dataset.kind = kind;
     form.dataset.id = String(id || "");
+    delete form.dataset.reviewVersion; delete form.dataset.queueVersion;
     actions.forEach(([action, label, tone]) => {
       const actionButton = make("button", `small-button${tone ? ` small-button-${tone}` : ""}`, label);
       actionButton.type = "submit";
       actionButton.dataset.reviewAction = action;
+      actionButton.disabled = true;
       actionBox.append(actionButton);
     });
     if (!actions.length) actionBox.append(button("small-button", "Close"));
@@ -890,7 +913,10 @@
     dialog.showModal();
     try {
       const payload = await api(`/api/admin/item?kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(String(id || ""))}`);
+      if (kind === "listing" && (!Number.isSafeInteger(payload.item?.reviewVersion) || !Number.isSafeInteger(payload.item?.queueVersion))) throw new Error("Reopen this submission to load its latest review.");
+      form.dataset.reviewVersion = String(payload.item?.reviewVersion ?? ""); form.dataset.queueVersion = String(payload.item?.queueVersion ?? "");
       evidence.replaceChildren(renderEvidence(payload.item));
+      actionBox.querySelectorAll("[data-review-action]").forEach(element => { element.disabled = false; });
     } catch (error) {
       evidence.replaceChildren(make("p", "portal-status error", error.message));
       actionBox.querySelectorAll("[data-review-action]").forEach((element) => { element.disabled = true; });
@@ -918,7 +944,7 @@
       try {
         await api("/api/admin/action", {
           method: "POST",
-          body: JSON.stringify({ kind: form.dataset.kind, id: form.dataset.id, action, reason: reason.value.trim() })
+          body: JSON.stringify({ kind: form.dataset.kind, id: form.dataset.id, action, reason: reason.value.trim(), ...(form.dataset.kind === "listing" ? { expectedVersion: Number(form.dataset.reviewVersion), expectedQueueVersion: Number(form.dataset.queueVersion) } : {}) })
         });
         status.textContent = "Decision saved.";
         status.className = "portal-status success";
@@ -928,7 +954,8 @@
       } catch (error) {
         status.textContent = error.message;
         status.className = "portal-status error";
-        buttons.forEach((element) => { element.disabled = false; });
+        buttons.forEach((element) => { element.disabled = error.status === 409 && form.dataset.kind === "listing"; });
+        if (error.status === 409 && form.dataset.kind === "listing") status.textContent += " Close this review and open it again to read the updated details.";
       }
     });
   }

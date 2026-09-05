@@ -273,6 +273,11 @@
     const form = select("#listing-form");
     const accountNotice = select("#listing-account-notice");
     const providerNote = select("#provider-note");
+    const correctionId = new URLSearchParams(location.search).get("submission");
+    if (correctionId !== null) {
+      const returnTo = `/list-server?submission=${correctionId}`;
+      document.querySelectorAll("[data-auth-provider]").forEach(link => { link.href = `/api/auth/${link.dataset.authProvider}?returnTo=${encodeURIComponent(returnTo)}`; });
+    }
     let submissionAttemptKey = crypto.randomUUID();
     setupTagPicker(form);
     const platformSelect = select('[name="platform"]', form);
@@ -329,8 +334,8 @@
     if (state.session.authenticated) {
       gate.hidden = true;
       gate.inert = true;
-      form.hidden = false;
-      form.inert = false;
+      form.hidden = correctionId !== null;
+      form.inert = correctionId !== null;
       const name = state.session.user?.profile?.display_name || state.session.user?.email || "your account";
       accountNotice.textContent = `Signed in as ${name}. Review updates will appear in My account.`;
     } else {
@@ -354,6 +359,14 @@
         providerNote.hidden = false;
         providerNote.textContent = "Sign-in is temporarily unavailable. Please try again later.";
       }
+    }
+
+    if (correctionId !== null) {
+      if (state.session.authenticated) {
+        if (!window.BrowseRPSubmissionCorrection) { form.before(element("p", "form-status error", "The correction form could not be loaded. Refresh this page to try again.")); return; }
+        await window.BrowseRPSubmissionCorrection.mount({ id: correctionId, accountId: state.session.user.id, form, api, updatePlatformFields, setFormStatus, toast });
+      }
+      return;
     }
 
     form.addEventListener("submit", async (event) => {

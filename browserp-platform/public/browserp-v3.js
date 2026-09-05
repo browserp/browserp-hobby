@@ -411,7 +411,7 @@
       ["Legal & help", [["Privacy policy","/privacy"],["Terms of service","/terms"],["Cookie policy","/legal#cookies"],["Help & contact","/legal#contact"]]]
     ];
     for (const [heading, links] of groups) { const column=node("div","footer-column-v3");column.append(node("strong","",heading));for(const [label,href] of links){const link=node("a","",label);link.href=href;column.append(link);}grid.append(column); }
-    const bottom=node("div","shell-v3 footer-bottom-v3");bottom.append(node("span","",`© ${new Date().getFullYear()} BrowseRP · Operated in the United Kingdom`),node("span","","Payments disabled while the coin system completes financial testing."));
+    const bottom=node("div","shell-v3 footer-bottom-v3");bottom.append(node("span","",`© ${new Date().getFullYear()} BrowseRP · Operated in the United Kingdom`));
     root.replaceChildren(grid,bottom);
   }
 

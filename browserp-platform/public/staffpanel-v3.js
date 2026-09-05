@@ -476,6 +476,7 @@
     const kind = normalKind === "moderation" && (record.target_type || record.targetType) === "server_comment" ? "comment" : normalKind;
     try {
       const { item } = await api(`/api/admin/item?kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(record.id)}`);
+      if (kind === "listing" && (!Number.isSafeInteger(item?.reviewVersion) || !Number.isSafeInteger(item?.queueVersion))) throw new Error("Reload the latest submission review before recording a decision.");
       const actionMap = {
         listing: [["approved","Approve and publish"],["changes_requested","Request changes"],["rejected","Reject"]],
         report: [["triaged","Mark triaged"],["resolved","Resolve"],["dismissed","Dismiss"]],
@@ -483,15 +484,22 @@
         comment: [["approve","Publish comment"],["reject","Reject comment"],["hide","Hide comment"]],
         security: [["resolved","Resolve alert"]]
       };
-      const evidence = Object.entries(item || {}).filter(([key])=>!["moderationReasons","reasons"].includes(key)).map(([key,value])=>`${key}: ${typeof value === "object" ? JSON.stringify(value) : value}`).join("\n");
+      let evidence = Object.entries(item || {}).filter(([key])=>!["moderationReasons","reasons","reviewVersion","queueVersion","history"].includes(key)).map(([key,value])=>`${key}: ${typeof value === "object" ? JSON.stringify(value) : value}`).join("\n");
+      if (kind === "listing" && Array.isArray(item.history) && item.history.length) evidence += "\n\nPrevious submission details:\n" + item.history.map(previous => `${date(previous.recordedAt)} — ${previous.name}\n${previous.description || ""}\n${previous.communityUrl || ""}\nStaff feedback: ${previous.reviewNote || "No feedback at this stage"}`).join("\n\n");
       const input = await decision({ title: `Review ${kind}`, description: evidence, fields: [
         { name: "action", label: "Decision", type: "select", options: (actionMap[kind]||[]).map(([value,label])=>({value,label})) },
         { name: "reason", label: "Decision reason", type: "textarea", minlength: 5, maxlength: 500 }
       ], submitLabel: "Record decision" });
       if (!input) return;
-      await api("/api/admin/action", { method: "POST", body: JSON.stringify({ kind, id: record.id, action: input.action, reason: input.reason }) });
+      await api("/api/admin/action", { method: "POST", body: JSON.stringify({ kind, id: record.id, action: input.action, reason: input.reason, ...(kind === "listing" ? { expectedVersion: item.reviewVersion, expectedQueueVersion: item.queueVersion } : {}) }) });
       location.reload();
-    } catch (error) { status(error.message, true); }
+    } catch (error) {
+      status(error.message, true);
+      if (kind === "listing" && error.status === 409) {
+        const refreshed = await decision({ title: "Submission changed", description: "The submission or its review queue changed while this review was open. Load the current details and read them before recording another decision.", fields: [], submitLabel: "Open latest review" });
+        if (refreshed) await openReview(record);
+      }
+    }
   }
 
   function overviewPageSafe(overviewData) { overview({ overview: overviewData }); }
@@ -575,6 +583,6 @@
           window.BrowseRPStaffPublishing.init({ api, permissions: website.permissions })
         ]);
       }});
-    }if(page==="moderation")await window.BrowseRPStaffModeration.init({api,onAuthFailure:showLogin,actions:{openReview,applyBan,viewNetwork,networkRequest,revokeSessions,reviewProfile,decideNetwork,resolveSecurityFlag,decideAppeal,revokeBan,permissionOverrides,securityControls}});if(page==="accounts")await accounts();if(page==="staff")await staffAccess();if(page==="profiles")await profileQueue();if(page==="content")await content();if(page==="security")await securityPage();if(page!=="moderation")wireForms();}catch(error){if(error.status===401||error.status===403){showLogin();}else status(error.message,true);}}
+    }if(page==="moderation")await window.BrowseRPStaffModeration.init({api,accountId:state.session?.user?.id,onAuthFailure:showLogin,actions:{openReview,applyBan,viewNetwork,networkRequest,revokeSessions,reviewProfile,decideNetwork,resolveSecurityFlag,decideAppeal,revokeBan,permissionOverrides,securityControls}});if(page==="accounts")await accounts();if(page==="staff")await staffAccess();if(page==="profiles")await profileQueue();if(page==="content")await content();if(page==="security")await securityPage();if(page!=="moderation")wireForms();}catch(error){if(error.status===401||error.status===403){showLogin();}else status(error.message,true);}}
   init();
 })();

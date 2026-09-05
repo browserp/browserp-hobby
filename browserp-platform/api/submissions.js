@@ -16,6 +16,8 @@ import { getSession, rest, rpc } from "../lib/supabase.js";
 // without altering the already-applied function signature.
 export const SERVER_SUBMISSION_RPC = "create_server_submission_server";
 export const SERVER_SUBMISSION_V2_RPC = "create_server_submission_server_v2";
+export const SERVER_SUBMISSION_CORRECTION_RPC = "resubmit_server_submission_server";
+const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 
 const SHORTENER_HOSTS = new Set([
   "bit.ly", "buff.ly", "cutt.ly", "goo.gl", "is.gd", "ow.ly", "rb.gy",
@@ -157,7 +159,7 @@ function submissionInput(body) {
   return input;
 }
 
-export default endpoint(["GET", "POST"], async (req, res, requestId) => {
+export default endpoint(["GET", "POST", "PATCH"], async (req, res, requestId) => {
   if (req.method !== "GET") assertSameOrigin(req);
   const session = await getSession(req, res, { required: true });
   const database = supabaseConfig();
@@ -167,6 +169,17 @@ export default endpoint(["GET", "POST"], async (req, res, requestId) => {
 
   if (req.method === "GET") {
     await rateLimit(req, "owner-submissions-read", 30, 60);
+    const id = new URL(req.url, "http://local").searchParams.get("id");
+    if (id !== null) {
+      if (!UUID.test(id)) throw Object.assign(new Error("Choose a valid submission from My account."), { status: 400 });
+      const account = new URL(req.url, "http://local").searchParams.get("account");
+      if (account !== null && account !== session.user.id) throw Object.assign(new Error("Your signed-in account changed. Sign in again to continue this correction."), { status: 401 });
+      return ok(res, await rpc("member_server_submission", { p_submission_id: id }, session.accessToken));
+    }
+    const access = await rpc("member_connection_status", {}, session.accessToken);
+    if (access?.active !== true || access.userId !== session.user.id) {
+      throw Object.assign(new Error("Sign in again to view your submissions."), { status: 401 });
+    }
     const submissions = await rest(
       `server_submissions?select=id,name,platform_id,region,language,framework,description,community_url,tags,access_type,cfx_join_url,status,review_note,terms_version,standards_version,created_at,updated_at&submitted_by=eq.${encodeURIComponent(session.user.id)}&order=created_at.desc&limit=50`,
       { useSecret: true }
@@ -174,7 +187,7 @@ export default endpoint(["GET", "POST"], async (req, res, requestId) => {
     return ok(res, { submissions: Array.isArray(submissions) ? submissions : [] });
   }
 
-  await rateLimit(req, "server-submission", 3, 3600);
+  await rateLimit(req, req.method === "PATCH" ? "submission-corrections" : "server-submission", req.method === "PATCH" ? 15 : 3, 3600);
   const body = await readBody(req);
   if (!acceptedAgreement(body)) {
     throw Object.assign(new Error("Confirm that you are authorised to list the server and accept the current terms and listing standards."), { status: 400 });
@@ -184,6 +197,36 @@ export default endpoint(["GET", "POST"], async (req, res, requestId) => {
   const moderation = assessContent(input);
   if (moderation.action === "reject") {
     throw Object.assign(new Error("This submission contains a high-risk link or pattern and cannot be accepted."), { status: 422 });
+  }
+
+  if (req.method === "PATCH") {
+    if (body.expectedAccountId !== session.user.id) {
+      throw Object.assign(new Error("Your signed-in account changed. Sign in again to continue this correction."), { status: 401 });
+    }
+    if (!UUID.test(String(body.submissionId || "")) || !Number.isSafeInteger(body.expectedVersion) || body.expectedVersion < 1
+        || !Number.isSafeInteger(body.expectedQueueVersion) || body.expectedQueueVersion < 0
+        || !req.headers?.["idempotency-key"]) {
+      throw Object.assign(new Error("Open the original submission from My account before sending corrections."), { status: 400 });
+    }
+    const access = await rpc("member_connection_status", {}, session.accessToken);
+    if (access?.active !== true || access.userId !== session.user.id || !UUID.test(String(access.sessionId || ""))) {
+      throw Object.assign(new Error("Sign in again before correcting your submission."), { status: 401 });
+    }
+    const submission = await rpc(SERVER_SUBMISSION_CORRECTION_RPC, {
+      p_user_id: session.user.id,
+      p_session_id: access.sessionId,
+      p_submission_id: body.submissionId,
+      p_expected_version: body.expectedVersion,
+      p_expected_queue_version: body.expectedQueueVersion,
+      p_idempotency_key: idempotencyHash(req, session.user.id, requestId),
+      p_data: input,
+      p_moderation_confidence: moderation.confidence,
+      p_moderation_score: moderation.score,
+      p_moderation_reasons: moderation.reasons,
+      p_terms_version: CURRENT_TERMS_VERSION,
+      p_standards_version: CURRENT_LISTING_STANDARDS_VERSION
+    }, undefined, { useSecret: true });
+    return ok(res, { submission }, 202);
   }
 
   const submission = await rpc(

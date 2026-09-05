@@ -1,9 +1,9 @@
 (() => {
   "use strict";
-  const VIEWS = ["summary", "members", "servers", "claims", "reports", "queue", "content", "profiles", "activity", "staff", "bans", "appeals", "security", "logs"];
+  const VIEWS = ["summary", "members", "servers", "claims", "reports", "queue", "content", "profiles", "activity", "staff", "bans", "appeals", "security", "logs", "data-requests"];
   const FIELDS = ["q", "status", "platform", "region", "language", "mode", "feature", "access", "online", "verified", "beginner", "from", "to", "severity", "targetType", "userId"];
   const COMMON = ["q", "from", "to"];
-  const ALLOWED = { summary: [], staff: [], claims: [], members: [...COMMON, "status"], servers: [...COMMON, "status", "platform", "region", "language", "mode", "feature", "access", "online", "verified", "beginner"], reports: [...COMMON, "status", "targetType", "userId"], queue: [...COMMON, "status", "platform"], content: [...COMMON, "status"], profiles: [...COMMON, "status"], activity: [...COMMON, "userId", "status"], bans: [...COMMON, "status", "targetType", "userId"], appeals: [...COMMON, "status"], security: [...COMMON, "status", "severity", "userId"], logs: [...COMMON, "userId"] };
+  const ALLOWED = { "data-requests": [], summary: [], staff: [], claims: [], members: [...COMMON, "status"], servers: [...COMMON, "status", "platform", "region", "language", "mode", "feature", "access", "online", "verified", "beginner"], reports: [...COMMON, "status", "targetType", "userId"], queue: [...COMMON, "status", "platform"], content: [...COMMON, "status"], profiles: [...COMMON, "status"], activity: [...COMMON, "userId", "status"], bans: [...COMMON, "status", "targetType", "userId"], appeals: [...COMMON, "status"], security: [...COMMON, "status", "severity", "userId"], logs: [...COMMON, "userId"] };
   const KIND = { queue: "listings", content: "queue", logs: "audit" };
   function normalize(view, input = {}) {
     const output = {};

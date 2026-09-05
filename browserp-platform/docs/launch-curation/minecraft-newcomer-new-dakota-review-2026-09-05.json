@@ -1,0 +1,171 @@
+{
+  "generatedAt": "2026-09-05T20:38:00Z",
+  "scope": "Research only; existing Minecraft listing recommendations and conditional New Dakota review. No live edits, imports, joins, messages, applications or challenge bypass.",
+  "report": "minecraft-newcomer-new-dakota-review-2026-09-05.md",
+  "recommended": [],
+  "existingMinecraft": [
+    {
+      "name": "Lord of the Craft",
+      "sourceKey": "5288e856934c",
+      "decision": "retain",
+      "accessType": "allowlisted",
+      "accessEvidence": "https://www.lordofthecraft.net/forums/topic/266402-new-player-application-guide/",
+      "actions": [
+        "Keep Whitelisted.",
+        "Link the current application and new-player guide.",
+        "Do not call Discord mandatory or confuse character minimum age with player minimum age."
+      ],
+      "lastStatus": {
+        "checkedAt": "2026-09-05T20:37:17.642Z",
+        "address": "mc.lotc.co",
+        "sourceKey": "5288e856934c",
+        "players": 210,
+        "capacity": 1000,
+        "online": true,
+        "version": "Waterfall 1.21.0 - 1.21.5",
+        "motd": "Lord of the Craft Venture Unto Azuras [1.21.5+]",
+        "iconBytes": 5055
+      }
+    },
+    {
+      "name": "MassiveCraft",
+      "sourceKey": "ef4882f9ebfb",
+      "decision": "retain_with_access_gap",
+      "accessType": "unknown",
+      "accessEvidence": null,
+      "actions": [
+        "Keep Not confirmed pending current admission/rules review.",
+        "Use mixed fantasy-RP and factions positioning.",
+        "Read current help centre through ordinary authorized human verification; do not rely on 2018/2023 no-whitelist wording."
+      ],
+      "unreadOfficialPages": [
+        "https://www.massivecraft.com/help-center/",
+        "https://wiki.massivecraft.com/"
+      ],
+      "lastStatus": {
+        "checkedAt": "2026-09-05T20:37:17.826Z",
+        "address": "massivecraft.com",
+        "sourceKey": "ef4882f9ebfb",
+        "players": 30,
+        "capacity": 500,
+        "online": true,
+        "version": "Velocity 1.7.2-1.20.6",
+        "motd": "MassiveCraft - The 1.20.4 Factions RPG",
+        "iconBytes": 2800
+      }
+    },
+    {
+      "name": "Stoneworks",
+      "sourceKey": "348e9b5a5f47",
+      "decision": "retain",
+      "accessType": "public",
+      "accessEvidence": "https://stoneworks.gg/index.html",
+      "actions": [
+        "Keep Public and nation-building/political-RP positioning.",
+        "Offer a direct rules/help destination.",
+        "Exclude unrelated Stormworks community stoneworks.live from evidence."
+      ],
+      "rulesUrl": "https://docs.google.com/document/d/1raHKuMt59czFlqpvvBPZWHpoagiPiNOiNy9FKO70Olo/edit?tab=t.0",
+      "lastStatus": {
+        "checkedAt": "2026-09-05T20:37:18.081Z",
+        "address": "play.stoneworks.gg",
+        "sourceKey": "348e9b5a5f47",
+        "players": 362,
+        "capacity": 550,
+        "online": true,
+        "version": "Velocity-CTD 1.21.11-26.2",
+        "motd": "Stoneworks [1.21.11]     \u2654 Nations -",
+        "iconBytes": 5707
+      }
+    }
+  ],
+  "conditionalCandidates": [
+    {
+      "name": "New Dakota",
+      "platform": "redm",
+      "joinCode": "969koe",
+      "publishReady": false,
+      "status": "review",
+      "decision": "promising_governance_confirmation_needed",
+      "region": null,
+      "language": "English",
+      "framework": "VORP",
+      "accessType": "allowlisted",
+      "accessReason": "Exact current source explicitly directs prospective players to Discord and an application for whitelist approval.",
+      "websiteUrl": null,
+      "discordUrl": "https://discord.gg/YyzMbTsjM6",
+      "cfxJoinUrl": "https://cfx.re/join/969koe",
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/969koe/-162528105.png",
+      "bannerUrl": null,
+      "proposedDescription": "New Dakota is an English-speaking RedM community built around immersive Western roleplay. The server advertises an 18+ setting and uses VORP. Players join its official Discord and apply for approval before connecting. Read the current rules and joining instructions before submitting an application.",
+      "tags": [
+        "Roleplay",
+        "Western",
+        "Whitelist"
+      ],
+      "keywords": [
+        "new dakota",
+        "english roleplay",
+        "application required"
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-05T20:28:29.999Z",
+        "observedAt": "2026-09-05T20:26:09.862Z",
+        "players": 57,
+        "max": 128,
+        "status": "online",
+        "fallback": false,
+        "refreshBeforePublication": true
+      },
+      "inviteCheck": {
+        "checkedAt": "2026-09-05T20:28:30.528Z",
+        "httpStatus": 200,
+        "guildName": "New Dakota",
+        "browserConfirmed": true
+      },
+      "history": {
+        "checkedAt": "2026-09-05T19:40:03Z",
+        "completeDays": 6,
+        "medianDailyPeak": 85,
+        "daysRepeated35Plus": 6,
+        "weekPeak": 104,
+        "samples": 2781,
+        "samples35Plus": 1552,
+        "url": "https://redmmetrics.com/server/969koe?hours=168",
+        "note": "Earlier same-day research preserved; not a new chart fetch or independently verified human count."
+      },
+      "remainingChecks": [
+        "Review current operator-provided conduct, reporting and appeal rules; no readable public copy established.",
+        "Confirm approved-player connection support; public newcomer accounts mention early connection difficulty.",
+        "Confirm region from community evidence rather than assuming en-US locale means US-only audience.",
+        "Refresh exact production source and review stored artwork through the normal staff import process."
+      ],
+      "confidence": {
+        "identity": "high",
+        "admission": "high",
+        "reportedActivity": "high",
+        "communityQuality": "moderate_positive_with_unresolved_governance",
+        "region": "unknown"
+      },
+      "sources": [
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/969koe",
+          "purpose": "Canonical RedM source, English locale, VORP, admission, invite and fresh count."
+        },
+        {
+          "url": "https://discord.gg/YyzMbTsjM6",
+          "purpose": "Public browser invite and API resolve to New Dakota; no account joined."
+        },
+        {
+          "url": "https://www.reddit.com/r/RedDeadOnline/comments/1w1ajkh/looking_for_beginner_friendly_redm_servers/",
+          "purpose": "Attributed newcomer recommendation with application and early-bug caveats; not universal proof."
+        },
+        {
+          "url": "https://www.reddit.com/r/RedDeadOnline/comments/1ve4g9p/why_there_is_no_such_thing_as_a_new_redm_server/",
+          "purpose": "Mixed first-person experience; criticism is an allegation, not an adjudicated finding."
+        }
+      ],
+      "comparison": "More repeated activity than Onyx in earlier same-day history, but less public governance/onboarding documentation. Onyx is already published by parent; do not duplicate it."
+    }
+  ]
+}

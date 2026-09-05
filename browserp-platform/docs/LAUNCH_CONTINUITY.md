@@ -113,3 +113,20 @@ For each completed item, record the change, meaningful test result, deployment e
 The integrated application passed `npm run verify`: 484 application/security/UI checks and 35 separate database checks, 519 total, with no failures. Syntax and Vercel function-count checks passed. Controlled and hosted browser checks remain separately recorded; these counts do not establish real third-party consent or physical-device coverage.
 
 GTA World English was researched, imported, corrected and published through the real staff panel at 20:14 UTC. Its exact Cfx code is 7b9dbvd; primary onboarding overrides the self-reported Public source flag to Whitelisted. Post-publication discovery returned one searched result with stored PNG artwork and a fresh 795/2000 observation from 20:11:58 UTC. Current launch counts become 26 FiveM, 20 RedM, 3 Minecraft; the 40 FiveM target remains incomplete. Research notes retain source-specific limitations.
+
+## Published release checkpoint, 5 September, 20:30 UTC
+
+Commit `cda768b50ba205190e0c708789cb7e7ec4d92fd6` on `launch/complete-inherited-work` is live at https://www.browserp.com through READY production deployment `dpl_CAEHW5hMUH1eHFQ8DYFaLrddYmfm`. The tested preview is https://browserp-hobby-c01n3472p-browserp.vercel.app/ (`dpl_H6yzKKTHqosFayMVPVeMsvjkfYCv`). Main was not merged or advanced. The previous production reference above remains the rollback target for this batch.
+
+The release includes the matching staff menu, real View website header action, private-session cleanup, safer account disconnection and authenticator controls, interrupted first-setup recovery, managed advert artwork upload and touch-animation cancellation during scrolling. The 519-check full repository gate applies to this commit, not unfinished successor changes.
+
+Additional proof:
+
+- 63 controlled staff browser cases across Chromium, Firefox and WebKit at 1280, 390 and 320px passed. These cover owner overview, access gates, menu position/focus/escape, authenticator UI and real browser image preview operations against controlled APIs. They do not prove hosted account recovery or real storage writes.
+- The exact hosted preview passed 54 route checks across the three engines at desktop and mobile widths, with no application page errors, broken visible images or horizontal overflow. Expected protected-preview feedback-script CSP diagnostics were kept separate; no CSP was weakened.
+- Post-publication checks in all three engines covered the home page, CaliRP search, GTA World details and signed-out staff access at 390px. All pages loaded correctly, and served script hashes matched the tested commit.
+- At 20:36 UTC the real owner's signed-in production overview loaded normally. Your sign-in security showed the existing verified BrowseRP staff factor, protected from removal until a backup is verified. Add/refresh controls rendered. No authenticator was added, removed or exposed during this read-only check.
+
+Onyx County (`lgrex4`) was published through staff review around 20:26 UTC with verified Discord, managed PNG logo and Public access supported by current joining instructions. The initial 7/128 observation is an off-peak reading; six complete days of reviewed history show repeated representative activity over 35. No unsupported banner was kept. Bright Falls RP (`lyy7rv`) was archived through staff moderation around 20:31 UTC as a reversible launch-quality hold, with its policy-evidence reason retained. That decision is not a closure or misconduct allegation. These two actions kept the recorded roster at 26 FiveM / 20 RedM / 3 Minecraft before subsequent imports.
+
+Current successor work remains separate and unproven until its own release gate: private member data requests and staff handling, same-submission owner corrections, and continued community research. Google/ordinary-member linking, full database-and-media backup restoration, Roblox application detail and advertising enquiries remain open. The Discord community and optional upgrades follow the inherited-work and qualified-roster gates.

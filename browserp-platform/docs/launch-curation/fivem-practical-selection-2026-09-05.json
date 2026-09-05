@@ -1,0 +1,652 @@
+{
+  "generatedAt": "2026-09-05T20:52:05.837068Z",
+  "scope": "Six bounded candidate reviews; no imports, live writes, joins or messages. Recommended records are draft staff-import payloads with researched metadata, not a claim that they are already published.",
+  "report": "fivem-practical-selection-2026-09-05.md",
+  "baselineNote": "Public API read around 20:43 UTC returned 27 published FiveM listings. Parent reports Ignite y5ox3y already exists in importer; do not duplicate. Recheck live identity before import.",
+  "recommended": [
+    {
+      "joinCode": "98yx4my",
+      "platform": "fivem",
+      "status": "review",
+      "name": "Brighter Times RP 3.0",
+      "description": "Brighter Times RP is an established English-speaking FiveM community built around ongoing character stories, civilian businesses, emergency services and criminal roleplay. Its current 3.0 server develops the community through a mix of everyday careers and organised group activities. New players request whitelist approval through the community Discord before joining. Players looking for a long-term home can read the current rules and application instructions there. Supporter purchases are available; check their terms and the community rules before deciding whether this is the right fit.",
+      "region": "International",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/brightertimesrp",
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/98yx4my",
+      "tags": [
+        "Roleplay",
+        "Serious RP",
+        "Voice RP",
+        "Whitelist",
+        "Businesses",
+        "Civilian Jobs",
+        "Police",
+        "EMS",
+        "DOJ"
+      ],
+      "keywords": [
+        "brighter times rp 3.0",
+        "english roleplay",
+        "roleplay",
+        "serious rp",
+        "voice rp",
+        "whitelist",
+        "businesses",
+        "civilian jobs",
+        "police",
+        "ems",
+        "doj"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/98yx4my/-805193613.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://forum.cfx.re/t/brighter-times-roleplay-2-0-bigger-and-better-than-ever-lspd-sast-bcso-ems-doj-sadot-civ-and-crim-activities-gangs-and-mcs-all-the-old-stuff-you-loved-plus-more/5209446",
+          "purpose": "Operator community thread created 2024-02-11; current public JSON was read successfully."
+        },
+        {
+          "url": "https://www.reddit.com/r/FiveMServers/comments/1w2y3bg/brighter_times_rp_30/",
+          "purpose": "Current 3.0 operator/recruitment claims; not independent quality proof."
+        },
+        {
+          "url": "https://www.reddit.com/r/FiveMServers/comments/1vacz8a/brighter_times_rp_active_5m_community/",
+          "purpose": "First-person newcomer account describing patient assistance; promotional tone and affiliation uncertainty retained."
+        },
+        {
+          "url": "https://www.reddit.com/r/FiveMServers/comments/1w4lcua/looking_for_a_new_home/",
+          "purpose": "Separate prospective player reports whitelist requirement in recent conversation."
+        },
+        {
+          "url": "https://brightertimesrp.tebex.io/",
+          "purpose": "Current community store; no blanket cosmetic-only claim."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/98yx4my",
+          "purpose": "Fresh exact official production aggregate, verified identity and icon version; do not hard-code this snapshot as live."
+        }
+      ],
+      "inclusionReasons": [
+        "Operation documented since at least February 2024, with the current 3.0 identity and production source verified.",
+        "Recent first-person newcomer testimony describes patient help and worthwhile civilian play; testimony is self-selected, not a guarantee.",
+        "Distinct civilian/economy and emergency-service options corroborated across operator material and player testimony."
+      ],
+      "conflicts": [
+        "Current complete private rulebook and actual staff application decision were not exercised.",
+        "Current supporter benefits exist; no cosmetic-only or no-pay-to-win certification is made.",
+        "Whitelisted is supported by explicit source instructions, historical operator material and a separate current prospective player, despite contradictory raw metadata.",
+        "International is an editorial audience label, not a verified host location or latency claim."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-05T20:42:30.273Z",
+        "status": "online",
+        "players": 111,
+        "max": 220,
+        "observedAt": "2026-09-05T20:41:34.489Z",
+        "refreshBeforePublication": true
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Brighter Times RP",
+        "checkedWindowUtc": "2026-09-05 20:44",
+        "identityNote": "Matched public invite and canonical community material."
+      },
+      "imageReview": {
+        "checkedAt": "2026-09-05T20:45:21.755Z",
+        "httpStatus": 200,
+        "format": {
+          "extension": "png",
+          "type": "image/png"
+        },
+        "width": 96,
+        "height": 96,
+        "bytes": 22956,
+        "logoNote": "HTTP response and actual raster validation passed. Not yet checked as stored artwork in a published listing.",
+        "bannerNote": "No verified banner supplied."
+      },
+      "requiresStaffReview": true,
+      "readyForStaffImport": true,
+      "confidence": {
+        "identity": "high",
+        "activity": "high-at-observation-time",
+        "access": "medium-high",
+        "editorialFit": "moderate-with-documented-caveats",
+        "moderationConsistency": "not-guaranteed"
+      },
+      "postImportChecks": [
+        "Refresh the exact production feed and check for duplicate identity before publishing.",
+        "Search the new listing, open detail and confirm fresh count/status and stored logo.",
+        "Verify applicable game/access filters; Not confirmed must not be silently recategorised as Public.",
+        "Verify community/join destinations and metadata order: platform, region, language, framework, access."
+      ]
+    },
+    {
+      "joinCode": "y9vd5d9",
+      "platform": "fivem",
+      "status": "review",
+      "name": "The Academy Roleplay — Ambassador",
+      "description": "The Academy Roleplay is an English-speaking FiveM community associated with Officer Messer, with ongoing police, civilian and emergency-service stories. This listing follows the Ambassador server. The community provides step-by-step joining guidance, and its creators direct newcomers to the Officer Messer Discord for current entry instructions. Broader Academy guidance describes an application process, but the exact current Ambassador requirements have not been confirmed. Read the community rules and joining instructions before connecting.",
+      "region": "International",
+      "language": "English",
+      "framework": "QBCore",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/officermesser",
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/y9vd5d9",
+      "tags": [
+        "Roleplay",
+        "Voice RP",
+        "Police",
+        "Civilian Jobs",
+        "EMS"
+      ],
+      "keywords": [
+        "the academy roleplay — ambassador",
+        "english roleplay",
+        "roleplay",
+        "voice rp",
+        "police",
+        "civilian jobs",
+        "ems"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/y9vd5d9/1670021097.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://www.youtube.com/watch?v=jMP3nZrvTNo",
+          "purpose": "Official Officer Messer joining video; title/author verified by YouTube oEmbed, not a claim that the full video was watched."
+        },
+        {
+          "url": "https://burtsbeat.com/",
+          "purpose": "Participating creator FAQ links exact Officer Messer Discord and states application plus 17+ guidance for the broader community."
+        },
+        {
+          "url": "https://www.hasroot.com/",
+          "purpose": "Current published stream titles distinguish Academy Ambassador/Partnered activity; not a gameplay-quality certification."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/y9vd5d9",
+          "purpose": "Fresh exact official production aggregate, verified identity and icon version; do not hard-code this snapshot as live."
+        }
+      ],
+      "inclusionReasons": [
+        "Current production source explicitly identifies the Officer Messer community and Ambassador instance.",
+        "Verified creator-owned step-by-step onboarding resource and a participating creator FAQ offer concrete joining help.",
+        "Current stream listings show ongoing Academy participation; one instance is represented without aggregating separate server counts."
+      ],
+      "conflicts": [
+        "Raw Cfx public flag conflicts with broader community application guidance. Keep access unknown until the exact current Ambassador gate is confirmed.",
+        "The 17+ age guidance is in the published broader FAQ; do not assert a current instance-specific age restriction without confirmation.",
+        "Full current rulebook, moderation consistency and in-game onboarding were not exercised.",
+        "Do not duplicate or add counts from the Partnered instance. The Google Sites payment prompt was not verified as an official payment destination.",
+        "International is an editorial audience label, not a verified host location or latency claim."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-05T20:42:30.196Z",
+        "status": "online",
+        "players": 120,
+        "max": 310,
+        "observedAt": "2026-09-05T20:37:59.050Z",
+        "refreshBeforePublication": true
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "Officer Messer",
+        "checkedWindowUtc": "2026-09-05 20:44",
+        "identityNote": "Matched public invite and canonical community material."
+      },
+      "imageReview": {
+        "checkedAt": "2026-09-05T20:45:21.700Z",
+        "httpStatus": 200,
+        "format": {
+          "extension": "png",
+          "type": "image/png"
+        },
+        "width": 96,
+        "height": 96,
+        "bytes": 16492,
+        "logoNote": "HTTP response and actual raster validation passed. Not yet checked as stored artwork in a published listing.",
+        "bannerNote": "No verified banner supplied."
+      },
+      "requiresStaffReview": true,
+      "readyForStaffImport": true,
+      "confidence": {
+        "identity": "high",
+        "activity": "high-at-observation-time",
+        "access": "not-confirmed",
+        "editorialFit": "moderate-with-documented-caveats",
+        "moderationConsistency": "not-guaranteed"
+      },
+      "postImportChecks": [
+        "Refresh the exact production feed and check for duplicate identity before publishing.",
+        "Search the new listing, open detail and confirm fresh count/status and stored logo.",
+        "Verify applicable game/access filters; Not confirmed must not be silently recategorised as Public.",
+        "Verify community/join destinations and metadata order: platform, region, language, framework, access."
+      ]
+    },
+    {
+      "joinCode": "m4zm5v7",
+      "platform": "fivem",
+      "status": "review",
+      "name": "Headliner RP",
+      "description": "Headliner RP is DGThe99's English-speaking FiveM community for ongoing character stories in Los Santos. Current community streams include civilian businesses, emergency-service careers, judicial roles and criminal groups. The community Discord provides its support route and current joining information. Access requirements have not been independently confirmed, so read its latest rules and entry instructions before connecting. Optional queue-priority and other supporter packages are offered by the community; check the terms before purchasing.",
+      "region": "International",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/headlinerrp",
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/m4zm5v7",
+      "tags": [
+        "Roleplay",
+        "Voice RP",
+        "Businesses",
+        "Police",
+        "EMS",
+        "DOJ"
+      ],
+      "keywords": [
+        "headliner rp",
+        "english roleplay",
+        "roleplay",
+        "voice rp",
+        "businesses",
+        "police",
+        "ems",
+        "doj"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/m4zm5v7/906092291.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://tebex.headlinerrp.com/",
+          "purpose": "Operator page links exact Discord and DGThe99 Twitch, with paid priority and support-ticket information."
+        },
+        {
+          "url": "https://www.hasroot.com/",
+          "purpose": "Current multi-character roleplay stream titles corroborate continuing participation and variety; audience size is not a quality rank."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/m4zm5v7",
+          "purpose": "Fresh exact official production aggregate, verified identity and icon version; do not hard-code this snapshot as live."
+        }
+      ],
+      "inclusionReasons": [
+        "Exact production source, named creator and valid community Discord match the operator support/store identity.",
+        "Ongoing public character streams show a range of civilian, law and criminal stories rather than a count-only selection.",
+        "Substantial current production activity and support route justify a moderate-confidence directory listing with truthful caveats."
+      ],
+      "conflicts": [
+        "Full current admission and rulebook require community access; do not turn raw public flag into a promise that no application is needed.",
+        "Paid priority terms include renewal/cancellation friction; do not treat buying priority as required.",
+        "No family-friendly, universally welcoming or consistent-moderation guarantee is made.",
+        "Public stream titles were inspected, not full in-game sessions.",
+        "International is an editorial audience label, not a verified host location or latency claim."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-05T20:42:30.224Z",
+        "status": "online",
+        "players": 176,
+        "max": 300,
+        "observedAt": "2026-09-05T20:38:12.238Z",
+        "refreshBeforePublication": true
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "HeadLiner RP",
+        "checkedWindowUtc": "2026-09-05 20:44",
+        "identityNote": "Matched public invite and canonical community material."
+      },
+      "imageReview": {
+        "checkedAt": "2026-09-05T20:45:21.733Z",
+        "httpStatus": 200,
+        "format": {
+          "extension": "png",
+          "type": "image/png"
+        },
+        "width": 96,
+        "height": 96,
+        "bytes": 27846,
+        "logoNote": "HTTP response and actual raster validation passed. Not yet checked as stored artwork in a published listing.",
+        "bannerNote": "No verified banner supplied."
+      },
+      "requiresStaffReview": true,
+      "readyForStaffImport": true,
+      "confidence": {
+        "identity": "high",
+        "activity": "high-at-observation-time",
+        "access": "not-confirmed",
+        "editorialFit": "moderate-with-documented-caveats",
+        "moderationConsistency": "not-guaranteed"
+      },
+      "postImportChecks": [
+        "Refresh the exact production feed and check for duplicate identity before publishing.",
+        "Search the new listing, open detail and confirm fresh count/status and stored logo.",
+        "Verify applicable game/access filters; Not confirmed must not be silently recategorised as Public.",
+        "Verify community/join destinations and metadata order: platform, region, language, framework, access."
+      ]
+    }
+  ],
+  "notReady": [
+    {
+      "joinCode": "7blbde",
+      "platform": "fivem",
+      "status": "review",
+      "name": "PMA Roleplay",
+      "description": "PMA is an established English-speaking FiveM community for adult immersive roleplay. Its published rules describe character conduct, mature-scene boundaries and technical support. Players should consult the current rules and Discord joining instructions before connecting. Supporter subscriptions offer queue benefits and other conveniences; review their terms first.",
+      "region": "International",
+      "language": "English",
+      "framework": null,
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/pmarp",
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/7blbde",
+      "tags": [
+        "Roleplay",
+        "Serious RP",
+        "Voice RP",
+        "Police",
+        "EMS",
+        "Businesses"
+      ],
+      "keywords": [
+        "pma roleplay",
+        "english roleplay",
+        "roleplay",
+        "serious rp",
+        "voice rp",
+        "police",
+        "ems",
+        "businesses"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/7blbde/1389858937.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://pma.network/rules",
+          "purpose": "Rules updated 2026-08-14; specific adult conduct and support guidance."
+        },
+        {
+          "url": "https://store.pmarp.com/category/subscriptions",
+          "purpose": "Actual current paid reporting conveniences and top-tier AFK exemption; preserve proportional interpretation."
+        },
+        {
+          "url": "https://www.reddit.com/r/FiveMServers/comments/1ark3s5/1500_hour_review_of_pma_rp_server/",
+          "purpose": "Historical subjective critical review, not treated as proven misconduct."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/7blbde",
+          "purpose": "Fresh exact official production aggregate, verified identity and icon version; do not hard-code this snapshot as live."
+        }
+      ],
+      "inclusionReasons": [
+        "Current detailed public rules and active production source."
+      ],
+      "conflicts": [
+        "Current subscription benefits include direct in-game moderator-call convenience, player-ID visibility and a top-tier AFK-check exemption. Free normal reporting remains available; reporting itself is not described as paywalled.",
+        "A full count is not proof that every player is actively roleplaying, particularly given the advertised AFK exemption.",
+        "Access conflicts in raw metadata remain unresolved; historical critical reviews are attributed opinions, not proven findings.",
+        "International is an editorial audience label, not a verified host location or latency claim."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-05T20:42:30.125Z",
+        "status": "online",
+        "players": 250,
+        "max": 250,
+        "observedAt": "2026-09-05T20:40:46.328Z",
+        "refreshBeforePublication": true
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "PMA",
+        "checkedWindowUtc": "2026-09-05 20:44",
+        "identityNote": "Matched public invite and canonical community material."
+      },
+      "imageReview": {
+        "checkedAt": "2026-09-05T20:45:21.633Z",
+        "httpStatus": 200,
+        "format": {
+          "extension": "png",
+          "type": "image/png"
+        },
+        "width": 96,
+        "height": 96,
+        "bytes": 8906,
+        "logoNote": "HTTP response and actual raster validation passed. Not yet checked as stored artwork in a published listing.",
+        "bannerNote": "No verified banner supplied."
+      },
+      "requiresStaffReview": true,
+      "readyForStaffImport": false,
+      "confidence": {
+        "identity": "high",
+        "activity": "high-at-observation-time",
+        "access": "not-confirmed",
+        "editorialFit": "reserve-or-hold",
+        "moderationConsistency": "not-guaranteed"
+      },
+      "postImportChecks": [
+        "Refresh the exact production feed and check for duplicate identity before publishing.",
+        "Search the new listing, open detail and confirm fresh count/status and stored logo.",
+        "Verify applicable game/access filters; Not confirmed must not be silently recategorised as Public.",
+        "Verify community/join destinations and metadata order: platform, region, language, framework, access."
+      ],
+      "decision": "Reserve; compare observable newcomer tradeoffs before selecting over the three recommendations."
+    },
+    {
+      "joinCode": "elalma",
+      "platform": "fivem",
+      "status": "review",
+      "name": "The Fracture",
+      "description": "The Fracture is an English-speaking, application-based FiveM community for adult supernatural and horror roleplay. Its public lore introduces human and supernatural characters with specialised story systems. Read the complete rules and confirm mature-scene boundaries before applying.",
+      "region": "International",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/thefracturerp",
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/elalma",
+      "tags": [
+        "Roleplay",
+        "Serious RP",
+        "Voice RP",
+        "Whitelist",
+        "Supernatural RP",
+        "Horror RP"
+      ],
+      "keywords": [
+        "the fracture",
+        "english roleplay",
+        "roleplay",
+        "serious rp",
+        "voice rp",
+        "whitelist",
+        "supernatural rp",
+        "horror rp"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/elalma/1957750653.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://fracturerp.crd.co/",
+          "purpose": "Community introduction/lore and linked public rules."
+        },
+        {
+          "url": "https://docs.google.com/document/d/118MEY8Gmf6hQesVs8MUvLaDUPHNUTLHWeDFLD4ZCyn0/edit",
+          "purpose": "Actual public rules read via legitimate public export; consent inconsistency and safety-report exception verified."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/elalma",
+          "purpose": "Fresh exact official production aggregate, verified identity and icon version; do not hard-code this snapshot as live."
+        }
+      ],
+      "inclusionReasons": [
+        "Distinct specialist setting, published lore and active production source."
+      ],
+      "conflicts": [
+        "General consent requirements conflict with a vampire feeding exception; torture rules also describe reciprocal conduct as automatic consent. Clarify before newcomer-facing recommendation.",
+        "The reporting deadline has a late community-safety exception; an earlier blanket interpretation was corrected.",
+        "Historical hostile reviews are disputed allegations, not a factual finding of abuse.",
+        "International is an editorial audience label, not a verified host location or latency claim."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-05T20:42:30.324Z",
+        "status": "online",
+        "players": 85,
+        "max": 150,
+        "observedAt": "2026-09-05T20:40:03.829Z",
+        "refreshBeforePublication": true
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "The Fracture",
+        "checkedWindowUtc": "2026-09-05 20:44",
+        "identityNote": "Matched public invite and canonical community material."
+      },
+      "imageReview": {
+        "checkedAt": "2026-09-05T20:45:21.775Z",
+        "httpStatus": 200,
+        "format": {
+          "extension": "png",
+          "type": "image/png"
+        },
+        "width": 96,
+        "height": 96,
+        "bytes": 22183,
+        "logoNote": "HTTP response and actual raster validation passed. Not yet checked as stored artwork in a published listing.",
+        "bannerNote": "No verified banner supplied."
+      },
+      "requiresStaffReview": true,
+      "readyForStaffImport": false,
+      "confidence": {
+        "identity": "high",
+        "activity": "high-at-observation-time",
+        "access": "medium-high",
+        "editorialFit": "reserve-or-hold",
+        "moderationConsistency": "not-guaranteed"
+      },
+      "postImportChecks": [
+        "Refresh the exact production feed and check for duplicate identity before publishing.",
+        "Search the new listing, open detail and confirm fresh count/status and stored logo.",
+        "Verify applicable game/access filters; Not confirmed must not be silently recategorised as Public.",
+        "Verify community/join destinations and metadata order: platform, region, language, framework, access."
+      ],
+      "decision": "Hold for clarification of actual contradictory consent guidance, not because mature roleplay is inherently unsuitable."
+    },
+    {
+      "joinCode": "98ymxxe",
+      "platform": "fivem",
+      "status": "review",
+      "name": "Storyline RP",
+      "description": "Storyline RP is a currently active English-speaking FiveM server whose production description advertises semi-serious roleplay, a player-driven economy, careers and businesses. Its canonical community website and Discord have not been confirmed.",
+      "region": "International",
+      "language": "English",
+      "framework": "Qbox",
+      "accessType": "unknown",
+      "discordUrl": null,
+      "websiteUrl": null,
+      "cfxJoinUrl": "https://cfx.re/join/98ymxxe",
+      "tags": [
+        "Roleplay",
+        "Economy",
+        "Businesses"
+      ],
+      "keywords": [
+        "storyline rp",
+        "english roleplay",
+        "roleplay",
+        "economy",
+        "businesses"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/98ymxxe/-1917553319.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://sites.google.com/view/storylinerp/rules",
+          "purpose": "Older same-name rules page only; identity continuity not established."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/98ymxxe",
+          "purpose": "Fresh exact official production aggregate, verified identity and icon version; do not hard-code this snapshot as live."
+        }
+      ],
+      "inclusionReasons": [
+        "Active exact production source and valid icon."
+      ],
+      "conflicts": [
+        "Old Google Sites serious-whitelisted rules are not reliably tied to the current Qbox semi-serious production identity.",
+        "Old extracted Discord invite WbvvTQC4yc returned HTTP 404. Do not reuse it or attach another Storyline community's Discord.",
+        "International is an editorial audience label, not a verified host location or latency claim."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-05T20:42:30.375Z",
+        "status": "online",
+        "players": 61,
+        "max": 120,
+        "observedAt": "2026-09-05T20:41:52.563Z",
+        "refreshBeforePublication": true
+      },
+      "discordCheck": {
+        "status": "not-confirmed",
+        "guildName": null,
+        "checkedWindowUtc": "2026-09-05 20:44",
+        "identityNote": "Old WbvvTQC4yc invite returned 404; no current canonical invite confirmed."
+      },
+      "imageReview": {
+        "checkedAt": "2026-09-05T20:45:21.796Z",
+        "httpStatus": 200,
+        "format": {
+          "extension": "png",
+          "type": "image/png"
+        },
+        "width": 96,
+        "height": 96,
+        "bytes": 22512,
+        "logoNote": "HTTP response and actual raster validation passed. Not yet checked as stored artwork in a published listing.",
+        "bannerNote": "No verified banner supplied."
+      },
+      "requiresStaffReview": true,
+      "readyForStaffImport": false,
+      "confidence": {
+        "identity": "production-high-community-unresolved",
+        "activity": "high-at-observation-time",
+        "access": "not-confirmed",
+        "editorialFit": "reserve-or-hold",
+        "moderationConsistency": "not-guaranteed"
+      },
+      "postImportChecks": [
+        "Refresh the exact production feed and check for duplicate identity before publishing.",
+        "Search the new listing, open detail and confirm fresh count/status and stored logo.",
+        "Verify applicable game/access filters; Not confirmed must not be silently recategorised as Public.",
+        "Verify community/join destinations and metadata order: platform, region, language, framework, access."
+      ],
+      "decision": "Hold for canonical community identity recovery; do not merge same-name communities."
+    }
+  ],
+  "excluded": [
+    {
+      "name": "Ignite",
+      "joinCode": "y5ox3y",
+      "reason": "Parent confirms existing importer record; no duplicate."
+    },
+    {
+      "name": "New Horizons RP",
+      "joinCode": "m4z8rrq",
+      "reason": "Fresh 0/64 observation without representative activity history recovered. Not a closure claim."
+    },
+    {
+      "name": "Paradox Gaming",
+      "reason": "Ordinary website TLS failure; no current verified source recovered, not a closure claim."
+    },
+    {
+      "name": "Pure Roleplay",
+      "reason": "Ambiguous same-name communities; old source 5maz56 returned 404, development instance not imported."
+    },
+    {
+      "name": "Vanity",
+      "reason": "Template/identity uncertainty; not used to pad quota."
+    }
+  ]
+}

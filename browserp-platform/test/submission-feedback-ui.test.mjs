@@ -46,6 +46,8 @@ test("submission progress loads owned review feedback as text, updates decisions
   assert.match(rows[3].textContent, /don't need to send it again/);
   assert.equal(section.querySelectorAll('a[href="/legal#standards"]').length, 2);
   assert.equal(section.querySelectorAll('a[href="/list-server"]').length, 0, "No duplicate-submission shortcut pretends to edit the original");
+  assert.equal(rows[0].querySelector('a[href="/list-server?submission=change"]')?.textContent, "Correct submission");
+  assert.equal(rows[1].querySelector('a[href^="/list-server?submission="]'), null);
   assert.match(h.doc.querySelector("#listings").textContent, /Existing live listing/);
   const request = h.requests.find(request => request.path === "/api/submissions");
   assert.equal(request.options.method, "GET"); assert.equal(request.options.credentials, "same-origin");

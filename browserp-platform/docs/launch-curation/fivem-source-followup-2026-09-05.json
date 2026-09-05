@@ -1,0 +1,215 @@
+{
+  "generatedAt": "2026-09-05T20:24:30.277Z",
+  "scope": "Research and staff review only. No imports or live changes made by this task. Parent reports 26 published FiveM listings after GTA World; recheck for duplicates before import.",
+  "report": "fivem-source-followup-2026-09-05.md",
+  "recommended": [
+    {
+      "joinCode": "qqqbm7v",
+      "platform": "fivem",
+      "status": "review",
+      "name": "ECLIPSE Roleplay",
+      "description": "ECLIPSE Roleplay is an established English-speaking community for structured voice roleplay in Los Santos. Players build ongoing characters through civilian work, businesses, emergency services, government and criminal stories. Founded in 2017, the community moved to FiveM in 2026 and develops its own game systems. New players complete a roleplay quiz and staff review before playing. Its detailed rules cover character conduct, reporting and consent for mature scenes. Read the official joining guide and rules first; the community is still refining the experience after its recent move to FiveM.",
+      "region": "International",
+      "language": "English",
+      "framework": "Custom setup",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/y2gxAjg",
+      "websiteUrl": "https://eclipse-rp.net/",
+      "cfxJoinUrl": "https://cfx.re/join/qqqbm7v",
+      "tags": [
+        "Roleplay",
+        "Serious RP",
+        "Voice RP",
+        "Whitelist",
+        "Businesses",
+        "Civilian Jobs",
+        "Police",
+        "EMS",
+        "DOJ",
+        "Custom Jobs"
+      ],
+      "keywords": [
+        "eclipse roleplay",
+        "eclipse rp",
+        "ecrp",
+        "english voice roleplay",
+        "character development",
+        "player businesses",
+        "civilian roleplay",
+        "government roleplay",
+        "application required",
+        "custom setup"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/qqqbm7v/788076764.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://eclipse-rp.net/",
+          "purpose": "Current homepage explicitly provides FiveM download steps and play.eclipse-rp.net:30120; links y2gxAjg Discord. Registration has a six-step public form; it was viewed without submission."
+        },
+        {
+          "url": "https://servers.fivem.net/servers/detail/qqqbm7v",
+          "purpose": "Official FiveM listing matches original ECLIPSE identity and website. Do not substitute similarly named yjbqg5 or Hungarian z7qzld."
+        },
+        {
+          "url": "https://forum.eclipse-rp.net/topic/15577-eclipse-roleplay-new-player-setup-guide/",
+          "purpose": "Still-published official onboarding requires a quiz with manually reviewed short answers. Its old RAGE Multiplayer client/address instructions are obsolete; current website gives FiveM connection."
+        },
+        {
+          "url": "https://www.reddit.com/r/GTARP/comments/1w7j8yp/struggling_to_find_a_good_server/",
+          "purpose": "September 5 first-person recommendation corroborates current quiz requirement and updates while noting criminal-system work remains. One player account is limited evidence, not universal endorsement."
+        },
+        {
+          "url": "https://forum.eclipse-rp.net/topic/57059-general-rules/",
+          "purpose": "English requirement and conduct/reporting rules. Mature scenarios use consent/withdrawal; IC slurs can be permitted under that system and entering certain scenes can imply consent. Do not promise family-friendly or universally comfortable play."
+        },
+        {
+          "url": "https://forum.eclipse-rp.net/topic/182326-suggestions-for-the-future/?comment=616399&do=findComment",
+          "purpose": "Current players confirm recent FiveM migration, appreciate identity/business roleplay and request improvements to civilian content, housing affordability and migration stability."
+        },
+        {
+          "url": "https://forum.eclipse-rp.net/topic/182511-reasonable-expectations-of-gov-factions/",
+          "purpose": "September 2026 faction-leadership criticism and founder response provide governance context. Concerns are attributed stakeholder perspectives, not proven abusive conduct."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/qqqbm7v",
+          "purpose": "Fresh aggregate gta5 source with matching website, English locale, count and icon version. Raw public flag must not override stronger reviewed admission evidence."
+        }
+      ],
+      "inclusionReasons": [
+        "Long-running structured voice-roleplay community with verified new FiveM identity.",
+        "Adds substantive civilian, business and government character options with published governing rules.",
+        "Fresh observed activity exceeds representative launch criterion without relying on Discord membership.",
+        "Working official Discord and actual decoded artwork verified.",
+        "Current criticism and mature policies are considered proportionately; inclusion carries truthful caveats."
+      ],
+      "conflicts": [
+        "Cfx raw access is public. Use reviewed allowlisted based on official quiz/manual-review guide plus current player corroboration; actual approval was not exercised.",
+        "Official onboarding retains obsolete RAGE connection instructions. Use current FiveM website/code, not old address/port.",
+        "Post-migration stability, economy affordability and faction leadership expectations receive current public criticism. Do not promise flawless/newcomer-perfect play.",
+        "Mature IC conduct policies are more permissive than some shortlist alternatives; accurate context matters.",
+        "International is an editorial audience label, not a hosting or latency claim.",
+        "No in-game session, private moderation outcome or paid-shop audit was performed. No cosmetic-only or universal friendliness claim is made."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-05T20:17:36.366Z",
+        "status": "online",
+        "players": 163,
+        "max": 2048,
+        "observedAt": "2026-09-05T20:15:06.279Z",
+        "refreshBeforePublication": true
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "ECLIPSE ROLEPLAY - GTA V ROLEPLAY",
+        "checkedAt": "2026-09-05T20:19:18.953Z",
+        "identityConfirmedBy": "Current official homepage links exact y2gxAjg invite."
+      },
+      "imageReview": {
+        "checkedAt": "2026-09-05T20:19:52.135Z",
+        "httpStatus": 200,
+        "width": 96,
+        "height": 96,
+        "originalBytes": 451955,
+        "validatedStaticBytes": 6550,
+        "logoNote": "Actual local PNG decoded and visually checked as ECRP branding after existing staticServerPng validation; no upload performed.",
+        "bannerNote": "No verified banner supplied."
+      },
+      "requiresStaffReview": true,
+      "confidence": {
+        "identity": "high",
+        "activity": "high-at-observation-time",
+        "access": "medium-high-primary-guide-plus-current-player-corroboration",
+        "editorialFit": "medium-high-with-mature-and-migration-caveats",
+        "moderationConsistency": "not-guaranteed"
+      },
+      "postImportChecks": [
+        "Refresh exact production feed before publication; do not reuse recorded count as live.",
+        "Search by Eclipse and open detail; latest count/status and stored logo agree.",
+        "Whitelisted filter includes listing, Public excludes it after refresh.",
+        "Community button opens verified y2gxAjg invite; join opens qqqbm7v; website opens eclipse-rp.net.",
+        "Preserve metadata order: platform, region, language, framework, access.",
+        "Use existing guarded managed-media import, verify image on directory/detail, and keep stable fallback."
+      ]
+    }
+  ],
+  "notReady": [
+    {
+      "name": "New Day RP",
+      "joinCode": "ypq96k",
+      "decision": "Source hold; strong quality shortlist",
+      "reason": "Repeated fallback:true despite changing raw clients. Browser confirms whitelist route exists behind login, not closure.",
+      "latestRawCheck": {
+        "checkedAt": "2026-09-05T20:20:54.425Z",
+        "lastSeen": "2026-09-05T20:17:53.38738983Z",
+        "fallback": true,
+        "rawClients": 169,
+        "max": 275,
+        "usableLivePlayers": null
+      },
+      "nextAction": "Find attributable non-fallback production source or explicitly supported aggregate feed; do not bypass freshness guard."
+    },
+    {
+      "name": "ONX",
+      "joinCode": "46pb7q",
+      "decision": "Source hold",
+      "reason": "Official-domain priority listing is fallback 7/7 with disabled Connect and end-of-life artifact warning; not a whole-community count. Current FAQ placeholder supersedes old indexed content.",
+      "latestRawCheck": {
+        "checkedAt": "2026-09-05T20:20:53.245Z",
+        "lastSeen": "2026-09-05T20:18:13.69605467Z",
+        "fallback": true,
+        "rawClients": 7,
+        "max": 7,
+        "usableLivePlayers": null
+      },
+      "nextAction": "Find official current production source; no development/Spanish/showcase substitution."
+    },
+    {
+      "name": "TRP",
+      "joinCode": null,
+      "decision": "FiveM source hold",
+      "wrongPlatformCode": "wzjb8d",
+      "reason": "Current public code is explicitly rdr3/TRP RedM; official GTA onboarding references Discord connection guide.",
+      "latestWrongPlatformCheck": {
+        "checkedAt": "2026-09-05T20:20:55.617Z",
+        "game": "rdr3",
+        "players": 0,
+        "max": 48
+      },
+      "nextAction": "Obtain officially attributable GTA production source and representative activity; do not import RedM as FiveM."
+    },
+    {
+      "name": "Connect RP",
+      "joinCode": null,
+      "decision": "Promising reserve; source hold",
+      "websiteUrl": "https://connectrp.net/",
+      "discordUrl": "https://discord.gg/connectrp",
+      "accessType": "allowlisted",
+      "reason": "Current safety policies and early player feedback promising; homepage 178/200 is missing-data fallback, production code unverified.",
+      "nextAction": "Verify canonical aggregate feed and representative activity. Search snippets incorrectly attach City of Justice or NoBull codes to neighboring Connect comments."
+    },
+    {
+      "name": "17th Street RP",
+      "joinCode": "86amo5",
+      "decision": "Active reserve",
+      "discordUrl": "https://discord.gg/17thstreetwl",
+      "alternateDiscordUrl": "https://discord.gg/6Kvuv6HkU3",
+      "invalidLegacyInvite": "https://discord.gg/17thstreet",
+      "lastCheck": {
+        "observedAt": "2026-09-05T20:08:11.985Z",
+        "players": 112,
+        "max": 200,
+        "status": "online"
+      },
+      "reason": "Official shop sells vehicle/cash gameplay head start; current attributable rules and newcomer/application process need confirmation. Shop alone is not a categorical rejection.",
+      "nextAction": "Confirm current governing/onboarding materials and judge fair progression against documented alternatives."
+    }
+  ],
+  "explicitlyDeferred": [
+    {
+      "name": "Redline RP",
+      "reason": "User latest instruction defers it."
+    }
+  ],
+  "remainingWork": "Quality research continues toward roughly40 FiveM; one additional candidate is recommended here. Source-held communities are not declared dead, and ordinary criticism is not treated as proof of misconduct."
+}

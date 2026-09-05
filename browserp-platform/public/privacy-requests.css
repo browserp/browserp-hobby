@@ -1,0 +1,22 @@
+.privacy-requests { color: var(--text, #f7f3fa); }
+.privacy-requests>summary { cursor: pointer; padding-block: .5rem; font-size: 1.2rem; font-weight: 700; }
+.privacy-requests { scroll-margin-top: 7rem; }
+.privacy-requests [data-privacy-requests-content] { padding: 1.25rem; }
+.privacy-request-controls,.privacy-request-list,.privacy-request-form { display: grid; gap: 1rem; }
+.privacy-request-controls { grid-template-columns: repeat(auto-fit,minmax(min(100%,16rem),1fr)); margin-block: 1rem; }
+.privacy-request-actions,.privacy-request-heading { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
+.privacy-request-actions { margin-block: 1rem; }
+.privacy-request-heading { justify-content: space-between; }
+.privacy-request-heading h3 { margin: 0; font-size: 1.15rem; }
+.privacy-request-card { background: var(--panel, #100c15); border: 1px solid var(--border, #33263f); border-radius: 1rem; padding: 1.25rem; min-width: 0; }
+.privacy-request-card summary { cursor: pointer; padding-block: .65rem; font-weight: 650; }
+.privacy-request-card details[open] summary { margin-bottom: .5rem; }
+.privacy-request-badge { border: 1px solid #795a9b; border-radius: 999px; padding: .3rem .7rem; background: #271b36; font-size: .9rem; }
+.privacy-request-date { color: var(--muted, #b2a9bc); font-size: .9rem; }
+.privacy-request-form { margin-block: 1rem; }
+.privacy-request-form textarea,.privacy-request-controls select { width: 100%; min-height: 2.75rem; }
+.privacy-request-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.privacy-request-reference,.privacy-request-card p { overflow-wrap: anywhere; }
+.privacy-request-note { border-left: 3px solid #c199f6; padding-left: 1rem; }
+.privacy-request-status:empty { display: none; }
+@media (max-width: 540px) { .privacy-request-actions>* { flex: 1 1 auto; } .privacy-request-card { padding: 1rem; } }

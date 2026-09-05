@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 
 const root = resolve(import.meta.dirname, "..");
 const targets = ["api", "lib", "public", "test"];
-const files = [join(root, "dev-server.mjs")];
+const files = [join(root, "dev-server.mjs"), join(root, "middleware.js")];
 
 function walk(directory) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {

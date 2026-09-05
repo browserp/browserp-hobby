@@ -1,5 +1,7 @@
 # BrowseRP: three useful product improvements
 
+**Update, 5 September:** The owner correction loop identified below is now implemented locally, including staff submission/queue version checks. See [SUBMISSION_CORRECTIONS.md](SUBMISSION_CORRECTIONS.md) for behavior, verification and deployment order. The original findings below describe the pre-fix state.
+
 Read-only review and primary-source research, 5 September 2026. This reflects the current local release candidate, including the owner-feedback and Roblox-status wording changes. No production interaction, application, enquiry, message, purchase or repository code change was made for this research pass. Existing release work takes priority over these implementations.
 
 ## Purpose and design test
