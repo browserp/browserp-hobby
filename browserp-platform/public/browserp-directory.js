@@ -73,7 +73,6 @@
     list.setAttribute("aria-busy", "true");
     list.replaceChildren(...Array.from({ length: count }, (_, index) => {
       const row = serverSkeletonCard();
-      row.style.setProperty("--card-reveal-delay", `${index * 35}ms`);
       window.__browserpReveal?.register?.(row, index * 35, false);
       if (!row.classList.contains("reveal-v3")) row.classList.add("reveal-v3");
       row.classList.add("is-revealed");
@@ -137,10 +136,9 @@
     }
     servers.forEach((server, index) => {
       const item = serverCard(server);
-      window.__browserpReveal?.register?.(item, Math.min(index, 12) * 40, true);
+      window.__browserpReveal?.register?.(item, Math.min(index, 8) * 12, true);
       if (!item.classList.contains("reveal-v3")) {
         item.classList.add("reveal-v3");
-        item.style.setProperty("--card-reveal-delay", `${Math.min(index, 12) * 40}ms`);
       }
       list.append(item);
     });

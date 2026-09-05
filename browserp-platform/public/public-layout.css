@@ -50,18 +50,20 @@ body select[size="1"]:not([multiple]) {
 .listing-form-v3 fieldset { min-inline-size: 0; margin: 0; padding: 18px; border: 1px solid var(--line); border-radius: 12px; }
 .listing-form-v3 legend { padding-inline: 6px; color: var(--copy); font-size: 14px; font-weight: 700; }
 .listing-form-v3 .field-help-v3 { margin: 0 0 14px; }
+.auth-trust-v6 { margin: 16px 0 0; color: var(--muted); font-size: 13px; }
+.auth-trust-v6 a { min-height: 44px; display: inline-flex; align-items: center; color: var(--pink-strong); text-decoration: underline; text-underline-offset: 3px; }
 .listing-form-v3 .check-v3:has([name="agreement"]) { align-items: flex-start; }
 .listing-form-v3 input[name="agreement"] { margin-top: 3px; }
 .detail-logo-v3 { flex: none; display: grid; place-items: center; border-radius: 14px; font-weight: 800; }
 .detail-title-v3 h1 { overflow-wrap: anywhere; }
 .detail-grid-v3 > aside { display: grid; align-content: start; gap: 20px; }
 .detail-grid-v3 > aside > .server-facts-v3 { margin-bottom: 0; }
-.policy-nav-v3 a { display: inline-flex; align-items: center; min-height: 42px; border-radius: 8px; }
+.policy-nav-v3 a { display: inline-flex; align-items: center; min-height: 44px; border-radius: 8px; }
 .toast { max-width: min(360px,calc(100vw - 36px)); overflow-wrap: anywhere; }
 .game-grid-v3 a { grid-template-columns: 64px minmax(0,1fr); }
 .game-grid-v3 strong,.game-grid-v3 small { min-width: 0; overflow-wrap: anywhere; }
 .footer-grid-v3 > * { min-width: 0; }
-.footer-column-v3 a { min-height: 36px; padding-block: 6px; }
+.footer-column-v3 a { min-height: 44px; padding-block: 9px; }
 
 @media (max-width: 1080px) {
   .hero-grid-v3 { grid-template-columns: minmax(0,1fr); gap: 36px; }

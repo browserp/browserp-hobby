@@ -81,7 +81,7 @@ test("public pages and fallback API load without external secrets", async () => 
   const home = await fetch(origin);
   assert.equal(home.status, 200);
   assert.match(await home.text(), /Find the world you want to[\s\S]*live in/);
-  for (const path of ["/servers", "/list-server", "/dashboard", "/staffpanel", "/legal", "/about", "/blog", "/appeal", "/advertise", "/coins", "/server/northstar-roleplay"]) {
+  for (const path of ["/servers", "/list-server", "/dashboard", "/staffpanel", "/legal", "/privacy", "/terms", "/about", "/blog", "/appeal", "/advertise", "/coins", "/server/northstar-roleplay"]) {
     const response = await fetch(`${origin}${path}`);
     assert.equal(response.status, 200, path);
     if (path === "/staffpanel") {
@@ -89,13 +89,37 @@ test("public pages and fallback API load without external secrets", async () => 
     }
   }
 
-  for (const path of ["/", "/servers", "/list-server", "/dashboard", "/legal", "/about", "/blog", "/server/northstar-roleplay"]) {
+  for (const path of ["/", "/servers", "/list-server", "/dashboard", "/legal", "/privacy", "/terms", "/about", "/blog", "/server/northstar-roleplay"]) {
     const response = await fetch(`${origin}${path}`);
     assert.doesNotMatch(await response.text(), /href=["']\/staffpanel/i, path);
   }
 
-  assert.equal((await fetch(`${origin}/developers`)).status, 404);
-  assert.equal((await fetch(`${origin}/resources`)).status, 404);
+  for (const path of ["/developers", "/resources", "/missing/nested-page"]) {
+    const missingPage = await fetch(`${origin}${path}`);
+    assert.equal(missingPage.status, 404);
+    assert.match(missingPage.headers.get("content-type") || "", /text\/html/);
+    assert.match(missingPage.headers.get("x-robots-tag") || "", /noindex, nofollow/);
+    assert.match(await missingPage.text(), /We couldn’t find[\s\S]*that page/);
+  }
+
+  const missingPageHead = await fetch(`${origin}/missing-page`, { method: "HEAD" });
+  assert.equal(missingPageHead.status, 404);
+  assert.match(missingPageHead.headers.get("content-type") || "", /text\/html/);
+  assert.equal(await missingPageHead.text(), "");
+
+  for (const path of ["/assets", "/assets/missing-image.png", "/assets/missing-image", "/missing-document.html"]) {
+    const missingAsset = await fetch(`${origin}${path}`);
+    assert.equal(missingAsset.status, 404);
+    assert.match(missingAsset.headers.get("content-type") || "", /text\/plain/);
+    assert.equal(await missingAsset.text(), "Not found");
+  }
+
+  for (const path of ["/api", "/api/missing-route"]) {
+    const missingApi = await fetch(`${origin}${path}`);
+    assert.equal(missingApi.status, 404);
+    assert.match(missingApi.headers.get("content-type") || "", /application\/json/);
+    assert.deepEqual(await missingApi.json(), { error: "API route not found." });
+  }
 
   const directory = await fetch(`${origin}/api/servers?platform=fivem&online=true`);
   const payload = await directory.json();

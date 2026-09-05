@@ -84,7 +84,7 @@
     $("#game-page-lead-v4").textContent = game.description;
     $("#game-hub-grid-v4").hidden = true;
     if (!AVAILABLE_GAME_IDS.has(game.id)) {
-      document.title = `${game.name} — Coming soon | BrowseRP`;
+      document.title = `${game.name} — Coming soon — BrowseRP`;
       document.querySelector('meta[name="description"]').content = `${game.name} discovery is coming soon to BrowseRP.`;
       $("#game-page-eyebrow-v4").textContent = "Coming soon";
       $("#game-page-title-v4").textContent = `${game.name} is coming soon.`;

@@ -214,6 +214,14 @@
       "destination": "/legal.html"
     },
     {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/terms.html"
+    },
+    {
       "source": "/about",
       "destination": "/about.html"
     },
@@ -344,7 +352,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; base-uri 'none'; connect-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' data: https://cdn.discordapp.com https://lh3.googleusercontent.com https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/; manifest-src 'self'; media-src 'none'; object-src 'none'; script-src 'self'; style-src 'self'; worker-src 'none'; upgrade-insecure-requests"
+          "value": "default-src 'self'; base-uri 'none'; connect-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' data: https://cdn.discordapp.com https://lh3.googleusercontent.com https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/; manifest-src 'self'; media-src 'none'; object-src 'none'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; worker-src 'none'; upgrade-insecure-requests"
         },
         {
           "key": "Strict-Transport-Security",
@@ -399,7 +407,7 @@
       ]
     },
     {
-      "source": "/(.*).(txt|xml)",
+      "source": "/(.*).(txt|xml|webmanifest)",
       "headers": [
         {
           "key": "Cache-Control",

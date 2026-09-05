@@ -45,13 +45,13 @@ async function harness(t, { reduced = false, observerAvailable = true } = {}) {
   } };
 }
 
-test("a full asynchronous FiveM page renders real cards and has a reachable reveal boundary for a section taller than the viewport", async t => {
+test("a full asynchronous FiveM page keeps its tall results and dynamic cards free from scroll gates", async t => {
   const h = await harness(t);
-  const results = h.$("#game-results-v4"), observer = h.observers.find(item => item.targets.has(results));
-  assert.ok(observer, "The actual reveal module must observe the results section");
+  const results = h.$("#game-results-v4"), observer = h.observers[0];
+  assert.ok(observer, "The actual reveal module must be available for result cards");
+  assert.equal(observer.targets.has(results), false, "A results container taller than the viewport must never wait on a reveal observer");
+  assert.equal(h.w.getComputedStyle(results).opacity, "1");
   assert.equal(h.$("#game-server-list-v4").children.length, 0, "Exercise the empty-to-full async layout change");
-  observer.deliver(results, 0, false);
-  assert.equal(h.w.getComputedStyle(results).opacity, "0");
   await h.loaded();
   assert.equal(new URL(h.requests.find(path => path.startsWith("/api/servers?")), "https://browserp.test").searchParams.get("platform"), "fivem", "The route's game must override an unrelated query-string game");
   assert.equal(h.$("#game-result-count").textContent, "32 servers · Showing 24");
@@ -59,16 +59,15 @@ test("a full asynchronous FiveM page renders real cards and has a reachable reve
   assert.equal(h.$("#game-server-list-v4").getAttribute("aria-busy"), "false");
   assert.equal(h.$("#game-server-empty-v4").hidden, true);
   assert.deepEqual([...h.$(".platform-meta-v5").children].map(item => item.getAttribute("aria-label")), ["Game: FiveM", "Region: United Kingdom", "Language: French", "Server setup: QBCore", "Access: Approval required"]);
-  const thresholds = Array.isArray(observer.options.threshold) ? observer.options.threshold : [observer.options.threshold ?? 0];
-  // This is the measured failing shape: 7,170px of results in an 814px viewport.
-  // A percentage of the whole result set must not be required before it becomes visible.
-  assert.ok(Math.min(...thresholds) <= 1 / 7170, "One visible pixel must reach the reveal threshold even for thousands of pixels of results");
-  observer.deliver(results, 1 / 7170);
-  assert.equal(h.w.getComputedStyle(results).opacity, "1");
-  assert.equal(observer.targets.has(results), false, "Visible results should stop being observed");
+  assert.equal(observer.options.threshold, 0);
+  assert.equal(observer.options.rootMargin, "0px 0px 35% 0px", "Static sections should begin revealing well before they enter the viewport");
+  const firstCard = h.$("#game-server-list-v4").firstElementChild;
+  assert.equal(observer.targets.has(firstCard), false, "Async result cards should not wait for an observer while the user scrolls");
+  assert.equal(firstCard.classList.contains("reveal-v3"), false);
+  assert.equal(h.w.getComputedStyle(firstCard).opacity, "1");
   const heading = h.$("#game-results-v4 .section-head-v3");
-  observer.deliver(heading, 0.01);
-  assert.equal(h.w.getComputedStyle(heading).opacity, "1", "The nested result heading must also reveal");
+  assert.equal(heading.classList.contains("reveal-v3"), false, "Nested headings should not replay the parent reveal");
+  assert.equal(h.w.getComputedStyle(heading).opacity, "1");
 });
 
 test("reduced-motion game pages display asynchronous results without relying on an observer", async t => {

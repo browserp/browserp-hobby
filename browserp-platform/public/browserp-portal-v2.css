@@ -85,6 +85,9 @@
   text-align: center;
 }
 .access-gate-v2 .portal-avatar { margin: 0 auto 25px; }
+.access-gate-v2 .portal-brand-mark-v6 { width: 68px; height: 68px; padding: 4px; border-radius: 18px; background: #08070b; }
+.access-gate-v2 .portal-brand-mark-v6 img { width: 100%; height: 100%; object-fit: contain; }
+.access-note-link { min-height: 44px; display: inline-flex; align-items: center; color: var(--accent-strong); text-decoration: underline; text-underline-offset: 3px; }
 .access-gate-v2 h1 { margin-bottom: 17px; font-size: clamp(36px, 6vw, 56px); }
 .access-gate-v2 p { max-width: 540px; margin: 0 auto 28px; font-size: 18px; }
 .access-actions { display: grid; gap: 10px; max-width: 390px; margin: 0 auto; }
@@ -552,7 +555,7 @@
   .portal-head { display: grid; align-items: start; gap: 22px; }
   .portal-head-actions { justify-content: flex-start; }
   .portal-head-actions .button { flex: 1 1 170px; }
-  .portal-nav { top: 76px; margin-inline: -2px; }
+  .portal-nav { top: 76px; margin-inline: -2px; backdrop-filter: none; background: #111216; }
   .portal-panel-v2 { scroll-margin-top: 150px; }
   .portal-panel-head { display: grid; }
   .portal-item,

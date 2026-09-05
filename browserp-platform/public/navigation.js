@@ -109,7 +109,7 @@
   input.type = "search";
   input.name = "q";
   input.maxLength = 120;
-  input.placeholder = "Search servers, games or play styles";
+  input.placeholder = "Search BrowseRP";
   input.setAttribute("aria-label", "Search servers, games or play styles");
   const submit = make("button");
   submit.type = "submit";
@@ -136,9 +136,9 @@
   gamesTitle.id = "navigation-games-title-v6";
   gamesHeading.append(gamesTitle, link("View all", "/games"));
   const gameLinks = make("div", "navigation-game-grid-v6");
-  [["FiveM", "fivem", "#ffa45e"], ["RedM", "redm", "#ff7a82"], ["Minecraft", "minecraft", "#80d697"], ["Roblox", "roblox", "#b89aff"]].forEach(([label, id, colour]) => {
+  [["FiveM", "fivem"], ["RedM", "redm"], ["Minecraft", "minecraft"], ["Roblox", "roblox"]].forEach(([label, id]) => {
     const anchor = link(label, `/games/${id}`, "navigation-game-v6");
-    anchor.style.setProperty("--game-colour", colour);
+    anchor.dataset.platform = id;
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("viewBox", "0 0 48 48");
     svg.setAttribute("aria-hidden", "true");

@@ -37,7 +37,7 @@ test("games hub offers exactly the four launch games in the requested order", ()
 
 test("upcoming game URLs show coming soon without loading a server directory", () => {
   const { document, nodes, requests } = render("/games/forza");
-  assert.equal(document.title, "Forza — Coming soon | BrowseRP");
+  assert.equal(document.title, "Forza — Coming soon — BrowseRP");
   assert.equal(nodes.get("#game-page-title-v4").textContent, "Forza is coming soon.");
   assert.equal(nodes.get("#game-page-actions-v4").children[0].href, "/games");
   assert.deepEqual(requests, []);

@@ -62,6 +62,7 @@
       window.BrowseRPContent.renderArticle(root, post.body); status.textContent = "";
     } catch (error) {
       const unavailable = error.status === 404;
+      document.title = unavailable ? "Story unavailable — BrowseRP" : "Blog unavailable — BrowseRP";
       $("#journal-title-v6").textContent = unavailable ? "This story is unavailable." : "We couldn’t load this story.";
       status.textContent = unavailable ? "The article may have been archived, or its address has changed. Explore the journal for the latest posts." : "Please try again in a moment.";
       retry.hidden = unavailable; status.dataset.error = "true";

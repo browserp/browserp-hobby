@@ -31,7 +31,9 @@ Payments and Google login are disabled. Keep them disabled. The production-data 
 - `SUPABASE_SECRET_KEY` — server-only key
 - `PRIVACY_HASH_SECRET` — unique random server-only value of at least 64 characters
 
-Discord remains the staff-owner identity provider. Supabase Auth's site URL and callback allow-list must include `https://www.browserp.com/api/auth/callback`. Google remains disabled until it has its own reviewed member-login test; it must never grant staff-owner access.
+Discord remains the staff-owner identity provider; Google is available for ordinary member sign-in and must never grant staff-owner access. Supabase Auth's site URL and callback allow-list must include `https://www.browserp.com/api/auth/callback`. Google and Discord must use their production BrowseRP applications, the square RP mark, and the public `https://www.browserp.com/privacy` and `https://www.browserp.com/terms` policy pages.
+
+The current Free Supabase project advertises its project hostname as the provider callback. Google brand verification can still identify the application as BrowseRP. A future switch to `auth.browserp.com` requires a paid Supabase plan and custom-domain add-on, both old and new provider callbacks registered before activation, dual storage-host allow-lists during cutover, and a complete login/linking smoke test before the old callback is removed.
 
 All secret values are entered in provider dashboards by the account owner. They are never committed, copied into documentation or pasted into chat.
 

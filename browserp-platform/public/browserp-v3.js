@@ -18,7 +18,6 @@
 
   function applyTheme(theme) {
     document.documentElement.dataset.theme = "dark";
-    document.documentElement.style.colorScheme = "dark";
   }
 
   function initials(value) {
@@ -57,6 +56,7 @@
   const reveal = (() => {
     let observer = null;
     const prefersReduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersDirectScroll = () => matchMedia("(hover: none), (pointer: coarse)").matches;
     const pending = new Set();
 
     function createObserver() {
@@ -70,20 +70,20 @@
           node.classList.add("is-revealed");
           observer.unobserve(node);
         });
-      }, { threshold: 0, rootMargin: "0px 0px -12% 0px" });
+      }, { threshold: 0, rootMargin: "0px 0px 35% 0px" });
       pending.forEach((node) => observer.observe(node));
+      pending.clear();
     }
 
-    function register(node, delay = 0, allowScrollReveal = true) {
+    function register(node, _delay = 0, allowScrollReveal = true) {
       if (!(node instanceof Element)) return;
       if (!node.classList.contains("reveal-v3")) node.classList.add("reveal-v3");
-      if (delay >= 0) node.style.setProperty("--card-reveal-delay", `${delay}ms`);
       if (!allowScrollReveal) {
         node.classList.add("is-revealed");
         if (observer) observer.unobserve(node);
         return;
       }
-      if (prefersReduced() || typeof IntersectionObserver !== "function") {
+      if (prefersReduced() || prefersDirectScroll() || typeof IntersectionObserver !== "function") {
         node.classList.add("is-revealed");
         return;
       }
@@ -99,27 +99,16 @@
       const selectors = [
         ".hero-v3",
         ".section-v3",
-        ".section-head-v3",
-        ".detail-hero-v3",
-        ".detail-layout-with-ad-v3",
-        ".content-with-rail-v3",
         ".side-ad-v3",
-        ".footer-v3",
-        ".footer-column-v3",
-        ".trust-grid-v3 article",
-        ".game-grid-v3 a",
-        ".blog-card-v3",
-        ".detail-grid-v3 > article",
-        ".detail-grid-v3 > aside",
-        ".game-strip-v3",
-        ".directory-toolbar-v3"
+        ".footer-v3"
       ];
       let index = 0;
       selectors.forEach((selector) => {
         $$(selector, root).forEach((item) => {
           if (item.classList.contains("reveal-v3")) return;
           item.classList.add("reveal-v3", "reveal-on-scroll");
-          register(item, Math.min(index++, 18) * 30);
+          const containsLiveResults = item.matches(".section-v3") && item.querySelector(".server-list-v3, #game-server-list-v4");
+          register(item, Math.min(index++, 6) * 12, !containsLiveResults && !prefersDirectScroll());
         });
       });
     }
@@ -398,10 +387,10 @@
     lockup.append(mark); brand.append(lockup, node("p", "", "A clearer way to discover roleplay communities across games and simulators."));
     grid.append(brand);
     const groups = [
-      ["Discover", [["Browse servers","/servers"],["UK servers","/servers?region=United%20Kingdom"],["US servers","/servers?region=United%20States"],["Guides & blog","/blog"]]],
+      ["Discover", [["Browse servers","/servers"],["UK servers","/servers?region=United%20Kingdom"],["US servers","/servers?region=United%20States"],["Blog","/blog"]]],
       ["Server owners", [["List my server","/list-server"],["My listings","/dashboard"],["Advertise","/advertise"],["BrowseRP Coins","/coins"]]],
       ["BrowseRP", [["Our vision","/about"],["Community standards","/legal#standards"],["Safety","/legal#safety"],["Ban appeal","/appeal"]]],
-      ["Legal & help", [["Privacy policy","/legal#privacy"],["Cookie policy","/legal#cookies"],["Refund policy","/legal#refunds"],["Help & contact","/legal#contact"]]]
+      ["Legal & help", [["Privacy policy","/privacy"],["Terms of service","/terms"],["Cookie policy","/legal#cookies"],["Help & contact","/legal#contact"]]]
     ];
     for (const [heading, links] of groups) { const column=node("div","footer-column-v3");column.append(node("strong","",heading));for(const [label,href] of links){const link=node("a","",label);link.href=href;column.append(link);}grid.append(column); }
     const bottom=node("div","shell-v3 footer-bottom-v3");bottom.append(node("span","",`© ${new Date().getFullYear()} BrowseRP · Operated in the United Kingdom`),node("span","","Payments disabled while the coin system completes financial testing."));
@@ -614,7 +603,7 @@
         return item;
       }));
       $("#comments-empty-v3").hidden = (engagement.comments || []).length > 0;
-      document.title = `${server.name} — ${platform} roleplay | BrowseRP`;
+      document.title = `${server.name} — ${platform} roleplay — BrowseRP`;
       const claimRoot = $("#server-claim-panel");
       if (claimRoot && window.BrowseRPServerClaims?.init) {
         try { await window.BrowseRPServerClaims.init({ server, root: claimRoot }); }
@@ -622,6 +611,7 @@
       }
       refreshServerPlayers(server, slug);
     } catch {
+      document.title = "Server unavailable — BrowseRP";
       const empty = node("section", "empty-v3 server-missing-v3");
       empty.append(
         node("span", "eyebrow-v3", "Server listing"),
@@ -638,29 +628,47 @@
   function interactionForms() {
     $("#vote-server-v3")?.addEventListener("click", async (event) => {
       if (!state.session?.authenticated) { location.assign("/dashboard"); return; }
+      const button = event.currentTarget;
+      if (button.disabled) return;
+      button.disabled = true;
+      button.setAttribute("aria-busy", "true");
       try {
-        const { result } = await api("/api/servers", { method: "POST", body: JSON.stringify({ action: "vote", serverId: event.currentTarget.dataset.serverId }) });
+        const { result } = await api("/api/servers", { method: "POST", body: JSON.stringify({ action: "vote", serverId: button.dataset.serverId }) });
         $("#server-votes-v3").textContent = `${Number(result.voteCount || 0).toLocaleString()} votes`;
-        event.currentTarget.textContent = "Voted";
-      } catch (error) { toast(error.message, "error"); }
+        button.textContent = "Voted";
+        button.setAttribute("aria-pressed", "true");
+      } catch (error) {
+        button.disabled = false;
+        toast(error.message, "error");
+      } finally { button.removeAttribute("aria-busy"); }
     });
     $("#comment-form-v3")?.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!state.session?.authenticated) { location.assign("/dashboard"); return; }
       const form = event.currentTarget;
+      const submit = $("button[type=submit]", form);
+      if (submit?.disabled) return;
+      if (submit) submit.disabled = true;
+      form.setAttribute("aria-busy", "true");
       try {
         await api("/api/servers", { method: "POST", body: JSON.stringify({ action: "comment", serverId: form.dataset.serverId, body: new FormData(form).get("comment") }) });
         form.reset(); toast("Comment sent for moderation.");
       } catch (error) { toast(error.message, "error"); }
+      finally { if (submit) submit.disabled = false; form.removeAttribute("aria-busy"); }
     });
     $("#report-form-v3")?.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!state.session?.authenticated) { location.assign("/dashboard"); return; }
       const form = event.currentTarget; const data = new FormData(form);
+      const submit = $("button[type=submit]", form);
+      if (submit?.disabled) return;
+      if (submit) submit.disabled = true;
+      form.setAttribute("aria-busy", "true");
       try {
         await api("/api/servers", { method: "POST", body: JSON.stringify({ action: "report", serverId: form.dataset.serverId, category: data.get("category"), body: data.get("details") }) });
         form.reset(); toast("Report received. Staff can now review it.");
       } catch (error) { toast(error.message, "error"); }
+      finally { if (submit) submit.disabled = false; form.removeAttribute("aria-busy"); }
     });
   }
 
@@ -677,8 +685,25 @@
     });
   }
 
+  function touchPolish() {
+    const coarse = matchMedia("(hover: none), (pointer: coarse)");
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+    const selector = ".button-primary-v3, .button-primary, .small-button-primary";
+    document.addEventListener("pointerdown", (event) => {
+      if (!coarse.matches || reduced.matches || event.pointerType === "mouse") return;
+      const control = event.target.closest(selector);
+      if (!control || control.matches(":disabled, [aria-disabled='true']")) return;
+      control.classList.remove("touch-sweep-v3");
+      requestAnimationFrame(() => requestAnimationFrame(() => control.classList.add("touch-sweep-v3")));
+    }, { passive: true });
+    document.addEventListener("animationend", (event) => {
+      if (event.animationName === "touch-sweep-v3") event.target.classList.remove("touch-sweep-v3");
+    });
+  }
+
   async function init() {
     applyTheme(preferredTheme());
+    touchPolish();
     footer();
     $$('[data-year-v3]').forEach((element) => { element.textContent = String(new Date().getFullYear()); });
     reveal.scan();
@@ -693,8 +718,8 @@
     announcementStyles.href = "/site-announcements.css?v=1";
     document.head.append(announcementStyles);
     import("/site-announcements.js?v=1").catch(() => {});
-    await serverDetail();
     interactionForms();
+    await serverDetail();
     appeal();
   }
   init();

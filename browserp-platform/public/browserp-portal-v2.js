@@ -192,7 +192,12 @@
 
   async function signInGate({ staffOnly = false, title, description } = {}) {
     const gate = make("section", "access-gate-v2");
-    append(gate, make("div", "portal-avatar", staffOnly ? "S" : "RP"));
+    const brand = make("div", "portal-avatar portal-brand-mark-v6");
+    const brandImage = make("img");
+    brandImage.src = "/browserp-mark-v3.png";
+    brandImage.alt = "";
+    brand.append(brandImage);
+    append(gate, brand);
     append(gate, make("span", "portal-kicker", staffOnly ? "Restricted workspace" : "Your BrowseRP account"));
     append(gate, make("h1", "", title || (staffOnly ? "Staff sign-in required" : "Sign in to continue")));
     append(gate, make("p", "", description || (staffOnly
@@ -209,7 +214,12 @@
     if (!staffOnly && providers.google) actions.append(providerButton(`/api/auth/google?returnTo=${encodeURIComponent(returnTo)}`, "button button-secondary", "Continue with Google", "google"));
     if (actions.childElementCount === 0) actions.append(make("p", "portal-status error", "Sign-in is temporarily unavailable. Please try again later."));
     gate.append(actions);
-    gate.append(make("small", "access-note", staffOnly ? "Access is checked again on every staff request." : "We only use account information needed to run your BrowseRP profile."));
+    const note = make("small", "access-note");
+    note.append(document.createTextNode(staffOnly ? "Access is checked again on every staff request. " : "By continuing, you agree to the "));
+    if (!staffOnly) {
+      note.append(link("/terms", "access-note-link", "Terms"), document.createTextNode(" and acknowledge the "), link("/privacy", "access-note-link", "Privacy Policy"), document.createTextNode("."));
+    }
+    gate.append(note);
     setRoot(gate);
   }
 

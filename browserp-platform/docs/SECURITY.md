@@ -12,7 +12,7 @@ Security is enforced at several independent boundaries. A hidden URL, disabled b
 
 ## Browser policy
 
-The Content Security Policy allows scripts, styles, fonts and connections only from BrowseRP. Images may additionally come from the approved Discord and Google avatar hosts, data URLs used by the image cropper, and the exact public advertisement, profile-media and server-media paths in BrowseRP's Supabase project. Inline script/style execution, frames, objects, media and workers are blocked. The site also sends `nosniff`, `DENY` framing, strict-origin referrers, restrictive browser permissions and same-origin opener/resource policies.
+The Content Security Policy allows scripts, stylesheets, fonts and connections only from BrowseRP. Images may additionally come from the approved Discord and Google avatar hosts, data URLs used by the image cropper, and the exact public advertisement, profile-media and server-media paths in BrowseRP's Supabase project. Inline scripts and inline style blocks remain blocked. Narrow inline style attributes are allowed for trusted client-side geometry such as the anchored menu control, image cropper and staff chart tooltip; user content is never inserted into those declarations. Frames, objects, media and workers are blocked. The site also sends `nosniff`, `DENY` framing, strict-origin referrers, restrictive browser permissions and same-origin opener/resource policies.
 
 `/staff` and `/dashboard` are private/no-store and `noindex`. CSS and JavaScript use immediate revalidation to avoid mixed-release caching across Vercel and Cloudflare.
 

@@ -46,7 +46,7 @@ test("staff finishing styles load last on every staff entry point and stay off p
   const files = readdirSync(new URL("../public", import.meta.url)).filter(file => file.endsWith(".html"));
   for (const file of files) {
     const html = read(file); const links = [...html.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/g)].map(match => match[1]);
-    if (file.startsWith("staff")) assert.match(links.at(-1), /^\/staff-layout\.css\?v=2$/, file);
+    if (file.startsWith("staff")) assert.equal(links.at(-1), "/staff-layout.css?v=2.12.0", file);
     else assert.equal(links.some(link => link.startsWith("/staff-layout.css")), false, file);
   }
 });

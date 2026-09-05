@@ -89,6 +89,7 @@ const mime = {
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
   ".svg": "image/svg+xml",
   ".png": "image/png",
   ".webp": "image/webp",
@@ -101,13 +102,13 @@ function securityHeaders(res) {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("Content-Security-Policy", "default-src 'self'; img-src 'self' data: https://cdn.discordapp.com https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/; style-src 'self'; script-src 'self' 'sha256-mjT0FPG3NQWnJyjqoM1ha+xDb2mlOSS3l/dtDWVxA8c='; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+  res.setHeader("Content-Security-Policy", "default-src 'self'; img-src 'self' data: https://cdn.discordapp.com https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/ https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/; style-src 'self'; style-src-attr 'unsafe-inline'; script-src 'self' 'sha256-mjT0FPG3NQWnJyjqoM1ha+xDb2mlOSS3l/dtDWVxA8c='; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), browsing-topics=()");
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
 }
 
-async function serveFile(res, path) {
+async function serveFile(res, path, { brandedNotFound = false } = {}) {
   const normalized = normalize(path).replace(/^(\.\.[/\\])+/, "");
   const filePath = join(publicDir, normalized);
   if (!filePath.startsWith(publicDir)) {
@@ -122,8 +123,19 @@ async function serveFile(res, path) {
     });
     res.end(res.req?.method === "HEAD" ? undefined : file);
   } catch (error) {
-    res.writeHead(error.code === "ENOENT" ? 404 : 500, { "Content-Type": "text/plain; charset=utf-8" });
-    res.end(error.code === "ENOENT" ? "Not found" : "Server error");
+    const missing = error.code === "ENOENT" || error.code === "EISDIR";
+    if (missing && brandedNotFound) {
+      try {
+        const page = await readFile(join(publicDir, "404.html"));
+        res.setHeader("X-Robots-Tag", "noindex, nofollow");
+        res.writeHead(404, { "Content-Type": mime[".html"], "Cache-Control": "no-cache" });
+        return res.end(res.req?.method === "HEAD" ? undefined : page);
+      } catch {
+        // Retain a reliable plain-text response if the branded page is unavailable.
+      }
+    }
+    res.writeHead(missing ? 404 : 500, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end(missing ? "Not found" : "Server error");
   }
 }
 
@@ -134,6 +146,8 @@ function staticRoute(pathname) {
   if (pathname === "/dashboard") return "dashboard.html";
   if (pathname === "/profile") return "profile.html";
   if (pathname === "/legal") return "legal.html";
+  if (pathname === "/privacy") return "privacy.html";
+  if (pathname === "/terms") return "terms.html";
   if (pathname === "/about") return "about.html";
   if (pathname === "/games" || /^\/games\/[a-z0-9-]+$/i.test(pathname)) return "game.html";
   if (pathname === "/blog") return "blog.html";
@@ -308,7 +322,7 @@ export function createBrowseRPServer({ environment = process.env } = {}) {
       const module = await import(pathToFileURL(join(root, modulePath)));
       return module.default(req, res);
     }
-    if (url.pathname.startsWith("/api/")) {
+    if (url.pathname === "/api" || url.pathname.startsWith("/api/")) {
       res.writeHead(404, { "Content-Type": "application/json; charset=utf-8" });
       return res.end(JSON.stringify({ error: "API route not found." }));
     }
@@ -316,7 +330,8 @@ export function createBrowseRPServer({ environment = process.env } = {}) {
       res.writeHead(405, { Allow: "GET, HEAD", "Content-Type": "text/plain; charset=utf-8" });
       return res.end("Method not allowed");
     }
-    return serveFile(res, staticRoute(url.pathname));
+    const brandedNotFound = extname(url.pathname) === "" && !/^\/assets(?:\/|$)/.test(url.pathname);
+    return serveFile(res, staticRoute(url.pathname), { brandedNotFound });
   });
 }
 

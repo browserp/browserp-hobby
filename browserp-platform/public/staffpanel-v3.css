@@ -9,7 +9,7 @@ body.staff-v3 { background: #08090c; }
 .staff-sidebar-v3 { position: sticky; top: 0; height: 100vh; padding: 24px 18px; border-right: 1px solid #252b35; background: #0b0d11; overflow-y: auto; }
 .staff-sidebar-v3 .logo-v3 { display: block; margin: 0 8px 30px; }
 .staff-nav-v3 { display: grid; gap: 3px; }
-.staff-nav-v3 a { min-height: 43px; display: flex; align-items: center; gap: 10px; padding: 9px 11px; color: #aeb6c4; border-left: 3px solid transparent; font-size: 14px; font-weight: 650; }
+.staff-nav-v3 a { min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 9px 11px; color: #aeb6c4; border-left: 3px solid transparent; font-size: 14px; font-weight: 650; }
 .staff-nav-v3 a:hover, .staff-nav-v3 a[aria-current="page"] { color: #fff; background: #151922; border-color: #d2519a; }
 .staff-nav-group-v3 { margin: 22px 10px 8px; color: #6f7887; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .staff-main-v3 { min-width: 0; padding: 34px clamp(22px,4vw,54px) 70px; }

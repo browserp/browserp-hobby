@@ -29,13 +29,13 @@
 .overview-section-heading p { margin: 8px 0 0; color: var(--copy); font-size: 13px; line-height: 1.6; }
 .overview-module > .overview-section-heading { padding: 24px; }
 .overview-range { position: relative; min-width: 206px; font-size: 13px; }
-.overview-range summary { min-height: 43px; display: flex; align-items: center; gap: 12px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 9px; background: var(--bg-soft); color: var(--copy); cursor: pointer; list-style: none; }
+.overview-range summary { min-height: 44px; display: flex; align-items: center; gap: 12px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 9px; background: var(--bg-soft); color: var(--copy); cursor: pointer; list-style: none; }
 .overview-range summary::-webkit-details-marker { display: none; }
 .overview-range summary strong { margin-left: auto; color: var(--text); }
 .overview-range summary > span { transition: transform .18s ease; }
 .overview-range[open] summary > span { transform: rotate(180deg); }
 .overview-range-options { position: absolute; top: calc(100% + 7px); left: 0; right: 0; z-index: 5; display: grid; gap: 4px; padding: 7px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); box-shadow: 0 18px 45px #0008; }
-.overview-range-options button { min-height: 42px; padding: 9px 12px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--copy); text-align: left; font: inherit; cursor: pointer; }
+.overview-range-options button { min-height: 44px; padding: 9px 12px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--copy); text-align: left; font: inherit; cursor: pointer; }
 .overview-range-options button:hover,.overview-range-options button[aria-pressed="true"] { background: #382039; color: #ffb8df; border-color: #794567; }
 .overview-chart-summary { display: flex; align-items: flex-end; flex-wrap: wrap; justify-content: space-between; gap: 14px; margin-block: 28px 8px; }
 .overview-chart-summary > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }

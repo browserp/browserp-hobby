@@ -61,7 +61,7 @@ body.staff-v3 {
 .staff-v3 .staff-top-v3 .eyebrow-v3 { margin-bottom: 12px; font-size: 11px; letter-spacing: .14em; }
 .staff-v3 .staff-top-v3 h1 { font-size: clamp(32px, 3.3vw, 44px); line-height: 1.12; letter-spacing: -.04em; overflow-wrap: anywhere; }
 .staff-v3 .staff-top-v3 p { max-width: 66ch; margin-top: 14px; font-size: 15px; line-height: 1.7; }
-.staff-v3 .staff-theme-v3 { flex: none; min-height: 0; padding: 6px 11px; margin: 0; border: 1px solid #57415e; border-radius: 30px; color: #c7b5d0; font-size: 11px; }
+.staff-v3 .staff-theme-v3 { flex: none; min-height: 44px; padding: 6px 11px; margin: 0; border: 1px solid #57415e; border-radius: 30px; color: #c7b5d0; font-size: 11px; }
 .staff-v3 :is(h2, h3, h4) { line-height: 1.3; letter-spacing: -.025em; text-wrap: balance; }
 .staff-v3 :is(.overview-main, .moderation-main) h2 { font-size: clamp(23px, 2.3vw, 29px); }
 .staff-v3 :is(.staff-top-v3, .overview-users, .overview-module, .moderation-staff-box, .staff-section-v3, .staff-fivem, .staff-claims) { scroll-margin-top: 24px; }
@@ -147,7 +147,7 @@ body.staff-v3 {
 .staff-v3 .moderation-record-actions { padding-top: 17px; border-top: 1px solid var(--line-soft); margin-top: 18px; }
 .staff-v3 .moderation-filter { padding: 22px; }
 .staff-v3 .moderation-empty { background: rgb(16 13 19 / .7); padding-block: 46px; }
-.staff-v3 .moderation-filter details > summary, .staff-v3 .moderation-details summary { min-height: 36px; align-content: center; }
+.staff-v3 .moderation-filter details > summary, .staff-v3 .moderation-details summary { min-height: 44px; align-content: center; }
 .staff-v3 .staff-fivem { padding: var(--staff-inset); border: 1px solid var(--line); border-radius: 16px; background: var(--panel); margin-top: 24px; }
 .staff-v3 .staff-claims { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); }
 .staff-v3 .staff-claims-filters { grid-template-columns: minmax(190px, 1.5fr) repeat(2, minmax(180px, 1fr)); gap: 14px; padding: 20px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; }
@@ -200,7 +200,7 @@ body.staff-v3 {
   body.staff-v3 { --staff-inset: 20px; }
   .staff-v3 .staff-shell-v3 { display: block; padding-top: 72px; }
   .staff-v3 .staff-main-v3 { padding: 24px 16px 54px; }
-  .staff-v3 .staff-mobile-bar-v3 { height: 72px; padding: 10px 16px; border-color: var(--line); background: rgb(10 7 14 / .97); backdrop-filter: blur(16px); }
+  .staff-v3 .staff-mobile-bar-v3 { height: 72px; padding: 10px 16px; border-color: var(--line); background: #0a070e; backdrop-filter: none; }
   .staff-v3 .staff-mobile-bar-v3 .logo-lockup-v3 { width: 170px; min-width: 0; }
   .staff-v3 .staff-mobile-bar-v3 .logo-full-v5 { width: 166px; }
   .staff-v3 #staff-menu-v3 { min-width: 88px; height: 46px; flex: none; margin: 0; }

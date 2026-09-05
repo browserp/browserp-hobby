@@ -20,7 +20,7 @@
 .refresh-health-game[data-platform="fivem"] { border-color: #ff9c5a; }.refresh-health-game[data-platform="redm"] { border-color: #ff7d88; }.refresh-health-game[data-platform="minecraft"] { border-color: #82dca3; }.refresh-health-game[data-platform="roblox"] { border-color: #e0e4ee; }
 .refresh-health-game span,.refresh-health-game small { font-size: 12px; }
 .refresh-health-details { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line,#32273b); }
-.refresh-health-details summary { cursor: pointer; font-weight: 650; padding: 7px 0; }
+.refresh-health-details summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 650; padding: 7px 0; }
 .refresh-health-details > p { color: var(--copy,#aaa0b4); font-size: 13px; line-height: 1.7; }
 .refresh-health-facts { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 15px 0; }
 .refresh-health-facts dt { color: var(--copy,#aaa0b4); font-size: 12px; }.refresh-health-facts dd { margin: 5px 0 0; font-size: 13px; overflow-wrap: anywhere; }

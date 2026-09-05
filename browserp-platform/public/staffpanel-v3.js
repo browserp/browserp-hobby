@@ -4,6 +4,21 @@
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const make = (tag, text, className = "") => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = String(text); return el; };
+  const pendingForms = new WeakSet();
+
+  function beginFormSubmission(form) {
+    if (pendingForms.has(form)) return null;
+    pendingForms.add(form);
+    const controls = $$("button,input,textarea,select", form).map((control) => [control, control.disabled]);
+    const previousBusy = form.getAttribute("aria-busy");
+    form.setAttribute("aria-busy", "true");
+    controls.forEach(([control]) => { control.disabled = true; });
+    return () => {
+      pendingForms.delete(form);
+      if (previousBusy === null) form.removeAttribute("aria-busy"); else form.setAttribute("aria-busy", previousBusy);
+      controls.forEach(([control, disabled]) => { control.disabled = disabled; });
+    };
+  }
 
   async function permissionOverrides() {
     const form = $("#permission-form-v3");
@@ -34,7 +49,8 @@
       const changes = $$('[data-permission]', form).filter((choice) => baseline.get(choice.dataset.permission) !== choice.value).map((choice) => [choice.dataset.permission, choice.value]);
       if (!changes.length) { feedback.textContent = "No permission changes to save."; return; }
       const reason = new FormData(form).get("reason"); const discordUserId = select.value;
-      const inputs = $$('button,input,textarea,select', form); inputs.forEach((item) => { item.disabled = true; });
+      const release = beginFormSubmission(form);
+      if (!release) return;
       feedback.textContent = "Saving permission changes…";
       try {
         for (const [permissionKey, value] of changes) {
@@ -47,7 +63,7 @@
         }
         feedback.textContent = "Permission changes saved.";
       } catch (error) { feedback.textContent = `${error.message} Any completed changes are saved; retry to finish the remaining changes.`; }
-      finally { inputs.forEach((item) => { item.disabled = false; }); }
+      finally { release(); }
     });
   }
 
@@ -373,9 +389,9 @@
     const idField=field("Discord user ID","discordUserId"); const roleField=field("Rank","roleKey","select"); (staff?.roles||[]).filter((role)=>role.key!=="owner").forEach((role)=>{const option=make("option",role.name);option.value=role.key;$("select",roleField).append(option);}); const actionField=field("Action","action","select"); [["assign","Assign new staff"],["change_role","Change rank"],["suspend","Suspend"],["reactivate","Reactivate"],["revoke","Revoke"]].forEach(([value,text])=>{const option=make("option",text);option.value=value;$("select",actionField).append(option);}); const versionField=field("Current version (filled when managing existing staff)","expectedVersion"); $("input",versionField).type="number";$("input",versionField).min="0";$("input",versionField).value="0"; const reasonField=field("Reason","reason","textarea"); [idField,roleField,actionField,versionField,reasonField].forEach((item)=>accessGrid.append(item)); const submit=make("button","Apply staff access change","button-v3 button-primary-v3");submit.type="submit";form.append(make("h3","Assign or change staff access"),accessGrid,submit);form.addEventListener("submit",saveStaffAccess);section?.append(form);
   }
 
-  async function saveStaffAccess(event){event.preventDefault();const data=Object.fromEntries(new FormData(event.currentTarget));try{await api("/api/admin/staff",{method:"POST",body:JSON.stringify({...data,expectedVersion:Number(data.expectedVersion)})});location.reload();}catch(error){status(error.message,true);}}
+  async function saveStaffAccess(event){event.preventDefault();const form=event.currentTarget;const data=Object.fromEntries(new FormData(form));const release=beginFormSubmission(form);if(!release)return;status("Applying staff access change…");try{await api("/api/admin/staff",{method:"POST",body:JSON.stringify({...data,expectedVersion:Number(data.expectedVersion)})});location.reload();}catch(error){release();status(error.message,true);}}
 
-  async function savePermission(event) { event.preventDefault(); const form=event.currentTarget; const discordUserId=$("#permission-user").value; const reasonText=new FormData(form).get("reason"); const entries=$$('[data-permission]').map((box)=>[box.dataset.permission,box.value]); try { for(const [permissionKey,value] of entries) await api("/api/admin/permissions",{method:"POST",body:JSON.stringify({discordUserId,permissionKey,allowed:value===""?null:value==="true",reason:reasonText})}); status("Permission overrides saved."); } catch(error){status(error.message,true);} }
+  async function savePermission(event) { event.preventDefault(); const form=event.currentTarget; const discordUserId=$("#permission-user",form).value; const reasonText=new FormData(form).get("reason"); const entries=$$('[data-permission]',form).map((box)=>[box.dataset.permission,box.value]); const release=beginFormSubmission(form); if(!release)return; status("Saving permission overrides…"); try { for(const [permissionKey,value] of entries) await api("/api/admin/permissions",{method:"POST",body:JSON.stringify({discordUserId,permissionKey,allowed:value===""?null:value==="true",reason:reasonText})}); status("Permission overrides saved."); } catch(error){status(error.message,true);} finally { release(); } }
 
   async function profileQueue() { const { profiles=[] }=await api("/api/admin/profiles"); tableRows($("#profile-review-rows"),profiles.map((profile)=>{const actions=make("div",undefined,"staff-row-actions-v3");if(profile.bioStatus==="pending_review")["approve","reject"].forEach((action)=>{const button=make("button",`${action} bio`,"button-v3 button-quiet-v3");button.type="button";button.addEventListener("click",()=>reviewProfile(profile.userId,"bio",action));actions.append(button);});if(!actions.childElementCount)actions.append(make("span","No action needed","staff-state-v3"));const avatar=make("div",undefined,"profile-evidence-v3");if(profile.avatarUrl){const image=new Image();image.src=profile.avatarUrl;image.alt=`Live profile picture for ${profile.displayName}`;image.referrerPolicy="no-referrer";avatar.append(image);}avatar.append(make("span",profile.avatarStatus));return row([profile.displayName,avatar,profile.bioStatus,profile.bio||"—",date(profile.joinedAt),actions]);})); }
   async function reviewProfile(userId,field,action){const input=await decision({title:`${action==="approve"?"Approve":"Reject"} ${field}`,description:"This decision controls what can appear on public BrowseRP pages and is recorded in the audit log.",fields:[{name:"reason",label:"Decision reason",type:"textarea",minlength:5,maxlength:500}],submitLabel:action==="approve"?"Approve":"Reject",danger:action==="reject"});if(!input)return;try{await api("/api/admin/profiles",{method:"POST",body:JSON.stringify({userId,field,action,reason:input.reason})});location.reload();}catch(error){status(error.message,true);}}
@@ -392,9 +408,9 @@
   }
   function editAdvert(ad){const form=$("#advert-create-v3");if(!form)return;form.dataset.id=ad.id;form.dataset.version=ad.version;for(const [name,value] of Object.entries({name:ad.name,placement:ad.placement,headline:ad.headline,ctaLabel:ad.ctaLabel,destinationUrl:ad.destinationUrl,imageUrl:ad.imageUrl,body:ad.body}))if(form.elements[name])form.elements[name].value=value||"";$("h3",form).textContent="Edit advert";form.scrollIntoView({behavior:"smooth",block:"start"});}
   function editBlog(post){const form=$("#blog-create-v3");if(!form)return;form.dataset.id=post.id;for(const [name,value] of Object.entries({title:post.title,slug:post.slug,excerpt:post.excerpt,body:post.body,seoTitle:post.seoTitle,seoDescription:post.seoDescription}))if(form.elements[name])form.elements[name].value=value||"";$("h3",form).textContent="Edit blog post";form.scrollIntoView({behavior:"smooth",block:"start"});}
-  async function saveAdvert(event){event.preventDefault();const form=event.currentTarget;const data=Object.fromEntries(new FormData(form));const action=event.submitter?.value||"save";try{await api("/api/admin/adverts",{method:"POST",body:JSON.stringify({...data,id:form.dataset.id||null,action,expectedVersion:Number(form.dataset.version||0)})});location.reload();}catch(error){status(error.message,true);}}
+  async function saveAdvert(event){event.preventDefault();const form=event.currentTarget;const data=Object.fromEntries(new FormData(form));const action=event.submitter?.value||"save";const release=beginFormSubmission(form);if(!release)return;status(action==="activate"?"Publishing advert…":"Saving advert draft…");try{await api("/api/admin/adverts",{method:"POST",body:JSON.stringify({...data,id:form.dataset.id||null,action,expectedVersion:Number(form.dataset.version||0)})});location.reload();}catch(error){release();status(error.message,true);}}
   async function advertAction(ad,action){const input=await decision({title:`${action==="pause"?"Pause":"Archive"} advert`,description:ad.headline,fields:[{name:"reason",label:"Publishing reason",type:"textarea",minlength:5,maxlength:500}],submitLabel:action==="pause"?"Pause advert":"Archive advert",danger:action==="archive"});if(!input)return;try{await api("/api/admin/adverts",{method:"POST",body:JSON.stringify({id:ad.id,action,expectedVersion:ad.version,reason:input.reason})});location.reload();}catch(error){status(error.message,true);}}
-  async function saveBlog(event){event.preventDefault();const form=event.currentTarget;const data=Object.fromEntries(new FormData(form));const action=event.submitter?.value||"save";try{await api("/api/admin/blogs",{method:"POST",body:JSON.stringify({...data,id:form.dataset.id||null,action})});location.reload();}catch(error){status(error.message,true);}}
+  async function saveBlog(event){event.preventDefault();const form=event.currentTarget;const data=Object.fromEntries(new FormData(form));const action=event.submitter?.value||"save";const release=beginFormSubmission(form);if(!release)return;status(action==="publish"?"Publishing article…":"Saving article draft…");try{await api("/api/admin/blogs",{method:"POST",body:JSON.stringify({...data,id:form.dataset.id||null,action})});location.reload();}catch(error){release();status(error.message,true);}}
   async function blogArchive(post){const input=await decision({title:"Archive blog post",description:post.title,fields:[{name:"reason",label:"Publishing reason",type:"textarea",minlength:5,maxlength:500}],submitLabel:"Archive post",danger:true});if(!input)return;try{await api("/api/admin/blogs",{method:"POST",body:JSON.stringify({id:post.id,action:"archive",reason:input.reason})});location.reload();}catch(error){status(error.message,true);}}
 
   async function moderation() {
