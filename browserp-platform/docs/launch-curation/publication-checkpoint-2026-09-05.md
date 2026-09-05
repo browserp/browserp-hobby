@@ -38,3 +38,13 @@ Twelve search/detail page checks passed in Chromium, Firefox and WebKit at 390px
 The published roster is **32 FiveM / 19 RedM / 3 Minecraft**, 54 total. The quality-first 40/20/3 target remains unfinished; no held community was restored to fill a slot.
 
 A bounded six-request filter check at22:38UTC confirmed Hydrate appears under Public and not Whitelisted, while SADRP appears in all-access search and neither confirmed-access filter. Hydrate retained the same4-player observation across search and Public; SADRP retained a fresh34-player observation. Returned feature, mode, region and game facets reflect the listings. Public filter usage numbers remain hidden in the UI.
+
+## Three British communities — 22:54 UTC verification
+
+**Roleplay UK** (`xaamj5`), **BritishRP** (`3eq4az`) and **Everyday Roleplay** (`xlzo95e`) were published through the visible staff scraper. [The selection report](fivem-next-launch-options-2026-09-05.md) preserves source identity, regional history, public onboarding/governance evidence and the limitations of each recommendation. Their descriptions were rewritten for players; promotional rankings and unsupported safety, age or no-store claims were omitted.
+
+Roleplay UK is Public based on its explicit operator FAQ. BritishRP is Whitelisted based on application plus approval. Everyday remains Not confirmed because the current website and source disagree about approval. Twelve bounded access-filter requests confirmed these memberships: none of the uncertain entries was silently classified as Public or Whitelisted.
+
+Eighteen public search/detail page checks passed across Chromium, Firefox and WebKit at390px. Stored PNG logos returned200 and rendered; there were no application errors, broken images or horizontal overflow. BritishRP's stored static logo was visually reviewed. Search preserved source observations of158/361 for Roleplay UK at22:49:15UTC,97/180 for BritishRP at22:52:12UTC and90/140 for Everyday at22:49:37UTC. These are historical observations, not permanent live values. The published catalogue now contains **35 FiveM / 19 RedM / 3 Minecraft**,57 total; the40/20/3 target remains open.
+
+The checks also exposed a search-order problem: an incidental description match could rank above the community whose name matched the query. A separate focused name-relevance fix is being verified; publication checks do not imply that successor is already live.

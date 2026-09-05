@@ -19,10 +19,20 @@ export function calculateDiscoveryScore(server) {
   );
 }
 
-export function sortServers(servers, sort = "recommended") {
+export function nameSearchRelevance(name, query = "") {
+  const normalize = value => String(value || "").toLowerCase().replace(/[-_]/g, " ").replace(/\s+/g, " ").trim();
+  const text = normalize(name), search = normalize(query);
+  if (!search) return 0;
+  if (text === search) return 3;
+  if (text.startsWith(search)) return 2;
+  return search.split(" ").every(word => text.includes(word)) ? 1 : 0;
+}
+
+export function sortServers(servers, sort = "recommended", query = "") {
   const copy = [...servers];
   const sorters = {
-    recommended: (a, b) => calculateDiscoveryScore(b) - calculateDiscoveryScore(a),
+    recommended: (a, b) => nameSearchRelevance(b.name, query) - nameSearchRelevance(a.name, query)
+      || calculateDiscoveryScore(b) - calculateDiscoveryScore(a),
     players: (a, b) => b.players - a.players,
     newest: (a, b) => new Date(b.created_at) - new Date(a.created_at),
     trending: (a, b) => b.engagement_score - a.engagement_score,

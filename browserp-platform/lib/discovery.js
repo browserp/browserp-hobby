@@ -7,7 +7,7 @@ const model = globalThis.BrowseRPDiscovery;
 
 export function localDiscovery(items, input) {
   const filters = model.normalize(input);
-  const matches = sortServers(items.filter(server => model.matches(server, filters)), filters.sort);
+  const matches = sortServers(items.filter(server => model.matches(server, filters)), filters.sort, filters.query);
   return { servers: matches.slice(filters.offset, filters.offset + filters.limit), total: matches.length, facets: model.facets(items, filters) };
 }
 
