@@ -18,4 +18,14 @@ Rollback of this firewall change means restoring `not http.request.method in {"G
 
 ## Still required
 
-Validate the fresh document CSP nonce through the actual Cloudflare-injected browser check after deployment. Inspect SSL/TLS mode, DNS origin exposure, DDoS details, cache rules and security events before claiming the edge audit complete. Do not weaken the content policy or blanket-challenge all visitors. A Cloudflare setting does not replace the website's session, permissions, request validation or database protections, and direct Vercel deployment routes require their own protection.
+Validate the fresh document CSP nonce through the actual Cloudflare-injected browser check after deployment. Follow up on shared-IP rate-limit usability before claiming the edge audit complete. Direct hosting routes and origin protection also require separate review. Do not weaken the content policy or blanket-challenge all visitors. A Cloudflare setting does not replace the website's session, permissions, request validation or database protections, and direct Vercel deployment routes require their own protection.
+
+## Additional signed-in checks — approximately 21:30 UTC
+
+- The DDoS detail page confirms active network-layer and SSL/TLS DDoS protection, with HTTP protection always enabled and no custom override. This is configuration evidence, not an attack/load test.
+- SSL/TLS mode is **Full (strict)**, with automatic mode enabled. The Universal certificate for browserp.com and its wildcard is active. Always Use HTTPS is on, minimum visitor TLS is 1.2, and TLS 1.3 is on. Automatic HTTPS Rewrites is on. No changes were needed.
+- All eight DNS records were inspected. Both website records (apex A and www CNAME) are proxied. The remaining six are IONOS mail authentication/routing records and correctly remain DNS-only. There is no unproxied website or origin hostname among these records. This does not hide or protect publicly reachable Vercel deployment aliases.
+- DMARC is currently monitoring-only (`p=none`). Tightening this requires verifying every legitimate sender and actual delivery first; no speculative mail policy change was made. Certificate Transparency Monitoring is off; it remains an optional owner alert improvement.
+
+- Cache Rules and Cache Response Rules both have zero active rules. Default caching is Standard; browser TTL respects existing origin headers. Always Online and Development Mode are off.
+- Security Events were inspected, rather than treating all mitigations as attacks. The sampled block at 18:45:01 UTC was a Firefox GET to `/api/public/adverts?placement=side`, matching the shared-IP API rate rule during browser verification. Other nearby rate events clustered in the same verification interval. Recent method-rule blocks matched the deliberate no-account negative probes. Bot Fight Mode also recorded managed challenges. These samples do not establish that all blocks were malicious or that no legitimate visitor was affected. The rate threshold remains unchanged pending a bounded normal-use/shared-IP check. No visitor IP addresses are copied into this report.

@@ -47,6 +47,7 @@ img { display: block; max-width: 100%; }
 .shell-v3 { width: min(calc(100% - 40px), var(--shell)); margin-inline: auto; }
 .skip-link { position: fixed; top: 10px; left: 10px; z-index: 999; padding: 10px 14px; background: #fff; color: #000; transform: translateY(-180%); }
 .skip-link:focus { transform: none; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 
 .reveal-v3 {
   opacity: 1;

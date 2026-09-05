@@ -206,6 +206,7 @@ body.staff-v3 {
   .staff-v3 #staff-menu-v3[hidden] { display: none; }
   .staff-v3 #staff-menu-v3 svg { width: 22px; height: 22px; flex: none; }
   .staff-v3 #staff-menu-v3:is(:hover, :active) { transform: none; background: var(--panel-2); border-color: var(--pink); }
+  .staff-v3 #staff-menu-v3:hover:not(:active) { box-shadow: none; }
   .staff-v3 #staff-menu-v3:active { border-color: var(--pink-strong); }
   .staff-v3 .staff-sidebar-v3 { inset: 72px 0 0; width: 100%; height: calc(100dvh - 72px); padding: 20px; overscroll-behavior: contain; transition: transform .2s var(--motion-ease), visibility .2s; visibility: hidden; }
   .staff-v3.staff-menu-open { overflow: hidden; }

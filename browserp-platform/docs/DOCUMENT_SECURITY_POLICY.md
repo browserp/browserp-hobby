@@ -1,6 +1,6 @@
 # Document security policy and Cloudflare checks
 
-The proposed middleware adds a fresh 256-bit script nonce to each GET/HEAD document response. It preserves the existing policy in `vercel.json`, including `frame-src 'none'`, and adds no `unsafe-inline`, `unsafe-eval`, wildcard or new external origin. The existing allowance for style attributes is unchanged. API endpoints, methods that change data, public assets and crawler files keep their existing behavior and caching.
+The middleware adds a fresh 256-bit script nonce to each GET/HEAD document response. It preserves the existing policy in `vercel.json`, including `frame-src 'none'`, and adds no `unsafe-inline`, `unsafe-eval`, wildcard or new external origin. The existing allowance for style attributes is unchanged. API endpoints, methods that change data, public assets and crawler files keep their existing behavior and caching.
 
 The nonce comes from WebCrypto. No request header, query parameter or cookie supplies it. HTML receives `private, no-store, max-age=0`, with no-store directives for the CDN and Cloudflare. A previously transformed page must not be cached and paired with a new nonce.
 
@@ -22,6 +22,12 @@ After the reviewed deployment crosses the Cloudflare-proxied hostname, observe t
 
 BrowseRP’s own account device identifier is random. Cloudflare’s separate essential security checks can use browser/request signals and security cookies, so the public Privacy/Legal copy no longer promises that no upstream security provider ever uses browser fingerprinting. It distinguishes those security checks from BrowseRP’s identifier and advertising, and links to Cloudflare’s [privacy policy](https://www.cloudflare.com/policies/privacy/) and [cookie documentation](https://developers.cloudflare.com/fundamentals/reference/policies-compliances/cloudflare-cookies/).
 
-### Hosted findings and correction
+### Hosted findings — 5 September 2026
 
-The first preview preserved all directives and produced distinct nonces, but an explicit conditional request still returned 304. The middleware now removes old document validators before forwarding to static hosting. A subsequent Node middleware build hit the actual Hobby limit because middleware counts as a Node function. The unchanged health handler now runs through the existing router at the same /api/health URL, leaving 11 API functions plus one Node middleware. The deployment checker counts both. This retains the supported runtime without buying a plan or dropping a feature. A replacement hosted check is required before promotion.
+Vercel previews preserve the full baseline policy and return one CSP header with a different nonce on each fresh document response. API policies and static asset bytes/cache behavior remain unchanged. Chromium, Firefox and WebKit each loaded the profile page and reloaded twice: all nine responses were HTTP 200 with private/no-store caching, nine distinct nonces, and no conditional request validators.
+
+An artificially constructed request carrying the static file's ETag can still receive a platform-generated 304, **without a CSP header**. The platform does not run the document middleware for that response; it does not attach a new nonce to the cached body. Request-header stripping and a middleware-generated ETag did not alter that platform behavior and have been removed. Normal browsers respected no-store in all three tested engines. This boundary is recorded rather than presented as a middleware guarantee to disable every possible 304. Cloudflare separately documents stripping ETags when it injects its checks.
+
+The supported Node middleware counts toward the actual Hobby function limit. The unchanged health handler now runs through the existing router at the same `/api/health` URL, leaving 11 API functions plus one Node middleware. The deployment checker counts both. No hosting plan upgrade or feature removal is required.
+
+The final release still requires its full preview checks and observation of the actual Cloudflare-injected scripts on the production hostname. Hosted reload evidence: `/tmp/browserp-normal-reload.json`; synthetic conditional-request evidence: `/tmp/browserp-etag-csp-preview.json` (local audit artifacts, not repository data).

@@ -134,3 +134,9 @@ Current successor work remains separate and unproven until its own release gate:
 ### Design clarification, 5 September 2026, 21:14 UTC
 
 Public site and staff panel should share visual standards and the same menu-button design, including spacing, typography, colour, focus/touch response and motion. They remain bespoke areas with different navigation and appropriately dense staff controls. Do not force identical layouts or remove useful operational features. Small tangible improvements are welcome; preserve character and verify the result. Keep visible in-app browser work available for the owner to follow.
+
+### 5 September, 21:40 UTC — coherent controls and next release
+
+The user clarified that shared design does not mean identical public and staff products. Public Menu/Close and staff Menu now share 100×46px targets, 22px icons, spacing, colours and mobile press feedback; the public menu and staff navigation remain bespoke. Both remain stationary. Removed an incorrectly positioned hidden search label that painted behind the home logo, retaining correct accessible labels and keyboard skip links. Focused checks: 55 passed; nine browser configurations across Chromium, Firefox and WebKit at desktop/390/320 widths passed against preview with local asset overlays. Final deployed-asset verification remains required.
+
+The roster is now 30 FiveM / 19 RedM / 3 Minecraft (52 total), with the new three communities checked on public search/detail pages in all three engines. The 40/20/3 quality target remains open. Live firewall review now covers strict TLS, proxy records, DDoS configuration, caching and sampled events; shared-IP rate limits and actual injected-script compatibility remain follow-up checks. Full database/media recovery has not been proven: PostgreSQL17 tools are prepared; the session pooler is reachable, but secure database credentials and an encrypted backup/restore exercise are still needed.

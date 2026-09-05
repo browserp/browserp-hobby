@@ -17,3 +17,11 @@ ECLIPSE search and Whitelisted filter each returned exactly one listing; the Pub
 A real Chromium mobile browser at 390px checked `/servers?q=eclipse`, `/server/eclipse-roleplay-qqqbm7v` and `/server/onyx-county-lgrex4`: HTTP 200, no horizontal overflow, no broken decoded images and no application page errors. ECLIPSE's metadata remains game, region, language, setup, access. Join and community actions point to `cfx.re/join/qqqbm7v` and `discord.gg/y2gxAjg` respectively. The full-page ECLIPSE screenshot was visually inspected. This check is browser emulation, not physical-phone proof or an in-game visit.
 
 See the source-specific [ECLIPSE follow-up](fivem-source-followup-2026-09-05.md), [RedM replacement research](redm-replacement-research-2026-09-05.md), and [current quality follow-up](quality-followup-2026-09-05.md) for sources and limitations. Current player values should always be read again through the site's normal refresh path.
+
+## Three further FiveM communities — 21:30 UTC readback
+
+Published through the visible staff scraper: **Brighter Times RP 3.0** (`98yx4my`), **The Academy Roleplay — Ambassador** (`y9vd5d9`) and **Headliner RP** (`m4zm5v7`). Exact instance identities, source evidence, access uncertainties and moderation/review limitations are recorded in [the selection review](fivem-practical-selection-2026-09-05.md). Brighter Times is Whitelisted; Academy and Headliner remain Not confirmed because the precise joining requirements were not established. No unsupported banner or official-website URL was invented.
+
+All three have stored, decoded PNG logos and recent source player observations. Eighteen public search/detail page checks passed across Chromium, Firefox and WebKit at 390px: no page errors, broken images or horizontal overflow. Search responses retain the correct access value. This is emulated browser coverage, not physical-device testing, in-game participation or a guarantee of community friendliness. Local evidence: `/tmp/browserp-three-community-check.json`; public mobile screenshots were saved and Brighter Times visually inspected.
+
+A fresh database readback confirmed **30 FiveM / 19 RedM / 3 Minecraft**, 52 published communities. The **40/20/3 target remains open**. Quality holds were not reversed to pad these counts.

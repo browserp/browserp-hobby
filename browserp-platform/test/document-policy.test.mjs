@@ -73,12 +73,3 @@ test("the middleware helper version is exact and agrees with the installed lockf
   assert.equal(lock.packages["node_modules/@vercel/functions"].version, "3.9.5");
   assert.equal(config.runtime, "nodejs");
 });
-
-test("document validators identify the fresh policy and do not reuse static HTML validators", () => {
-  const first = documentSecurityHeaders(), second = documentSecurityHeaders();
-  assert.equal(first.ETag, `"brp-document-${nonceFrom(first["Content-Security-Policy"])}"`);
-  assert.notEqual(first.ETag, second.ETag);
-  const response = middleware(new Request("https://browserp.test/profile", {headers: {"if-none-match": first.ETag}}));
-  assert.notEqual(response.headers.get("etag"), first.ETag);
-  assert.equal(response.headers.get("x-middleware-override-headers"), null);
-});

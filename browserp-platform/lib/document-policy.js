@@ -7,9 +7,8 @@ export function documentSecurityHeaders(randomBytes = crypto.getRandomValues(new
   const nonce = btoa(String.fromCharCode(...randomBytes));
   return {
     "Content-Security-Policy": BASE_DOCUMENT_POLICY.replace("script-src 'self';", `script-src 'self' 'nonce-${nonce}';`),
-    "ETag": `"brp-document-${nonce}"`,
-    // A cached Cloudflare-transformed body contains the old nonce. Do not pair
-    // it with a new policy through a 304 response or another shared cache.
+    // Cloudflare may add scripts carrying this response nonce. Keep the
+    // transformed document out of browser and shared caches.
     "Cache-Control": "private, no-store, max-age=0",
     "CDN-Cache-Control": "no-store",
     "Cloudflare-CDN-Cache-Control": "no-store"
