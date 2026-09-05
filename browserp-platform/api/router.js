@@ -592,10 +592,12 @@ const routes = {
       if (!Number.isSafeInteger(body.expectedVersion) || body.expectedVersion < 1 || body.expectedVersion > 2147483647 || !Number.isSafeInteger(body.expectedQueueVersion) || body.expectedQueueVersion < 0 || body.expectedQueueVersion > 2147483647) {
         throw Object.assign(new Error("Reopen this listing to review its latest details before making a decision."), { status: 409 });
       }
-      return ok(res, { result: await rpc("staff_review_server_submission", {
+      return ok(res, { result: await rpc("staff_review_server_application", {
         p_submission_id: uuid(itemId, "Choose a valid listing review."),
         p_expected_version: body.expectedVersion,
         p_expected_queue_version: body.expectedQueueVersion,
+        p_control_reviewed: body.controlReviewed === true,
+        p_control_note: sanitizePlainText(body.controlNote, 500) || null,
         p_action: action,
         p_reason: reason,
         p_request_id: id

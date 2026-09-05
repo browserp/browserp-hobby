@@ -111,3 +111,17 @@ test("Missing, executable, credential-bearing and malformed website URLs never b
     } finally { h.dom.window.close(); }
   }
 });
+
+test("reviewed Roblox detail separates community joining from experience and never animates a fake live count", async () => {
+  const h = await harness([{ ...fixture(), platform_id:"roblox",platform_name:"Roblox",framework:"Emergency Response Liberty County",imported:false,applicationOnly:true,players:null,online:false,cfx_join_url:null,community_url:"https://discord.gg/community",roblox:{kind:"independent_community",experienceUrl:"https://www.roblox.com/games/12345",joiningInstructions:"Join our official community Discord and read the rules before an organised roleplay session."} }]);
+  try {
+    assert.equal(h.$("#server-status-v3").textContent,"Live player count not provided");
+    assert.equal(h.$("#server-checked-v3").hidden,true);
+    assert.equal(h.timers.some(timer=>timer.delay===60000),false);
+    assert.match(h.$("#server-roblox-joining").textContent,/independent roleplay community/);
+    assert.equal(h.$("#server-roblox-joining a").href,"https://www.roblox.com/games/12345");
+    assert.equal(h.$("#server-join-v3").href,"https://discord.gg/community");
+    assert.equal(h.$("#server-connect-v3").hidden,true);
+    assert.equal(h.$("#server-info-v5 .server-info-card-v5:nth-child(4) dt").textContent,"Roblox experience");
+  } finally { h.dom.window.close(); }
+});

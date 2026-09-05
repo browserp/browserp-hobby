@@ -7,3 +7,10 @@
 .submission-correction-v3 dd { margin: 5px 0 0; color: var(--copy); white-space: pre-wrap; }
 .submission-correction-v3 li { margin-top: 12px; white-space: pre-wrap; }
 .submission-correction-v3 .hero-actions-v3 { margin-top: 20px; }
+.roblox-application-v3 { color: var(--text); }
+.roblox-application-v3 .field-v3 small { font-weight: 400; }
+.listing-form-v3 .roblox-application-v3 .field-v3 .field-help-v3 { margin: 0; }
+.roblox-private-evidence-v3 { margin-top: 6px; padding-top: 20px; border-top: 1px solid var(--line); }
+.roblox-private-evidence-v3 h3 { margin: 0 0 10px; font-size: 18px; }
+.roblox-private-evidence-v3 + .field-v3 { margin-top: -10px; }
+.listing-form-v3 [data-roblox-fields] textarea { min-height: 140px; }

@@ -106,7 +106,7 @@
 
     const top = element("div", "server-card-top");
     top.append(media);
-    const status = element("span", `status${server.online ? " online" : ""}`, server.online ? "Online now" : "Status unavailable");
+    const status = element("span", `status${server.online ? " online" : ""}`, server.applicationOnly ? "Community listing" : server.online ? "Online now" : "Status unavailable");
     top.append(status);
     card.append(top);
 
@@ -121,7 +121,7 @@
     const bottom = element("div", "server-card-bottom");
     const playerText = server.online
       ? `${Number(server.players || 0).toLocaleString()}${server.capacity ? ` / ${Number(server.capacity).toLocaleString()}` : ""} players${server.count_scope === "network" ? " across the network" : ""}`
-      : "Player count unavailable";
+      : server.applicationOnly ? "Live player count not provided" : "Player count unavailable";
     bottom.append(element("strong", "", playerText), element("span", "server-card-action", "View listing"));
     card.append(bottom);
     return card;
@@ -273,17 +273,64 @@
     const form = select("#listing-form");
     const accountNotice = select("#listing-account-notice");
     const providerNote = select("#provider-note");
-    const correctionId = new URLSearchParams(location.search).get("submission");
-    if (correctionId !== null) {
-      const returnTo = `/list-server?submission=${correctionId}`;
-      document.querySelectorAll("[data-auth-provider]").forEach(link => { link.href = `/api/auth/${link.dataset.authProvider}?returnTo=${encodeURIComponent(returnTo)}`; });
+    const query = new URLSearchParams(location.search);
+    const correctionId = query.get("submission");
+    const requestedPlatform = DISCOVER_GAME_IDS.includes(query.get("platform")) ? query.get("platform") : "";
+    const returnTo = correctionId !== null ? `/list-server?submission=${encodeURIComponent(correctionId)}` : requestedPlatform ? `/list-server?platform=${requestedPlatform}` : "/list-server";
+    document.querySelectorAll("[data-auth-provider]").forEach(link => { link.href = `/api/auth/${link.dataset.authProvider}?returnTo=${encodeURIComponent(returnTo)}`; });
+    const fields = select(".form-grid-v3", form);
+    const submit = select("#submit-listing", form);
+    const abort = new AbortController();
+    let accountId = null, ended = false, busy = false, attempt = null, uncertain = false, dirty = false, checkingSession = false;
+    function endCreateSession({ showSignIn = true } = {}) {
+      if (ended) return;
+      ended = true; abort.abort(); attempt = null; accountId = null; dirty = false;
+      state.session = { authenticated: false, user: null };
+      form.reset(); form.hidden = true; form.inert = true; fields.inert = true;
+      for (const field of form.querySelectorAll("input,textarea,select")) { field.value = ""; if (field.type === "checkbox") field.checked = false; }
+      accountNotice.textContent = ""; setFormStatus("");
+      const toastNode = select("#site-toast"); if (toastNode) { toastNode.textContent = ""; toastNode.classList.remove("show"); }
+      gate.hidden = !showSignIn; gate.inert = !showSignIn;
+      if (!showSignIn) return;
+      gate.querySelector("h2").textContent = "Sign in again before sending a listing.";
+      gate.querySelector("p").textContent = "Your account changed or its session ended. Reopen this form after signing in. If you already sent a listing, check My account before starting another.";
+      api("/api/auth/providers").then(payload => {
+        let available = false;
+        gate.querySelectorAll("[data-auth-provider]").forEach(link => { const enabled = Boolean(payload.providers?.[link.dataset.authProvider]); link.hidden = !enabled; link.inert = !enabled; available ||= enabled; });
+        providerNote.hidden = available; providerNote.textContent = "Sign-in is temporarily unavailable. Please try again later.";
+      }).catch(() => { providerNote.hidden = false; providerNote.textContent = "Sign-in is temporarily unavailable. Please try again later."; });
     }
-    let submissionAttemptKey = crypto.randomUUID();
+    if (correctionId === null) {
+      window.addEventListener("browserp:session-ended", endCreateSession);
+      window.addEventListener("pagehide", () => endCreateSession({ showSignIn: false }));
+      window.addEventListener("pageshow", event => { if (event.persisted) { endCreateSession({ showSignIn: false }); location.reload(); } });
+      window.addEventListener("beforeunload", event => { if (dirty && !ended) { event.preventDefault(); event.returnValue = ""; } });
+    }
     setupTagPicker(form);
     const platformSelect = select('[name="platform"]', form);
     await loadPlatforms(platformSelect, false);
+    if (ended) return;
+    if (requestedPlatform) platformSelect.value = requestedPlatform;
     const cfxField = select('[data-cfx-field]', form);
     const frameworkInput = select('[name="framework"]', form);
+    const robloxFields = select('[data-roblox-fields]', form);
+    const readRoblox = () => platformSelect.value === "roblox" ? Object.fromEntries([...robloxFields.querySelectorAll('[data-roblox-key]')].map(field => [field.dataset.robloxKey, field.value.trim()])) : null;
+    function updateRobloxKind() {
+      select("#roblox-kind-help", form).textContent = form.elements.robloxKind.value === "creator_experience"
+        ? "You or your creator team control the Roblox experience being listed."
+        : "Your RP community uses an experience made by someone else, such as ER:LC or Brookhaven.";
+    }
+    form.elements.robloxKind.addEventListener("change", updateRobloxKind);
+    function validateRobloxLinks() {
+      for (const key of ["experienceUrl", "communityGroupUrl"]) {
+        const field = robloxFields.querySelector(`[data-roblox-key="${key}"]`);
+        const path = key === "experienceUrl" ? "games" : "(?:communities|groups)";
+        const pattern = new RegExp(`^https://(?:www\\.)?roblox\\.com/${path}/[1-9][0-9]{0,19}(?:/[A-Za-z0-9_-]+)?/?$`);
+        const valid = !field.value.trim() || pattern.test(field.value.trim());
+        field.setCustomValidity(platformSelect.value !== "roblox" || valid ? "" : key === "experienceUrl" ? "Use a public https://www.roblox.com/games/123456 page, without a query, share link or private-server code." : "Use a public Roblox /communities/123456 or /groups/123456 page, without a query or private access link.");
+      }
+    }
+    robloxFields.addEventListener("input", validateRobloxLinks);
     const FRAMEWORK_SUGGESTIONS = Object.freeze({
       fivem: ["QBCore", "ESX", "vMenu", "Custom setup", "Default game setup"],
       redm: ["VORP", "RedEM:RP", "RSG Core", "Custom setup"],
@@ -319,19 +366,36 @@
       if (setupLabel) setupLabel.textContent = setupField().label;
       const cfxPlatform = ["fivem", "redm"].includes(platformSelect?.value);
       if (cfxField) { cfxField.hidden = !cfxPlatform; cfxField.inert = !cfxPlatform; }
-      if (frameworkInput) frameworkInput.placeholder = setupField().example;
+      const cfxInput = select('[name="cfxJoinUrl"]', form);
+      cfxInput.disabled = !cfxPlatform;
+      if (!cfxPlatform) cfxInput.value = "";
+      const isRoblox = platformSelect.value === "roblox";
+      robloxFields.hidden = !isRoblox; robloxFields.inert = !isRoblox; robloxFields.disabled = !isRoblox;
+      updateRobloxKind();
+      const communityInput = select('[name="communityUrl"]', form);
+      communityInput.required = isRoblox;
+      if (frameworkInput) { frameworkInput.placeholder = setupField().example; frameworkInput.required = isRoblox; frameworkInput.minLength = isRoblox ? 2 : 0; }
+      if (correctionId === null) {
+        form.querySelector(".form-heading-v3 .eyebrow-v3").textContent = isRoblox ? "Roblox application" : "New listing";
+        submit.textContent = isRoblox ? "Send application for review" : "Submit for review";
+      }
+      validateRobloxLinks();
       if (document.activeElement === frameworkInput) frameworkInput.dispatchEvent(new Event("input"));
     }
     platformSelect?.addEventListener("change", () => { if (frameworkInput) frameworkInput.value = ""; updatePlatformFields(); });
     updatePlatformFields();
 
     try {
-      state.session = await api("/api/auth/session");
+      const current = await api("/api/auth/session");
+      if (ended) return;
+      state.session = current;
     } catch {
       state.session = { authenticated: false, user: null };
     }
 
-    if (state.session.authenticated) {
+    if (ended) return;
+    if (state.session.authenticated && state.session.user?.id) {
+      accountId = state.session.user.id;
       gate.hidden = true;
       gate.inert = true;
       form.hidden = correctionId !== null;
@@ -362,54 +426,88 @@
     }
 
     if (correctionId !== null) {
-      if (state.session.authenticated) {
+      if (accountId) {
         if (!window.BrowseRPSubmissionCorrection) { form.before(element("p", "form-status error", "The correction form could not be loaded. Refresh this page to try again.")); return; }
-        await window.BrowseRPSubmissionCorrection.mount({ id: correctionId, accountId: state.session.user.id, form, api, updatePlatformFields, setFormStatus, toast });
+        await window.BrowseRPSubmissionCorrection.mount({ id: correctionId, accountId: state.session.user.id, form, api, updatePlatformFields, readRoblox, setFormStatus, toast });
       }
       return;
     }
 
+    function syncCreate() {
+      fields.inert = busy || uncertain || ended;
+      submit.disabled = busy || ended || !accountId;
+      submit.textContent = busy ? "Sending…" : uncertain ? "Try sending again" : platformSelect.value === "roblox" ? "Send application for review" : "Submit for review";
+    }
+    async function confirmAccount() {
+      const current = await api("/api/auth/session", { signal: abort.signal });
+      if (ended) return false;
+      if (!current.authenticated || current.user?.id !== accountId) { endCreateSession(); return false; }
+      state.session = current;
+      return true;
+    }
+    async function checkReturningSession() {
+      if (ended || !accountId || busy || checkingSession || document.visibilityState === "hidden") return;
+      checkingSession = true;
+      try { await confirmAccount(); }
+      catch (error) { if (!ended && [401,403].includes(error.status)) endCreateSession(); }
+      finally { checkingSession = false; }
+    }
+    window.addEventListener("focus", checkReturningSession);
+    document.addEventListener("visibilitychange", checkReturningSession);
+    form.addEventListener("input", () => { if (!busy && !uncertain && !ended) dirty = true; });
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (!state.session.authenticated || !form.reportValidity()) return;
-      const submit = select("#submit-listing");
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData);
-      const tags = formData.getAll("tags").slice(0, 8);
-      submit.disabled = true;
-      submit.textContent = "Submitting…";
-      setFormStatus("Sending your listing for review…");
+      if (ended || busy || !accountId) return;
+      if (!attempt) {
+        validateRobloxLinks();
+        if (!form.reportValidity()) return;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+        attempt = { key: crypto.randomUUID(), body: JSON.stringify({
+          expectedAccountId: accountId,
+          platform: data.platform,
+          name: data.name,
+          region: data.region,
+          language: data.language,
+          framework: data.framework,
+          description: data.description,
+          communityUrl: data.communityUrl,
+          cfxJoinUrl: ["fivem", "redm"].includes(data.platform) ? data.cfxJoinUrl : "",
+          accessType: data.accessType,
+          roblox: readRoblox(),
+          tags: formData.getAll("tags").slice(0, 8),
+          agreement: data.agreement === "on"
+        }) };
+      }
+      busy = true; syncCreate();
+      setFormStatus("Checking your account and sending your listing for review…");
+      let sent = false;
       try {
+        if (!await confirmAccount()) return;
+        sent = true;
         const payload = await api("/api/submissions", {
-          method: "POST",
-          headers: { "Idempotency-Key": submissionAttemptKey },
-          body: JSON.stringify({
-            platform: data.platform,
-            name: data.name,
-            region: data.region,
-            language: data.language,
-            framework: data.framework,
-            description: data.description,
-            communityUrl: data.communityUrl,
-            cfxJoinUrl: data.cfxJoinUrl,
-            accessType: data.accessType,
-            tags,
-            agreement: data.agreement === "on"
-          })
+          method: "POST", headers: { "Idempotency-Key": attempt.key }, body: attempt.body, signal: abort.signal
         });
+        if (ended) return;
+        if (!payload.submission?.id) throw new Error("The result could not be confirmed. Retry the same application safely.");
+        const completedPlatform = platformSelect.value;
         form.reset();
+        platformSelect.value = completedPlatform;
         updatePlatformFields();
-        submissionAttemptKey = crypto.randomUUID();
-        setFormStatus(`Listing received. Reference: ${payload.submission.id}`, "success");
+        attempt = null; uncertain = false; dirty = false;
+        setFormStatus(`Listing received. Reference: ${payload.submission.id}. You can follow its review in My account.`, "success");
         toast("Your listing was submitted for review.");
       } catch (error) {
-        setFormStatus(error.message, "error");
-        toast(error.message, "error");
-      } finally {
-        submit.disabled = false;
-        submit.textContent = "Submit for review";
-      }
+        if (ended) return;
+        if ([401,403].includes(error.status)) { endCreateSession(); return; }
+        uncertain = sent && (!error.status || error.status >= 500);
+        if (!uncertain) attempt = null;
+        const message = uncertain ? "We couldn't confirm whether your listing arrived. Retry the same application safely, or check My account before starting another. Your details are kept unchanged for this retry." : error.message;
+        setFormStatus(message, "error");
+        toast(message, "error");
+      } finally { busy = false; if (!ended) syncCreate(); }
     });
+    syncCreate();
   }
 
   if (page === "home") home();

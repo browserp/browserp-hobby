@@ -140,7 +140,9 @@ test("listing tags are canonical, unique and limited in the browser", () => {
   const directory = readFileSync(join(root, "public", "browserp-directory.js"), "utf8");
   assert.match(directory, /const LISTING_TAGS = Object\.freeze/);
   assert.match(directory, /selected >= 8/);
-  const values = [...directory.matchAll(/\["([a-z0-9-]+)", "[^"]+"\]/g)].map((match) => match[1]);
+  const tagDefinitions = directory.match(/const LISTING_TAGS = Object\.freeze\(\[([\s\S]*?)\]\);/)?.[1];
+  assert.ok(tagDefinitions);
+  const values = [...tagDefinitions.matchAll(/\["([a-z0-9-]+)", "[^"]+"\]/g)].map((match) => match[1]);
   assert.equal(values.length, new Set(values).size);
   assert.ok(values.includes("economy"));
   assert.ok(values.includes("whitelisted"));

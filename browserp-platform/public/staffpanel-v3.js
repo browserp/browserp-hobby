@@ -6,6 +6,9 @@
   const make = (tag, text, className = "") => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = String(text); return el; };
   const pendingForms = new WeakSet();
   let staffNavigation = null;
+  let reviewGeneration = 0;
+  window.addEventListener("browserp:session-ended", () => { reviewGeneration++; });
+  window.addEventListener("pagehide", () => { reviewGeneration++; });
 
   function beginFormSubmission(form) {
     if (pendingForms.has(form)) return null;
@@ -172,7 +175,9 @@
       const submit = make("button", submitLabel, danger ? "button-v3 staff-danger-v3" : "button-v3 button-primary-v3"); submit.type = "submit";
       actions.append(cancel, submit); form.append(actions); dialog.append(form); document.body.append(dialog);
       let settled = false; let expiry;
-      const finish = (value) => { if (settled) return; settled = true; if (expiry) clearTimeout(expiry); dialog.close(); dialog.remove(); resolve(value); };
+      const finish = (value) => { if (settled) return; settled = true; if (expiry) clearTimeout(expiry); window.removeEventListener("browserp:session-ended", abandon); window.removeEventListener("pagehide", abandon); dialog.close(); dialog.remove(); resolve(value); };
+      const abandon = () => finish(null);
+      window.addEventListener("browserp:session-ended", abandon); window.addEventListener("pagehide", abandon);
       cancel.addEventListener("click", () => finish(null));
       dialog.addEventListener("cancel", (event) => { event.preventDefault(); finish(null); });
       form.addEventListener("submit", (event) => { event.preventDefault(); finish(Object.fromEntries(new FormData(form))); });
@@ -471,11 +476,13 @@
   }
 
   async function openReview(record) {
+    const generation = reviewGeneration;
     const baseKind = record.kind.toLowerCase();
     const normalKind = baseKind === "queue" ? "moderation" : baseKind;
     const kind = normalKind === "moderation" && (record.target_type || record.targetType) === "server_comment" ? "comment" : normalKind;
     try {
       const { item } = await api(`/api/admin/item?kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(record.id)}`);
+      if (generation !== reviewGeneration) return;
       if (kind === "listing" && (!Number.isSafeInteger(item?.reviewVersion) || !Number.isSafeInteger(item?.queueVersion))) throw new Error("Reload the latest submission review before recording a decision.");
       const actionMap = {
         listing: [["approved","Approve and publish"],["changes_requested","Request changes"],["rejected","Reject"]],
@@ -484,14 +491,24 @@
         comment: [["approve","Publish comment"],["reject","Reject comment"],["hide","Hide comment"]],
         security: [["resolved","Resolve alert"]]
       };
-      let evidence = Object.entries(item || {}).filter(([key])=>!["moderationReasons","reasons","reviewVersion","queueVersion","history"].includes(key)).map(([key,value])=>`${key}: ${typeof value === "object" ? JSON.stringify(value) : value}`).join("\n");
+      let evidence = Object.entries(item || {}).filter(([key])=>!["moderationReasons","reasons","reviewVersion","queueVersion","history","roblox"].includes(key)).map(([key,value])=>`${key}: ${typeof value === "object" ? JSON.stringify(value) : value}`).join("\n");
+      if (kind === "listing" && item.platform === "roblox") {
+        const application = item.roblox || {};
+        evidence += `\n\nRoblox community application\nListing: ${application.kind === "creator_experience" ? "Creator-run experience" : "Independent community using an experience"}\nExperience: ${application.experienceUrl || "Missing"}\nRoblox community: ${application.communityGroupUrl || "Not supplied"}\nHow players join: ${application.joiningInstructions || "Missing"}\n\nPrivate applicant information\nTheir role: ${application.applicantRole || "Missing"}\nEvidence of control: ${application.authorityEvidence || "Missing"}\n\nCheck the applicant controls this specific community. A Discord invite or Roblox profile alone is not proof. This application does not establish player activity or official Roblox endorsement.`;
+      }
       if (kind === "listing" && Array.isArray(item.history) && item.history.length) evidence += "\n\nPrevious submission details:\n" + item.history.map(previous => `${date(previous.recordedAt)} — ${previous.name}\n${previous.description || ""}\n${previous.communityUrl || ""}\nStaff feedback: ${previous.reviewNote || "No feedback at this stage"}`).join("\n\n");
       const input = await decision({ title: `Review ${kind}`, description: evidence, fields: [
         { name: "action", label: "Decision", type: "select", options: (actionMap[kind]||[]).map(([value,label])=>({value,label})) },
         { name: "reason", label: "Decision reason", type: "textarea", minlength: 5, maxlength: 500 }
       ], submitLabel: "Record decision" });
       if (!input) return;
-      await api("/api/admin/action", { method: "POST", body: JSON.stringify({ kind, id: record.id, action: input.action, reason: input.reason, ...(kind === "listing" ? { expectedVersion: item.reviewVersion, expectedQueueVersion: item.queueVersion } : {}) }) });
+      let controlReview = {};
+      if (kind === "listing" && item.platform === "roblox" && input.action === "approved") {
+        const checked = await decision({ title: "Confirm community control", description: "Describe the independent evidence you checked that connects this applicant to this specific community. Keep passwords, tokens and private player information out of this note. Experience ownership and Discord community ownership are different; an independent RP community need not own the experience it uses.", fields: [{ name: "controlNote", label: "How did you confirm their control?", type: "textarea", minlength: 20, maxlength: 500 }], submitLabel: "Confirm and publish" });
+        if (!checked) return;
+        controlReview = { controlReviewed: true, controlNote: checked.controlNote };
+      }
+      await api("/api/admin/action", { method: "POST", body: JSON.stringify({ kind, id: record.id, action: input.action, reason: input.reason, ...controlReview, ...(kind === "listing" ? { expectedVersion: item.reviewVersion, expectedQueueVersion: item.queueVersion } : {}) }) });
       location.reload();
     } catch (error) {
       status(error.message, true);

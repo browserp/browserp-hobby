@@ -23,9 +23,9 @@
       steps: ["Choose 3–5 public or owner-submitted communities and confirm Java or Bedrock, address, version and RP style.", "Check player counts and server status only at reviewed addresses. Confirm whether each total belongs to a network or a specific world.", "Use a server-control challenge for claims. Request an owner integration later if a roleplay world needs its own accurate count."]
     },
     roblox: {
-      summary: "The proposed Roblox section starts with community applications. Each application identifies its Roblox experience, community owners, joining requirements and evidence of control; experience-wide player totals stay separate.",
+      summary: "Roblox communities apply for a reviewed listing. Check the experience, community identity, joining instructions and the applicant’s authority. An experience’s total players never becomes an independent community’s count.",
       sources: [["Roblox discovery", "https://www.roblox.com/charts", "Find experiences, then verify their official creator and community pages."], ["Emergency Response: Liberty County", "https://erlc.gg/", "A potential first pilot for independent RP communities."], ["ER:LC owner integration", "https://apidocs.erlc.gg/", "Official API for consenting private-server owners; feasibility must be agreed first."], ["Roblox server-list changes", "https://devforum.roblox.com/t/test-updates-to-server-list-page/3966648", "Why a complete public-instance scraper is not a dependable source."]],
-      steps: ["Design an applications-led section for independent RP communities, with experience links and owner-control evidence.", "Review submitted communities and any available source data. Never copy the experience’s total into a community’s count.", "Assess an owner-approved ER:LC integration for exact community counts and control proof. Other Roblox games need their own documented integration or manual submission."]
+      steps: ["Open Roblox applications in Moderation. Check whether the applicant represents an independent community or the experience’s creator team.", "Review the public experience and community links, joining instructions and private evidence of authority. Request changes when something is unclear; record your evidence decision before approval.", "Keep Public and Whitelisted about how players join. Every BrowseRP application is reviewed, even when the community itself is public. Exact community counts need a separately approved owner integration."]
     }
   };
   const make = (tag, text, className = "") => {
@@ -56,7 +56,7 @@
       link.append(make("strong", `${title} ↗`), make("span", description)); sources.append(link);
     }
     const plan = make("details", undefined, "staff-scraper-plan");
-    plan.append(make("summary", ["fivem", "redm", "minecraft"].includes(game.id) ? "Review and refresh plan" : "Application workflow — in development"));
+    plan.append(make("summary", ["fivem", "redm", "minecraft"].includes(game.id) ? "Review and refresh plan" : "How to review Roblox applications"));
     const steps = make("ol"); for (const step of info.steps) steps.append(make("li", step)); plan.append(steps);
     section.append(sources, plan, make("p", "Researched 4 September 2026. These links are discovery references; future imports depend on supported access and source permissions.", "staff-scraper-note"));
     return section;
@@ -116,7 +116,7 @@
       const revision = ++generation; scraper?.destroy(); scraper = null;
       const selected = games.find((game) => location.hash === `#${game.id}`);
       const title = document.querySelector("#scrapers-title");
-      title.textContent = selected ? `${selected.name} scraper` : "Scrapers";
+      title.textContent = selected?.id === "roblox" ? "Roblox applications" : selected ? `${selected.name} scraper` : "Scrapers";
       document.title = `${title.textContent} — BrowseRP Staff`;
       for (const link of links.children) {
         if (selected?.id === link.dataset.platform) link.setAttribute("aria-current", "page");
@@ -130,7 +130,11 @@
         const panel = make("section", undefined, "staff-scraper-preview");
         panel.dataset.platform = selected.id;
         const copy = make("div", undefined, "staff-scraper-copy");
-        copy.append(make("span", selected.name, "staff-scraper-platform"), make("h2", "Roblox applications"), make("p", "The application workflow is in development. Review the planned approach and sources below. Application tools are not active yet."));
+        copy.append(make("span", selected.name, "staff-scraper-platform"), make("h2", "Review community applications"), make("p", "Owners submit their experience, joining instructions and private evidence of authority. Review applications in the existing Moderation queue, request corrections or approve a listing when the evidence supports it."));
+        const actions = make("div", undefined, "hero-actions-v3");
+        const queue = make("a", "Review Roblox applications", "button-v3 button-primary-v3"); queue.href = "/staffpanel/moderation#queue?platform=roblox";
+        const application = make("a", "View application form", "button-v3 button-secondary-v3"); application.href = "/list-server?platform=roblox";
+        actions.append(queue, application); copy.append(actions);
         panel.append(artwork(selected, "staff-scraper-artwork"), copy);
         root.append(panel);
       }
@@ -143,7 +147,7 @@
         link.dataset.platform = game.id;
         if (selected?.id === game.id) link.setAttribute("aria-current", "page");
         const copy = make("span");
-        copy.append(make("strong", game.name), make("small", ["fivem", "redm", "minecraft"].includes(game.id) ? "Import servers" : "Coming soon"));
+        copy.append(make("strong", game.name), make("small", ["fivem", "redm", "minecraft"].includes(game.id) ? "Import servers" : "Review applications"));
         link.append(artwork(game, "staff-scrapers-thumb"), copy);
         link.addEventListener("click", (event) => {
           if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;

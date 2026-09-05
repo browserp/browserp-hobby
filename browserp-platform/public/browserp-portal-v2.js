@@ -877,12 +877,19 @@
     return list;
   }
 
+  let legacyReviewGeneration = 0;
   function closeReview() {
+    legacyReviewGeneration++;
     const dialog = document.querySelector("#review-dialog");
     if (dialog?.open) dialog.close();
+    document.querySelector("#review-evidence")?.replaceChildren();
+    document.querySelector("[data-roblox-control-review]")?.remove();
   }
+  window.addEventListener("browserp:session-ended", closeReview);
+  window.addEventListener("pagehide", closeReview);
 
   async function openReview(kind, id, title, actions) {
+    const generation = ++legacyReviewGeneration;
     const dialog = document.querySelector("#review-dialog");
     const form = document.querySelector("#review-form");
     const evidence = document.querySelector("#review-evidence");
@@ -900,7 +907,8 @@
     reason.required = actions.length > 0;
     form.dataset.kind = kind;
     form.dataset.id = String(id || "");
-    delete form.dataset.reviewVersion; delete form.dataset.queueVersion;
+    delete form.dataset.reviewVersion; delete form.dataset.queueVersion; delete form.dataset.roblox;
+    form.querySelector("[data-roblox-control-review]")?.remove();
     actions.forEach(([action, label, tone]) => {
       const actionButton = make("button", `small-button${tone ? ` small-button-${tone}` : ""}`, label);
       actionButton.type = "submit";
@@ -913,9 +921,17 @@
     dialog.showModal();
     try {
       const payload = await api(`/api/admin/item?kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(String(id || ""))}`);
+      if (generation !== legacyReviewGeneration) return;
       if (kind === "listing" && (!Number.isSafeInteger(payload.item?.reviewVersion) || !Number.isSafeInteger(payload.item?.queueVersion))) throw new Error("Reopen this submission to load its latest review.");
       form.dataset.reviewVersion = String(payload.item?.reviewVersion ?? ""); form.dataset.queueVersion = String(payload.item?.queueVersion ?? "");
       evidence.replaceChildren(renderEvidence(payload.item));
+      if (kind === "listing" && payload.item?.platform === "roblox") {
+        form.dataset.roblox = "true";
+        const controls = make("fieldset", "portal-panel-v2"); controls.dataset.robloxControlReview = "";
+        controls.append(make("legend", "", "Community control — required for approval"), make("p", "portal-help", "Confirm independent evidence that this applicant controls this specific community. An invite or profile link alone is not enough. Keep credentials and private player information out of the note."));
+        const label = make("label", "field"), check = make("input"); check.type = "checkbox"; check.name = "robloxControlReviewed"; label.append(check, make("span", "", "I confirmed the applicant controls this community"));
+        const noteLabel = make("label", "field"); const note = make("textarea"); note.name = "robloxControlNote"; note.minLength = 20; note.maxLength = 500; noteLabel.append(make("span", "", "How did you confirm their control?"), note); controls.append(label, noteLabel); actionBox.before(controls);
+      }
       actionBox.querySelectorAll("[data-review-action]").forEach(element => { element.disabled = false; });
     } catch (error) {
       evidence.replaceChildren(make("p", "portal-status error", error.message));
@@ -936,6 +952,12 @@
       if (!action) return;
       const reason = document.querySelector("#review-reason");
       if (!reason.reportValidity()) return;
+      const robloxApproval = form.dataset.roblox === "true" && action === "approved";
+      const controlNote = form.elements.robloxControlNote;
+      if (robloxApproval && (!form.elements.robloxControlReviewed?.checked || (controlNote?.value.trim().length || 0) < 20)) {
+        document.querySelector("#review-status").textContent = "Confirm community control and describe the evidence before approving.";
+        controlNote?.focus(); return;
+      }
       const status = document.querySelector("#review-status");
       const buttons = [...form.querySelectorAll("[data-review-action]")];
       buttons.forEach((element) => { element.disabled = true; });
@@ -944,7 +966,7 @@
       try {
         await api("/api/admin/action", {
           method: "POST",
-          body: JSON.stringify({ kind: form.dataset.kind, id: form.dataset.id, action, reason: reason.value.trim(), ...(form.dataset.kind === "listing" ? { expectedVersion: Number(form.dataset.reviewVersion), expectedQueueVersion: Number(form.dataset.queueVersion) } : {}) })
+          body: JSON.stringify({ kind: form.dataset.kind, id: form.dataset.id, action, reason: reason.value.trim(), ...(robloxApproval ? { controlReviewed: true, controlNote: controlNote.value.trim() } : {}), ...(form.dataset.kind === "listing" ? { expectedVersion: Number(form.dataset.reviewVersion), expectedQueueVersion: Number(form.dataset.queueVersion) } : {}) })
         });
         status.textContent = "Decision saved.";
         status.className = "portal-status success";

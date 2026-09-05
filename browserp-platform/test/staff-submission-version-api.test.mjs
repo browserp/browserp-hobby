@@ -16,8 +16,8 @@ test("staff listing decisions require both displayed versions; other review kind
     else if (path.endsWith("/rpc/check_security_ban_server")) payload = null;
     else if (path.endsWith("/rpc/consume_rate_limit")) payload = true;
     else if (path.endsWith("/rpc/staff_server_submission_review")) payload = { id: submission, reviewVersion: 4, queueVersion: 2 };
-    else if (path.endsWith("/rpc/staff_review_server_submission") && conflict) { payload = { message: "This submission changed. Reopen it before deciding.", code: "PT409" }; status = 409; }
-    else if (/\/(staff_review_server_submission|staff_resolve_queue_item|staff_resolve_comment_review)$/.test(path)) payload = { ok: true };
+    else if (path.endsWith("/rpc/staff_review_server_application") && conflict) { payload = { message: "This submission changed. Reopen it before deciding.", code: "PT409" }; status = 409; }
+    else if (/\/(staff_review_server_application|staff_resolve_queue_item|staff_resolve_comment_review)$/.test(path)) payload = { ok: true };
     else throw new Error(`Unexpected fixture request ${path}`);
     return new Response(JSON.stringify(payload), { status, headers: { "Content-Type": "application/json" } });
   };
@@ -30,13 +30,13 @@ test("staff listing decisions require both displayed versions; other review kind
   const base = { kind: "listing", id: submission, action: "approved", reason: "Reviewed the current listing details." };
   const detail = await request(null, "admin/item", "GET", `?kind=listing&id=${submission}`); assert.equal(detail.status, 200); assert.equal(detail.value.item.reviewVersion, 4); assert.equal(detail.value.item.queueVersion, 2);
   for (const values of [{}, { expectedVersion: 4 }, { expectedVersion: 0, expectedQueueVersion: 0 }, { expectedVersion: 4, expectedQueueVersion: -1 }, { expectedVersion: "4", expectedQueueVersion: 2 }, { expectedVersion: 4, expectedQueueVersion: 1.5 }]) {
-    const before = calls.filter(call => call.path.endsWith("/rpc/staff_review_server_submission")).length;
+    const before = calls.filter(call => call.path.endsWith("/rpc/staff_review_server_application")).length;
     assert.equal((await request({ ...base, ...values })).status, 409);
-    assert.equal(calls.filter(call => call.path.endsWith("/rpc/staff_review_server_submission")).length, before);
+    assert.equal(calls.filter(call => call.path.endsWith("/rpc/staff_review_server_application")).length, before);
   }
   assert.equal((await request({ ...base, expectedVersion: 4, expectedQueueVersion: 2 })).status, 200);
-  const decision = calls.find(call => call.path.endsWith("/rpc/staff_review_server_submission"));
-  assert.deepEqual({ ...decision.body, p_request_id: "present" }, { p_submission_id: submission, p_expected_version: 4, p_expected_queue_version: 2, p_action: "approved", p_reason: base.reason, p_request_id: "present" });
+  const decision = calls.find(call => call.path.endsWith("/rpc/staff_review_server_application"));
+  assert.deepEqual({ ...decision.body, p_request_id: "present" }, { p_submission_id: submission, p_expected_version: 4, p_expected_queue_version: 2, p_control_reviewed: false, p_control_note: null, p_action: "approved", p_reason: base.reason, p_request_id: "present" });
   assert.match(decision.body.p_request_id, /^[a-f0-9-]{36}$/); assert.equal(decision.options.headers.Authorization, `Bearer ${token}`);
   conflict = true; assert.equal((await request({ ...base, expectedVersion: 4, expectedQueueVersion: 2 })).status, 409);
   for (const kind of ["comment", "report"]) assert.equal((await request({ ...base, kind })).status, 200);

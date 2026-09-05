@@ -6,7 +6,7 @@
   const labels = { pending_review: "Waiting for review", changes_requested: "Changes requested", approved: "Approved", rejected: "Not approved", withdrawn: "Withdrawn" };
   const date = value => { const time = new Date(value); return Number.isFinite(time.getTime()) ? time.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : ""; };
 
-  async function mount({ id, accountId, form, api, updatePlatformFields, setFormStatus, toast }) {
+  async function mount({ id, accountId, form, api, updatePlatformFields, readRoblox, setFormStatus, toast }) {
     const submit = form.querySelector("#submit-listing");
     const fields = form.querySelector(".form-grid-v3");
     const gate = document.querySelector("#listing-auth-gate");
@@ -43,6 +43,7 @@
         }
         field.value = value;
       }
+      for (const field of form.querySelectorAll('[data-roblox-key]')) field.value = data.roblox?.[field.dataset.robloxKey] || (field.dataset.robloxKey === "kind" ? "independent_community" : "");
       updatePlatformFields();
       const picker = form.querySelector(".tag-picker-v3");
       // Preserve previous valid features even if the current picker has changed.
@@ -66,6 +67,10 @@
         const details = make("details"); details.append(make("summary", "Compare with the latest saved details")); const list = make("dl");
         for (const [label, value] of [["Name",record.name],["Game",record.platform_id],["Region",record.region],["Language",record.language],["Setup",record.framework],["Access",record.access_type],["Description",record.description],["Community link",record.community_url],["Connect link",record.cfx_join_url],["Features",record.tags?.join(", ")]]) {
           if (value) list.append(make("dt", label), make("dd", value));
+        }
+        if (record.platform_id === "roblox" && record.roblox) {
+          const names = { kind: "Community type", experienceUrl: "Roblox experience link", communityGroupUrl: "Roblox community / group", joiningInstructions: "Joining instructions", applicantRole: "Your role — private", authorityEvidence: "Your control evidence — private" };
+          for (const [key, label] of Object.entries(names)) if (record.roblox[key]) list.append(make("dt", label), make("dd", key === "kind" ? record.roblox[key] === "creator_experience" ? "Creator-run experience" : "Independent community" : record.roblox[key]));
         }
         details.append(list); feedback.append(details);
       }
@@ -132,6 +137,7 @@
           submissionId: id, expectedVersion: record.review_version, expectedQueueVersion: record.queue_version, expectedAccountId: accountId,
           ...Object.fromEntries(Object.keys(fieldNames).map(name => [name, values[name]])),
           cfxJoinUrl: ["fivem","redm"].includes(values.platform) ? values.cfxJoinUrl : "",
+          roblox: readRoblox(),
           tags: data.getAll("tags"), agreement: values.agreement === "on"
         }) };
       }

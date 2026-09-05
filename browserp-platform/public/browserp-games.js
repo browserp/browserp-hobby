@@ -4,7 +4,7 @@
   const GAMES = Object.freeze([
     { id: "fivem", name: "FiveM", line: "City, emergency and economy roleplay", description: "Discover city communities built around characters, careers, public services and player-run economies." },
     { id: "redm", name: "RedM", line: "Frontier and western roleplay", description: "Find frontier communities shaped by period stories, settlements, law, trade and life beyond the city." },
-    { id: "roblox", name: "Roblox", line: "Player-built social worlds", description: "Explore original roleplay experiences ranging from everyday life to emergency services and fantasy worlds." },
+    { id: "roblox", name: "Roblox", line: "Community-led roleplay worlds", description: "Discover reviewed Roblox roleplay communities, from everyday life to emergency services and fantasy. Owners apply to list their community; each listing explains how players join." },
     { id: "minecraft", name: "Minecraft", line: "Storytelling and survival worlds", description: "Browse communities where building, survival, factions and long-running characters create shared stories." },
     { id: "forza", name: "Forza", line: "Cruising and automotive groups", description: "Meet driving communities built around cruises, meets, clubs, photography and believable road culture." },
     { id: "gmod", name: "Garry's Mod", line: "Flexible sandbox roleplay", description: "Find established sandbox communities covering city life, serious stories and player-created game modes." },
@@ -52,9 +52,10 @@
     const imageUrl = String(server.logo_url || server.banner_url || "");
     if (/^https?:\/\/|^\//i.test(imageUrl)) { const image = new Image(); image.src = imageUrl; image.alt = ""; image.loading = "lazy"; image.className = "server-card-media-image"; image.addEventListener("error", () => image.replaceWith(node("span", "server-initials", String(server.name || "RP").split(/\s+/).slice(0,2).map(part => part[0]).join("").toUpperCase())), { once: true }); media.append(image); }
     else media.append(node("span", "server-initials", String(server.name || "RP").split(/\s+/).slice(0,2).map((part) => part[0]).join("").toUpperCase()));
-    const top = node("div", "server-card-top"); top.append(media, node("span", `status${server.online ? " online" : ""}`, server.online ? "Online now" : "Status unavailable"));
+    const applicationOnly = server.applicationOnly === true;
+    const top = node("div", "server-card-top"); top.append(media, node("span", `status${!applicationOnly && server.online ? " online" : ""}`, applicationOnly ? "Reviewed community" : server.online ? "Online now" : "Status unavailable"));
     link.append(top, node("h3", "", server.name || "Roleplay server"), window.BrowseRPPlatforms.metadata(server), node("p", "server-description", server.description || "Open the listing to learn more."));
-    const bottom = node("div", "server-card-bottom"); bottom.append(node("strong", "", server.online ? `${Number(server.players || 0).toLocaleString()} players${server.count_scope === "network" ? " across the network" : ""}` : "Player count unavailable"), node("span", "server-card-action", "View listing")); link.append(bottom);
+    const bottom = node("div", "server-card-bottom"); bottom.append(node("strong", "", applicationOnly ? "Live player count not provided" : server.online ? `${Number(server.players || 0).toLocaleString()} players${server.count_scope === "network" ? " across the network" : ""}` : "Player count unavailable"), node("span", "server-card-action", "View listing")); link.append(bottom);
     return link;
   }
 
@@ -83,6 +84,16 @@
     $("#game-page-title-v4").textContent = `Find your ${game.name} roleplay community.`;
     $("#game-page-lead-v4").textContent = game.description;
     $("#game-hub-grid-v4").hidden = true;
+    if (game.id === "roblox") {
+      const browse = node("a", "button-v3 button-primary-v3", "Browse Roblox communities"); browse.href = "/servers?platform=roblox";
+      const apply = node("a", "button-v3 button-secondary-v3", "Apply to list your community"); apply.href = "/list-server?platform=roblox";
+      $("#game-page-actions-v4").replaceChildren(browse, apply);
+      const empty = $("#game-server-empty-v4");
+      const heading = node("h3", "", "Help shape Roblox roleplay on BrowseRP.");
+      const copy = node("p", "", "Run a community? Apply for a reviewed listing. Applying to BrowseRP is separate from any application players need to join you.");
+      const emptyApply = node("a", "button-v3 button-primary-v3", "Apply to list your community"); emptyApply.href = "/list-server?platform=roblox";
+      empty.replaceChildren(heading, copy, emptyApply);
+    }
     if (!AVAILABLE_GAME_IDS.has(game.id)) {
       document.title = `${game.name} — Coming soon — BrowseRP`;
       document.querySelector('meta[name="description"]').content = `${game.name} discovery is coming soon to BrowseRP.`;
@@ -94,7 +105,7 @@
       return;
     }
     const results = $("#game-results-v4"); results.hidden = false;
-    $("#game-results-title-v4").textContent = `${game.name} servers`;
+    $("#game-results-title-v4").textContent = game.id === "roblox" ? "Roblox communities" : `${game.name} servers`;
     $("#game-results-lead-v4").textContent = `Reviewed ${game.line.toLowerCase()} listings appear below.`;
     $("#game-directory-link-v4").href = `/servers?platform=${encodeURIComponent(game.id)}`;
     window.BrowseRPSearch.mount({ root: $("#game-discovery-controls"), list: $("#game-server-list-v4"), empty: $("#game-server-empty-v4"), count: $("#game-result-count"), fixedGame: game.id, render: (list, servers) => list.replaceChildren(...servers.map(serverCard)) });

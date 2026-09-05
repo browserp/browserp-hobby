@@ -20,7 +20,7 @@ const sources = [
 
 test('equal current observations recover transient errors without duplicate or newer timestamps', async t => {
  const db = new PGlite();
- const observedAt = new Date(Date.now()-120000).toISOString();
+ let observedAt;
  const value = async (sql, args = []) => (await db.query(`select (select ${sql}) as value`, args)).rows[0].value;
  const reset = () => db.exec('reset role');
  const sourceTable = source => source.platform==='minecraft'?'minecraft_import_sources':'server_import_sources';
@@ -50,6 +50,9 @@ test('equal current observations recover transient errors without duplicate or n
   for (const name of ['public.service_refresh_cfx_snapshot','public.service_mark_cfx_unavailable']) await db.exec(extract(cfxSql,name));
   for (const name of ['public.service_refresh_minecraft_snapshot','public.service_mark_minecraft_unavailable']) await db.exec(extract(minecraftSql,name));
   await db.exec(minecraftSql.match(/create or replace view private\.effective_server_status[\s\S]*?x on true;/)[0]);
+  // Timestamp the observation after the database and source functions are ready.
+  // Slow WASM startup on a busy machine must not age a fresh fixture into expiry.
+  observedAt = new Date(Date.now()-120000).toISOString();
   for (const source of sources) {
    await db.query("insert into public.servers values($1,$2,'published','teen')",[source.id,source.platform]);
    if (source.platform==='minecraft') await db.query('insert into public.minecraft_import_sources(server_id,join_code) values($1,$2)',[source.id,source.code]);

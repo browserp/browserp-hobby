@@ -40,7 +40,7 @@ test("v2 submission and CMS boundaries remain server-authorized and safely rende
   assert.match(submissionGrantBlock, /grant execute[\s\S]*to service_role;/);
   assert.doesNotMatch(submissionGrantBlock, /to (?:anon|authenticated);/);
   assert.match(migration, /alter table private\.site_content_revisions enable row level security;/);
-  assert.match(directory, /"Idempotency-Key": submissionAttemptKey/);
+  // Exact retry body/key and account binding are exercised by roblox-applications-ui.test.mjs.
   assert.match(directory, /agreement: data\.agreement === "on"/);
   assert.match(shell, /element\.textContent = text/);
   assert.doesNotMatch(shell, /innerHTML/);

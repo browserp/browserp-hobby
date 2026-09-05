@@ -1,5 +1,13 @@
 # BrowseRP database transport and recovery review
 
+## Actual recovery and media checkpoint — 5 September, 23:32 UTC
+
+The owner unlocked the existing saved capture once using the local hidden passphrase prompt. No database password or new production database connection was used. The reviewed adapter authenticated the original encrypted artifacts, decoded the full PostgreSQL custom archive without executing its SQL, and restored the exact captured `public.platforms` data into a fresh local PostgreSQL17 database using only a trusted fixed COPY/table definition. All14 rows, values and constraints matched. The temporary database accepted only its private Unix socket and was stopped and removed. This is a verified partial restore, not full BrowseRP recovery.
+
+The same local session captured all78 public Storage objects in the reviewed inventory (5 profile and73 server images;2,898,198 bytes). Bytes and the object manifest remain encrypted; every object's size and SHA-256 passed authenticated in-memory verification. No plaintext image files were extracted. The advertisements and private quarantine buckets were empty. A subsequent read-only metadata recount matched the same bucket totals and pre-inventory latest-update times. Database and media snapshots have different recorded times; no simultaneous-snapshot claim is made.
+
+Safe completion evidence is in the private local folder `BrowseRP Backups/recovery-check-20260905T233211Z-dd2774`. The original encrypted database capture remains unchanged. The combined check has no INCOMPLETE marker. Full accounts/Auth/MFA, server/private data, policies/roles, Vault, scheduled-job isolation, Storage-service restoration and an off-device recovery copy remain separately required. The historical read-only-transaction evidence limitation is retained in the original capture and the restore report.
+
 Reviewed 5 September 2026. Read-only: no live setting changes, password handling, secret-file reads or restores. The owner/root is handling the password reset and backup capture separately.
 
 ## Decision

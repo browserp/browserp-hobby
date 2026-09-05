@@ -506,6 +506,7 @@
   }
 
   function serverPlayerStatus(server) {
+    if (server.applicationOnly === true) return { text: "Live player count not provided", checked: null, stale: false };
     const checked = typeof server.checked_at === "string" && Number.isFinite(Date.parse(server.checked_at)) ? new Date(server.checked_at) : null;
     const age = checked ? Date.now() - checked.getTime() : null;
     const stale = server.imported === true && (age === null || age > 5 * 60_000 || age < -60_000);
@@ -597,6 +598,13 @@
       const validConnect = typeof connectUrl === "string" && /^https:\/\/cfx\.re\/join\/[a-z0-9]{6,12}\/?$/i.test(connectUrl);
       connect.hidden = !validConnect;
       if (validConnect) { connect.href = connectUrl; connect.rel = "noopener noreferrer"; connect.textContent = "Connect via Cfx"; }
+      let robloxBox = $("#server-roblox-joining");
+      if (server.applicationOnly && server.roblox && /^https:\/\/www\.roblox\.com\/games\/[1-9][0-9]{0,19}$/.test(server.roblox.experienceUrl || "")) {
+        if (!robloxBox) { robloxBox = node("section", "server-community-joining"); robloxBox.id = "server-roblox-joining"; connect.parentElement.after(robloxBox); }
+        const experience = node("a", "button-v3 button-secondary-v3", "View Roblox experience"); experience.href = server.roblox.experienceUrl; experience.target = "_blank"; experience.rel = "noopener noreferrer";
+        robloxBox.replaceChildren(node("h2", "", "How to join"), node("p", "", server.roblox.joiningInstructions), experience,
+          node("p", "muted-v3", server.roblox.kind === "independent_community" ? "This is an independent roleplay community using the linked Roblox experience. The experience's total player count does not represent this community." : "This listing represents the reviewed creator-run roleplay community. Live community player counts are not provided."));
+      } else robloxBox?.remove();
       let addressBox = $("#server-minecraft-address");
       if (server.minecraft_address && /^[a-z0-9.-]+:[0-9]{4,5}$/.test(server.minecraft_address)) {
         if (!addressBox) { addressBox=node("div","server-minecraft-address");addressBox.id="server-minecraft-address";connect.parentElement.after(addressBox); }

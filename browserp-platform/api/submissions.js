@@ -1,3 +1,4 @@
+import { robloxApplication } from "../lib/roblox-application.js";
 import { createHash } from "node:crypto";
 import { isIP } from "node:net";
 import { endpoint, ok } from "../lib/api.js";
@@ -11,11 +12,11 @@ import { assessContent, sanitizePlainText } from "../lib/moderation.js";
 import { rateLimit } from "../lib/rate-limit.js";
 import { getSession, rest, rpc } from "../lib/supabase.js";
 
-// Retained for the v1 contract and rollback compatibility. New writes use the
-// additive v2 RPC so production can accept idempotency and legal-version data
-// without altering the already-applied function signature.
+// Retain earlier exported contract names for compatibility checks. New writes
+// use the complete application RPC with live-session and atomic metadata checks.
 export const SERVER_SUBMISSION_RPC = "create_server_submission_server";
 export const SERVER_SUBMISSION_V2_RPC = "create_server_submission_server_v2";
+export const SERVER_APPLICATION_RPC = "create_server_application_server";
 export const SERVER_SUBMISSION_CORRECTION_RPC = "resubmit_server_submission_server";
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 
@@ -108,16 +109,6 @@ function idempotencyHash(req, userId, requestId) {
   return createHash("sha256").update(`${userId}\0${raw}`).digest("hex");
 }
 
-function buildV2Payload(userId, input, moderation, req, requestId) {
-  return {
-    ...buildServerSubmissionRpcPayload(userId, input, moderation),
-    p_request_id: requestId,
-    p_idempotency_key: idempotencyHash(req, userId, requestId),
-    p_terms_version: CURRENT_TERMS_VERSION,
-    p_standards_version: CURRENT_LISTING_STANDARDS_VERSION
-  };
-}
-
 function acceptedAgreement(body) {
   return body.agreement === true || (
     body.authorizedListing === true
@@ -134,7 +125,7 @@ function submissionInput(body) {
     throw Object.assign(new Error("Choose up to eight valid server tags."), { status: 400 });
   }
   const accessType = sanitizePlainText(body.accessType || "public", 20).toLowerCase();
-  if (!["public", "allowlisted", "application"].includes(accessType)) {
+  if (!["public", "allowlisted", "application", "unknown"].includes(accessType)) {
     throw Object.assign(new Error("Choose a valid server access type."), { status: 400 });
   }
   const cfxJoinUrl = canonicalCommunityUrl(body.cfxJoinUrl);
@@ -156,6 +147,8 @@ function submissionInput(body) {
   if (!input.name || !input.platform || !input.region || !input.language || input.description.length < 40) {
     throw Object.assign(new Error("A name, platform, region, language and fuller description are required."), { status: 400 });
   }
+  if (input.cfxJoinUrl && !["fivem", "redm"].includes(input.platform)) throw Object.assign(new Error("Cfx connect links belong only to FiveM or RedM."), { status: 400 });
+  input.roblox = robloxApplication(body.roblox, input.platform, input.framework, input.communityUrl);
   return input;
 }
 
@@ -187,10 +180,11 @@ export default endpoint(["GET", "POST", "PATCH"], async (req, res, requestId) =>
     return ok(res, { submissions: Array.isArray(submissions) ? submissions : [] });
   }
 
+  let creationAccess;
   if (req.method === "POST") {
     // Auth can still accept an access token after its session is revoked.
     // Recheck the current account before either privileged submission write.
-    const access = await rpc("member_connection_status", {}, session.accessToken);
+    const access = creationAccess = await rpc("member_connection_status", {}, session.accessToken);
     if (access?.active !== true || access.userId !== session.user.id || !UUID.test(String(access.sessionId || ""))) {
       throw Object.assign(new Error("Sign in again before submitting your listing."), { status: 401 });
     }
@@ -202,8 +196,12 @@ export default endpoint(["GET", "POST", "PATCH"], async (req, res, requestId) =>
     throw Object.assign(new Error("Confirm that you are authorised to list the server and accept the current terms and listing standards."), { status: 400 });
   }
 
+  if (req.method === "POST" && body.expectedAccountId !== session.user.id) {
+    throw Object.assign(new Error("Your signed-in account changed. Reopen the application before sending it."), { status: 403 });
+  }
+  if (req.method === "POST" && !req.headers?.["idempotency-key"]) throw Object.assign(new Error("Start a new application attempt and try again."), { status: 400 });
   const input = submissionInput(body);
-  const moderation = assessContent(input);
+  const moderation = assessContent({ ...input, ...(input.roblox || {}) });
   if (moderation.action === "reject") {
     throw Object.assign(new Error("This submission contains a high-risk link or pattern and cannot be accepted."), { status: 422 });
   }
@@ -238,24 +236,18 @@ export default endpoint(["GET", "POST", "PATCH"], async (req, res, requestId) =>
     return ok(res, { submission }, 202);
   }
 
-  const submission = await rpc(
-    SERVER_SUBMISSION_V2_RPC,
-    buildV2Payload(session.user.id, input, moderation, req, requestId),
-    undefined,
-    { useSecret: true }
-  );
-  const metadataFingerprint = createHash("sha256").update(JSON.stringify({
-    tags: input.tags,
-    accessType: input.accessType,
-    cfxJoinUrl: input.cfxJoinUrl
-  })).digest("hex");
-  const metadata = await rpc("attach_server_submission_metadata_server", {
+  const submission = await rpc(SERVER_APPLICATION_RPC, {
     p_user_id: session.user.id,
-    p_submission_id: submission.id,
-    p_tags: input.tags,
-    p_access_type: input.accessType,
-    p_cfx_join_url: input.cfxJoinUrl,
-    p_metadata_fingerprint: metadataFingerprint
+    p_session_id: creationAccess.sessionId,
+    p_expected_user_id: body.expectedAccountId,
+    p_data: input,
+    p_moderation_confidence: moderation.confidence,
+    p_moderation_score: moderation.score,
+    p_moderation_reasons: moderation.reasons,
+    p_request_id: requestId,
+    p_idempotency_key: idempotencyHash(req, session.user.id, requestId),
+    p_terms_version: CURRENT_TERMS_VERSION,
+    p_standards_version: CURRENT_LISTING_STANDARDS_VERSION
   }, undefined, { useSecret: true });
-  return ok(res, { submission: { ...submission, ...metadata } }, 202);
+  return ok(res, { submission }, 202);
 });
