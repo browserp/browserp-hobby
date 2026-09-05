@@ -23,6 +23,14 @@
 .adverts-form h3 { margin: 0 0 20px; font-size: 22px; }
 .adverts-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
 .adverts-wide { grid-column: 1 / -1; }
+.adverts-artwork { padding: 18px; border: 1px solid var(--line); border-radius: 11px; background: var(--bg-soft); }
+.adverts-artwork-label { font-size: 14px; font-weight: 650; }
+.adverts-artwork > .adverts-help { margin: 7px 0 15px; }
+.adverts-artwork .adverts-status { margin: 12px 0; }
+.adverts-image-address { border-top: 1px solid var(--line); padding-top: 12px; }
+.adverts-image-address summary { cursor: pointer; color: var(--copy); font-size: 13px; }
+.adverts-image-address .field-v3 { margin-top: 14px; }
+.adverts-image-address input { width: 100%; }
 .adverts-fields textarea { resize: vertical; min-height: 85px; }
 .adverts-notice { margin: 0 0 22px; padding: 13px 15px; color: #edc8ee; background: #2a1b32; border-left: 3px solid #bd8dce; font-size: 13px; }
 .adverts-preview { margin: 22px 0; border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }

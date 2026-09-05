@@ -12,20 +12,25 @@ import { memberClaims, staffClaims } from "../lib/claim-workflow.js";
 import { staffFiveM, staffCfx } from "../lib/fivem-workflow.js";
 import { fetchServerImage } from "../lib/server-media.js";
 import { moderationMutation, moderationQuery } from "../lib/staff-moderation.js";
+import { staffAuthenticators } from "../lib/staff-authenticators.js";
+import { prepareInitialStaffAuthenticator, verifyInitialStaffAuthenticator } from "../lib/staff-initial-authenticator.js";
+import { staffAdvertMedia } from "../lib/staff-advert-media.js";
 import {
   authCapabilities,
   beginOAuth,
   beginIdentityLink,
+  connectionSessionStatus,
   csrfTokenForRequest,
-  enrollTotp,
   finishOAuth,
   getSession,
   hasStaffMembership,
   memberIdentityProviders,
+  ownedIdentityId,
   rest,
   rpc,
   signOut,
   uploadStorageObject,
+  unlinkMemberIdentity,
   verifyTotp
 } from "../lib/supabase.js";
 
@@ -41,6 +46,13 @@ function publicOverviewFields(value) {
 
 function safeServerRead() {
   return supabaseConfig().privileged ? { useSecret: true } : {};
+}
+
+async function currentAccountSession(session) {
+  // Auth can recognise a signed JWT after its session has been revoked. Check
+  // the live session before reading personal data or writing with service access.
+  const access = await rpc("member_connection_status", {}, session.accessToken);
+  return access?.active === true && access.userId === session.user.id && Boolean(access.sessionId);
 }
 
 export function staffAccessMutation(body) {
@@ -241,6 +253,7 @@ const routes = {
     const csrfToken = csrfTokenForRequest(req, res);
     const session = await getSession(req, res);
     if (!session) return ok(res, { authenticated: false, user: null, csrfToken });
+    if (!await currentAccountSession(session)) return ok(res, { authenticated: false, user: null, csrfToken });
     let profile = null;
     try {
       profile = (await rest(`profiles?select=id,username,display_name,avatar_url,avatar_review_status,bio,bio_review_status,joined_at,profile_visibility&id=eq.${encodeURIComponent(session.user.id)}&limit=1`, { useSecret: true }))?.[0] || null;
@@ -280,8 +293,16 @@ const routes = {
     const allowed = await rpc("staff_mfa_enrollment_allowed", {}, session.accessToken);
     if (allowed !== true) throw Object.assign(new Error("An active BrowseRP staff assignment is required."), { status: 403 });
     const body = await readBody(req, 4 * 1024);
-    const friendlyName = sanitizePlainText(body.friendlyName || "BrowseRP staff", 50);
-    const factor = await enrollTotp(session.accessToken, friendlyName || "BrowseRP staff");
+    req.body = body;
+    if (session.factors.some(factor => factor.status === "verified")) {
+      if (body.action === "restart") throw Object.assign(new Error("An authenticator is already verified. Use it to sign in and manage your security."), { status: 409 });
+      // Existing staff must use the same AAL2, capacity and operation lease
+      // checks as the security panel, including through this older endpoint.
+      req.body = { action: "enroll", label: sanitizePlainText(body.friendlyName || "BrowseRP staff", 40) };
+      const result = await staffAuthenticators(req, res, requestId, session);
+      return ok(res, { factor: result.setup }, 201);
+    }
+    const factor = await prepareInitialStaffAuthenticator(req, res, requestId, session);
     await recordActivitySafely(req, res, {
       userId: session.user.id,
       eventType: "auth.mfa_enrolled",
@@ -303,10 +324,13 @@ const routes = {
     const session = await getSession(req, res, { required: true, provider: "discord" });
     await rateLimit(req, "mfa-verify", 8, 600);
     const body = await readBody(req, 4 * 1024);
+    req.body = body;
     const factorId = uuid(body.factorId, "Choose the authenticator factor again.");
     const code = String(body.code || "").replace(/\s+/g, "");
     if (!/^\d{6}$/.test(code)) throw Object.assign(new Error("Enter the six-digit authenticator code."), { status: 400 });
-    const verified = await verifyTotp(res, session.accessToken, factorId, code, session.csrfToken);
+    const verified = session.factors.some(factor => factor.status === "verified")
+      ? await verifyTotp(res, session.accessToken, factorId, code, session.csrfToken)
+      : await verifyInitialStaffAuthenticator(req, res, requestId, session);
     let mfaRequirementActivated = false;
     try {
       const securityStatus = await rpc("staff_security_status", {}, verified.access_token);
@@ -351,20 +375,38 @@ const routes = {
     return ok(res, { overview: await rpc("member_dashboard_overview", {}, session.accessToken) });
   }),
 
-  "me/connections": endpoint(["GET", "POST"], async (req, res) => {
+  "me/connections": endpoint(["GET", "POST"], async (req, res, requestId) => {
     if (req.method === "POST") assertSameOrigin(req);
     if (req.method === "GET") {
       const session = await getSession(req, res, { required: true });
-      const [configured, staffAccount] = await Promise.all([authCapabilities(), hasStaffMembership(session.user.id)]);
+      const [configured, staffAccount, access] = await Promise.all([authCapabilities(), hasStaffMembership(session.user.id), connectionSessionStatus(session)]);
       const connected = memberIdentityProviders(session.user);
-      return ok(res, { connections: { canManage: !staffAccount, message: staffAccount ? "Staff accounts use a dedicated Discord sign-in. Additional connections are unavailable for this account." : "Connect another sign-in method to this BrowseRP profile.", providers: ["discord", "google"].map(provider => ({ provider, connected: connected.includes(provider), enabled: configured[provider] === true, canConnect: !staffAccount && configured[provider] === true && !connected.includes(provider) })) } });
+      const canManage = !staffAccount && access.staff !== true;
+      return ok(res, { connections: {
+        accountId: session.user.id, canManage, reauthenticationRequired: canManage && access.recent !== true,
+        message: !canManage ? "Staff accounts use a dedicated Discord sign-in. Additional connections are unavailable for this account." : access.recent !== true ? "Sign in again before changing your connected accounts." : "Manage the sign-in methods attached to this BrowseRP profile.",
+        providers: ["discord", "google"].map(provider => {
+          const identity = session.user.identities?.find(item => item.provider === provider && ownedIdentityId(item, session.user.id));
+          const identityId = ownedIdentityId(identity, session.user.id);
+          return { provider, identityId, connected: connected.includes(provider), enabled: configured[provider] === true,
+            canConnect: canManage && access.recent === true && configured[provider] === true && !connected.includes(provider),
+            canDisconnect: canManage && access.recent === true && Boolean(identityId) && connected.some(value => value !== provider && configured[value] === true) };
+        })
+      } });
     }
     await rateLimit(req, "account-connect", 6, 600);
     const body = await readBody(req, 2048);
     const provider = String(body.provider || "").toLowerCase();
+    if (typeof body.accountId !== "string" || !body.accountId) throw Object.assign(new Error("Refresh your profile before changing account connections."), { status: 409 });
+    if (body.action === "disconnect") {
+      const result = await unlinkMemberIdentity(req, res, { provider, identityId: body.identityId, accountId: body.accountId });
+      await recordActivitySafely(req, res, { userId: body.accountId, eventType: "auth.identity_unlinked", provider, requestId, metadata: { sessionsEnded: result.sessionsEnded } });
+      return ok(res, result);
+    }
+    if (body.action && body.action !== "connect") throw Object.assign(new Error("Choose a valid account action."), { status: 400 });
     const configured = await authCapabilities();
     if (!["discord", "google"].includes(provider) || configured[provider] !== true) throw Object.assign(new Error("This sign-in provider is temporarily unavailable."), { status: 409 });
-    const authorizationUrl = await beginIdentityLink(req, res, provider, body.returnTo);
+    const authorizationUrl = await beginIdentityLink(req, res, provider, body.returnTo, body.accountId);
     return ok(res, { authorizationUrl });
   }),
 
@@ -372,6 +414,7 @@ const routes = {
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true });
     if (req.method === "GET") {
+      if (!await currentAccountSession(session)) throw Object.assign(new Error("Your sign-in expired. Sign in again to continue."), { status: 401 });
       const profile = (await rest(
         `profiles?select=display_name,bio,profile_visibility,avatar_url,avatar_review_status,bio_review_status&id=eq.${encodeURIComponent(session.user.id)}&limit=1`,
         { useSecret: true }
@@ -410,6 +453,7 @@ const routes = {
   "me/avatar": endpoint("POST", async (req, res, requestId) => {
     assertSameOrigin(req);
     const session = await getSession(req, res, { required: true });
+    if (!await currentAccountSession(session)) throw Object.assign(new Error("Your sign-in expired. Sign in again to continue."), { status: 401 });
     await rateLimit(req, "profile-avatar", 6, 3600);
     // A 1 MiB PNG expands to approximately 1.4 MB in the JSON data URL.
     const body = await readBody(req, 1_500_000);
@@ -742,6 +786,10 @@ const routes = {
       p_request_id: id
     }, session.accessToken) });
   }),
+
+  "admin/authenticators": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffAuthenticators(req, res, id))),
+
+  "admin/adverts/media": endpoint("POST", staffAdvertMedia),
 
   "admin/adverts": endpoint(["GET", "POST"], async (req, res, id) => {
     if (req.method === "POST") assertSameOrigin(req);

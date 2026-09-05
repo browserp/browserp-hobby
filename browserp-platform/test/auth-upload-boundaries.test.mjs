@@ -139,6 +139,7 @@ test("a real cropped PNG crosses the avatar route and storage boundary using onl
     const url = new URL(value);
     if (url.pathname === "/auth/v1/user") return response(user);
     if (url.pathname.endsWith("/rpc/check_security_ban_server")) return response(null);
+    if (url.pathname.endsWith("/rpc/member_connection_status")) return response({ active: true, userId: user.id, sessionId: "fixture-active-session" });
     if (url.pathname.endsWith("/rpc/consume_rate_limit")) return response(true);
     if (url.pathname.startsWith("/storage/v1/object/profile-media/")) { storedPath = url.pathname; assert.deepEqual(options.body, png); assert.equal(options.headers["x-upsert"], "false"); return response({ Key: url.pathname }); }
     if (url.pathname === "/rest/v1/uploaded_assets") { registered = JSON.parse(options.body); assert.equal(registered.owner_id, user.id); return response([{ id: "00000000-0000-4000-8000-000000000002" }]); }
@@ -153,6 +154,54 @@ test("a real cropped PNG crosses the avatar route and storage boundary using onl
     const forged = output(); forged.end = value => { forged.body = JSON.parse(value); };
     await router({ ...req, headers: { ...req.headers, "x-browserp-csrf": "d".repeat(43) } }, forged); assert.equal(forged.statusCode, 403);
   }, { SUPABASE_SECRET_KEY: "sb_secret_fixture", PRIVACY_HASH_SECRET: "fixture-private-hash" });
+});
+
+test("revoked but otherwise valid JWTs cannot read private profiles, expose session identity or write avatar files", async () => {
+  for (const denied of [{ active: false }, { active: true, userId: "another-user", sessionId: "another-session" }, { active: true, userId: user.id }]) {
+    const privileged = [];
+    await isolated(async (value, options) => {
+      const path = new URL(value).pathname;
+      if (path === "/auth/v1/user") return response({ ...user, email: "private-fixture@example.test", factors: [{ id: "private-factor", factor_type: "totp", status: "verified" }] });
+      if (path.endsWith("/rpc/check_security_ban_server")) return response(null);
+      if (path.endsWith("/rpc/member_connection_status")) return response(denied);
+      privileged.push({ path, method: options.method }); throw new Error("Privileged work must not run for a revoked session");
+    }, async () => {
+      for (const route of ["auth/session", "me/profile", "me/avatar"]) {
+        const req = { ...request(`brp_access=${access}; brp_csrf=${csrf}`), browserpRoute: route, method: route === "me/avatar" ? "POST" : "GET", body: { imageData: "must not be decoded or uploaded" } };
+        req.headers = { ...req.headers, "content-type": "application/json", origin: "http://localhost:8080", "x-browserp-csrf": csrf };
+        const res = output(); res.end = value => { res.body = JSON.parse(value); };
+        await router(req, res);
+        assert.equal(res.statusCode, route === "auth/session" ? 200 : 401);
+        if (route === "auth/session") { assert.equal(res.body.authenticated, false); assert.equal(res.body.user, null); }
+        assert.doesNotMatch(JSON.stringify(res.body), /private-fixture|private-factor|another-user/);
+      }
+      assert.deepEqual(privileged, []);
+    }, { SUPABASE_SECRET_KEY: "sb_secret_fixture", PRIVACY_HASH_SECRET: "fixture-private-hash" });
+  }
+});
+
+test("current account sessions can read profiles and AAL1 staff setup remains available; lookup outages fail closed", async () => {
+  for (const unavailable of [false, true]) {
+    let profileReads = 0;
+    await isolated(async value => {
+      const path = new URL(value).pathname;
+      if (path === "/auth/v1/user") return response(user);
+      if (path.endsWith("/rpc/check_security_ban_server")) return response(null);
+      if (path.endsWith("/rpc/member_connection_status")) return unavailable ? response({ message: "Unavailable" }, 503) : response({ active: true, userId: user.id, sessionId: "fixture-active-session", recent: false });
+      if (path === "/rest/v1/profiles") { profileReads++; return response([{ display_name: "Fixture member" }]); }
+      if (path.endsWith("/rpc/staff_mfa_enrollment_allowed")) return response(true);
+      if (path.endsWith("/rpc/staff_mfa_policy")) return response({ staffMfaRequired: true });
+      throw new Error(`Unexpected endpoint ${path}`);
+    }, async () => {
+      for (const route of ["auth/session", "me/profile"]) {
+        const res = output(); res.end = value => { res.body = JSON.parse(value); };
+        await router({ ...request(`brp_access=${access}; brp_csrf=${csrf}`), browserpRoute: route }, res);
+        assert.equal(res.statusCode, unavailable ? 503 : 200);
+        if (!unavailable && route === "auth/session") { assert.equal(res.body.authenticated, true); assert.equal(res.body.aal, "aal1"); assert.equal(res.body.staffAccess, true); }
+      }
+      assert.equal(profileReads, unavailable ? 0 : 2);
+    }, { SUPABASE_SECRET_KEY: "sb_secret_fixture", PRIVACY_HASH_SECRET: "fixture-private-hash" });
+  }
 });
 
 test("profile routes are present locally, private without sign-in, and share safe image CSP with production", async () => isolated(null, async () => {

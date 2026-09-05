@@ -1,0 +1,20 @@
+{
+  "functions": [
+    {
+      "acl": "{postgres=X/postgres}",
+      "signature": "private.has_current_auth_session()",
+      "definition": "CREATE OR REPLACE FUNCTION private.has_current_auth_session()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select exists (\n    select 1 from auth.sessions s\n    where s.user_id = (select auth.uid())\n      and s.id = case\n        when coalesce((select auth.jwt())->>'session_id', '')\n          ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'\n        then ((select auth.jwt())->>'session_id')::uuid\n        else null::uuid\n      end\n  );\n$function$\n"
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "signature": "record_account_activity_server(uuid,text,text,text,text,text,text,text,text,text,text,text,jsonb)",
+      "definition": "CREATE OR REPLACE FUNCTION public.record_account_activity_server(p_user_id uuid, p_event_type text, p_provider text, p_masked_network text, p_browser_family text, p_os_family text, p_device_family text, p_request_id text, p_network_ciphertext text, p_network_hash text, p_device_hash text, p_user_agent_hash text, p_metadata jsonb)\n RETURNS bigint\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare v_id bigint;\nbegin\n  if p_user_id is null or not exists (select 1 from auth.users where id=p_user_id) then\n    raise exception 'Unknown account' using errcode='42501';\n  end if;\n  if p_event_type not in ('auth.signed_in','auth.signed_out','auth.mfa_enrolled','auth.mfa_verified','auth.session_revoked','profile.updated','profile.media_submitted','security.ban_matched') then\n    raise exception 'Invalid account activity type';\n  end if;\n  insert into public.account_activity (\n    user_id,event_type,provider,masked_network,browser_family,os_family,\n    device_family,request_id,metadata\n  ) values (\n    p_user_id,p_event_type,nullif(p_provider,''),nullif(p_masked_network,''),\n    nullif(p_browser_family,''),nullif(p_os_family,''),nullif(p_device_family,''),\n    nullif(p_request_id,''),coalesce(p_metadata,'{}'::jsonb)\n  ) returning id into v_id;\n  insert into private.network_evidence (\n    activity_id,network_ciphertext,network_hash,device_hash,user_agent_hash\n  ) values (\n    v_id,nullif(p_network_ciphertext,''),nullif(p_network_hash,''),\n    nullif(p_device_hash,''),nullif(p_user_agent_hash,'')\n  );\n  return v_id;\nend;\n$function$\n"
+    }
+  ],
+  "captured_at": "2026-09-05T19:50:26.035296+00:00",
+  "advert_bucket": null,
+  "advert_triggers": [
+    "CREATE TRIGGER ad_campaigns_set_updated_at BEFORE UPDATE ON public.ad_campaigns FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+  ],
+  "activity_constraint": "CHECK ((event_type = ANY (ARRAY['account.created'::text, 'auth.signed_in'::text, 'auth.signed_out'::text, 'auth.mfa_enrolled'::text, 'auth.mfa_verified'::text, 'auth.session_revoked'::text, 'profile.updated'::text, 'profile.media_submitted'::text, 'security.ban_matched'::text])))"
+}

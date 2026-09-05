@@ -56,7 +56,7 @@
       link.append(make("strong", `${title} ↗`), make("span", description)); sources.append(link);
     }
     const plan = make("details", undefined, "staff-scraper-plan");
-    plan.append(make("summary", ["fivem", "redm", "minecraft"].includes(game.id) ? "Review and refresh plan" : "Proposed pilot — awaiting agreement"));
+    plan.append(make("summary", ["fivem", "redm", "minecraft"].includes(game.id) ? "Review and refresh plan" : "Application workflow — in development"));
     const steps = make("ol"); for (const step of info.steps) steps.append(make("li", step)); plan.append(steps);
     section.append(sources, plan, make("p", "Researched 4 September 2026. These links are discovery references; future imports depend on supported access and source permissions.", "staff-scraper-note"));
     return section;
@@ -130,7 +130,7 @@
         const panel = make("section", undefined, "staff-scraper-preview");
         panel.dataset.platform = selected.id;
         const copy = make("div", undefined, "staff-scraper-copy");
-        copy.append(make("span", selected.name, "staff-scraper-platform"), make("h2", "Plan the next scraper"), make("p", `Review the sources and proposed ${selected.name} pilot below. Import tools are not active yet.`));
+        copy.append(make("span", selected.name, "staff-scraper-platform"), make("h2", "Roblox applications"), make("p", "The application workflow is in development. Review the planned approach and sources below. Application tools are not active yet."));
         panel.append(artwork(selected, "staff-scraper-artwork"), copy);
         root.append(panel);
       }

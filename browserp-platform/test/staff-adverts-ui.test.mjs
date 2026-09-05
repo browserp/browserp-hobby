@@ -27,6 +27,45 @@ function runtime() {
 }
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 
+test("artwork preparation stays local, blocks double saves, and preserves the previous image when replacement fails", async () => {
+  const { root, api } = runtime(); const requests = []; let complete;
+  const prepared = { name: "Community.png", data: "data:image/png;base64,cHJldmlldw==", width: 640, height: 360 };
+  await api.init({ permissions: { manageAdverts: true }, api: async (path, options) => { requests.push({ path, options }); return { adverts: [] }; }, prepareImage: file => file.name === "broken.png" ? Promise.reject(new Error("This image could not be opened.")) : new Promise(resolve => { complete = resolve; }) });
+  await root.querySelectorAll("button").find(item => item.textContent === "Create advert").listeners.click();
+  const form=root.querySelectorAll("form")[0], file=form.querySelectorAll("input").find(item=>item.type==="file");
+  file.files=[{name:"Community.png"}]; const preparing=file.listeners.change();
+  assert.equal(root.attributes["aria-busy"],"true");
+  form.listeners.submit({preventDefault(){},submitter:{value:"save"}}); await tick();
+  assert.equal(requests.length,1,"Preparation and a double submit must not upload");
+  complete(prepared);await preparing;
+  assert.equal(root.attributes["aria-busy"],"false");assert.equal(requests.length,1);
+  assert.equal(form.querySelectorAll("img")[0].src,prepared.data);
+  file.files=[{name:"broken.png"}];await file.listeners.change();
+  assert.equal(form.querySelectorAll("img")[0].src,prepared.data,"Invalid replacement keeps the good selection");
+  assert.ok(root.querySelectorAll("p").some(item=>item.textContent.includes("could not be opened")));
+  root.querySelectorAll("button").find(item=>item.textContent==="Remove image").listeners.click();
+  assert.equal(form.querySelectorAll("img")[0].hidden,true);assert.equal(requests.length,1);
+});
+
+test("failed advert saves clean an uploaded selection and preserve the local preview for retry", async () => {
+  const { root, api }=runtime();const requests=[];const imageUrl="https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/staff/fixture.png";
+  const prepared={name:"Community.png",data:"data:image/png;base64,cHJldmlldw==",width:640,height:360};
+  await api.init({permissions:{manageAdverts:true},prepareImage:async()=>prepared,api:async(path,options)=>{
+    const body=options?.body?JSON.parse(options.body):null;requests.push({path,body});
+    if(!body)return {adverts:[]};
+    if(path.endsWith("/media"))return body.action==="upload"?{asset:{id:"fixture-asset",imageUrl}}:{removed:true};
+    throw new Error("Campaign changed. Reload before saving.");
+  }});
+  await root.querySelectorAll("button").find(item=>item.textContent==="Create advert").listeners.click();
+  const form=root.querySelectorAll("form")[0], file=form.querySelectorAll("input").find(item=>item.type==="file");
+  const controls=Object.fromEntries(form.querySelectorAll("input,select,textarea").map(item=>[item.name,item]));controls.destinationUrl.value="/servers";
+  file.files=[{}];await file.listeners.change();
+  form.listeners.submit({preventDefault(){},submitter:{value:"save"}});await tick();await tick();
+  assert.deepEqual(requests.filter(item=>item.body).map(item=>[item.path,item.body.action]),[["/api/admin/adverts/media","upload"],["/api/admin/adverts","save"],["/api/admin/adverts/media","remove"]]);
+  assert.equal(requests[2].body.imageUrl,imageUrl);assert.equal(controls.imageUrl.value,"");
+  assert.equal(form.querySelectorAll("img")[0].src,prepared.data);assert.equal(root.attributes["aria-busy"],"false");
+});
+
 test("advert images stay within the existing database allowlist and destinations reject executable URLs", () => {
   const { api } = runtime();
   for (const url of ["", "/assets/adverts/campaign.jpg", "https://www.browserp.com/assets/adverts/season/new.webp", "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/advertisements/campaign.v2.png"]) assert.equal(api.allowedImage(url), true, url);

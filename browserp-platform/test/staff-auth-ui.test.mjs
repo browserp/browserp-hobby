@@ -27,6 +27,26 @@ test("staff session outages show a retry state rather than pretending the user s
   h.$(".skip-link").click(); assert.equal(h.w.document.activeElement, h.$(".staff-login-card-v3"));
 });
 
+test("staff access gates never leave a menu for a removed navigation panel", async t => {
+  const states = [
+    { authenticated: false },
+    { ...session, staffAccess: false },
+    session,
+    { ...session, mfa: { required: true, factors: [{ id: "factor-fixture", status: "verified" }] } }
+  ];
+  for (const value of states) {
+    const h = await harness(t, async () => json(value));
+    const menu = h.$("#staff-menu-v3");
+    assert.ok(h.$(".staff-login-card-v3"));
+    assert.equal(h.$(".staff-sidebar-v3"), null);
+    assert.equal(menu.hidden, true); assert.equal(menu.disabled, true);
+    assert.equal(menu.hasAttribute("aria-controls"), false);
+    menu.click();
+    assert.equal(menu.getAttribute("aria-expanded"), "false");
+    assert.equal(h.w.document.body.classList.contains("staff-menu-open"), false);
+  }
+});
+
 test("MFA setup failure remains visible and the user can retry without duplicate requests", async t => {
   let finish; const calls = [];
   const h = await harness(t, async (path, options) => {
@@ -67,11 +87,40 @@ test("denied staff access offers explicit sign-out with CSRF and no automatic ac
   assert.match(h.text(), /Continue with Discord/); assert.match(h.$('a[href^="/api/auth/discord"]').href, /returnTo=%2Fstaffpanel%2Fscrapers$/);
 });
 
+test("staff can use a named backup at the MFA gate and changing factors clears the previous code", async t => {
+  const calls = [];
+  const h = await harness(t, async (path, options) => {
+    if (path === "/api/auth/session") return json({ ...session, mfa: { required: true, factors: [{ id: "main", friendlyName: "Main phone", status: "verified" }, { id: "backup", friendlyName: "Backup phone", status: "verified" }] } });
+    calls.push({ path, options }); return json({ error: "Fixture code rejected" }, 422);
+  });
+  const select = h.$('[name="authenticator"]'); assert.ok(select); assert.equal(select.options[1].textContent, "Backup phone");
+  h.$('[name="code"]').value = "111111"; select.value = "backup"; select.dispatchEvent(new h.w.Event("change"));
+  const input = h.$('[name="code"]'); assert.equal(input.value, ""); input.value = "222222"; h.submit(input.form); await tick();
+  assert.deepEqual(JSON.parse(calls[0].options.body), { factorId: "backup", code: "222222" });
+});
+
+test("an unfinished initial authenticator can resume and restarting requires an explicit confirmation", async t => {
+  const calls=[];
+  const h=await harness(t,async(path,options)=>{
+    if(path==="/api/auth/session")return json({...session,mfa:{required:true,factors:[{id:"pending",friendlyName:"BrowseRP staff",status:"unverified"}]}});
+    calls.push({path,options});return path==="/api/auth/mfa/enroll"?json({factor:{id:"replacement",secret:"NEWSETUPKEY",qrCode:"data:image/svg+xml;base64,PHN2Zy8+"}}):json({error:"Fixture verification rejected"},422);
+  });
+  assert.match(h.text(),/Finish authenticator setup/);assert.equal(h.button("Set up authenticator"),undefined);
+  const input=h.$('[name="code"]');input.value="123456";h.submit(input.form);await tick();
+  assert.deepEqual(JSON.parse(calls[0].options.body),{factorId:"pending",code:"123456"});
+  h.button("Start again").click();await tick();assert.equal(calls.length,1);assert.ok(h.$("dialog"));h.button("Cancel").click();await tick();assert.equal(calls.length,1);assert.equal(h.$('[name="code"]').value,"123456");
+  h.button("Start again").click();await tick();h.submit(h.$("dialog form"));await tick();
+  assert.deepEqual(JSON.parse(calls[1].options.body),{action:"restart",factorId:"pending"});assert.match(h.text(),/Scan the QR code/);assert.equal(h.$("code").hidden,true);
+});
+
 test("expired staff access clears a previously open mobile menu and leaves the sign-in card reachable", async t => {
   const h = await harness(t, async () => json({ ...session, mfa: { required: false } }), "moderation");
   h.$("#staff-menu-v3").click(); assert.equal(h.w.document.body.classList.contains("staff-menu-open"), true);
   h.moderation().onAuthFailure();
   assert.equal(h.w.document.body.classList.contains("staff-menu-open"), false); assert.equal(h.$("#staff-menu-v3").getAttribute("aria-expanded"), "false");
+  assert.equal(h.$("#staff-menu-v3").hidden, true); assert.equal(h.$("#staff-menu-v3").disabled, true);
+  assert.equal(h.w.document.activeElement, h.$(".staff-login-card-v3"));
+  h.$("#staff-menu-v3").click(); assert.equal(h.w.document.body.classList.contains("staff-menu-open"), false);
   assert.ok(h.$(".staff-login-card-v3")); h.$(".skip-link").click(); assert.equal(h.w.document.activeElement, h.$(".staff-login-card-v3"));
 });
 

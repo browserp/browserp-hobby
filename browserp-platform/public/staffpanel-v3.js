@@ -5,6 +5,7 @@
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const make = (tag, text, className = "") => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = String(text); return el; };
   const pendingForms = new WeakSet();
+  let staffNavigation = null;
 
   function beginFormSubmission(form) {
     if (pendingForms.has(form)) return null;
@@ -135,9 +136,6 @@
     document.documentElement.dataset.theme = "dark";
   }
 
-  function themeButton() {
-    return make("span", "Dark workspace", "staff-theme-v3");
-  }
 
   applyTheme(preferredTheme());
 
@@ -203,12 +201,12 @@
   function mountAccessCard(card) {
     const root = $("#staff-app-v3");
     if (!root) return;
-    document.body.classList.remove("staff-menu-open");
     const menu = $("#staff-menu-v3");
-    menu?.setAttribute("aria-expanded", "false");
-    menu?.setAttribute("aria-label", "Open staff navigation");
+    const restoreFocus = root.contains(document.activeElement) || document.activeElement === menu;
+    staffNavigation?.disable();
     card.tabIndex = -1;
     root.replaceChildren(card);
+    if (restoreFocus) card.focus({ preventScroll: true });
   }
 
   function accessActions(card) {
@@ -229,7 +227,7 @@
 
   function showSessionUnavailable(error) {
     const card = make("section", undefined, "staff-login-card-v3");
-    card.append(themeButton(), brand(), make("span", "Connection interrupted", "eyebrow-v3"), make("h1", "Staff access could not be checked"), make("p", "We couldn’t confirm your staff access. Try again in a moment, or return to BrowseRP."));
+    card.append(brand(), make("span", "Connection interrupted", "eyebrow-v3"), make("h1", "Staff access could not be checked"), make("p", "We couldn’t confirm your staff access. Try again in a moment, or return to BrowseRP."));
     const feedback = make("p", error?.message || "The sign-in service could not be reached.", "staff-form-status-v3"); feedback.setAttribute("role", "status");
     const retry = make("button", "Try again", "button-v3 button-primary-v3"); retry.type = "button"; retry.addEventListener("click", () => location.reload());
     card.append(feedback, retry); accessActions(card); mountAccessCard(card);
@@ -239,7 +237,7 @@
     const root = $("#staff-app-v3");
     if (!root) return;
     const card = make("section", undefined, "staff-login-card-v3");
-    card.append(themeButton(), brand(), make("span", "BrowseRP staff workspace", "eyebrow-v3"), make("h1", "Welcome to the staff panel"), make("p", "Continue with the Discord account assigned to your BrowseRP staff role."));
+    card.append(brand(), make("span", "BrowseRP staff workspace", "eyebrow-v3"), make("h1", "Welcome to the staff panel"), make("p", "Continue with the Discord account assigned to your BrowseRP staff role."));
     const authState = new URLSearchParams(location.search).get("auth");
     if (authState) { const feedback = make("p", authState === "backend-not-configured" || authState === "provider-unavailable" ? "Discord sign-in is temporarily unavailable. Please try again later." : "Sign-in was not completed. Please try again with your staff Discord account.", "staff-form-status-v3"); feedback.setAttribute("role", "status"); card.append(feedback); }
     const returnTo = /^\/staffpanel\/(overview|moderation|scrapers)$/.test(location.pathname) ? location.pathname : "/staffpanel/overview";
@@ -253,15 +251,49 @@
     const root = $("#staff-app-v3");
     if (!root) return;
     const card = make("section", undefined, "staff-login-card-v3");
-    card.append(themeButton(), brand(), make("span", "Access not assigned", "eyebrow-v3"), make("h1", "Staff access required"), make("p", "This Discord account does not have an active BrowseRP staff rank."));
+    card.append(brand(), make("span", "Access not assigned", "eyebrow-v3"), make("h1", "Staff access required"), make("p", "This Discord account does not have an active BrowseRP staff rank."));
     accessActions(card); mountAccessCard(card);
   }
 
   function showMfa() {
     const root = $("#staff-app-v3"); const factors = state.session?.mfa?.factors || []; const verified = factors.find((factor) => factor.status === "verified");
-    const card = make("section", undefined, "staff-login-card-v3"); card.append(themeButton(), brand(), make("span", "Two-factor verification", "eyebrow-v3"), make("h1", verified ? "Enter your authenticator code" : "Secure your staff account"), make("p", verified ? "Open Google Authenticator or another authenticator app and enter the current six-digit code." : "Protect your staff account with an authenticator app. You’ll use its six-digit code after signing in with Discord."));
-    if (!verified) { const enroll = make("button", "Set up authenticator", "button-v3 button-primary-v3"); enroll.type = "button"; enroll.addEventListener("click", enrollMfa); card.append(enroll); }
-    else card.append(mfaVerifyForm(verified.id));
+    const card = make("section", undefined, "staff-login-card-v3"); card.append(brand(), make("span", "Two-factor verification", "eyebrow-v3"), make("h1", verified ? "Enter your authenticator code" : "Secure your staff account"), make("p", verified ? "Open Google Authenticator or another authenticator app and enter the current six-digit code." : "Protect your staff account with an authenticator app. You’ll use its six-digit code after signing in with Discord."));
+    if (!verified) {
+      const pending = factors.filter((factor) => factor.status === "unverified");
+      if (pending.length) {
+        $("h1", card).textContent = "Finish authenticator setup";
+        card.append(make("p", "If you already scanned the QR code, enter the code from your app. If you lost the setup key, start again to get a new one."));
+        const verification = make("div"); let selectedFactor = pending[0].id;
+        verification.append(mfaVerifyForm(selectedFactor));
+        if (pending.length > 1) {
+          const label = make("label", undefined, "field-v3"); const select = document.createElement("select"); select.name = "unfinished-authenticator";
+          pending.forEach((factor, index) => { const option = make("option", factor.friendlyName || factor.friendly_name || `Unfinished setup ${index + 1}`); option.value = factor.id; select.append(option); });
+          select.addEventListener("change", () => {
+            if ($('[aria-busy="true"]', card)) { select.value = selectedFactor; return; }
+            selectedFactor = select.value; verification.replaceChildren(mfaVerifyForm(selectedFactor)); $("input", verification)?.focus();
+          });
+          label.append(make("span", "Unfinished setup"), select); card.append(label);
+        }
+        const restart = make("button", "Start again", "button-v3 button-secondary-v3"); restart.type = "button";
+        restart.addEventListener("click", () => restartMfaSetup(selectedFactor, card, restart));
+        card.append(verification, restart);
+      } else { const enroll = make("button", "Set up authenticator", "button-v3 button-primary-v3"); enroll.type = "button"; enroll.addEventListener("click", enrollMfa); card.append(enroll); }
+    }
+    else {
+      const available = factors.filter((factor) => factor.status === "verified");
+      const verification = make("div"); verification.append(mfaVerifyForm(verified.id));
+      if (available.length > 1) {
+        const label = make("label", undefined, "field-v3"); const select = document.createElement("select"); select.name = "authenticator";
+        available.forEach((factor, index) => { const option = make("option", factor.friendlyName || factor.friendly_name || `Authenticator ${index + 1}`); option.value = factor.id; select.append(option); });
+        label.append(make("span", "Choose an authenticator"), select); card.append(label);
+        let selectedFactor = verified.id;
+        select.addEventListener("change", () => {
+          if ($('[aria-busy="true"]', verification)) { select.value = selectedFactor; return; }
+          selectedFactor = select.value; verification.replaceChildren(mfaVerifyForm(selectedFactor)); $("input", verification)?.focus();
+        });
+      }
+      card.append(verification);
+    }
     accessActions(card); mountAccessCard(card);
   }
 
@@ -284,6 +316,20 @@
       finally { input.disabled = false; submit.disabled = false; form.removeAttribute("aria-busy"); }
     });
     return form;
+  }
+
+  async function restartMfaSetup(factorId, card, button) {
+    if (button.disabled || $('[aria-busy="true"]', card)) return;
+    button.disabled = true;
+    const confirmed = await decision({ title: "Restart authenticator setup?", description: "This replaces only your unfinished setup. Its old QR code will stop working. You’ll scan a new code and verify it before entering the staff panel.", fields: [], submitLabel: "Start again" });
+    if (!confirmed) { button.disabled = false; button.focus(); return; }
+    const feedback = make("p", "Preparing a new setup…", "staff-form-status-v3"); feedback.setAttribute("role", "status"); card.append(feedback);
+    card.setAttribute("aria-busy", "true"); $$("input,select,button", card).forEach(control => { control.disabled = true; });
+    try {
+      const { factor } = await api("/api/auth/mfa/enroll", { method: "POST", body: JSON.stringify({ action: "restart", factorId }) });
+      authenticatorSetup(card, factor);
+    } catch (error) { feedback.textContent = error.message; }
+    finally { card.removeAttribute("aria-busy"); $$("input,select,button", card).forEach(control => { control.disabled = false; }); }
   }
 
   function authenticatorSetup(card, factor) {
@@ -481,26 +527,35 @@
     const button=$("#staff-menu-v3"); const sidebar=$(".staff-sidebar-v3");
     if(!button||!sidebar)return;
     const compact=window.matchMedia?.("(max-width: 760px)")||{matches:false};
+    button.type="button";button.classList.add("staff-navigation-toggle");
+    const icon=document.createElementNS("http://www.w3.org/2000/svg","svg");
+    for(const [name,value] of Object.entries({viewBox:"0 0 24 24",fill:"none",stroke:"currentColor","stroke-width":"1.7","stroke-linecap":"round","stroke-linejoin":"round","aria-hidden":"true",focusable:"false"}))icon.setAttribute(name,value);
+    const path=document.createElementNS(icon.namespaceURI,"path");icon.append(path);
+    const label=make("span","Menu");button.replaceChildren(icon,label);
     sidebar.id="staff-sidebar-v3";button.setAttribute("aria-controls",sidebar.id);
+    let available=true;
     function setOpen(value,restoreFocus=false){
-      const open=compact.matches&&value;
+      const open=available&&sidebar.isConnected&&compact.matches&&value;
       document.body.classList.toggle("staff-menu-open",open);
       button.setAttribute("aria-expanded",String(open));button.setAttribute("aria-label",open?"Close staff navigation":"Open staff navigation");
+      label.textContent=open?"Close":"Menu";
+      path.setAttribute("d",open?"m6 6 12 12M6 18 18 6":"M4 7h16M4 12h12M4 17h16");
       sidebar.inert=compact.matches&&!open;
       if(compact.matches&&!open)sidebar.setAttribute("aria-hidden","true");else sidebar.removeAttribute("aria-hidden");
       if(main)main.inert=open;
-      if(restoreFocus)button.focus();
+      if(available&&(open||restoreFocus))button.focus({preventScroll:true});
     }
+    staffNavigation={disable(){setOpen(false);available=false;button.hidden=true;button.disabled=true;button.removeAttribute("aria-controls");}};
     button.addEventListener("click",()=>setOpen(!document.body.classList.contains("staff-menu-open")));
     sidebar.addEventListener("click",event=>{if(event.target.closest("a")&&compact.matches)setOpen(false);});
     document.addEventListener("keydown",event=>{
       if(!compact.matches||!document.body.classList.contains("staff-menu-open"))return;
       if(event.key==="Escape"){event.preventDefault();setOpen(false,true);return;}
       if(event.key!=="Tab")return;
-      const targets=[button,...$$('a[href],button,summary,[tabindex="0"]',sidebar).filter(item=>!item.disabled&&item.getClientRects().length)];
-      const first=targets[0],last=targets.at(-1);
-      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
-      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+      const targets=[button,...$$('a[href],button,summary,[tabindex="0"]',sidebar).filter(item=>!item.disabled&&item.tabIndex>=0&&!item.closest("[inert],[hidden]")&&item.getClientRects().length)];
+      const index=targets.indexOf(document.activeElement);
+      const next=index<0?(event.shiftKey?targets.length-1:0):(index+(event.shiftKey?-1:1)+targets.length)%targets.length;
+      event.preventDefault();targets[next].focus();
     });
     compact.addEventListener?.("change",()=>setOpen(false));setOpen(false);
   }
@@ -510,7 +565,7 @@
     if (legacy[pageKey]) { location.replace(`/staffpanel/moderation#${legacy[pageKey]}`); return; }
     if (pageKey === "content") { location.replace("/staffpanel/overview#overview-adverts"); return; }
     if (pageKey === "overview" && location.hash === "#overview-roles") { location.replace("/staffpanel/moderation#staff"); return; }
-    mobile();const top=$(".staff-top-v3");if(top){top.append(themeButton());applyTheme(document.documentElement.dataset.theme||preferredTheme());}if(!await ensureStaff())return;void window.BrowseRPStaffRefreshHealth?.init({api});window.BrowseRPStaffScrapers?.init({api});try{const page=document.body.dataset.staffPage;if(page==="overview") {
+    mobile();applyTheme(document.documentElement.dataset.theme||preferredTheme());if(!await ensureStaff())return;void window.BrowseRPStaffRefreshHealth?.init({api});window.BrowseRPStaffScrapers?.init({api});try{const page=document.body.dataset.staffPage;if(page==="overview") {
       let toolsMounted = false;
       await window.BrowseRPStaffOverview.init({ api, onAuthFailure: showLogin, onLoad: async (website) => {
         if (toolsMounted) return;

@@ -27,7 +27,7 @@ The transferred production-data snapshot contained two Discord users and profile
 - Staff actions are permission-scoped and single-item. Review decisions require a reason and create an audit record.
 - Staff can review listings, reports, profiles, account/security signals, rank permissions, blog posts and picture adverts through permission-scoped audited workflows. Staff cannot inject raw HTML.
 - Account creation and sign-ins use masked network/device evidence. Full IP evidence requires an owner-approved, time-limited reveal and is audited.
-- Accounts receive an inactivity warning after 45 days and guarded deletion after 60 days; active staff, financial records and unresolved media are excluded.
+- Accounts may receive an inactivity reminder after 45 days and appear for staff review after 60 days. Inactivity alone never deletes accounts or removes ownership; requested deletion needs a separate review.
 - The browser uses only essential authentication and short-lived OAuth cookies. No analytics or advertising pixels are used. An explicit light/dark preference is stored locally in the member's own browser.
 - Payments have no public launch path in v2. Keep them disabled until checkout, webhook, refund, dispute and reconciliation flows have all passed live end-to-end review.
 

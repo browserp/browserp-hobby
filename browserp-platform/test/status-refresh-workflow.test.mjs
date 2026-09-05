@@ -18,7 +18,7 @@ function rpcFixture({cfx=[],minecraft=[],claim=runId}={}){
   if(name==='service_finish_status_refresh'){assert.equal(data.p_run_id,runId);assert.notEqual(options.signal,sharedSignal);assert.equal(options.signal.aborted,false);return true;}
   assert.fail(`Unexpected privileged call: ${name}`);
  };
- return{callRpc,calls};
+ return{callRpc,calls,cleanupMedia:async()=>0};
 }
 const sum=summary=>['checked','unchanged','unavailable','skipped','failed','deferred'].reduce((total,key)=>total+summary[key],0);
 
@@ -108,4 +108,17 @@ test('internal refresh HTTP route is POST-only and denies signed-out requests wi
   await router({method,url:'/api/internal/server-status',browserpRoute:'internal/server-status',headers:{host:'localhost:8080','content-type':'application/json'},body:{}},res);
   assert.equal(res.statusCode,method==='GET'?405:401);assert.equal(headers.get('Cache-Control'),'no-store');assert.ok(res.body.error);if(method==='GET')assert.equal(headers.get('Allow'),'POST');
  }
+});
+
+test('artwork cleanup requires a claimed scheduler run, follows persisted health, and cannot turn success into failure',async()=>{
+ let cleaned=0;
+ const rpc=rpcFixture();
+ const result=await scheduledStatusRefresh(request(),{...rpc,now:()=>100,cleanupMedia:async({signal})=>{
+  cleaned++; assert.equal(rpc.calls.at(-1).name,'service_finish_status_refresh');
+  assert.ok(signal instanceof AbortSignal); assert.equal(signal.aborted,false);
+  throw new Error('Private storage failure');
+ }});
+ assert.equal(cleaned,1);assert.equal(result.accepted,true);assert.equal(result.summary.failed,0);
+ const busy=rpcFixture({claim:null});await scheduledStatusRefresh(request(),{...busy,cleanupMedia:async()=>{cleaned++;}});assert.equal(cleaned,1);
+ await assert.rejects(scheduledStatusRefresh(request({headers:{}}),{...rpc,cleanupMedia:async()=>{cleaned++;}}),{status:401});assert.equal(cleaned,1);
 });

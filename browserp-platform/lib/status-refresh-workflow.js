@@ -2,12 +2,13 @@ import { rpc } from "./supabase.js";
 import { readBody } from "./http.js";
 import { refreshCfxCode } from "./fivem-workflow.js";
 import { refreshMinecraftCode } from "./minecraft-workflow.js";
+import { cleanupAdvertMedia } from "./staff-advert-media.js";
 
 // Only the database scheduler holds this opaque credential. Source addresses
 // and codes always come from reviewed, published database records.
 export async function scheduledStatusRefresh(req, {
   callRpc = rpc, refreshCfx = refreshCfxCode, refreshMinecraft = refreshMinecraftCode,
-  now = Date.now, budgetMs = 40_000, signal = AbortSignal.timeout(45_000)
+  now = Date.now, budgetMs = 40_000, signal = AbortSignal.timeout(45_000), cleanupMedia = cleanupAdvertMedia
 } = {}) {
   const start = now();
   const authorization = req.headers?.authorization;
@@ -57,5 +58,12 @@ export async function scheduledStatusRefresh(req, {
   // record the run before the hosted route's 60-second limit.
   await callRpc("service_finish_status_refresh", { p_run_id: runId, p_summary: summary }, undefined, { useSecret: true, signal: AbortSignal.timeout(8_000) });
   if (sourceReadFailed) throw Object.assign(new Error("The scheduled source list could not be read."), { status: 503 });
+  // Reuse the authenticated, leased scheduler. Source checks and their recorded
+  // outcome take priority; abandoned artwork gets a separate four-second budget.
+  // The cleanup RPC only claims aged, unreferenced assets and retries safely.
+  if (now() - start < 54_000) {
+    try { await cleanupMedia({ signal: AbortSignal.timeout(4_000) }); }
+    catch { console.warn(JSON.stringify({ event: "advert_media_cleanup_deferred", runId })); }
+  }
   return { accepted: true, summary };
 }

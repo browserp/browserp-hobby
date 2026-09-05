@@ -30,6 +30,16 @@ async function harness(t, platform, post = async () => ({ candidates: [], errors
   return { w, $, click, submit, edit, calls };
 }
 
+test("Roblox shows the accepted application direction while its tools remain in development", async t => {
+  const h = await harness(t, "roblox");
+  assert.equal(h.$(".staff-scraper-preview h2").textContent, "Roblox applications");
+  assert.equal(h.$(".staff-scraper-plan summary").textContent, "Application workflow — in development");
+  assert.match(h.$(".staff-scraper-preview").textContent, /Application tools are not active yet/);
+  assert.doesNotMatch(h.$("#scrapers-content").textContent, /awaiting agreement|proposed Roblox pilot/);
+  assert.ok(h.$(".staff-scraper-source-grid a")); assert.ok(h.$(".staff-scraper-plan li"));
+  assert.deepEqual(h.calls, [], "Planning has no pretend import action or hidden import request");
+});
+
 for (const [platform, destination] of [["fivem", "redm"], ["redm", "minecraft"], ["minecraft", "fivem"]]) {
   test(`${platform} review keeps edits when navigation is cancelled and leaves only after explicit discard`, async t => {
     const h = await harness(t, platform); const name = await h.edit();

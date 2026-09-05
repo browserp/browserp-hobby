@@ -113,6 +113,32 @@ const member = {
   user: { profile: { display_name: "Alex Rivers", avatar_review_status: "approved", avatar_url: "https://cdn.discordapp.com/avatar.png" } }
 };
 
+test("ending a member session removes private header identity and returns account focus to sign in", async () => {
+  const h = harness();
+  try {
+    await sessionHydration(h, { session: member });
+    const button = h.$(".account-trigger-v3"); button.focus(); button.click(); h.frame();
+    h.w.dispatchEvent(new h.w.CustomEvent("browserp:session-ended", { detail: { reason: "connection-removed" } }));
+    assert.equal(h.$(".account-menu-v3"), null);
+    assert.equal(h.w.document.body.textContent.includes("Alex Rivers"), false);
+    assert.equal(h.w.document.activeElement.textContent, "Sign in");
+    assert.equal(h.w.document.activeElement.getAttribute("href"), "/dashboard");
+  } finally { h.dom.window.close(); }
+});
+
+test("a delayed earlier session response cannot restore header identity after disconnection", async () => {
+  const h = harness();
+  try {
+    let resolve;
+    const pending = sessionHydration(h, { response: () => new Promise(done => { resolve = done; }) });
+    h.w.dispatchEvent(new h.w.CustomEvent("browserp:session-ended"));
+    resolve({ ok: true, json: async () => member }); await pending;
+    assert.equal(h.$(".account-menu-v3"), null);
+    assert.equal(h.w.document.body.textContent.includes("Alex Rivers"), false);
+    assert.equal(h.$("[data-account-v3]").textContent, "Sign in");
+  } finally { h.dom.window.close(); }
+});
+
 test("all public pages expose the same complete header and dialog navigation", async t => {
   for (const page of publicPages) await t.test(page, () => {
     const h = harness({ page });

@@ -18,16 +18,22 @@ async function harness(t) {
 test("staff mobile navigation hides inactive links from keyboard access and Escape returns focus", async t => {
   const h = await harness(t);
   assert.equal(h.sidebar.inert, true); assert.equal(h.sidebar.getAttribute("aria-hidden"), "true"); assert.equal(h.main.inert, false);
+  assert.equal(h.button.textContent, "Menu"); const closedIcon = h.button.querySelector("path").getAttribute("d");
   h.button.click();
   assert.equal(h.sidebar.inert, false); assert.equal(h.sidebar.hasAttribute("aria-hidden"), false); assert.equal(h.main.inert, true); assert.equal(h.button.getAttribute("aria-expanded"), "true");
+  assert.equal(h.button.textContent, "Close"); assert.notEqual(h.button.querySelector("path").getAttribute("d"), closedIcon);
+  assert.equal(h.w.document.activeElement, h.button);
   h.sidebar.querySelector("a").focus(); h.w.document.dispatchEvent(new h.w.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
   assert.equal(h.w.document.activeElement, h.button); assert.equal(h.sidebar.inert, true); assert.equal(h.main.inert, false); assert.equal(h.button.getAttribute("aria-expanded"), "false");
+  assert.equal(h.button.textContent, "Menu"); assert.equal(h.button.querySelector("path").getAttribute("d"), closedIcon);
 });
 
 test("staff mobile menu contains keyboard focus and restores content after a navigation choice", async t => {
   const h = await harness(t); const links = [...h.sidebar.querySelectorAll("a")];
   for (const link of links) link.getClientRects = () => [{ width: 100, height: 44 }];
-  h.button.click(); links.at(-1).focus();
+  h.button.click();
+  h.w.document.dispatchEvent(new h.w.KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true })); assert.equal(h.w.document.activeElement, links[0]);
+  links.at(-1).focus();
   h.w.document.dispatchEvent(new h.w.KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true })); assert.equal(h.w.document.activeElement, h.button);
   h.w.document.dispatchEvent(new h.w.KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true, cancelable: true })); assert.equal(h.w.document.activeElement, links.at(-1));
   // Prevent jsdom navigation while exercising the production delegated click listener.
@@ -46,7 +52,7 @@ test("staff finishing styles load last on every staff entry point and stay off p
   const files = readdirSync(new URL("../public", import.meta.url)).filter(file => file.endsWith(".html"));
   for (const file of files) {
     const html = read(file); const links = [...html.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/g)].map(match => match[1]);
-    if (file.startsWith("staff")) assert.equal(links.at(-1), "/staff-layout.css?v=2.12.0", file);
+    if (file.startsWith("staff")) assert.equal(new URL(links.at(-1), "https://browserp.com").pathname, "/staff-layout.css", file);
     else assert.equal(links.some(link => link.startsWith("/staff-layout.css")), false, file);
   }
 });

@@ -22,6 +22,8 @@ const OAUTH_COOKIE_BASES = [
   "brp_auth_provider",
   "brp_auth_claims",
   "brp_link_user",
+  "brp_link_session",
+  "brp_link_authenticated",
   "brp_oauth_state",
   "brp_oauth_nonce"
 ];
@@ -208,6 +210,73 @@ export async function hasStaffMembership(userId) {
   return memberships.length > 0;
 }
 
+export async function connectionSessionStatus(session, { requireRecent = false } = {}) {
+  const access = await rpc("member_connection_status", {}, session.accessToken);
+  if (access?.active !== true || access.userId !== session.user.id || !access.sessionId) {
+    throw Object.assign(new Error("Sign in again to manage your connected accounts."), { status: 401 });
+  }
+  if (requireRecent && access.staff === true) throw Object.assign(new Error("Staff accounts must keep their assigned Discord sign-in."), { status: 403 });
+  if (requireRecent && access.recent !== true) throw Object.assign(new Error("Sign in again before changing your connected accounts."), { status: 428 });
+  return access;
+}
+
+const IDENTITY_UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+export function ownedIdentityId(identity, userId) {
+  if (!identity || (identity.user_id && identity.user_id !== userId)) return null;
+  // Supabase identity_id is the identity UUID; provider_id identifies the
+  // external account and must never be used for the Auth delete endpoint.
+  const id = identity.identity_id || identity.id;
+  return IDENTITY_UUID.test(String(id || "")) ? id : null;
+}
+
+export async function unlinkMemberIdentity(req, res, { provider, identityId, accountId }) {
+  let session = await getSession(req, res, { required: true });
+  if (accountId !== session.user.id) throw Object.assign(new Error("Your signed-in account changed. Refresh before changing connections."), { status: 409 });
+  await connectionSessionStatus(session, { requireRecent: true });
+  if (await hasStaffMembership(session.user.id)) throw Object.assign(new Error("Staff accounts must keep their assigned Discord sign-in."), { status: 403 });
+  if (!OAUTH_PROVIDERS.has(provider) || !IDENTITY_UUID.test(String(identityId || ""))) throw Object.assign(new Error("Choose a connected account to disconnect."), { status: 400 });
+  const operation = await rpc("member_connection_operation", { p_action: "begin" }, session.accessToken);
+  let providerCalled = false;
+  try {
+    // Re-read after acquiring the account lease: another tab may have changed
+    // identities since the profile was rendered or this request started.
+    // The first session read may have refreshed an expired cookie. Re-read the
+    // provider using that validated token, never reuse the original refresh
+    // cookie a second time after waiting for the account lease.
+    session = { ...session, user: await userForToken(session.accessToken) };
+    if (session.user?.id !== accountId) throw Object.assign(new Error("Your signed-in account changed. Refresh before changing connections."), { status: 409 });
+    await connectionSessionStatus(session, { requireRecent: true });
+    const configured = await authCapabilities();
+    const identities = Array.isArray(session.user.identities) ? session.user.identities : [];
+    const identity = identities.find(item => ownedIdentityId(item, accountId) === identityId && item.provider === provider);
+    if (!identity) throw Object.assign(new Error("That connection is no longer attached to this account. Refresh your connections."), { status: 409 });
+    const remaining = identities.filter(item => ownedIdentityId(item, accountId) && ownedIdentityId(item, accountId) !== identityId && OAUTH_PROVIDERS.has(item.provider) && configured[item.provider]);
+    if (!remaining.length) throw Object.assign(new Error("Keep at least one working sign-in method connected."), { status: 409 });
+    providerCalled = true;
+    await supabaseRequest(`auth/v1/user/identities/${identityId}`, { method: "DELETE", accessToken: session.accessToken });
+    const updated = await userForToken(session.accessToken);
+    if (updated?.id !== accountId || updated.identities?.some(item => ownedIdentityId(item, accountId) === identityId)) throw Object.assign(new Error("The change could not be confirmed. Sign in again and check your connected accounts."), { status: 409 });
+    const signInProviders = memberIdentityProviders(updated).filter(value => configured[value]);
+    if (!signInProviders.length) throw Object.assign(new Error("Your remaining sign-in could not be confirmed. Please contact BrowseRP support."), { status: 409 });
+    await rpc("member_connection_operation", { p_action: "release", p_token: operation }, session.accessToken);
+    let sessionsEnded = true;
+    try { await supabaseRequest("auth/v1/logout?scope=global", { method: "POST", accessToken: session.accessToken }); }
+    catch { sessionsEnded = false; }
+    clearSession(res);
+    return { disconnected: true, provider, signInProviders, sessionsEnded };
+  } catch (error) {
+    if (!providerCalled) {
+      await rpc("member_connection_operation", { p_action: "release", p_token: operation }, session.accessToken).catch(() => {});
+      throw error;
+    }
+    // A timeout can arrive after Auth committed the unlink. Keep the lease,
+    // clear this browser's session and require a fresh check instead of
+    // presenting another destructive action against an uncertain identity list.
+    clearSession(res);
+    throw Object.assign(new Error("We couldn’t confirm the change. You’re signed out here. Sign in again to check your connected accounts."), { status: 401 });
+  }
+}
+
 export function safeProviderAuthorizationUrl(value, provider) {
   if (typeof value !== "string" || value.length > 12000 || /[\s\\]/.test(value)) return null;
   try {
@@ -327,7 +396,7 @@ export function beginOAuth(req, res, provider) {
     ...transitionCookies("brp_auth_return", returnTo, { maxAge: 600 }),
     ...transitionCookies("brp_auth_provider", normalizedProvider, { maxAge: 600 }),
     ...transitionCookies("brp_auth_claims", normalizedProvider === "discord" && requestUrl.searchParams.get("claimGuilds") === "1" ? "1" : "0", { maxAge: 600 }),
-    ...expiredCookies(["brp_link_user"]),
+    ...expiredCookies(["brp_link_user", "brp_link_session", "brp_link_authenticated"]),
     ...transitionCookies("brp_oauth_state", state, { maxAge: 600 }),
     ...transitionCookies("brp_oauth_nonce", nonce, { maxAge: 600 })
   ]);
@@ -341,11 +410,13 @@ export function beginOAuth(req, res, provider) {
   return authorize.toString();
 }
 
-export async function beginIdentityLink(req, res, provider, returnTo = "/profile") {
+export async function beginIdentityLink(req, res, provider, returnTo = "/profile", accountId) {
   if (!OAUTH_PROVIDERS.has(provider)) throw Object.assign(new Error("Choose Discord or Google."), { status: 400 });
   const session = await getSession(req, res, { required: true });
+  if (accountId !== undefined && accountId !== session.user.id) throw Object.assign(new Error("Your signed-in account changed. Refresh before changing connections."), { status: 409 });
   if (await hasStaffMembership(session.user.id)) throw Object.assign(new Error("Additional connections are unavailable for staff accounts. Keep using your assigned Discord account."), { status: 403 });
   if (memberIdentityProviders(session.user).includes(provider)) throw Object.assign(new Error("This provider is already connected to your account."), { status: 409 });
+  const original = await connectionSessionStatus(session, { requireRecent: true });
   const destination = returnTo === "/dashboard" ? "/dashboard" : "/profile";
   const authorize = new URL(beginOAuth({ ...req, url: `/api/auth/${provider}?returnTo=${encodeURIComponent(destination)}` }, res, provider));
   const callback = new URL(authorize.searchParams.get("redirect_to")); callback.searchParams.set("brp_link", "1");
@@ -355,7 +426,11 @@ export async function beginIdentityLink(req, res, provider, returnTo = "/profile
     const { data } = await supabaseRequest(`${authorize.pathname}${authorize.search}`, { accessToken: session.accessToken });
     const url = safeProviderAuthorizationUrl(data?.url, provider);
     if (!url) throw Object.assign(new Error("The provider did not return a valid connection page. Please try again later."), { status: 502 });
-    setCookies(res, transitionCookies("brp_link_user", session.user.id, { maxAge: 600 }));
+    setCookies(res, [
+      ...transitionCookies("brp_link_user", session.user.id, { maxAge: 600 }),
+      ...transitionCookies("brp_link_session", original.sessionId, { maxAge: 600 }),
+      ...transitionCookies("brp_link_authenticated", String(original.authenticatedAt), { maxAge: 600 })
+    ]);
     return url;
   } catch (error) {
     clearOAuthState(res);
@@ -393,6 +468,8 @@ export async function finishOAuth(req, res) {
   if (linking) {
     const current = await getSession(req, res, { required: true });
     if (current.user.id !== linkUser || await hasStaffMembership(linkUser)) throw Object.assign(new Error("Sign in to the original member account before connecting a provider."), { status: 403 });
+    const original = await connectionSessionStatus(current, { requireRecent: true });
+    if (original.sessionId !== cookieValue(cookies, "brp_link_session") || String(original.authenticatedAt) !== cookieValue(cookies, "brp_link_authenticated")) throw Object.assign(new Error("Your sign-in changed. Start the connection again from your profile."), { status: 403 });
   }
 
   const { data } = await supabaseRequest("auth/v1/token?grant_type=pkce", {
@@ -416,7 +493,7 @@ export async function enrollTotp(accessToken, friendlyName = "BrowseRP staff") {
   const { data } = await supabaseRequest("auth/v1/factors", {
     method: "POST",
     accessToken,
-    body: { factor_type: "totp", friendly_name: friendlyName }
+    body: { factor_type: "totp", friendly_name: friendlyName, issuer: "BrowseRP" }
   });
   return data;
 }

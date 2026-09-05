@@ -234,7 +234,15 @@
           add("Community URL", "communityUrl", { type: "url", maxLength: 500 });
           add("Website URL", "websiteUrl", { type: "url", maxLength: 500 });
           add("Cfx join link (FiveM / RedM)", "cfxJoinUrl", { type: "url", maxLength: 100, wide: true });
-          for (const [name, label] of [["verified", "Verified community"], ["beginnerFriendly", "Beginner friendly"]]) { const wrapper = make("label", undefined, "moderation-filter-booleans"); const input = make("input"); input.type = "checkbox"; input.name = name; input.checked = record[name] === true; controls[name] = input; wrapper.append(input, make("span", label)); grid.append(wrapper); }
+          for (const [name, label] of [["verified", "Owner verified"], ["beginnerFriendly", "Beginner friendly"]]) {
+            const wrapper = make("label", undefined, "moderation-filter-booleans"); const input = make("input"); input.type = "checkbox"; input.name = name; input.checked = record[name] === true; controls[name] = input;
+            const copy = make("span", label);
+            if (name === "verified") {
+              const help = make("small", "Confirms ownership of the listing, not server quality.", "staff-dialog-copy-v3"); help.id = "moderation-owner-verified-help";
+              input.setAttribute("aria-describedby", help.id); copy.append(make("br"), help);
+            }
+            wrapper.append(input, copy); grid.append(wrapper);
+          }
         }
         return controls;
       }, "Save changes", async (controls, reason) => {

@@ -12,4 +12,7 @@
 .member-connected-badge { border: 1px solid #306f59; border-radius: 99px; background: #10281f; color: #99edcb; padding: 5px 11px; font-size: 13px; }
 .member-connection-unavailable { margin: 0; font-size: 13px; color: var(--muted, #aca0b5); }
 .member-connection .button { min-height: 44px; width: 100%; }
+.member-connection .button[hidden] { display: none; }
+.member-connection-confirmation, .member-connection-actions { display: grid; gap: 12px; width: 100%; }
+.member-connection-confirmation p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--copy); }
 @media (max-width: 520px) { .member-connections-grid { grid-template-columns: minmax(0, 1fr); } }

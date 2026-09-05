@@ -23,20 +23,37 @@ function harness(api) {
   }
   const nodes = new Map();
   const metrics = ["totalUsers", "publishedServers", "publishedBlogs", "activeStaff"].map((key) => { const element = new Element("strong"); element.dataset.overviewMetric = key; return element; });
+  const queues = ["pendingSubmissions", "openReports", "openReports"].map((key) => { const element = new Element("span"); element.dataset.overviewQueue = key; return element; });
   const ranges = ["30d", "90d", "180d", "1y", "max"].map((key) => { const element = new Element("button"); element.dataset.overviewRange = key; return element; });
   document = new Element("document"); document.hidden = false; document.activeElement = null;
   document.querySelector = (selector) => { if (!nodes.has(selector)) nodes.set(selector, new Element()); return nodes.get(selector); };
-  document.querySelectorAll = (selector) => selector === "[data-overview-metric]" ? metrics : selector === "[data-overview-range]" ? ranges : [];
+  document.querySelectorAll = (selector) => selector === "[data-overview-metric]" ? metrics : selector === "[data-overview-queue]" ? queues : selector === "[data-overview-range]" ? ranges : [];
   document.createElement = (tag) => new Element(tag);
   document.createElementNS = (_, tag) => new Element(tag);
   const window = new Element("window"); const timers = [];
   const context = { document, window, Intl, Date, setInterval(callback, delay) { timers.push({ callback, delay, cleared: false }); return timers.length - 1; }, clearInterval(id) { if (timers[id]) timers[id].cleared = true; } };
   vm.runInNewContext(readFileSync(new URL("../public/staff-overview.js", import.meta.url), "utf8"), context);
-  return { init: (extra = {}) => window.BrowseRPStaffOverview.init({ api, ...extra }), document, window, nodes, metrics, ranges, timers };
+  return { init: (extra = {}) => window.BrowseRPStaffOverview.init({ api, ...extra }), document, window, nodes, metrics, queues, ranges, timers };
 }
 
 const flush = async () => { for (let index = 0; index < 8; index += 1) await Promise.resolve(); };
 const allText = (element) => [element.textContent, ...element.children.map(allText)].join(" ");
+
+test("overview updates every queue badge, including reports, zero counts and expired access", async () => {
+  let data = fixture(); data.overview.metrics.openReports = 7;
+  let expired = false;
+  const app = harness(async () => { if (expired) throw Object.assign(new Error("Staff access denied"), { status: 403 }); return data; });
+  const controller = await app.init({ onAuthFailure() {} });
+  assert.deepEqual(app.queues.map(queue => queue.textContent), ["3 pending", "7 open", "7 open"]);
+  data = fixture(); data.overview.metrics.openReports = 0;
+  await controller.refresh(); assert.deepEqual(app.queues.map(queue => queue.textContent), ["3 pending", "0 open", "0 open"]);
+  delete data.overview.metrics.openReports;
+  await controller.refresh(); assert.deepEqual(app.queues.map(queue => queue.textContent), ["3 pending", "", ""]);
+  data.overview.openReports = 2;
+  await controller.refresh(); assert.deepEqual(app.queues.map(queue => queue.textContent), ["3 pending", "2 open", "2 open"]);
+  expired = true; await controller.refresh(); assert.deepEqual(app.queues.map(queue => queue.textContent), ["", "", ""]);
+  controller.destroy();
+});
 
 test("overview waits for authorised init and renders exact API counts with keyboard chart inspection", async () => {
   const requests = []; const loaded = [];

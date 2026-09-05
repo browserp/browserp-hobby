@@ -104,6 +104,9 @@ test("server editor preserves platform, region, language, framework and access o
   const controls = [...dialog.querySelectorAll("input"), ...dialog.querySelectorAll("select"), ...dialog.querySelectorAll("textarea")]; const named = (name) => controls.find((input) => input.name === name);
   const fieldGrid = dialog.querySelector(".moderation-editor-fields"); const order = fieldGrid.children.map((label) => label.children.find((item) => item.name)?.name).filter(Boolean);
   assert.deepEqual(order.slice(1, 6), ["platform", "region", "language", "framework", "access"]);
+  assert.match(text(named("verified").parent), /Owner verified.*Confirms ownership of the listing, not server quality/);
+  assert.equal(named("verified").attributes["aria-describedby"], "moderation-owner-verified-help");
+  assert.equal(named("verified").checked, true);
   assert.equal(named("language").value, "French"); assert.equal(named("framework").value, "QBCore"); named("reason").value = "Correct the reviewed server details.";
   await dialog.querySelector("form").emit("submit"); await editing;
   assert.equal(writes[0].kind, "server"); assert.equal(writes[0].expectedVersion, 8); assert.equal(writes[0].data.language, "French"); assert.equal(writes[0].data.framework, "QBCore"); controller.destroy();

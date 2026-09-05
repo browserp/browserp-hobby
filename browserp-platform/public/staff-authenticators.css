@@ -1,0 +1,17 @@
+.staff-authenticators { padding: clamp(18px,2.5vw,28px); }
+.staff-authenticators > summary { min-height: 44px; cursor: pointer; color: var(--text); font-size: 18px; font-weight: 700; }
+.staff-authenticators p { color: var(--copy); line-height: 1.65; }
+.staff-authenticator-list { display: grid; gap: 12px; margin: 20px 0; padding: 0; list-style: none; }
+.staff-authenticator-list li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-soft); }
+.staff-authenticator-list strong,.staff-authenticator-list span { display: block; overflow-wrap: anywhere; }
+.staff-authenticator-list span,.staff-authenticator-list small { margin-top: 5px; color: var(--copy); font-size: 13px; }
+.staff-authenticator-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.staff-authenticator-actions .button-v3 { min-height: 44px; }
+.staff-authenticator-editor:not(:empty) { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--line); }
+.staff-authenticator-editor .staff-form-v3 { max-width: 560px; }
+.staff-authenticator-editor h3 { margin: 0; }
+.staff-authenticator-fields { display: grid; gap: 16px; }
+.staff-authenticator-fields input,.staff-authenticator-fields select { width: 100%; min-width: 0; min-height: 44px; }
+.staff-authenticator-fields .secret-v3 { overflow-wrap: anywhere; }
+.staff-authenticator-fields .secret-v3[hidden] { display: none; }
+.staff-authenticators [aria-busy="true"] { cursor: progress; }

@@ -29,6 +29,7 @@
     if (typeof api !== "function") throw new TypeError("Overview requires the authorised staff API client.");
     if (!$("#website-overview")) return null;
     active?.destroy();
+    const authenticators = window.BrowseRPStaffAuthenticators?.init({ api });
     const state = { range: "30d", website: null, busy: false, destroyed: false, request: 0, selectedDate: null, interval: null, observer: null, lastWidth: 0 };
     const cleanup = [];
     const listen = (element, event, callback) => { if (!element) return; element.addEventListener(event, callback); cleanup.push(() => element.removeEventListener(event, callback)); };
@@ -132,8 +133,11 @@
 
     function render(payload, website) {
       $$("[data-overview-metric]").forEach((element) => { const value = website.metrics?.[element.dataset.overviewMetric]; element.textContent = count(value) ? number.format(value) : "Unavailable"; });
-      const queue = $("[data-overview-queue]"); const pending = payload.overview?.metrics?.pendingSubmissions ?? payload.overview?.pendingSubmissions;
-      if (queue) queue.textContent = count(pending) ? `${number.format(pending)} pending` : "";
+      $$("[data-overview-queue]").forEach((element) => {
+        const key = element.dataset.overviewQueue;
+        const value = payload.overview?.metrics?.[key] ?? payload.overview?.[key];
+        element.textContent = count(value) ? `${number.format(value)} ${key === "openReports" ? "open" : "pending"}` : "";
+      });
       $("#overview-users-total").textContent = number.format(website.users.total);
       const period = state.range === "max" ? "since the first signup" : `in the selected ${RANGE_LABELS[state.range].toLowerCase()}`;
       $("#overview-users-new").textContent = `${number.format(website.users.newUsers)} current accounts joined ${period}`;
@@ -164,6 +168,7 @@
           controller.destroy();
           empty("Your staff session has ended. Sign in again to view current data.");
           $$("[data-overview-metric]").forEach((element) => { element.textContent = "—"; });
+          $$("[data-overview-queue]").forEach((element) => { element.textContent = ""; });
           $("#overview-users-total").textContent = "—";
           $("#overview-users-new").textContent = "Staff access is required.";
           status("Staff access needs to be verified again.", "error");
@@ -181,7 +186,7 @@
       } finally { if (!state.destroyed && request === state.request) busy(false); }
     }
 
-    const controller = { refresh, get website() { return state.website; }, destroy() { state.destroyed = true; state.request += 1; clearInterval(state.interval); state.observer?.disconnect(); cleanup.forEach((remove) => remove()); if (active === controller) active = null; } };
+    const controller = { refresh, get website() { return state.website; }, destroy() { state.destroyed = true; state.request += 1; clearInterval(state.interval); state.observer?.disconnect(); authenticators?.destroy(); cleanup.forEach((remove) => remove()); if (active === controller) active = null; } };
     active = controller;
     $$("[data-overview-range]").forEach((button) => listen(button, "click", () => selectRange(button.dataset.overviewRange)));
     listen($("#overview-refresh"), "click", () => { void refresh(); });

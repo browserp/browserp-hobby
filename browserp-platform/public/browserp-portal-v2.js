@@ -3,7 +3,7 @@
 
   const page = document.body.dataset.page || "";
   const root = document.querySelector("#portal-root");
-  const state = { session: null, csrfToken: "", staffOverview: null, content: {} };
+  const state = { session: null, csrfToken: "", staffOverview: null, content: {}, sessionEnded: false };
 
   function make(tag, className = "", text) {
     const element = document.createElement(tag);
@@ -47,6 +47,7 @@
   }
 
   async function api(path, options = {}) {
+    if (state.sessionEnded && /^\/api\/(me|admin)\//.test(path)) throw Object.assign(new Error("Sign in again to return to your account."), { status: 401 });
     const method = String(options.method || "GET").toUpperCase();
     const changing = method !== "GET" && method !== "HEAD";
     if (changing && !state.csrfToken) {
@@ -71,6 +72,7 @@
   async function loadSession() {
     try {
       const session = await api("/api/auth/session");
+      if (state.sessionEnded) return state.session;
       state.session = session;
       state.csrfToken = typeof session.csrfToken === "string" ? session.csrfToken : "";
       return session;
@@ -177,7 +179,8 @@
     return make("span", `status-chip ${statusTone(value)}`, friendlyStatus(value));
   }
 
-  function setRoot(content) {
+  function setRoot(content, { accessGate = false } = {}) {
+    if (state.sessionEnded && !accessGate) return;
     root.className = "";
     root.setAttribute("aria-busy", "false");
     root.replaceChildren(content);
@@ -190,7 +193,8 @@
     return section;
   }
 
-  async function signInGate({ staffOnly = false, title, description } = {}) {
+  async function signInGate({ staffOnly = false, title, description, remainingProviders, returnTo: accountReturn } = {}) {
+    if (state.sessionEnded && !remainingProviders) return;
     const gate = make("section", "access-gate-v2");
     const brand = make("div", "portal-avatar portal-brand-mark-v6");
     const brandImage = make("img");
@@ -204,12 +208,16 @@
       ? "Use the Discord account attached to an active BrowseRP staff membership."
       : "Sign in to manage listings, follow review progress and keep servers saved in one place.")));
 
+    // Remove personal content before waiting for external provider availability.
+    setRoot(gate, { accessGate: true });
     const actions = make("div", "access-actions");
-    let providers = { discord: true, google: false };
+    let providers = remainingProviders ? { discord: false, google: false } : { discord: true, google: false };
     try {
       providers = (await api("/api/auth/providers")).providers || providers;
     } catch { /* A clear unavailable state is shown below if no provider works. */ }
-    const returnTo = staffOnly ? "/staff" : "/dashboard";
+    if (remainingProviders) providers = Object.fromEntries(["discord", "google"].map(provider => [provider, providers[provider] === true && remainingProviders.includes(provider)]));
+    const requestedReturn = new URLSearchParams(location.search).get("returnTo") || "";
+    const returnTo = staffOnly ? "/staff" : ["/profile", "/dashboard"].includes(accountReturn) ? accountReturn : /^\/server\/[a-z0-9-]+\/?$/i.test(requestedReturn) ? requestedReturn : "/dashboard";
     if (providers.discord) actions.append(providerButton(`/api/auth/discord?returnTo=${encodeURIComponent(returnTo)}`, "button button-primary", "Continue with Discord", "discord"));
     if (!staffOnly && providers.google) actions.append(providerButton(`/api/auth/google?returnTo=${encodeURIComponent(returnTo)}`, "button button-secondary", "Continue with Google", "google"));
     if (actions.childElementCount === 0) actions.append(make("p", "portal-status error", "Sign-in is temporarily unavailable. Please try again later."));
@@ -220,8 +228,26 @@
       note.append(link("/terms", "access-note-link", "Terms"), document.createTextNode(" and acknowledge the "), link("/privacy", "access-note-link", "Privacy Policy"), document.createTextNode("."));
     }
     gate.append(note);
-    setRoot(gate);
+    if (gate.isConnected && state.sessionEnded) { gate.tabIndex = -1; gate.focus({ preventScroll: true }); }
   }
+
+  window.addEventListener("browserp:session-ended", event => {
+    const messages = {
+      "connection-removed": "Your account connection was removed and you’ve been signed out on all devices. Sign in below to continue.",
+      "connection-removed-local": "Your account connection was removed. You’re signed out here, but sign-out on other devices couldn’t be confirmed. Sign in below to review your account.",
+      "connection-unconfirmed": "We couldn’t confirm the account change. You’re signed out here. Sign in below to check your connected accounts."
+    };
+    if (!Object.hasOwn(messages, event.detail?.reason)) return;
+    state.sessionEnded = true;
+    state.session = { authenticated: false, user: null, csrfToken: "" };
+    state.csrfToken = ""; state.staffOverview = null;
+    if (!root || !["profile", "dashboard"].includes(page)) return;
+    document.querySelectorAll(".avatar-crop-dialog-v3").forEach(dialog => { if (dialog.open && typeof dialog.close === "function") dialog.close(); dialog.remove(); });
+    const siteToast = document.querySelector("#site-toast");
+    if (siteToast) { siteToast.classList.remove("show"); siteToast.textContent = ""; }
+    const remainingProviders = Array.isArray(event.detail.remainingProviders) ? event.detail.remainingProviders.filter(provider => ["discord", "google"].includes(provider)) : [];
+    void signInGate({ title: "Sign in to continue", description: messages[event.detail.reason], remainingProviders, returnTo: page === "profile" ? "/profile" : "/dashboard" });
+  });
 
   function portalHead(kicker, title, description, displayName) {
     const head = make("header", "portal-head");
@@ -314,10 +340,52 @@
       return section;
     }
     const list = make("ul", "portal-list");
-    submissions.forEach((submission) => {
-      list.append(listItem(submission.name || "Server submission", `Submitted ${dateLabel(submission.created_at)}`, [], { status: submission.status }));
-    });
-    section.append(list);
+    const feedbackStatus = make("p", "portal-help", "Loading review feedback…");
+    feedbackStatus.setAttribute("role", "status");
+    const retry = button("small-button", "Try review feedback again"); retry.hidden = true;
+    const session = state.session;
+    let loading = false;
+    const current = () => !state.sessionEnded && state.session === session && section.isConnected;
+    const render = (items) => {
+      list.replaceChildren(...items.map((submission) => {
+        const status = String(submission.status || "").toLowerCase();
+        const nextStep = {
+          pending_review: "Your listing is waiting for staff review. You don't need to send it again.",
+          changes_requested: "Changes are needed before this listing can be approved. Check the review feedback and listing standards.",
+          rejected: "This submission wasn't approved. Check the review feedback and listing standards before submitting again.",
+          approved: "Approved. Find your published listing under Your listings."
+        }[status];
+        const actions = ["changes_requested", "rejected"].includes(status)
+          ? [link("/legal#standards", "small-button", "Read listing standards")] : [];
+        const item = listItem(submission.name || "Server submission", `Submitted ${dateLabel(submission.created_at)}`, actions, { status });
+        const main = item.querySelector(".portal-item-main");
+        if (typeof submission.review_note === "string" && submission.review_note.trim()) {
+          main.append(append(make("p"), make("strong", "", "Review feedback: "), make("span", "", submission.review_note.trim())));
+        }
+        if (nextStep) main.append(make("p", "", nextStep));
+        return item;
+      }));
+    };
+    const loadFeedback = async () => {
+      if (loading || !current()) return;
+      loading = true; retry.disabled = true; feedbackStatus.hidden = false; feedbackStatus.textContent = "Loading review feedback…";
+      try {
+        const payload = await api("/api/submissions");
+        if (!current()) return;
+        if (!Array.isArray(payload.submissions)) throw new Error("Review feedback is unavailable.");
+        const reviewed = new Map(payload.submissions.map((submission) => [submission.id, submission]));
+        render(submissions.map((submission) => ({ ...submission, ...reviewed.get(submission.id) })));
+        feedbackStatus.textContent = ""; feedbackStatus.hidden = true; retry.hidden = true;
+      } catch {
+        if (!current()) return;
+        feedbackStatus.textContent = "Review feedback couldn't be loaded. Your last known submission status is shown below.";
+        retry.hidden = false;
+      } finally { loading = false; retry.disabled = false; }
+    };
+    render(submissions);
+    retry.addEventListener("click", loadFeedback);
+    section.append(feedbackStatus, retry, list);
+    Promise.resolve().then(loadFeedback);
     return section;
   }
 
@@ -359,6 +427,7 @@
       if (image.naturalWidth < 128 || image.naturalHeight < 128 || image.naturalWidth > 6000 || image.naturalHeight > 6000) {
         toast("Choose an image between 128 and 6000 pixels.", "error"); return;
       }
+      if (state.sessionEnded || !shell.isConnected) return;
       const dialog = make("dialog", "portal-dialog avatar-crop-dialog-v3");
       const form = make("form", "dialog-form"); form.method = "dialog";
       const head = make("div", "dialog-head"); head.append(make("div", "", undefined), button("icon-button", "×"));
@@ -1448,6 +1517,7 @@
     if (!root) return;
     wireReviewDialog();
     const [session] = await Promise.all([loadSession(), loadPublishedContent()]);
+    if (state.sessionEnded) return;
     if (page === "dashboard") await dashboardPage(session);
     if (page === "profile") await profilePage(session);
     if (page === "server") await serverPage(session);

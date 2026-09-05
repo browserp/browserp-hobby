@@ -286,6 +286,13 @@
       minecraft: ["Vanilla roleplay", "Paper", "Fabric", "Forge", "Fantasy SMP", "Towny"],
       forza: ["Forza Horizon 5", "Forza Motorsport", "Cruising", "Car meet roleplay"]
     });
+    const SETUP_FIELDS = Object.freeze({
+      fivem: { label: "Server setup", example: "e.g. QBCore, ESX or vMenu", kind: "Server setup" },
+      redm: { label: "Server setup", example: "e.g. VORP, RedEM:RP or RSG Core", kind: "Server setup" },
+      roblox: { label: "Roblox experience", example: "e.g. Brookhaven or Emergency Response: Liberty County", kind: "Experience" },
+      minecraft: { label: "Modpack or game mode", example: "e.g. Fantasy SMP, Towny or your modpack name", kind: "Game mode / setup" }
+    });
+    const setupField = () => SETUP_FIELDS[platformSelect?.value] || { label: "Game mode or setup", example: "e.g. your game mode or custom setup", kind: "Game mode / setup" };
     if (frameworkInput) {
       const suggestionRoot = element("div", "search-suggestions-v3 listing-suggestions-v3");
       suggestionRoot.id = "framework-suggestions-v3"; suggestionRoot.hidden = true; frameworkInput.parentElement.append(suggestionRoot);
@@ -295,7 +302,7 @@
         const options = (FRAMEWORK_SUGGESTIONS[platformSelect?.value] || ["Custom game mode", "Default game setup"])
           .filter((item) => !term || item.toLowerCase().includes(term)).slice(0, 6);
         if (!options.length) { suggestionRoot.classList.remove("search-suggestions-open"); suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.setAttribute("aria-expanded","false");return; }
-        suggestionRoot.replaceChildren(...options.map((item) => { const option=element("button","search-suggestion-v3");option.type="button";option.setAttribute("role","option");option.append(element("span","search-suggestion-kind-v3","Game mode"),element("strong","",item));option.addEventListener("click",()=>{frameworkInput.value=item;frameworkInput.focus();suggestionRoot.classList.remove("search-suggestions-open");suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.setAttribute("aria-expanded","false");});return option; }));
+        suggestionRoot.replaceChildren(...options.map((item) => { const option=element("button","search-suggestion-v3");option.type="button";option.setAttribute("role","option");option.append(element("span","search-suggestion-kind-v3",setupField().kind),element("strong","",item));option.addEventListener("click",()=>{frameworkInput.value=item;frameworkInput.focus();suggestionRoot.classList.remove("search-suggestions-open");suggestionRoot.hidden=true;suggestionRoot.inert=true;frameworkInput.setAttribute("aria-expanded","false");});return option; }));
         suggestionRoot.hidden=false;suggestionRoot.inert=false;frameworkInput.setAttribute("aria-expanded","true");requestAnimationFrame(()=>suggestionRoot.classList.add("search-suggestions-open"));
       };
       frameworkInput.addEventListener("focus", updateFrameworkSuggestions);
@@ -304,10 +311,10 @@
     function updatePlatformFields() {
       setupTagPicker(form, platformSelect?.value);
       const setupLabel = frameworkInput?.parentElement.querySelector("span");
-      if (setupLabel) setupLabel.textContent = platformSelect?.value === "minecraft" ? "Modpack or game mode" : platformSelect?.value === "roblox" ? "Roblox experience" : "Server setup";
+      if (setupLabel) setupLabel.textContent = setupField().label;
       const cfxPlatform = ["fivem", "redm"].includes(platformSelect?.value);
       if (cfxField) { cfxField.hidden = !cfxPlatform; cfxField.inert = !cfxPlatform; }
-      if (frameworkInput) frameworkInput.placeholder = cfxPlatform ? "e.g. QBCore, ESX or custom" : "e.g. modpack or game mode";
+      if (frameworkInput) frameworkInput.placeholder = setupField().example;
       if (document.activeElement === frameworkInput) frameworkInput.dispatchEvent(new Event("input"));
     }
     platformSelect?.addEventListener("change", () => { if (frameworkInput) frameworkInput.value = ""; updatePlatformFields(); });

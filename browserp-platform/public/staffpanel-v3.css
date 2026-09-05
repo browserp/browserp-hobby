@@ -172,10 +172,3 @@ body.staff-v3 { background: var(--bg); color: var(--text); }
 .staff-dialog-card-v3 { background: var(--panel); }
 .staff-dialog-copy-v3 { color: var(--copy); }
 .staff-dialog-actions-v3 .staff-danger-v3 { border-color: var(--danger); background: #4f242f; }
-
-.staff-theme-v3 {
-  margin-left: auto;
-  min-height: 40px;
-  padding: 7px 12px;
-  font-size: 12px;
-}

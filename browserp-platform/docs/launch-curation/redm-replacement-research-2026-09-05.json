@@ -1,0 +1,842 @@
+{
+  "kind": "editorial_research_not_import_manifest",
+  "reviewedAt": "2026-09-05T19:47:08Z",
+  "liveWritesPerformed": false,
+  "membershipOrMessagesPerformed": false,
+  "currentRosterReference": "current-roster-audit-2026-09-05.md",
+  "decisionReference": "redm-replacement-research-2026-09-05.md",
+  "historyMethod": {
+    "source": "RedMMetrics public chart samples",
+    "range": "Approximately 2026-08-29T19:55Z through 2026-09-05T19:40Z",
+    "completeUtcDays": [
+      "2026-08-30",
+      "2026-08-31",
+      "2026-09-01",
+      "2026-09-02",
+      "2026-09-03",
+      "2026-09-04"
+    ],
+    "repeated35Definition": "At least three observations >=35 on a complete UTC day",
+    "limits": [
+      "Unequal sampling; mean is not time weighted.",
+      "History is not a current live count, independent human census or quality score.",
+      "Daily UTC boundaries do not infer a community home region."
+    ]
+  },
+  "candidates": [
+    {
+      "name": "Onyx County",
+      "cfxCode": "lgrex4",
+      "rankForNextReview": 1,
+      "decision": "preferred_conditional_replacement",
+      "publishReady": false,
+      "proposedMetadata": {
+        "platform": "redm",
+        "region": null,
+        "language": "English",
+        "framework": "vorp",
+        "access": "unknown"
+      },
+      "officialWebsite": "https://onyxcountyrp.com/",
+      "discordUrl": "https://discord.gg/onyxcounty",
+      "discordAssociation": "Current official website and/or exact Cfx source; resolution not independently certified in this pass.",
+      "discordCurrentResolution": "HTTP403_access_limited_not_invalid",
+      "joinUrl": "https://cfx.re/join/lgrex4",
+      "joinRouteConfirmed": true,
+      "admissionEvidence": "Public suggested; current Cfx whitelist field says Off and public guides do not show a whole-server application. Confirm Discord admission before publishing.",
+      "gates": [
+        "Resolve canonical invite without joining.",
+        "Confirm whether general admission requires application, rather than department applications only.",
+        "Review stored artwork and full listing in the staff importer.",
+        "Keep reporting evidence/time-limit caveat in editorial assessment."
+      ],
+      "cfxObservation": {
+        "url": "https://frontend.cfx-services.net/api/servers/single/lgrex4",
+        "fetchedAt": "2026-09-05T19:38:27.557965+00:00",
+        "sourceLastSeen": "2026-09-05T19:36:41.431736632Z",
+        "sourceGame": "rdr3",
+        "sourceLocale": "en-US",
+        "fallback": false,
+        "usableAtFetch": true,
+        "playersAtFetch": 12,
+        "capacityAtFetch": 128,
+        "note": "Historical research observation only; never copy into live player fields."
+      },
+      "activityHistory": {
+        "code": "lgrex4",
+        "url": "https://redmmetrics.com/server/lgrex4?hours=168",
+        "fetchedAt": "2026-09-05T19:40:03.294191+00:00",
+        "samples": 2277,
+        "start": "2026-08-29T19:59:45Z",
+        "end": "2026-09-05T19:38:09Z",
+        "peak": 49,
+        "mean": 13.5,
+        "medianDailyPeak": 36.5,
+        "daysWithRepeated35": 4,
+        "samples35": 102,
+        "days": [
+          {
+            "date": "2026-08-30",
+            "samples": 284,
+            "peak": 45,
+            "samples35": 22
+          },
+          {
+            "date": "2026-08-31",
+            "samples": 271,
+            "peak": 37,
+            "samples35": 17
+          },
+          {
+            "date": "2026-09-01",
+            "samples": 254,
+            "peak": 42,
+            "samples35": 15
+          },
+          {
+            "date": "2026-09-02",
+            "samples": 319,
+            "peak": 36,
+            "samples35": 6
+          },
+          {
+            "date": "2026-09-03",
+            "samples": 379,
+            "peak": 28,
+            "samples35": 0
+          },
+          {
+            "date": "2026-09-04",
+            "samples": 387,
+            "peak": 32,
+            "samples35": 0
+          }
+        ]
+      },
+      "assetChecks": [
+        {
+          "code": "lgrex4",
+          "kind": "icon",
+          "url": "https://frontend.cfx-services.net/api/servers/icon/lgrex4/1226300458.png",
+          "fetchedAt": "2026-09-05T19:45:17.786306+00:00",
+          "status": 200,
+          "contentType": "image/png",
+          "bytesRead": 29170,
+          "image": true,
+          "format": "PNG",
+          "width": 96,
+          "height": 96
+        },
+        {
+          "code": "lgrex4",
+          "kind": "banner",
+          "url": "https://imgproxy.cfx.re/JkQEU0gK4RQn5euzSg6DYHHEDaqhfAIu9jPGwM7jDJM/f:webp/q:70/aHR0cHM6Ly9tZWRpYS5kaXNjb3JkYXBwLm5ldC9hdHRhY2htZW50cy8xMjI1OTI3Mjg1MTIzODQ2MzM1LzE0NDA3NzQ2NTAzNzUzMDcyODQvcmVkbS1iYW5uZXItb255eC1jb3VudHkucG5nP2V4PTY5MWY2MTc0JmlzPTY5MWUwZmY0JmhtPTAzYWJhN2FiMDNkMGNmZDJlOTljMGFlMDhhOGJlNTI1YzJjN2NlNTMzZTRiMDhlNTMzNDhiOWMzMWRmY2E0ZjAmPSZmb3JtYXQ9d2VicCZxdWFsaXR5PWxvc3NsZXNz.webp",
+          "fetchedAt": "2026-09-05T19:45:17.786791+00:00",
+          "status": 200,
+          "contentType": "image/webp",
+          "bytesRead": 12144,
+          "image": true,
+          "format": "WEBP"
+        }
+      ],
+      "sourceUrls": [
+        "https://onyxcountyrp.com/getting-started.html",
+        "https://onyxcountyrp.com/welcome-guide.html",
+        "https://www.onyxcountyrp.com/general-rules.html",
+        "https://onyxcountyrp.com/appeals.html",
+        "https://onyxcountyrp.com/donations.html",
+        "https://forum.cfx.re/t/onyx-county-new-server-active-staff-serious-rp-custom-scripts-vorp-framework/5238504",
+        "https://www.reddit.com/r/RedDeadOnline/comments/1s0fj3w/redm_servers/",
+        "https://steamcommunity.com/app/1404210/discussions/0/4205867979937454198/"
+      ]
+    },
+    {
+      "name": "New Dakota",
+      "cfxCode": "969koe",
+      "rankForNextReview": 2,
+      "decision": "hold_governance",
+      "publishReady": false,
+      "proposedMetadata": {
+        "platform": "redm",
+        "region": null,
+        "language": "English",
+        "framework": "vorp",
+        "access": "whitelisted"
+      },
+      "officialWebsite": null,
+      "discordUrl": "https://discord.gg/YyzMbTsjM6",
+      "discordAssociation": "Current official website and/or exact Cfx source; resolution not independently certified in this pass.",
+      "discordCurrentResolution": "HTTP403_access_limited_not_invalid",
+      "joinUrl": "https://cfx.re/join/969koe",
+      "joinRouteConfirmed": true,
+      "admissionEvidence": "Current Cfx admission instructions explicitly require applying for whitelist before connecting.",
+      "gates": [
+        "Read current canonical conduct, reporting and appeals procedures.",
+        "Resolve the exact invite and practical connection steps for approved newcomers.",
+        "Weigh positive newcomer accounts against the dated disputed enforcement account; no misconduct verdict.",
+        "Review artwork and listing before any publication."
+      ],
+      "cfxObservation": {
+        "url": "https://frontend.cfx-services.net/api/servers/single/969koe",
+        "fetchedAt": "2026-09-05T19:38:27.721441+00:00",
+        "sourceLastSeen": "2026-09-05T19:37:43.245047673Z",
+        "sourceGame": "rdr3",
+        "sourceLocale": "en-US",
+        "fallback": false,
+        "usableAtFetch": true,
+        "playersAtFetch": 53,
+        "capacityAtFetch": 128,
+        "note": "Historical research observation only; never copy into live player fields."
+      },
+      "activityHistory": {
+        "code": "969koe",
+        "url": "https://redmmetrics.com/server/969koe?hours=168",
+        "fetchedAt": "2026-09-05T19:40:05.029317+00:00",
+        "samples": 2781,
+        "start": "2026-08-29T19:57:19Z",
+        "end": "2026-09-05T19:40:04Z",
+        "peak": 104,
+        "mean": 44.5,
+        "medianDailyPeak": 85.0,
+        "daysWithRepeated35": 6,
+        "samples35": 1552,
+        "days": [
+          {
+            "date": "2026-08-30",
+            "samples": 339,
+            "peak": 104,
+            "samples35": 215
+          },
+          {
+            "date": "2026-08-31",
+            "samples": 337,
+            "peak": 98,
+            "samples35": 171
+          },
+          {
+            "date": "2026-09-01",
+            "samples": 320,
+            "peak": 82,
+            "samples35": 140
+          },
+          {
+            "date": "2026-09-02",
+            "samples": 398,
+            "peak": 77,
+            "samples35": 186
+          },
+          {
+            "date": "2026-09-03",
+            "samples": 474,
+            "peak": 69,
+            "samples35": 262
+          },
+          {
+            "date": "2026-09-04",
+            "samples": 450,
+            "peak": 88,
+            "samples35": 254
+          }
+        ]
+      },
+      "assetChecks": [
+        {
+          "code": "969koe",
+          "kind": "icon",
+          "url": "https://frontend.cfx-services.net/api/servers/icon/969koe/-162528105.png",
+          "fetchedAt": "2026-09-05T19:45:17.995045+00:00",
+          "status": 200,
+          "contentType": "image/png",
+          "bytesRead": 22276,
+          "image": true,
+          "format": "PNG",
+          "width": 96,
+          "height": 96
+        }
+      ],
+      "sourceUrls": [
+        "https://www.reddit.com/r/RedDeadOnline/comments/1w1ajkh/looking_for_beginner_friendly_redm_servers/",
+        "https://www.reddit.com/r/RedDeadOnline/comments/1v1mr2y/redm_server/",
+        "https://www.reddit.com/r/RedDeadOnline/comments/1ve4g9p/why_there_is_no_such_thing_as_a_new_redm_server/"
+      ]
+    },
+    {
+      "name": "WildRP",
+      "cfxCode": "vxe5ve",
+      "rankForNextReview": 3,
+      "decision": "hold_source_and_main_join_route",
+      "publishReady": false,
+      "proposedMetadata": {
+        "platform": "redm",
+        "region": null,
+        "language": "English",
+        "framework": "unknown",
+        "access": "whitelisted"
+      },
+      "officialWebsite": "https://www.wildrp.com/",
+      "discordUrl": "https://discord.gg/wildrp",
+      "discordAssociation": "Current official website and/or exact Cfx source; resolution not independently certified in this pass.",
+      "discordCurrentResolution": "not_tested",
+      "joinUrl": "https://cfx.re/join/vxe5ve",
+      "joinRouteConfirmed": false,
+      "admissionEvidence": "Official application requires linked Steam/Discord accounts and approval; demanding creative and microphone requirements.",
+      "gates": [
+        "Obtain fresh non-fallback main-server observation.",
+        "Corroborate that the current Main Realm-labelled record is the official intended join route, consistent with the launcher.",
+        "Resolve current official invite and inspect member journey without submitting an application.",
+        "Present as demanding specialist storytelling, not universal beginner-friendly entry."
+      ],
+      "cfxObservation": {
+        "url": "https://frontend.cfx-services.net/api/servers/single/vxe5ve",
+        "fetchedAt": "2026-09-05T19:38:27.860208+00:00",
+        "sourceLastSeen": "2026-09-05T19:35:56.580505503Z",
+        "sourceGame": "rdr3",
+        "sourceLocale": "en-US",
+        "fallback": true,
+        "usableAtFetch": false,
+        "playersAtFetch": null,
+        "capacityAtFetch": null,
+        "note": "Historical research observation only; never copy into live player fields."
+      },
+      "activityHistory": {
+        "code": "vxe5ve",
+        "url": "https://redmmetrics.com/server/vxe5ve?hours=168",
+        "fetchedAt": "2026-09-05T19:40:07.672071+00:00",
+        "samples": 2351,
+        "start": "2026-08-29T19:59:45Z",
+        "end": "2026-09-05T19:40:07Z",
+        "peak": 93,
+        "mean": 25.6,
+        "medianDailyPeak": 83.5,
+        "daysWithRepeated35": 6,
+        "samples35": 750,
+        "days": [
+          {
+            "date": "2026-08-30",
+            "samples": 262,
+            "peak": 91,
+            "samples35": 81
+          },
+          {
+            "date": "2026-08-31",
+            "samples": 271,
+            "peak": 83,
+            "samples35": 74
+          },
+          {
+            "date": "2026-09-01",
+            "samples": 278,
+            "peak": 84,
+            "samples35": 94
+          },
+          {
+            "date": "2026-09-02",
+            "samples": 331,
+            "peak": 78,
+            "samples35": 102
+          },
+          {
+            "date": "2026-09-03",
+            "samples": 391,
+            "peak": 93,
+            "samples35": 137
+          },
+          {
+            "date": "2026-09-04",
+            "samples": 422,
+            "peak": 69,
+            "samples35": 133
+          }
+        ]
+      },
+      "assetChecks": [
+        {
+          "code": "vxe5ve",
+          "kind": "icon",
+          "url": "https://frontend.cfx-services.net/api/servers/icon/vxe5ve/1482406282.png",
+          "fetchedAt": "2026-09-05T19:45:18.079663+00:00",
+          "status": 200,
+          "contentType": "image/png",
+          "bytesRead": 4179,
+          "image": true,
+          "format": "PNG",
+          "width": 96,
+          "height": 96
+        }
+      ],
+      "sourceUrls": [
+        "https://www.wildrp.com/rules",
+        "https://www.wildrp.com/application",
+        "https://www.wildrp.com/ban-appeal",
+        "https://www.reddit.com/r/RedDeadOnline/comments/1uzzdjq/is_wild_rp_really_that_good/"
+      ]
+    },
+    {
+      "name": "New Eden Roleplay",
+      "cfxCode": "lg53q5",
+      "rankForNextReview": 4,
+      "decision": "hold_governance_and_admission",
+      "publishReady": false,
+      "proposedMetadata": {
+        "platform": "redm",
+        "region": null,
+        "language": "English",
+        "framework": "rsg",
+        "access": "unknown"
+      },
+      "officialWebsite": null,
+      "discordUrl": "https://discord.gg/newedenrp",
+      "discordAssociation": "Current official website and/or exact Cfx source; resolution not independently certified in this pass.",
+      "discordCurrentResolution": "HTTP403_access_limited_not_invalid",
+      "joinUrl": "https://cfx.re/join/lg53q5",
+      "joinRouteConfirmed": true,
+      "admissionEvidence": "Current Cfx says request allowlisting, not enough to certify application-plus-approval requirement.",
+      "gates": [
+        "Read current canonical conduct, reporting, appeals and newcomer instructions.",
+        "Establish exact admission steps and canonical community identity.",
+        "Verify the banner or omit it; do not use an unconfirmed website.",
+        "Do not conflate this community with the New Eden fictional setting in OutlawedRP rules."
+      ],
+      "cfxObservation": {
+        "url": "https://frontend.cfx-services.net/api/servers/single/lg53q5",
+        "fetchedAt": "2026-09-05T19:38:27.558570+00:00",
+        "sourceLastSeen": "2026-09-05T19:36:34.056954107Z",
+        "sourceGame": "rdr3",
+        "sourceLocale": "en-US",
+        "fallback": false,
+        "usableAtFetch": true,
+        "playersAtFetch": 74,
+        "capacityAtFetch": 128,
+        "note": "Historical research observation only; never copy into live player fields."
+      },
+      "activityHistory": {
+        "code": "lg53q5",
+        "url": "https://redmmetrics.com/server/lg53q5?hours=168",
+        "fetchedAt": "2026-09-05T19:40:05.204825+00:00",
+        "samples": 2824,
+        "start": "2026-08-29T19:56:07Z",
+        "end": "2026-09-05T19:40:04Z",
+        "peak": 80,
+        "mean": 34.2,
+        "medianDailyPeak": 59.5,
+        "daysWithRepeated35": 6,
+        "samples35": 1148,
+        "days": [
+          {
+            "date": "2026-08-30",
+            "samples": 340,
+            "peak": 79,
+            "samples35": 195
+          },
+          {
+            "date": "2026-08-31",
+            "samples": 333,
+            "peak": 71,
+            "samples35": 116
+          },
+          {
+            "date": "2026-09-01",
+            "samples": 321,
+            "peak": 57,
+            "samples35": 138
+          },
+          {
+            "date": "2026-09-02",
+            "samples": 392,
+            "peak": 60,
+            "samples35": 162
+          },
+          {
+            "date": "2026-09-03",
+            "samples": 480,
+            "peak": 59,
+            "samples35": 176
+          },
+          {
+            "date": "2026-09-04",
+            "samples": 491,
+            "peak": 52,
+            "samples35": 189
+          }
+        ]
+      },
+      "assetChecks": [
+        {
+          "code": "lg53q5",
+          "kind": "icon",
+          "url": "https://frontend.cfx-services.net/api/servers/icon/lg53q5/-785746678.png",
+          "fetchedAt": "2026-09-05T19:45:17.787137+00:00",
+          "status": 200,
+          "contentType": "image/png",
+          "bytesRead": 16612,
+          "image": true,
+          "format": "PNG",
+          "width": 96,
+          "height": 96
+        },
+        {
+          "code": "lg53q5",
+          "kind": "banner",
+          "url": "https://files.catbox.moe/lb3587.png",
+          "fetchedAt": "2026-09-05T19:45:17.908712+00:00",
+          "image": false,
+          "error": "Remote end closed connection without response"
+        }
+      ],
+      "sourceUrls": [
+        "https://www.gtaboom.com/servers/lg53q5",
+        "https://www.reddit.com/r/RedDeadOnline/comments/1mn5k3d/best_redm_rp_servers/"
+      ]
+    },
+    {
+      "name": "Wanted RP: The Last Ride",
+      "cfxCode": "bpa6db",
+      "rankForNextReview": 5,
+      "decision": "hold_governance_and_source",
+      "publishReady": false,
+      "proposedMetadata": {
+        "platform": "redm",
+        "region": null,
+        "language": "English",
+        "framework": "vorp",
+        "access": "whitelisted"
+      },
+      "officialWebsite": "https://wantedroleplay.com/",
+      "discordUrl": "https://discord.gg/wantedroleplaytlr",
+      "discordAssociation": "Current official website and/or exact Cfx source; resolution not independently certified in this pass.",
+      "discordCurrentResolution": "HTTP403_access_limited_not_invalid",
+      "joinUrl": "https://cfx.re/join/bpa6db",
+      "joinRouteConfirmed": true,
+      "admissionEvidence": "Official application service plus current Cfx instructions establish application-based admission.",
+      "gates": [
+        "Read current conduct, reporting and appeal procedures.",
+        "Obtain a usable non-fallback source observation.",
+        "Resolve canonical invite and check approved-player connection instructions.",
+        "Treat July 17 launch as operator claim and old development-store copy as a dated conflict."
+      ],
+      "cfxObservation": {
+        "url": "https://frontend.cfx-services.net/api/servers/single/bpa6db",
+        "fetchedAt": "2026-09-05T19:38:27.558411+00:00",
+        "sourceLastSeen": "2026-09-05T19:37:33.806575608Z",
+        "sourceGame": "rdr3",
+        "sourceLocale": "en-US",
+        "fallback": true,
+        "usableAtFetch": false,
+        "playersAtFetch": null,
+        "capacityAtFetch": null,
+        "note": "Historical research observation only; never copy into live player fields."
+      },
+      "activityHistory": {
+        "code": "bpa6db",
+        "url": "https://redmmetrics.com/server/bpa6db?hours=168",
+        "fetchedAt": "2026-09-05T19:40:04.734131+00:00",
+        "samples": 2813,
+        "start": "2026-08-29T19:55:42Z",
+        "end": "2026-09-05T19:40:03Z",
+        "peak": 138,
+        "mean": 62.5,
+        "medianDailyPeak": 129.5,
+        "daysWithRepeated35": 6,
+        "samples35": 1976,
+        "days": [
+          {
+            "date": "2026-08-30",
+            "samples": 341,
+            "peak": 138,
+            "samples35": 238
+          },
+          {
+            "date": "2026-08-31",
+            "samples": 339,
+            "peak": 134,
+            "samples35": 214
+          },
+          {
+            "date": "2026-09-01",
+            "samples": 312,
+            "peak": 125,
+            "samples35": 265
+          },
+          {
+            "date": "2026-09-02",
+            "samples": 401,
+            "peak": 134,
+            "samples35": 267
+          },
+          {
+            "date": "2026-09-03",
+            "samples": 470,
+            "peak": 117,
+            "samples35": 347
+          },
+          {
+            "date": "2026-09-04",
+            "samples": 486,
+            "peak": 115,
+            "samples35": 326
+          }
+        ]
+      },
+      "assetChecks": [
+        {
+          "code": "bpa6db",
+          "kind": "icon",
+          "url": "https://frontend.cfx-services.net/api/servers/icon/bpa6db/1881853052.png",
+          "fetchedAt": "2026-09-05T19:45:17.786969+00:00",
+          "status": 200,
+          "contentType": "image/png",
+          "bytesRead": 16216,
+          "image": true,
+          "format": "PNG",
+          "width": 96,
+          "height": 96
+        }
+      ],
+      "sourceUrls": [
+        "https://apps.wantedroleplay.com/",
+        "https://wanted-rp-the-last-ride.tebex.io/",
+        "https://www.reddit.com/r/RDR2RP/comments/1u66rm8/need_help/"
+      ]
+    }
+  ],
+  "reserves": [
+    {
+      "name": "Brandywine RP",
+      "cfxCode": "zjj9jzd",
+      "publishReady": false,
+      "reason": "Watch launch: strong current session, but no full preceding day with repeated35+; canonical invite association and governance unresolved.",
+      "discordUrl": "https://discord.gg/brandywine",
+      "discordCurrentResolution": "HTTP403_access_limited_not_invalid",
+      "cfxSourceUrl": "https://frontend.cfx-services.net/api/servers/single/zjj9jzd",
+      "sourceFetchedAt": "2026-09-05T19:38:27.793509+00:00",
+      "activityHistory": {
+        "code": "zjj9jzd",
+        "url": "https://redmmetrics.com/server/zjj9jzd?hours=168",
+        "fetchedAt": "2026-09-05T19:40:06.699547+00:00",
+        "samples": 1899,
+        "start": "2026-08-29T19:59:45Z",
+        "end": "2026-09-05T19:40:05Z",
+        "peak": 88,
+        "mean": 3.9,
+        "medianDailyPeak": 5.5,
+        "daysWithRepeated35": 0,
+        "samples35": 49,
+        "days": [
+          {
+            "date": "2026-08-30",
+            "samples": 226,
+            "peak": 5,
+            "samples35": 0
+          },
+          {
+            "date": "2026-08-31",
+            "samples": 226,
+            "peak": 5,
+            "samples35": 0
+          },
+          {
+            "date": "2026-09-01",
+            "samples": 212,
+            "peak": 4,
+            "samples35": 0
+          },
+          {
+            "date": "2026-09-02",
+            "samples": 262,
+            "peak": 6,
+            "samples35": 0
+          },
+          {
+            "date": "2026-09-03",
+            "samples": 316,
+            "peak": 13,
+            "samples35": 0
+          },
+          {
+            "date": "2026-09-04",
+            "samples": 334,
+            "peak": 14,
+            "samples35": 0
+          }
+        ]
+      },
+      "assetChecks": [
+        {
+          "code": "zjj9jzd",
+          "kind": "icon",
+          "url": "https://frontend.cfx-services.net/api/servers/icon/zjj9jzd/653626041.png",
+          "fetchedAt": "2026-09-05T19:45:18.038635+00:00",
+          "status": 200,
+          "contentType": "image/png",
+          "bytesRead": 19029,
+          "image": true,
+          "format": "PNG",
+          "width": 96,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "name": "GGI Equestrian",
+      "cfxCode": "mam33d",
+      "publishReady": false,
+      "reason": "Optional-RP horse sandbox; does not replace core serious-RP breadth automatically. Linked Wix site returned404; governance and admission require review.",
+      "discordUrl": "https://discord.com/invite/ggiequestrian",
+      "discordCurrentResolution": "HTTP403_access_limited_not_invalid",
+      "cfxSourceUrl": "https://frontend.cfx-services.net/api/servers/single/mam33d",
+      "sourceFetchedAt": "2026-09-05T19:38:27.558696+00:00",
+      "activityHistory": {
+        "code": "mam33d",
+        "url": "https://redmmetrics.com/server/mam33d?hours=168",
+        "fetchedAt": "2026-09-05T19:40:06.606302+00:00",
+        "samples": 2697,
+        "start": "2026-08-29T19:57:23Z",
+        "end": "2026-09-05T19:40:06Z",
+        "peak": 74,
+        "mean": 28.8,
+        "medianDailyPeak": 61.0,
+        "daysWithRepeated35": 6,
+        "samples35": 732,
+        "days": [
+          {
+            "date": "2026-08-30",
+            "samples": 327,
+            "peak": 74,
+            "samples35": 100
+          },
+          {
+            "date": "2026-08-31",
+            "samples": 324,
+            "peak": 67,
+            "samples35": 83
+          },
+          {
+            "date": "2026-09-01",
+            "samples": 310,
+            "peak": 51,
+            "samples35": 48
+          },
+          {
+            "date": "2026-09-02",
+            "samples": 376,
+            "peak": 57,
+            "samples35": 118
+          },
+          {
+            "date": "2026-09-03",
+            "samples": 442,
+            "peak": 59,
+            "samples35": 112
+          },
+          {
+            "date": "2026-09-04",
+            "samples": 475,
+            "peak": 63,
+            "samples35": 151
+          }
+        ]
+      },
+      "assetChecks": [
+        {
+          "code": "mam33d",
+          "kind": "icon",
+          "url": "https://frontend.cfx-services.net/api/servers/icon/mam33d/-992051870.png",
+          "fetchedAt": "2026-09-05T19:45:17.919871+00:00",
+          "status": 200,
+          "contentType": "image/png",
+          "bytesRead": 17948,
+          "image": true,
+          "format": "PNG",
+          "width": 96,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "name": "The Rift Trails",
+      "cfxCode": "d9eyr3",
+      "publishReady": false,
+      "reason": "Officially not a strict-RP server; Discord self-role gate is not proof of application. Banner field returns HTML viewer.",
+      "discordUrl": "https://discord.gg/rifttrails",
+      "discordCurrentResolution": "HTTP403_access_limited_not_invalid",
+      "cfxSourceUrl": "https://frontend.cfx-services.net/api/servers/single/d9eyr3",
+      "sourceFetchedAt": "2026-09-05T19:38:27.713809+00:00",
+      "activityHistory": {
+        "code": "d9eyr3",
+        "url": "https://redmmetrics.com/server/d9eyr3?hours=168",
+        "fetchedAt": "2026-09-05T19:40:06.827813+00:00",
+        "samples": 2769,
+        "start": "2026-08-29T19:56:19Z",
+        "end": "2026-09-05T19:40:06Z",
+        "peak": 93,
+        "mean": 29.2,
+        "medianDailyPeak": 73.5,
+        "daysWithRepeated35": 6,
+        "samples35": 960,
+        "days": [
+          {
+            "date": "2026-08-30",
+            "samples": 333,
+            "peak": 72,
+            "samples35": 135
+          },
+          {
+            "date": "2026-08-31",
+            "samples": 333,
+            "peak": 75,
+            "samples35": 74
+          },
+          {
+            "date": "2026-09-01",
+            "samples": 301,
+            "peak": 71,
+            "samples35": 64
+          },
+          {
+            "date": "2026-09-02",
+            "samples": 400,
+            "peak": 93,
+            "samples35": 152
+          },
+          {
+            "date": "2026-09-03",
+            "samples": 466,
+            "peak": 75,
+            "samples35": 165
+          },
+          {
+            "date": "2026-09-04",
+            "samples": 492,
+            "peak": 66,
+            "samples35": 203
+          }
+        ]
+      },
+      "assetChecks": [
+        {
+          "code": "d9eyr3",
+          "kind": "icon",
+          "url": "https://frontend.cfx-services.net/api/servers/icon/d9eyr3/397345550.png",
+          "fetchedAt": "2026-09-05T19:45:17.926933+00:00",
+          "status": 200,
+          "contentType": "image/png",
+          "bytesRead": 17819,
+          "image": true,
+          "format": "PNG",
+          "width": 96,
+          "height": 96
+        },
+        {
+          "code": "d9eyr3",
+          "kind": "banner",
+          "url": "https://drive.google.com/file/d/1ciDwGBeodgf40H6xWAO_JDudvsAhfs3o/view?usp=sharing",
+          "fetchedAt": "2026-09-05T19:45:17.935549+00:00",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8",
+          "bytesRead": 77638,
+          "image": false
+        }
+      ]
+    }
+  ]
+}

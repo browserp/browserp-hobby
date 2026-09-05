@@ -4,7 +4,7 @@
 
 The transfer record says production is a healthy v1.3.0 deployment and GitHub `main` is still the older v1.1.0 source. The v2.0.0 working tree is a candidate, not production, until a verified preview is promoted. Do not let an automatic Git deployment build from the historical branch during this release.
 
-Payments and Google login are disabled. Keep them disabled. The production-data snapshot at transfer contained two Discord users/profiles, one active owner and zero listings, submissions, staff actions or payment orders.
+Historical transfer snapshot: payments and Google login were disabled, with two Discord users/profiles and one active owner. These are not current operational settings. On 5 September 2026, Google and Discord are enabled for members; staff require Discord and MFA. Email login and payments remain disabled. See LAUNCH_CONTINUITY.md for the current release and evidence boundaries.
 
 ## Vercel contract
 
@@ -86,7 +86,7 @@ Promote the already-verified preview artifact. Immediately repeat health, public
 
 Keep the known-good v1.3.0 deployment ID and the v2 candidate deployment ID in the private release log. Code rollback is an alias change to the known-good deployment. The additive v2 database boundary should normally remain in place because v1.3 does not depend on the new RPCs; do not improvise a destructive database rollback during an incident.
 
-After production is healthy, create a recovery branch/tag for the historical remote state, push the reviewed release branch, require the Node 24 workflow to pass, then fast-forward `main`. Never force-push over the only copy of the old remote history.
+The owner explicitly requires main to remain untouched. Publish only the tested working-branch deployment after verification, retain the prior deployment for rollback, and recheck production. Do not merge or fast-forward main.
 
 ## Payment quarantine
 

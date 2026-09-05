@@ -1,0 +1,152 @@
+{
+  "generatedAt": "2026-09-05T20:01:11.434Z",
+  "scope": "Research and staff-review data only. No live imports or publication performed. Prepared against an audited baseline of 25 FiveM listings; recheck baseline and source freshness before importing.",
+  "report": "fivem-candidate-research-2026-09-05.md",
+  "recommended": [
+    {
+      "joinCode": "7b9dbvd",
+      "platform": "fivem",
+      "status": "review",
+      "name": "GTA World English",
+      "description": "GTA World is an English-speaking, text-based roleplay community focused on lasting characters and everyday life in Los Santos. Players build stories through civilian jobs, businesses, government, emergency services and criminal factions. The community moved to FiveM in August 2026 and uses its own developed game systems. Joining requires an accepted application, so read the official rules and onboarding guide before connecting. This is mature GTA roleplay with detailed conduct and consent rules; it is a slower, writing-led experience rather than a voice-chat server.",
+      "region": "International",
+      "language": "English",
+      "framework": "Custom setup",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/gtaworld",
+      "websiteUrl": "https://ucp.gta.world/tutorial",
+      "cfxJoinUrl": "https://cfx.re/join/7b9dbvd",
+      "tags": [
+        "Roleplay",
+        "Serious RP",
+        "Text RP",
+        "Whitelist",
+        "Businesses",
+        "Civilian Jobs",
+        "Police",
+        "EMS",
+        "DOJ",
+        "Custom Jobs"
+      ],
+      "keywords": [
+        "gta world",
+        "gtaworld",
+        "gtaw",
+        "english text roleplay",
+        "character development",
+        "civilian roleplay",
+        "player businesses",
+        "writing led",
+        "application required",
+        "custom setup"
+      ],
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/7b9dbvd/396854001.png",
+      "bannerUrl": null,
+      "sources": [
+        {
+          "url": "https://forum.gta.world/en/topic/162491-were-now-on-fivem/",
+          "purpose": "Founder announcement dated 17 August 2026 explicitly confirms migration from RAGE Multiplayer to FiveM and exact production code 7b9dbvd. Warns of migration issues and directs troubleshooting to official Discord."
+        },
+        {
+          "url": "https://ucp.gta.world/tutorial",
+          "purpose": "Public current onboarding names the English server and exact FiveM code, explains access after an accepted application, and links official rules, community forums, jobs and Discord support."
+        },
+        {
+          "url": "https://forum.gta.world/en/topic/27-in-game-rules/",
+          "purpose": "Detailed conduct, roleplay, reporting and consent rules. Private adult sexual RP is restricted and withdrawal is allowed; this does not establish an 18+ minimum for every player. Some legacy references remain."
+        },
+        {
+          "url": "https://forum.gta.world/en/topic/163091-community-update-september-2026/",
+          "purpose": "Current management confirms completed migration, faction/property development and remaining backlog. Treat claimed performance and peak-player statements as community reports, separate from timestamped Cfx observations."
+        },
+        {
+          "url": "https://forum.gta.world/en/topic/159717-community-update-june-2026/",
+          "purpose": "Primary operational evidence of controlled mod development, optimization standards, QA staffing and an effort to reduce report/appeal delays. Does not independently prove consistent outcomes."
+        },
+        {
+          "url": "https://www.pcgamer.com/games/grand-theft-auto/i-thought-text-only-grand-theft-auto-roleplay-sounded-too-intimidating-but-gta-world-is-showing-me-why-players-are-slowing-things-down/",
+          "purpose": "June 2026 first-person journalism supports civilian story depth after the writer played a plumber. Predates FiveM migration; not a current client-performance test."
+        },
+        {
+          "url": "https://forum.gta.world/en/topic/155294-concerns-and-feedback-regarding-community-experience-on-gta-w/",
+          "purpose": "February 2026 public player discussion supplies balanced experience evidence: in-game help praised, forum-report delays criticized, donor preference alleged and disputed by other players/admins. Allegations are unproven."
+        },
+        {
+          "url": "https://frontend.cfx-services.net/api/servers/single/7b9dbvd",
+          "purpose": "Canonical current gta5 listing with English identity, matching official website/Discord, timestamped count and icon version. Its raw public access flag conflicts with primary application evidence and must not override the reviewed Whitelisted label."
+        },
+        {
+          "url": "https://discord.com/api/v10/invites/gtaworld?with_counts=true",
+          "purpose": "Public invite check returned valid guild GTAW Roleplay at 19:50 UTC. No account joined, no member identities stored and no private content accessed."
+        }
+      ],
+      "inclusionReasons": [
+        "Current primary sources tie an established community to the exact new FiveM production listing, avoiding obsolete RAGE Multiplayer assumptions.",
+        "Adds text-based character and civilian roleplay variety, supported by first-person reporting rather than a player-count leaderboard alone.",
+        "Published onboarding, mature conduct/consent policies and continuing development provide meaningful organizational evidence.",
+        "Fresh aggregate Cfx observation comfortably meets representative activity criterion; no need to infer health from Discord membership.",
+        "Official Discord identity and actual decoded logo are checked."
+      ],
+      "conflicts": [
+        "Cfx raw access is public, but official onboarding requires an accepted application. Preserve accessType allowlisted with the primary source evidence.",
+        "Cfx en-US locale is not proof of hosting location or an exclusively American community. International is an editorial audience label, not a latency guarantee.",
+        "FiveM migration is recent. Remaining property/faction backlogs and legacy wording are acknowledged publicly; do not promise all systems are already flawless.",
+        "Player reports of donor preference are disputed, not independently established; report waiting times remain a follow-up concern.",
+        "No in-game playtest or private appeal process was performed. Research does not certify universal friendliness or fair treatment in every case.",
+        "Paid-shop details were behind login. No cosmetic-only or no-pay-to-win claim is supported.",
+        "Mature roleplay policies do not justify labelling every player 18+, family-friendly, or the whole community an ERP server.",
+        "Cfx-provided banners use an unsupported external host. Keep bannerUrl null and preserve image-host restrictions."
+      ],
+      "lastCheck": {
+        "checkedAt": "2026-09-05T19:50:16.437Z",
+        "status": "online",
+        "players": 734,
+        "max": 2000,
+        "observedAt": "2026-09-05T19:46:05.182Z",
+        "refreshBeforePublication": true
+      },
+      "discordCheck": {
+        "status": "valid",
+        "guildName": "GTAW Roleplay",
+        "checkedAt": "2026-09-05T19:50:16.437Z",
+        "identityConfirmedBy": "Official public UCP tutorial and canonical Cfx listing link the same gtaworld invite."
+      },
+      "imageReview": {
+        "checkedAt": "2026-09-05T20:01:11.434Z",
+        "httpStatus": 200,
+        "width": 96,
+        "height": 96,
+        "originalBytes": 424066,
+        "validatedStaticBytes": 14099,
+        "logoNote": "Decoded visibly in Chromium as GTA World branding. Existing staticServerPng/rasterType checks accepted a 96x96 static PNG extracted from the supplied APNG. No storage upload performed.",
+        "bannerNote": "Unsupported source host omitted; use existing guarded media import for the logo."
+      },
+      "requiresStaffReview": true,
+      "confidence": {
+        "identity": "high",
+        "access": "high-primary-source-override",
+        "activity": "high-at-observation-time",
+        "editorialFit": "medium-high",
+        "moderationConsistency": "not-guaranteed"
+      },
+      "postImportChecks": [
+        "Exact canonical identity and latest observed count match staff and public directory, including a name search.",
+        "Whitelisted filter includes this listing and Public filter excludes it after refresh.",
+        "Logo is persisted through the managed image path, decodes on cards/detail and uses a stable fallback if unavailable.",
+        "Join opens 7b9dbvd; community opens the verified Discord; website opens current official onboarding.",
+        "Text RP and verified feature tags appear under FiveM filters without inventing private framework metadata or public filter usage counts."
+      ]
+    }
+  ],
+  "priorityFollowups": [
+    { "name": "New Day RP", "joinCode": "ypq96k", "decision": "Hold pending usable current source count and admission availability; strong quality shortlist." },
+    { "name": "ONX", "joinCode": null, "decision": "Hold pending publicly attributable main production code and activity. Do not substitute 9pk56y showcase." },
+    { "name": "TRP", "joinCode": null, "decision": "Hold pending canonical production source and activity; private Discord connection not accessed." },
+    { "name": "Enemy of the State", "joinCode": "zpeaky", "decision": "Reserve pending culture/safeguarding and personal scene-exit clarification; identity/activity/art confirmed, but no approved import payload." }
+  ],
+  "explicitlyDeferred": [
+    { "name": "Redline RP", "reason": "User's latest instruction defers it; do not add based on earlier request." },
+    { "name": "The Towns", "reason": "Retain prior review hold; concerns not re-audited during this research pass." }
+  ],
+  "remainingWork": "The target near40 remains incomplete. This file prepares one candidate only. Use the Markdown report's prioritized unresolved evidence rather than filling slots with merely popular or unverified communities."
+}

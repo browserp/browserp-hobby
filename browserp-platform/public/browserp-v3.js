@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const state = { session: null, ads: new Map() };
+  const state = { session: null, ads: new Map(), sessionGeneration: 0 };
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
@@ -122,8 +122,12 @@
   window.__browserpReveal = reveal;
 
   async function session() {
-    try { state.session = await api("/api/auth/session"); }
-    catch { state.session = { authenticated: false, csrfToken: "" }; }
+    const generation = state.sessionGeneration;
+    let current;
+    try { current = await api("/api/auth/session"); }
+    catch { current = { authenticated: false, csrfToken: "" }; }
+    if (generation !== state.sessionGeneration) return state.session;
+    state.session = current;
     $$('[data-account-v3], [data-account-link]').forEach((link, index) => {
       if (!state.session.authenticated) { link.textContent = "Sign in"; link.href = "/dashboard"; return; }
       const profile = state.session.user?.profile || {};
@@ -183,6 +187,20 @@
     });
     return state.session;
   }
+
+  window.addEventListener("browserp:session-ended", () => {
+    state.sessionGeneration++;
+    state.session = { authenticated: false, csrfToken: "" };
+    document.dispatchEvent(new Event("navigation:close"));
+    $$(".account-menu-v3").forEach(menu => {
+      const focused = menu.contains(document.activeElement);
+      const link = node("a", "button-v3 button-secondary-v3", "Sign in");
+      link.href = "/dashboard"; link.setAttribute("data-account-v3", "");
+      menu.replaceWith(link);
+      if (focused) link.focus({ preventScroll: true });
+    });
+    $$('[data-account-v3], [data-account-link]').forEach(link => { link.textContent = "Sign in"; link.href = "/dashboard"; });
+  });
 
   function safeDestination(value) {
     try {
@@ -626,50 +644,7 @@
   }
 
   function interactionForms() {
-    $("#vote-server-v3")?.addEventListener("click", async (event) => {
-      if (!state.session?.authenticated) { location.assign("/dashboard"); return; }
-      const button = event.currentTarget;
-      if (button.disabled) return;
-      button.disabled = true;
-      button.setAttribute("aria-busy", "true");
-      try {
-        const { result } = await api("/api/servers", { method: "POST", body: JSON.stringify({ action: "vote", serverId: button.dataset.serverId }) });
-        $("#server-votes-v3").textContent = `${Number(result.voteCount || 0).toLocaleString()} votes`;
-        button.textContent = "Voted";
-        button.setAttribute("aria-pressed", "true");
-      } catch (error) {
-        button.disabled = false;
-        toast(error.message, "error");
-      } finally { button.removeAttribute("aria-busy"); }
-    });
-    $("#comment-form-v3")?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      if (!state.session?.authenticated) { location.assign("/dashboard"); return; }
-      const form = event.currentTarget;
-      const submit = $("button[type=submit]", form);
-      if (submit?.disabled) return;
-      if (submit) submit.disabled = true;
-      form.setAttribute("aria-busy", "true");
-      try {
-        await api("/api/servers", { method: "POST", body: JSON.stringify({ action: "comment", serverId: form.dataset.serverId, body: new FormData(form).get("comment") }) });
-        form.reset(); toast("Comment sent for moderation.");
-      } catch (error) { toast(error.message, "error"); }
-      finally { if (submit) submit.disabled = false; form.removeAttribute("aria-busy"); }
-    });
-    $("#report-form-v3")?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      if (!state.session?.authenticated) { location.assign("/dashboard"); return; }
-      const form = event.currentTarget; const data = new FormData(form);
-      const submit = $("button[type=submit]", form);
-      if (submit?.disabled) return;
-      if (submit) submit.disabled = true;
-      form.setAttribute("aria-busy", "true");
-      try {
-        await api("/api/servers", { method: "POST", body: JSON.stringify({ action: "report", serverId: form.dataset.serverId, category: data.get("category"), body: data.get("details") }) });
-        form.reset(); toast("Report received. Staff can now review it.");
-      } catch (error) { toast(error.message, "error"); }
-      finally { if (submit) submit.disabled = false; form.removeAttribute("aria-busy"); }
-    });
+    window.BrowseRPServerInteractions?.init({ api, session: state.session, toast });
   }
 
   function appeal() {
@@ -689,16 +664,51 @@
     const coarse = matchMedia("(hover: none), (pointer: coarse)");
     const reduced = matchMedia("(prefers-reduced-motion: reduce)");
     const selector = ".button-primary-v3, .button-primary, .small-button-primary";
+    let press = null;
+    const reset = () => {
+      if (!press) return;
+      if (press.frame !== null) cancelAnimationFrame(press.frame);
+      press.control.classList.remove("touch-sweep-v3");
+      press = null;
+    };
+    const movedAway = (event) => Math.hypot(event.clientX - press.x, event.clientY - press.y) > 10
+      || event.clientX < press.bounds.left || event.clientX > press.bounds.right
+      || event.clientY < press.bounds.top || event.clientY > press.bounds.bottom;
     document.addEventListener("pointerdown", (event) => {
-      if (!coarse.matches || reduced.matches || event.pointerType === "mouse") return;
+      if (!coarse.matches || reduced.matches || event.pointerType === "mouse" || event.isPrimary === false) return;
+      reset();
       const control = event.target.closest(selector);
       if (!control || control.matches(":disabled, [aria-disabled='true']")) return;
-      control.classList.remove("touch-sweep-v3");
-      requestAnimationFrame(() => requestAnimationFrame(() => control.classList.add("touch-sweep-v3")));
+      const current = { control, pointerId: event.pointerId, x: event.clientX, y: event.clientY, bounds: control.getBoundingClientRect(), released: false, frame: null };
+      press = current;
+      current.frame = requestAnimationFrame(() => {
+        current.frame = requestAnimationFrame(() => {
+          current.frame = null;
+          if (press !== current) return;
+          if (!coarse.matches || reduced.matches || !control.isConnected || control.matches(":disabled, [aria-disabled='true']")) { reset(); return; }
+          control.classList.add("touch-sweep-v3");
+        });
+      });
+    }, { passive: true });
+    document.addEventListener("pointermove", (event) => {
+      if (press && !press.released && event.pointerId === press.pointerId && movedAway(event)) reset();
+    }, { passive: true });
+    document.addEventListener("pointerup", (event) => {
+      if (!press || event.pointerId !== press.pointerId) return;
+      if (movedAway(event)) reset();
+      else press.released = true;
+    }, { passive: true });
+    document.addEventListener("pointercancel", (event) => {
+      if (press && event.pointerId === press.pointerId) reset();
     }, { passive: true });
     document.addEventListener("animationend", (event) => {
-      if (event.animationName === "touch-sweep-v3") event.target.classList.remove("touch-sweep-v3");
+      if (event.animationName === "touch-sweep-v3" && press?.control === event.target) reset();
     });
+    window.addEventListener("scroll", reset, { passive: true, capture: true });
+    window.addEventListener("blur", reset);
+    document.addEventListener("visibilitychange", () => { if (document.hidden) reset(); });
+    coarse.addEventListener?.("change", reset);
+    reduced.addEventListener?.("change", reset);
   }
 
   async function init() {
@@ -718,8 +728,8 @@
     announcementStyles.href = "/site-announcements.css?v=1";
     document.head.append(announcementStyles);
     import("/site-announcements.js?v=1").catch(() => {});
-    interactionForms();
     await serverDetail();
+    interactionForms();
     appeal();
   }
   init();

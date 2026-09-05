@@ -20,6 +20,29 @@
   function dateLabel(value) {
     const date = new Date(value); return value && !Number.isNaN(date.getTime()) ? new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(date) : "No date set";
   }
+  async function prepareArtwork(file) {
+    if (!file || !["image/png", "image/jpeg", "image/webp"].includes(file.type) || /\.svg$/i.test(file.name || "")) throw new Error("Choose a PNG, JPG or WebP image.");
+    if (!file.size || file.size > 5 * 1024 * 1024) throw new Error("Choose an image under 5 MB.");
+    // Data URLs work within BrowseRP's existing image policy; no blob-source
+    // exception or wider external image access is needed for local previews.
+    const url = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(new Error("This image could not be read. Choose it again.")); reader.readAsDataURL(file); });
+    const image = new Image();
+    await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(new Error("This image could not be opened. Choose another file.")); image.src = url; });
+    if (image.naturalWidth < 320 || image.naturalHeight < 180) throw new Error("Choose an image at least 320 × 180 pixels.");
+    if (image.naturalWidth > 8192 || image.naturalHeight > 8192 || image.naturalWidth * image.naturalHeight > 40_000_000) throw new Error("Choose an image up to 8192 pixels per side and 40 megapixels.");
+    let scale = Math.min(1, 1600 / image.naturalWidth, 1600 / image.naturalHeight);
+    const canvas = document.createElement("canvas"); const context = canvas.getContext("2d");
+    if (!context) throw new Error("Image preparation is unavailable. Try another browser or use an approved image address.");
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const width = Math.floor(image.naturalWidth * scale), height = Math.floor(image.naturalHeight * scale);
+      if (width < 320 || height < 180) break;
+      canvas.width = width; canvas.height = height; context.drawImage(image, 0, 0, width, height);
+      const data = canvas.toDataURL("image/png");
+      if (data.length < 1_398_000) return { data, width, height, name: file.name || "Advert artwork" };
+      scale *= 0.8;
+    }
+    throw new Error("This image is too detailed to prepare under 1 MB. Crop it or choose a smaller image.");
+  }
   function confirmAction(title, copy, label) {
     return new Promise((resolve) => {
       const dialog = make("dialog", undefined, "staff-dialog-v3 adverts-dialog");
@@ -34,7 +57,7 @@
     });
   }
 
-  async function init({ api, permissions = {} } = {}) {
+  async function init({ api, permissions = {}, prepareImage = prepareArtwork } = {}) {
     const root = document.querySelector("#overview-adverts");
     if (!root || root.dataset.initialized === "true" || typeof api !== "function") return;
     root.dataset.initialized = "true"; root.classList.add("staff-adverts");
@@ -56,7 +79,7 @@
       for (const key of ["minLength", "maxLength", "rows", "placeholder"]) if (options[key] !== undefined) control[key] = options[key];
       for (const [value, label] of Object.entries(options.choices || {})) { const option = make("option", label); option.value = value; control.append(option); }
       wrapper.append(make("span", text), control); if (options.help) wrapper.append(make("small", options.help, "adverts-help"));
-      fields.append(wrapper); controls[name] = control;
+      (options.container || fields).append(wrapper); controls[name] = control;
     }
     field("name", "Campaign name", { minLength: 3, maxLength: 100, help: "An internal name for your team. 3–100 characters." });
     field("placement", "Placement", { type: "select", choices: placements });
@@ -64,7 +87,15 @@
     field("body", "Advert text", { type: "textarea", minLength: 10, maxLength: 300, rows: 3, wide: true, help: "10–300 characters. Keep it clear and relevant." });
     field("ctaLabel", "Button text", { minLength: 2, maxLength: 40, placeholder: "Explore this community" });
     field("destinationUrl", "Button destination", { maxLength: 500, placeholder: "/servers", help: "A BrowseRP page path or a secure https:// address." });
-    field("imageUrl", "Image address", { required: false, maxLength: 500, wide: true, placeholder: "/assets/adverts/campaign-name.jpg", help: "Use an approved BrowseRP advert asset or public advertisements storage URL. JPG, PNG, WebP and AVIF. An image is required except for the top carousel." });
+    const artwork = make("div", undefined, "adverts-artwork adverts-wide");
+    const artworkActions = make("div", undefined, "adverts-actions");
+    const chooseImage = button("Upload image"); const removeImage = button("Remove image"); removeImage.hidden = true;
+    const fileInput = make("input"); fileInput.type = "file"; fileInput.accept = "image/png,image/jpeg,image/webp"; fileInput.hidden = true;
+    const artworkStatus = make("p", "No image selected.", "adverts-status"); artworkStatus.setAttribute("role", "status");
+    const advanced = make("details", undefined, "adverts-image-address"); advanced.append(make("summary", "Use an approved image address"));
+    field("imageUrl", "Image address", { container: advanced, required: false, maxLength: 500, placeholder: "/assets/adverts/campaign-name.jpg", help: "For an existing BrowseRP advert image. Other image hosts are not supported." });
+    artworkActions.append(chooseImage, removeImage, fileInput);
+    artwork.append(make("span", "Artwork", "adverts-artwork-label"), make("p", "PNG, JPG or WebP · up to 5 MB · at least 320 × 180 pixels. We resize larger images for fast loading. Images are public once uploaded; they appear in a placement only after publishing.", "adverts-help"), artworkActions, artworkStatus, advanced); fields.append(artwork);
     field("startsAt", "Start (your local time)", { type: "datetime-local", required: false, help: "Leave blank to start when published." });
     field("endsAt", "End (your local time)", { type: "datetime-local", required: false, help: "Leave blank for no scheduled end." });
     field("reason", "Reason for this change", { type: "textarea", minLength: 5, maxLength: 500, rows: 2, wide: true, help: "5–500 characters. Saved in the staff audit log." });
@@ -81,7 +112,7 @@
     const close = button("Close editor"); actions.append(save, publish, pause, archive, close);
     const formStatus = make("p", "", "adverts-status"); formStatus.setAttribute("role", "status");
     form.append(editorTitle, activeNotice, fields, preview, actions, formStatus); root.append(loadStatus, retry, list, form);
-    let items = []; let current = null; let dirty = false; let busy = false; let previewSource = "";
+    let items = []; let current = null; let dirty = false; let busy = false; let previewSource = ""; let selectedImage = null;
     window.addEventListener("beforeunload", (event) => {
       if (dirty && form.isConnected) { event.preventDefault(); event.returnValue = ""; }
     });
@@ -91,7 +122,15 @@
     function renderPreview() {
       previewHeadline.textContent = controls.headline.value.trim() || "Your advert headline"; previewBody.textContent = controls.body.value.trim() || "Your advert text will appear here."; previewCta.textContent = controls.ctaLabel.value.trim() || "Your button";
       previewCard.dataset.placement = controls.placement.value;
-      controls.imageUrl.required = controls.placement.value !== "top";
+      controls.imageUrl.required = false;
+      chooseImage.textContent = selectedImage || controls.imageUrl.value.trim() ? "Replace image" : "Upload image";
+      removeImage.hidden = !selectedImage && !controls.imageUrl.value.trim();
+      if (selectedImage) {
+        artworkStatus.textContent = `${selectedImage.name} · ${selectedImage.width} × ${selectedImage.height} · ready to save`;
+        if (previewSource !== selectedImage.data) { previewSource = selectedImage.data; previewImage.hidden = false; imageStatus.textContent = ""; previewImage.src = selectedImage.data; }
+        return;
+      }
+      artworkStatus.textContent = controls.imageUrl.value.trim() ? "Existing image selected." : "No image selected. An image is required except for the top carousel.";
       const value = controls.imageUrl.value.trim();
       if (!value || !allowedImage(value)) { previewImage.hidden = true; previewImage.removeAttribute("src"); previewSource = ""; imageStatus.textContent = value ? "Use an approved BrowseRP image address to see its preview." : "No image selected."; return; }
       const source = value.replace(/^https:\/\/www\.browserp\.com(?=\/assets\/adverts\/)/i, "");
@@ -118,7 +157,7 @@
     async function discard() { return !dirty || await confirmAction("Discard unsaved changes?", "Your changes have not been saved. Close this advert and discard them?", "Discard changes"); }
     async function openEditor(item = null) {
       if (busy || !await discard()) return;
-      current = item; form.reset(); dirty = false;
+      current = item; form.reset(); dirty = false; selectedImage = null; advanced.open = false;
       for (const [name, control] of Object.entries(controls)) control.value = name === "reason" ? "" : ["startsAt", "endsAt"].includes(name) ? localDate(item?.[name]) : item?.[name] || (name === "placement" ? "top" : "");
       editorTitle.textContent = item ? "Edit advert" : "New advert"; updateActions(); renderPreview(); status(""); form.hidden = false; controls.name.focus();
     }
@@ -128,30 +167,56 @@
       else {
         if (!form.reportValidity()) return;
         if (!allowedDestination(controls.destinationUrl.value)) { status("Use a BrowseRP page path or a secure https:// destination.", true); controls.destinationUrl.focus(); return; }
-        if (!allowedImage(controls.imageUrl.value)) { status("Use an approved BrowseRP advert image address. Other image hosts and file types are not supported.", true); controls.imageUrl.focus(); return; }
+        if (!selectedImage && !allowedImage(controls.imageUrl.value)) { status("Use an approved BrowseRP advert image address. Other image hosts and file types are not supported.", true); advanced.open = true; controls.imageUrl.focus(); return; }
+        if (!selectedImage && !controls.imageUrl.value.trim() && controls.placement.value !== "top") { status("Choose an image for this placement.", true); chooseImage.focus(); return; }
         if (controls.endsAt.value && new Date(controls.endsAt.value) <= new Date(controls.startsAt.value || Date.now())) { status("Choose an end time after the start time.", true); controls.endsAt.focus(); return; }
       }
       const confirmation = { activate: ["Publish this advert?", "This advert will appear in its selected website placement during the scheduled dates.", "Publish advert"], pause: ["Pause this advert?", "This removes it from the website until you publish it again. Unsaved content changes will not be applied.", "Pause advert"], archive: ["Archive this advert?", "This removes it from the website and keeps its content and audit history. Unsaved content changes will not be applied.", "Archive advert"], save: ["Move this advert to draft?", "Your changes will be saved as a draft and the live advert will be removed from the website.", "Move to draft"] };
       setBusy(true);
       if ((action !== "save" || current?.status === "active") && !await confirmAction(...confirmation[action])) { setBusy(false); return; }
       status("Saving advert…");
+      let uploadedAsset = null;
       try {
         const data = { id: current?.id || null, action, expectedVersion: current?.version || 0 };
         for (const [name, control] of Object.entries(controls)) data[name] = ["startsAt", "endsAt"].includes(name) ? control.value ? new Date(control.value).toISOString() : null : control.value.trim();
+        if (["save", "activate"].includes(action) && selectedImage) {
+          status("Uploading image…");
+          const upload = await api("/api/admin/adverts/media", { method: "POST", body: JSON.stringify({ action: "upload", imageData: selectedImage.data }) });
+          if (!upload.asset?.id || !upload.asset.imageUrl || !allowedImage(upload.asset.imageUrl)) throw new Error("The image upload could not be confirmed. Please try again.");
+          uploadedAsset = upload.asset; data.imageUrl = upload.asset.imageUrl; status("Saving advert…");
+        }
         const response = await api("/api/admin/adverts", { method: "POST", body: JSON.stringify(data) });
-        dirty = false; const result = response.result || {}; const id = result.id || current?.id;
+        uploadedAsset = null;
+        if (["save", "activate"].includes(action)) { controls.imageUrl.value = data.imageUrl; selectedImage = null; fileInput.value = ""; renderPreview(); }
+        dirty = Boolean(selectedImage); const result = response.result || {}; const id = result.id || current?.id;
         const refreshed = await refresh();
         current = (refreshed && items.find((item) => item.id === id)) || { ...current, ...data, id, status: action === "activate" ? "active" : action === "pause" ? "paused" : action === "archive" ? "completed" : "draft", version: result.version ?? current?.version };
         controls.reason.value = ""; updateActions(); editorTitle.textContent = "Edit advert";
         status(`Advert ${action === "activate" ? "published" : action === "save" ? "saved as a draft" : action === "pause" ? "paused" : "archived"}.${refreshed ? "" : " Saved successfully, but the campaign list could not refresh. Reload adverts to check its latest state."}`);
-      } catch (error) { status(error.message, true); }
+      } catch (error) {
+        if (uploadedAsset) {
+          try { await api("/api/admin/adverts/media", { method: "POST", body: JSON.stringify({ action: "remove", assetId: uploadedAsset.id }) }); }
+          catch { /* Registered unused images are collected by the server cleanup. */ }
+        }
+        status(error.message, true);
+      }
       finally { setBusy(false); }
     }
     create.addEventListener("click", () => openEditor()); retry.addEventListener("click", refresh);
+    chooseImage.addEventListener("click", () => { if (!busy) fileInput.click(); });
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files?.[0]; if (!file || busy) return;
+      setBusy(true); status("Preparing image…");
+      try { selectedImage = await prepareImage(file); dirty = true; renderPreview(); status("Image ready. Save the advert to upload it."); }
+      catch (error) { status(error.message, true); }
+      finally { fileInput.value = ""; setBusy(false); }
+    });
+    removeImage.addEventListener("click", () => { if (busy) return; selectedImage = null; controls.imageUrl.value = ""; fileInput.value = ""; dirty = true; renderPreview(); status("Image removed from this edit. Save to apply the change."); chooseImage.focus(); });
+    controls.imageUrl.addEventListener("input", () => { selectedImage = null; renderPreview(); });
     form.addEventListener("input", () => { dirty = true; renderPreview(); }); form.addEventListener("change", () => { dirty = true; renderPreview(); });
     form.addEventListener("submit", (event) => { event.preventDefault(); submit(event.submitter?.value || "save"); }); pause.addEventListener("click", () => submit("pause")); archive.addEventListener("click", () => submit("archive"));
-    close.addEventListener("click", async () => { if (!busy && await discard()) { form.hidden = true; dirty = false; create.focus(); } });
+    close.addEventListener("click", async () => { if (!busy && await discard()) { form.hidden = true; dirty = false; selectedImage = null; fileInput.value = ""; previewImage.removeAttribute("src"); previewSource = ""; create.focus(); } });
     await refresh();
   }
-  window.BrowseRPStaffAdverts = Object.freeze({ init, allowedImage, allowedDestination });
+  window.BrowseRPStaffAdverts = Object.freeze({ init, allowedImage, allowedDestination, prepareArtwork });
 })();
