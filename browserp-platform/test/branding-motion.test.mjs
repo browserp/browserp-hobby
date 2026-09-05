@@ -54,12 +54,12 @@ test("every user-facing document publishes one consistent BrowseRP browser ident
       type: link.getAttribute("type"),
     }));
     assert.deepEqual(icons, [
-      { href: "/favicon.ico", sizes: "32x32 48x48", type: null },
+      { href: "/favicon.ico?v=2.12.1", sizes: "32x32 48x48", type: null },
       { href: "/assets/browserp-icon-32.png", sizes: "32x32", type: "image/png" },
       { href: "/assets/browserp-icon-48.png", sizes: "48x48", type: "image/png" },
     ], `${page} favicons`);
     const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
-    assert.equal(appleIcon?.getAttribute("href"), "/apple-touch-icon.png", `${page} Apple icon`);
+    assert.equal(appleIcon?.getAttribute("href"), "/apple-touch-icon.png?v=2.12.1", `${page} Apple icon`);
     assert.equal(appleIcon?.getAttribute("sizes"), "180x180", `${page} Apple icon size`);
     assert.equal(document.querySelector('link[rel="manifest"]')?.getAttribute("href"), "/manifest.webmanifest", `${page} manifest`);
   }
