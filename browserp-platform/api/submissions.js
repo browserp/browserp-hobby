@@ -187,6 +187,15 @@ export default endpoint(["GET", "POST", "PATCH"], async (req, res, requestId) =>
     return ok(res, { submissions: Array.isArray(submissions) ? submissions : [] });
   }
 
+  if (req.method === "POST") {
+    // Auth can still accept an access token after its session is revoked.
+    // Recheck the current account before either privileged submission write.
+    const access = await rpc("member_connection_status", {}, session.accessToken);
+    if (access?.active !== true || access.userId !== session.user.id || !UUID.test(String(access.sessionId || ""))) {
+      throw Object.assign(new Error("Sign in again before submitting your listing."), { status: 401 });
+    }
+  }
+
   await rateLimit(req, req.method === "PATCH" ? "submission-corrections" : "server-submission", req.method === "PATCH" ? 15 : 3, 3600);
   const body = await readBody(req);
   if (!acceptedAgreement(body)) {

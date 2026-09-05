@@ -25,3 +25,16 @@ Published through the visible staff scraper: **Brighter Times RP 3.0** (`98yx4my
 All three have stored, decoded PNG logos and recent source player observations. Eighteen public search/detail page checks passed across Chromium, Firefox and WebKit at 390px: no page errors, broken images or horizontal overflow. Search responses retain the correct access value. This is emulated browser coverage, not physical-device testing, in-game participation or a guarantee of community friendliness. Local evidence: `/tmp/browserp-three-community-check.json`; public mobile screenshots were saved and Brighter Times visually inspected.
 
 A fresh database readback confirmed **30 FiveM / 19 RedM / 3 Minecraft**, 52 published communities. The **40/20/3 target remains open**. Quality holds were not reversed to pad these counts.
+
+## Hydrate and SADRP — 22:29 UTC verification
+
+Both were imported, corrected and published through the real staff scraper. [The source review](fivem-hydrate-sadrp-review-2026-09-05.md) retains the original research observations and editorial limitations.
+
+- **Hydrate** (`l9yp9v`, `hydrate-l9yp9v`) adds Australian English roleplay with documented novice onboarding. Public means no general application: the guide requires self-service Discord verification. Players are 16+, characters 18+. Its quiet Australian morning count is assessed against the researched 24h peak132 / average51, not treated as a dead server. The stored logo is the actual source-provided image; no banner was invented.
+- **San Andreas Department of Roleplay (SADRP)** (`o6oodx`, `san-andreas-department-of-roleplay-sadrp-o6oodx`) adds structured English vMenu roleplay and emergency-service training. General admission stays **Not confirmed**: department applications do not prove the whole server is Whitelisted. This is distinct from existing SACRP. Paid spawn privileges and limited independent review evidence remain caveats in the source packet.
+
+Twelve search/detail page checks passed in Chromium, Firefox and WebKit at 390px, without application errors, broken images or horizontal overflow. Both stored logos returned200 and decoded as PNG; metadata and exact Discord/Cfx links were checked. The two full-page mobile screenshots were visually reviewed. Search retained Hydrate's 2/1000 observation at 22:27:37UTC and SADRP's 33/64 at 22:25:59UTC. These are timestamped source observations, not static counts or a guarantee of friendliness.
+
+The published roster is **32 FiveM / 19 RedM / 3 Minecraft**, 54 total. The quality-first 40/20/3 target remains unfinished; no held community was restored to fill a slot.
+
+A bounded six-request filter check at22:38UTC confirmed Hydrate appears under Public and not Whitelisted, while SADRP appears in all-access search and neither confirmed-access filter. Hydrate retained the same4-player observation across search and Public; SADRP retained a fresh34-player observation. Returned feature, mode, region and game facets reflect the listings. Public filter usage numbers remain hidden in the UI.
