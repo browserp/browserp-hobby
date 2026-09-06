@@ -1,6 +1,6 @@
 import { assertCsrf, assertSameOrigin, readBody } from "./http.js";
 import { getSession, rpc } from "./supabase.js";
-import { rateLimit } from "./rate-limit.js";
+import { memberRateLimit } from "./rate-limit.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const fail = message => Object.assign(new Error(message), { status: 400 });
@@ -51,7 +51,7 @@ export async function memberAdvertisingEnquiries(req, res) {
     } };
   } else if (body.action === "withdraw") values = { p_action: "withdraw", p_id: id(body.id), p_expected_version: version(body.version), p_key: id(body.key) };
   else throw fail("Choose an enquiry action.");
-  await rateLimit(req, "member-advertising-enquiries", 12, 3600);
+  await memberRateLimit(req, "member-advertising-enquiries", 12, 3600, session.user.id, 120);
   return rpc("member_advertising_enquiries", values, session.accessToken);
 }
 export async function staffAdvertisingEnquiries(req, res) {
@@ -68,6 +68,6 @@ export async function staffAdvertisingEnquiries(req, res) {
   if (body.action !== "review" || !["reviewing", "replied", "closed"].includes(body.status)) throw fail("Choose a review action.");
   const values = { p_id: id(body.id), p_expected_version: version(body.version), p_status: body.status,
     p_reply: plain(body.reply ?? "", 0, 2000, "the reply"), p_key: id(body.key) };
-  await rateLimit(req, "staff-advertising-enquiries", 40, 600);
+  await memberRateLimit(req, "staff-advertising-enquiries", 40, 600, session.user.id, 400);
   return rpc("staff_review_advertising_enquiry", values, session.accessToken);
 }
