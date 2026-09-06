@@ -78,16 +78,16 @@ test("public search uses shared contextual choices and clear wording", () => {
   for (const page of ["index", "servers", "game"]) assert.match(read(`public/${page}.html`), /smart-search.js/);
 });
 
-test("homepage game cards use local publisher artwork instead of letter tiles", () => {
+test("homepage game cards use the selected artwork instead of letter tiles", () => {
   const home = read("public/index.html");
   const css = read("public/browserp-v3.css");
   for (const game of ["fivem", "redm", "roblox", "minecraft"]) {
     assert.match(home, new RegExp(`game-art-${game}-v3`));
-    assert.match(css, new RegExp(`/assets/games/${game}-official\\.${game === "roblox" ? "webp" : "jpg"}`));
+    assert.match(css, new RegExp(`/assets/games/${game}-selected-v2\\.webp`));
   }
   assert.doesNotMatch(home, /<b>(5M|RM|RB|MC|FZ)<\/b>/);
   assert.doesNotMatch(home, /href="\/games\/forza"/);
-  assert.match(home, /src="\/assets\/games\/all-games-collage\.webp"/);
+  assert.match(home, /src="\/assets\/games\/all-games-selected-v2\.webp"/);
 });
 
 test("profile picture previews remain compatible with the strict image CSP", () => {

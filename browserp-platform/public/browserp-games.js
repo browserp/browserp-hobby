@@ -31,7 +31,7 @@
     if (!GAMES.some((game) => game.id === id)) return icon(id, className);
     const image = node("img", `game-artwork-v5 game-official-artwork-v6 ${className}`);
     const artworkId = id === "6m" ? "gta6" : id;
-    image.src = `/assets/games/${artworkId}-official.${id === "roblox" ? "webp" : "jpg"}`;
+    image.src = AVAILABLE_GAME_IDS.has(id) ? `/assets/games/${id}-selected-v2.webp` : `/assets/games/${artworkId}-official.jpg`;
     image.alt = "";
     image.width = 460;
     image.height = 215;
@@ -86,7 +86,7 @@
     if (!game) {
       nav.hidden = true;
       const allGamesLogo = node("img", "game-page-all-logo-v5 game-artwork-v5");
-      allGamesLogo.src = "/assets/games/all-games-collage.webp";
+      allGamesLogo.src = "/assets/games/all-games-selected-v2.webp";
       allGamesLogo.alt = "";
       allGamesLogo.width = 140;
       allGamesLogo.height = 140;

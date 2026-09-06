@@ -17,13 +17,13 @@ const games = {
   minecraft: ["Minecraft", "Storytelling and survival worlds", "Browse communities where building, survival, factions and long-running characters create shared stories."]
 };
 const upcoming = { forza: "Forza", gmod: "Garry's Mod", arma: "ARMA", vrchat: "VRChat", dayz: "DayZ", "project-zomboid": "Project Zomboid", ets2: "Euro Truck Simulator 2", "assetto-corsa": "Assetto Corsa", beamng: "BeamNG.drive", gta6: "GTA VI Roleplay", "6m": "6M" };
-const gameArtwork = id => `/assets/games/${id === "6m" ? "gta6" : id}-official.${id === "roblox" ? "webp" : "jpg"}`;
-const gameImageSizes = { fivem: [460, 215], redm: [460, 215], minecraft: [1170, 500], roblox: [1200, 675] };
+const gameArtwork = id => Object.hasOwn(games, id) ? `/assets/games/${id}-selected-v2.webp` : `/assets/games/${id === "6m" ? "gta6" : id}-official.jpg`;
+const gameImageSizes = { fivem: [825, 413], redm: [740, 423], minecraft: [640, 339], roblox: [1920, 1076] };
 const brandImage = { url: `${ORIGIN}/browserp-mark-v3.png`, alt: "BrowseRP RP logo", type: "image/png", width: 1254, height: 1254, card: "summary" };
 const publisher = { "@type": "Organization", "@id": `${ORIGIN}/#organization`, name: "BrowseRP", url: `${ORIGIN}/`, logo: { "@type": "ImageObject", url: brandImage.url, width: 1254, height: 1254 } };
 const website = { "@type": "WebSite", "@id": `${ORIGIN}/#website`, name: "BrowseRP", url: `${ORIGIN}/`, publisher };
 function breadcrumbs(items) { return { "@type": "BreadcrumbList", itemListElement: [["BrowseRP", "/"], ...items].map(([name, path], index) => ({ "@type": "ListItem", position: index + 1, name, item: ORIGIN + path })) }; }
-function gameImage(id) { const [width, height] = gameImageSizes[id]; return { url: ORIGIN + gameArtwork(id), alt: `${games[id][0]} artwork`, type: id === "roblox" ? "image/webp" : "image/jpeg", width, height, card: "summary_large_image" }; }
+function gameImage(id) { const [width, height] = gameImageSizes[id]; return { url: ORIGIN + gameArtwork(id), alt: `${games[id][0]} artwork`, type: "image/webp", width, height, card: "summary_large_image" }; }
 function serverImage(server) {
   for (const [value, label, card] of [[server.banner_url, "community artwork", "summary_large_image"], [server.logo_url, "community logo", "summary"]]) {
     const approved = value && safeURL(value, true);
@@ -211,7 +211,7 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         if (!isDirectory) {
           html = slot(html, "game-page-nav-v4", navGames(id), { hidden: !id ? "" : false });
           html = slot(html, "game-hub-grid-v4", Object.keys(games).map(gameCard).join(""), { hidden: id ? "" : false });
-          html = slot(html, "game-page-mark-v4", id ? `<img class="game-artwork-v5 game-page-symbol-v4 game-official-artwork-v6" src="${gameArtwork(id)}" alt="" width="460" height="215">` : '<img class="game-page-all-logo-v5 game-artwork-v5" src="/assets/games/all-games-collage.webp" alt="" width="140" height="140">');
+          html = slot(html, "game-page-mark-v4", id ? `<img class="game-artwork-v5 game-page-symbol-v4 game-official-artwork-v6" src="${gameArtwork(id)}" alt="" width="460" height="215">` : '<img class="game-page-all-logo-v5 game-artwork-v5" src="/assets/games/all-games-selected-v2.webp" alt="" width="140" height="140">');
           if (id) {
             title = game ? `${game[0]} roleplay servers — BrowseRP` : `${coming} — Coming soon — BrowseRP`;
             description = game ? game[2] : `${coming} discovery is coming soon to BrowseRP.`;

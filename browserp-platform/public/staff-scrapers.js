@@ -36,7 +36,7 @@
   };
   function artwork(game, className) {
     const image = make("img", undefined, className);
-    image.src = `/assets/games/${game.id}-roleplay.webp`;
+    image.src = `/assets/games/${game.id}-selected-v2.webp`;
     image.alt = "";
     image.width = 512;
     image.height = 512;

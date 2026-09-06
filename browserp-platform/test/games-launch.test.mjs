@@ -23,6 +23,8 @@ test("games hub offers exactly the four launch games in the requested order", ()
   const { nodes } = render("/games");
   const cards = nodes.get("#game-hub-grid-v4").children;
   assert.deepEqual(cards.map((card) => card.dataset.platform), ["fivem", "redm", "roblox", "minecraft"]);
+  for (const card of cards) assert.equal(card.children[0].children[0].src, `/assets/games/${card.dataset.platform}-selected-v2.webp`);
+  assert.equal(nodes.get("#game-page-mark-v4").children[0].src, "/assets/games/all-games-selected-v2.webp");
   assert.ok(cards.every((card) => card.tagName === "a" && card.href.startsWith("/games/")));
   assert.equal(nodes.get("#game-page-nav-v4").hidden, true);
   const upcoming = nodes.get("#game-upcoming-grid-v5").children;

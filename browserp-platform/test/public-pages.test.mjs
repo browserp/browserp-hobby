@@ -144,9 +144,10 @@ test("published article text, social identity and safe structured data are prese
 });
 
 test("game and server share images identify the public page and retain the RP fallback without invented dimensions", async () => {
-  for (const [id, width, height, ext] of [["fivem", 460, 215, "jpg"], ["redm", 460, 215, "jpg"], ["minecraft", 1170, 500, "jpg"], ["roblox", 1200, 675, "webp"]]) {
+  for (const [id, width, height] of [["fivem", 825, 413], ["redm", 740, 423], ["minecraft", 640, 339], ["roblox", 1920, 1076]]) {
     const doc = (await request(`/games/${id}`)).document();
-    assert.equal(doc.querySelector('meta[property="og:image"]').content, `https://www.browserp.com/assets/games/${id}-official.${ext}`);
+    assert.equal(doc.querySelector('meta[property="og:image"]').content, `https://www.browserp.com/assets/games/${id}-selected-v2.webp`);
+    assert.equal(doc.querySelector('meta[property="og:image:type"]').content, "image/webp");
     assert.equal(doc.querySelector('meta[property="og:image:width"]').content, String(width));
     assert.equal(doc.querySelector('meta[property="og:image:height"]').content, String(height));
     assert.equal(doc.querySelector('meta[name="twitter:card"]').content, "summary_large_image");

@@ -72,6 +72,41 @@
     toast.timer = setTimeout(() => target.classList.remove("show"), 3600);
   }
 
+  function homeWordmarks() {
+    const pattern = $(".home-hero-pattern");
+    if (!pattern || pattern.querySelector(".home-hero-wordmarks")) return;
+    const plane = node("div", "home-hero-wordmarks");
+    pattern.append(plane);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let inView = false, parked = false;
+    const sync = () => {
+      pattern.dataset.motion = inView && !parked && !document.hidden && !reduced.matches ? "running" : "paused";
+    };
+    const size = () => {
+      const rect = pattern.getBoundingClientRect();
+      // Overscan keeps the rotated plane covered throughout a whole-wordmark loop.
+      const extent = Math.ceil(Math.hypot(rect.width, rect.height) + 480);
+      plane.style.width = `${extent}px`;
+      const style = getComputedStyle(pattern);
+      const rowPitch = (parseFloat(style.getPropertyValue("--wordmark-width")) || 120) * 358 / 1400 + (parseFloat(style.getPropertyValue("--wordmark-gap")) || 16);
+      const rows = Math.ceil(extent / rowPitch) + 1;
+      while (plane.children.length < rows) plane.append(node("div", "home-hero-wordmark-row"));
+      while (plane.children.length > rows) plane.lastElementChild.remove();
+      inView = rect.bottom > 0 && rect.top < window.innerHeight;
+      sync();
+    };
+    size();
+    if (typeof ResizeObserver === "function") new ResizeObserver(size).observe(pattern);
+    else window.addEventListener("resize", size, { passive: true });
+    if (typeof IntersectionObserver === "function") {
+      new IntersectionObserver(entries => { inView = entries[0].isIntersecting; sync(); }).observe(pattern);
+    }
+    document.addEventListener("visibilitychange", sync);
+    reduced.addEventListener?.("change", sync);
+    window.addEventListener("pagehide", () => { parked = true; sync(); });
+    window.addEventListener("pageshow", () => { parked = false; size(); });
+  }
+
   const reveal = (() => {
     let observer = null;
     const prefersReduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -741,6 +776,7 @@
     applyTheme(preferredTheme());
     footer();
     $$('[data-year-v3]').forEach((element) => { element.textContent = String(new Date().getFullYear()); });
+    homeWordmarks();
     reveal.scan();
     await session();
     window.BrowseRPAdvertisingEnquiries?.initMember({ api, session: state.session, root: document.querySelector("#advertising-enquiries") });
