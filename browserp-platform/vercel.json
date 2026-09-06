@@ -26,6 +26,14 @@
       "destination": "/api/router?_route=health"
     },
     {
+      "source": "/api/internal/discord-role-sync",
+      "destination": "/api/router?_route=internal/discord-role-sync"
+    },
+    {
+      "source": "/api/admin/discord-role-sync",
+      "destination": "/api/router?_route=admin/discord-role-sync"
+    },
+    {
       "source": "/api/internal/server-status",
       "destination": "/api/router?_route=internal/server-status"
     },

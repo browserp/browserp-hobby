@@ -1,5 +1,18 @@
 # Launch SEO completion — 6 September 2026
 
+## Live Google markup checks — 6 September, 21:46–21:49 BST
+
+Google's public Rich Results Test fetched the real production pages successfully using its smartphone inspection agent:
+
+- `/blog/how-to-choose-a-fivem-roleplay-server`: **2 valid items**, comprising one Article and one Breadcrumb list. The Article has two **optional**, non-critical omissions: `image` and `author`. No author or article image was invented to silence these warnings. Result: `https://search.google.com/test/rich-results/result?id=MPIErfvaSmNsgqKX8fboQA`.
+- `/games/fivem`: **1 valid Breadcrumb item**, with no warning shown in the summary. Result: `https://search.google.com/test/rich-results/result?id=0JuUYN0y6u7pesx1_sFIaw`.
+
+These checks complete the planned live game/article rich-result validation. They establish successful crawl and valid supported markup, not indexing or ranking guarantees. Search Console's selected-canonical/indexing observations remain separate. No repeated sitemap submission or DNS change was made.
+
+## Current production checkpoint
+
+The accepted visual/SEO release is `9c1826e1e3f9fa7c58296e5c672ca421fa1db27b`, tree `14f3095f34d943f8530dcc3bd1ba8c75cf1dbe9f`, READY at https://www.browserp.com through `dpl_9SVwhj1szJRAkvTmJ41W8W3a8m7d`. Its isolated Node 24 gate passed **938 tests**, 217 JavaScript checks and the 12-function deployment limit. All **18 bounded production checks** passed after promotion, including the exact release SHA, changed asset bytes, canonical redirect, real directory/article content and anonymous staff non-disclosure. Historical source and preview records below describe earlier checkpoints; they do not mean this accepted release is still awaiting publication. The disabled Discord role-sync foundation is separate development work and is not included in this production SHA.
+
 This reconciles the earlier [SEO launch plan](SEO_LAUNCH_PLAN.md) against base commit `dfbb66e`, the final SEO changes integrated as `13ff5ce`, and the homepage changes integrated as `d4c4f5a` in `release/seo-community-home-20260906`. The integrated source passed full verification at `5465e3f868fc5007035f9f867d6b4ae2da4fb023`. This document records source and provider verification separately from deployment evidence. The follow-up used the existing Bing DNS verification record without changing DNS, and no search submission was repeated.
 
 ## Completed foundation and final corrections
@@ -39,7 +52,7 @@ In **Bing Webmaster Tools**, the current account initially showed no sites. Adde
 Remaining search evidence after publication:
 
 1. Use Google URL Inspection / Test live URL for the canonical homepage, the FiveM game page, a real community listing and `/servers?offset=24`; record access, indexing permission and the selected canonical when available. Request homepage indexing only if still needed, without repeatedly submitting every URL. Allow the existing performance and indexing reports to finish processing.
-2. Use Google's public Rich Results Test for a game/community breadcrumb and a genuine published article if one exists. Schema validation establishes markup validity, not a promise of a special result or ranking. No article needs to be invented just to make a test URL.
+2. The planned game/article Rich Results Test is complete; the real results and optional omissions are recorded above. Additional community-page inspection can accompany the remaining Search Console work when useful, without inventing content or promising special results.
 
 Search rankings, crawl timing and sufficient field-performance data remain external outcomes. Successful sitemap processing and branding approval do not guarantee ranking. The old plan's ongoing analytics, editorial programme and future landing-page ideas are post-launch options driven by real evidence; they are not a new open-ended launch implementation requirement.
 

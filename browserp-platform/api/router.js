@@ -2,6 +2,7 @@ import publicPage from "../lib/public-pages.js";
 import staffDocument from "../lib/staff-documents.js";
 import health from "../lib/health.js";
 import { staffMinecraft } from "../lib/minecraft-workflow.js";
+import { scheduledDiscordRoleSync, validateDiscordSyncConfiguration } from "../lib/discord-role-sync.js";
 import { scheduledStatusRefresh } from "../lib/status-refresh-workflow.js";
 import { createHash, randomBytes } from "node:crypto";
 import { endpoint, ok } from "../lib/api.js";
@@ -645,6 +646,21 @@ const routes = {
     return ok(res, { result });
   }),
 
+  "admin/discord-role-sync": endpoint(["GET", "POST"], async (req, res) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") return ok(res, { control: await rpc("staff_discord_role_sync_control", {}, session.accessToken) });
+    await rateLimit(req, "staff-discord-role-sync", 10, 300);
+    const body = await readBody(req, 4096);
+    validateDiscordSyncConfiguration(body);
+    const result = await rpc("staff_configure_discord_role_sync", {
+      p_guild_id: body.guildId, p_bot_user_id: body.botUserId, p_protected_role_ids: body.protectedRoleIds,
+      p_mappings: body.mappings, p_enabled: body.enabled, p_revoke_only: body.revokeOnly,
+      p_expected_version: body.expectedVersion, p_reason: sanitizePlainText(body.reason, 500)
+    }, session.accessToken);
+    return ok(res, { result });
+  }),
+
   "admin/staff": endpoint(["GET", "POST"], async (req, res, id) => {
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true, provider: "discord" });
@@ -971,6 +987,7 @@ const routes = {
     }
   }),
 
+  "internal/discord-role-sync": endpoint("POST", async (req, res) => ok(res, await scheduledDiscordRoleSync(req))),
   "internal/server-status": endpoint("POST", async (req, res) => ok(res, await scheduledStatusRefresh(req))),
   "admin/minecraft": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffMinecraft(req, res, id))),
   "admin/fivem": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffFiveM(req, res, id))),
