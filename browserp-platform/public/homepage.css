@@ -8,7 +8,6 @@
   z-index: -2;
   overflow: hidden;
   pointer-events: none;
-  opacity: .22;
   mask-image: linear-gradient(#000 0%, #000 80%, transparent 100%);
   -webkit-mask-image: linear-gradient(#000 0%, #000 80%, transparent 100%);
   --wordmark-width: 120px;
@@ -27,15 +26,20 @@
 }
 .home-hero-wordmark-row {
   position: relative;
+}
+.home-hero-wordmark-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background: url("/assets/browserp-logo-v5.png") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
+  opacity: .22;
 }
 .home-hero-wordmark-row::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: #ffe2f3;
-  mask: url("/assets/browserp-logo-v5.png") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
-  -webkit-mask: url("/assets/browserp-logo-v5.png") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
+  background: url("/assets/browserp-logo-v5.png") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
+  filter: brightness(1.16) drop-shadow(0 0 2px rgb(236 79 166 / .45));
   opacity: 0;
   transform-origin: center;
 }
@@ -43,7 +47,7 @@
   .home-hero-wordmarks { animation: home-wordmark-drift 36s linear infinite; animation-play-state: paused; }
   .home-hero-wordmark-row::after {
     animation: home-wordmark-wave var(--wave-duration, 14s) linear infinite;
-    animation-delay: calc(var(--wave-index, 0) * .26s - 2s);
+    animation-delay: calc((var(--wave-index, 0) - var(--wave-start, 0)) * .18s - .6s);
     animation-play-state: paused;
   }
   .home-hero-pattern[data-motion="running"] .home-hero-wordmarks,
@@ -52,7 +56,7 @@
 /* Row order becomes a top-left to bottom-right wave after the plane's rotation. */
 @keyframes home-wordmark-wave {
   0%, 14%, 100% { opacity: 0; transform: scaleY(1); }
-  6% { opacity: .55; transform: scaleY(1.06); }
+  6% { opacity: .7; transform: scaleY(1.1); }
 }
 @keyframes home-wordmark-drift {
   from { transform: translate(-50%, -50%) rotate(-45deg) translateX(0); }
@@ -74,12 +78,15 @@
 .home-game-discovery .game-grid-v3 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .home-game-discovery .game-grid-v3 a:not(.game-all-v3) { padding: 12px; }
 .home-game-discovery .game-grid-v3 .game-all-v3 {
-  grid-template-columns: 120px minmax(0, 1fr);
+  justify-self: center;
+  width: clamp(320px, calc((100% - 36px) / 4), 420px);
+  max-width: 100%;
+  grid-template-columns: 136px minmax(0, 1fr);
   column-gap: 20px;
   min-height: 0;
   padding: 12px;
 }
-.home-game-discovery .game-grid-v3 .game-art-all-v5 { width: 120px; height: 120px; }
+.home-game-discovery .game-grid-v3 .game-art-all-v5 { width: 136px; height: 136px; }
 .home-game-discovery .game-grid-v3 .game-art-all-v5 img { width: 100%; height: 100%; object-fit: cover; }
 .home-game-discovery .game-grid-v3 [aria-pressed="true"] {
   border-color: var(--platform-accent, var(--pink));
@@ -93,15 +100,39 @@
 .home-game-filter-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .home-game-discovery .home-game-filter-status { font-size: 14px; line-height: 1.5; margin: 12px 0 0; color: var(--muted); }
 .home-game-filter-status:empty { display: none; }
+/* Show the full portrait creative and keep copy outside its artwork. */
+body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 { min-height: 0; }
+body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-image-v3 {
+  position: static;
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: contain;
+  transform: none;
+}
+body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-shade-v3 { display: none; }
+body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { position: static; max-width: none; padding: 20px 18px; }
+body[data-page="home"] .content-with-rail-v3 > .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { min-height: 260px; align-content: center; }
+body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) { max-width: 900px; }
+body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .side-ad-stage-v3 { display: grid; grid-template-columns: 180px minmax(0, 1fr); align-items: center; }
+body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .side-ad-copy-v3 { padding: 24px 64px 24px 28px; }
+body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .ad-dots-v3 { position: static; }
+body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .ad-arrow-previous-v3 { left: 10px; }
 @media (max-width: 760px) {
   .home-hero-v3 { padding-bottom: 42px; }
   .home-hero-intro { padding-top: 60px; }
   .home-game-discovery .game-grid-v3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .home-game-discovery .game-grid-v3 .game-all-v3 { grid-template-columns: 96px minmax(0, 1fr); column-gap: 16px; }
-  .home-game-discovery .game-grid-v3 .game-art-all-v5 { width: 96px; height: 96px; }
+  .home-game-discovery .game-grid-v3 .game-all-v3 { width: 100%; grid-template-columns: 110px minmax(0, 1fr); column-gap: 16px; }
+  .home-game-discovery .game-grid-v3 .game-art-all-v5 { width: 110px; height: 110px; }
   .home-game-discovery .game-grid-v3 a:not(.game-all-v3) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; gap: 4px; }
   .home-game-discovery .game-grid-v3 a:not(.game-all-v3) .game-art-v3 { grid-row: auto; width: 100%; height: auto; aspect-ratio: 460 / 215; }
   .home-game-discovery .smart-home-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); align-items: center; }
+  body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { min-height: 260px; padding: 18px 14px; align-content: center; }
+  body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 strong { font-size: 20px; }
+  body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 .ad-arrow-v3 { position: relative; top: auto; left: auto; right: auto; margin: 0 12px 12px; }
+  body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 .ad-arrow-next-v3 { justify-self: end; }
 }
 @media (max-width: 440px) {
   .home-game-discovery .smart-home-filters { grid-template-columns: minmax(0, 1fr); }

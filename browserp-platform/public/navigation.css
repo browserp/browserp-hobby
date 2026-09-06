@@ -5,8 +5,11 @@
 .public-header-v6 { background: color-mix(in srgb, var(--bg) 94%, transparent); }
 /* Leave room around the rounded panel without moving Close away from its opener. */
 .public-nav-v6 { width: min(calc(100% - 72px),var(--shell)); min-height: 88px; display: flex; align-items: center; gap: 26px; }
-.navigation-brand-v6 { display: inline-flex; align-items: center; flex: none; transform-origin: left center; animation: browserp-brand-pulse-v4 8s ease-in-out infinite; }
+.navigation-brand-v6 { display: inline-flex; align-items: center; flex: none; }
 .navigation-brand-v6 img { width: 190px; height: 54px; object-fit: contain; }
+.public-nav-v6 > .navigation-brand-v6 img { transform-origin: left center; animation: navigation-brand-breathe 5s ease-in-out infinite; }
+.public-nav-v6[data-brand-motion="paused"] > .navigation-brand-v6 img { animation-play-state: paused; }
+@keyframes navigation-brand-breathe { 0%, 100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.04); opacity: 1; } }
 .public-nav-links-v6 { display: flex; align-items: center; gap: 3px; margin-right: auto; }
 .public-nav-links-v6 > a { position: relative; padding: 12px; color: var(--copy); font-size: 14px; font-weight: 650; transition: color .2s ease; }
 .public-nav-links-v6 > a::after { content: ""; position: absolute; height: 2px; bottom: 5px; inset-inline: 12px; background: var(--pink); border-radius: 2px; transform: scaleX(0); transition: transform .2s ease; }
@@ -85,7 +88,7 @@
 .navigation-enter-v6:nth-child(5),.navigation-enter-v6:nth-child(6) { animation-delay: 100ms !important; }
 @keyframes navigation-arrive-v6 { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 /* The page is inert while the modal is open; pause ambient repainting behind it. */
-.navigation-open-v6 .hero-v3::after,.navigation-open-v6 .navigation-brand-v6,.navigation-open-v6 .logo-lockup-v3 { animation-play-state: paused; }
+.navigation-open-v6 .hero-v3::after,.navigation-open-v6 .navigation-brand-v6,.navigation-open-v6 .public-nav-v6 > .navigation-brand-v6 img,.navigation-open-v6 .logo-lockup-v3 { animation-play-state: paused; }
 @media (max-width: 1200px) { .public-nav-v6 { gap: 16px; } .public-nav-actions-v6 .account-name-v3 { display: none; } }
 @media (max-width: 1080px) { .public-nav-v6 { justify-content: space-between; } .public-nav-links-v6,.public-nav-actions-v6 { display: none; } }
 @media (max-width: 520px) {

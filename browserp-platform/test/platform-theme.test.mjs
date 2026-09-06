@@ -73,6 +73,24 @@ test("theme helper loads before consumers on every directory and detail page", (
   }
 });
 
+test("public game colours keep Minecraft darker than FiveM and remain readable without changing staff tokens", () => {
+  const css = read("public/browserp-v3.css");
+  const colours = { fivem: "71e685", redm: "ff797f", roblox: "ffffff", minecraft: "35a65f" };
+  const staff = { fivem: "ffac69", redm: "ff797f", roblox: "e5e9f0", minecraft: "8cdd8b" };
+  const rgb = hex => hex.match(/../g).map(part => parseInt(part, 16));
+  const luminance = rgb => rgb.map(v => v / 255).map(v => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4).reduce((sum, v, i) => sum + v * [.2126, .7152, .0722][i], 0);
+  for (const [id, colour] of Object.entries(colours)) {
+    assert.ok(css.includes(`body:not([data-staff-page]):not(.staff-v3) [data-platform="${id}"] { --platform-accent: #${colour}; }`));
+    assert.ok(css.includes(`\n[data-platform="${id}"] { --platform-accent: #${staff[id]}; }`));
+    const foreground = rgb(colour);
+    for (const panel of ["100d13", "111116", "19191f"]) {
+      const background = rgb(panel).map((v, i) => v * .87 + foreground[i] * .13);
+      assert.ok((luminance(foreground) + .05) / (luminance(background) + .05) >= 4.5, `${id} on ${panel}`);
+    }
+  }
+  assert.ok(luminance(rgb(colours.minecraft)) < luminance(rgb(colours.fivem)) * .6);
+});
+
 test("suggestions stay open for keyboard focus and close only after focus leaves the widget", () => {
   const source = read("public/browserp-directory.js");
   const start = source.indexOf("  function bindSuggestionKeyboard(");

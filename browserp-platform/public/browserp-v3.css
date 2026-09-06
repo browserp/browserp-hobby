@@ -745,6 +745,12 @@ main { animation: none; }
 [data-platform="redm"] { --platform-accent: #ff797f; }
 [data-platform="roblox"] { --platform-accent: #e5e9f0; }
 [data-platform="minecraft"] { --platform-accent: #8cdd8b; }
+/* Public game labels follow their requested colours; staff themes stay intact. */
+body:not([data-staff-page]):not(.staff-v3) [data-platform="fivem"] { --platform-accent: #71e685; }
+body:not([data-staff-page]):not(.staff-v3) [data-platform="redm"] { --platform-accent: #ff797f; }
+body:not([data-staff-page]):not(.staff-v3) [data-platform="roblox"] { --platform-accent: #ffffff; }
+body:not([data-staff-page]):not(.staff-v3) [data-platform="minecraft"] { --platform-accent: #35a65f; }
+body:not([data-staff-page]):not(.staff-v3) :is(.navigation-game-v6,.directory-game-choice)[data-platform] { color: var(--platform-accent); --game-colour: var(--platform-accent); }
 [data-platform="forza"] { --platform-accent: #f995d3; }
 [data-platform="gmod"] { --platform-accent: #70b8ff; }
 [data-platform="arma"] { --platform-accent: #c5d883; }

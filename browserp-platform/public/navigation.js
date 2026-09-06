@@ -82,6 +82,12 @@
   toggle.setAttribute("aria-haspopup", "dialog");
   toggle.append(icon("menu"), make("span", "", "Menu"));
   nav.replaceChildren(brand(), inlineLinks, inlineActions, toggle);
+  let brandParked = false;
+  const syncBrandMotion = () => { nav.dataset.brandMotion = document.hidden || brandParked ? "paused" : "running"; };
+  document.addEventListener("visibilitychange", syncBrandMotion);
+  window.addEventListener("pagehide", () => { brandParked = true; syncBrandMotion(); });
+  window.addEventListener("pageshow", () => { brandParked = false; syncBrandMotion(); });
+  syncBrandMotion();
 
   const dialog = make("dialog", "navigation-dialog-v6");
   dialog.id = "public-navigation";

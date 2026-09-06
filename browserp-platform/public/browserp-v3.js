@@ -90,7 +90,10 @@
       const style = getComputedStyle(pattern);
       const rowPitch = (parseFloat(style.getPropertyValue("--wordmark-width")) || 120) * 358 / 1400 + (parseFloat(style.getPropertyValue("--wordmark-gap")) || 16);
       const rows = Math.ceil(extent / rowPitch) + 1;
-      plane.style.setProperty("--wave-duration", (rows * .26 + 2.4).toFixed(2) + "s");
+      // Start at the visible top-left edge, rather than waiting through overscan.
+      const visibleRows = Math.ceil((rect.width + rect.height) / Math.SQRT2 / rowPitch) + 2;
+      plane.style.setProperty("--wave-start", Math.max(0, (rows - visibleRows) / 2));
+      plane.style.setProperty("--wave-duration", (visibleRows * .18 + 1.4).toFixed(2) + "s");
       while (plane.children.length < rows) {
         const row = node("div", "home-hero-wordmark-row");
         row.style.setProperty("--wave-index", plane.children.length);

@@ -87,6 +87,24 @@ function open(h) {
   return h.$("#public-navigation");
 }
 
+test("header branding pauses in hidden or parked pages and resumes on return", () => {
+  const h = harness();
+  try {
+    let hidden = false;
+    Object.defineProperty(h.w.document, "hidden", { get: () => hidden });
+    const nav = h.$(".public-nav-v6");
+    h.w.document.dispatchEvent(new h.w.Event("visibilitychange"));
+    assert.equal(nav.dataset.brandMotion, "running");
+    hidden = true; h.w.document.dispatchEvent(new h.w.Event("visibilitychange"));
+    assert.equal(nav.dataset.brandMotion, "paused");
+    hidden = false; h.w.dispatchEvent(new h.w.Event("pagehide"));
+    h.w.document.dispatchEvent(new h.w.Event("visibilitychange"));
+    assert.equal(nav.dataset.brandMotion, "paused");
+    h.w.dispatchEvent(new h.w.Event("pageshow"));
+    assert.equal(nav.dataset.brandMotion, "running");
+  } finally { h.dom.window.close(); }
+});
+
 function assertClosed(h, overflow = "") {
   assert.equal(h.$("#public-navigation").open, false);
   assert.equal(h.$(".navigation-toggle-v6").getAttribute("aria-expanded"), "false");
