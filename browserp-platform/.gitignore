@@ -2,6 +2,7 @@
 node_modules/
 coverage/
 *.log
+test/navigation-stability-*.png
 
 # Local provider/runtime state
 .vercel/

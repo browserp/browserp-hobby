@@ -1,7 +1,10 @@
 /* Wide community pages: two discreet artwork rails, with the listing at the centre. */
 #server-detail-v3.server-page-v7 { padding-block: 32px 80px; }
 #server-detail-v3.server-page-v7 .server-frame-v7 { width: min(calc(100% - clamp(48px, 4vw, 112px)), 2400px); display: grid; grid-template-columns: clamp(180px, 12vw, 300px) minmax(0, 1fr) clamp(180px, 12vw, 300px); gap: clamp(24px, 2vw, 48px); align-items: start; }
-.server-content-v7 { min-width: 0; }
+/* Keep the listing in its own track before either asynchronous advert arrives. */
+.server-content-v7 { min-width: 0; grid-column: 2; grid-row: 1; }
+.server-ad-left-v7 { grid-column: 1; grid-row: 1; }
+.server-ad-right-v7 { grid-column: 3; grid-row: 1; }
 .server-breadcrumb-v7 { display: flex; align-items: center; gap: 12px; min-height: 24px; margin-bottom: 20px; font-size: 13px; color: var(--muted); }
 .server-breadcrumb-v7 a { color: var(--copy); }
 .server-breadcrumb-v7 a:hover { color: var(--pink-strong); }
@@ -57,8 +60,8 @@
 }
 @media (max-width: 1100px) {
   #server-detail-v3.server-page-v7 .server-frame-v7 { grid-template-columns: minmax(0, 1fr); gap: 32px; width: min(calc(100% - 48px), 980px); }
-  .server-content-v7 { grid-row: 1; }
-  #server-detail-v3.server-page-v7 .server-ad-left-v7 { position: relative; margin: 0; top: auto; }
+  .server-content-v7 { grid-column: 1; grid-row: 1; }
+  #server-detail-v3.server-page-v7 .server-ad-left-v7 { grid-column: 1; grid-row: 2; position: relative; margin: 0; top: auto; }
   #server-detail-v3.server-page-v7 .server-ad-right-v7 { display: none; }
   #server-detail-v3.server-page-v7 .server-ad-rail-v7:not(.artwork-unavailable) .side-ad-stage-v3 { min-height: 220px; }
   #server-detail-v3.server-page-v7 .server-ad-rail-v7:not(.artwork-unavailable) .side-ad-copy-v3 { width: min(85%, 700px); padding: 28px 64px; }

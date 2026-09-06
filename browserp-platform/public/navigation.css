@@ -1,4 +1,7 @@
 /* One public navigation surface, independent of the staff workspace. */
+/* Reserve the enhanced header's dimensions before deferred navigation loads. */
+.header-v3 > .nav-v3,.site-header > .site-nav { --nav-height: 88px; min-height: 88px; width: min(calc(100% - 72px),var(--shell)); }
+.header-v3 > .nav-v3 .logo-lockup-v3,.site-header > .site-nav .logo-lockup-v3 { width: 190px; min-width: 190px; height: 54px; }
 .public-header-v6 { background: color-mix(in srgb, var(--bg) 94%, transparent); }
 /* Leave room around the rounded panel without moving Close away from its opener. */
 .public-nav-v6 { width: min(calc(100% - 72px),var(--shell)); min-height: 88px; display: flex; align-items: center; gap: 26px; }
@@ -86,6 +89,8 @@
 @media (max-width: 1200px) { .public-nav-v6 { gap: 16px; } .public-nav-actions-v6 .account-name-v3 { display: none; } }
 @media (max-width: 1080px) { .public-nav-v6 { justify-content: space-between; } .public-nav-links-v6,.public-nav-actions-v6 { display: none; } }
 @media (max-width: 520px) {
+  .header-v3 > .nav-v3,.site-header > .site-nav { --nav-height: 68px; min-height: 68px; width: min(calc(100% - 28px),var(--shell)); }
+  .header-v3 > .nav-v3 .logo-lockup-v3,.site-header > .site-nav .logo-lockup-v3 { width: 165px; min-width: 165px; height: 48px; }
   .public-nav-v6 { width: min(calc(100% - 28px),var(--shell)); min-height: 68px; }
   .public-nav-v6 .navigation-brand-v6 img { width: 165px; height: 48px; }
   .navigation-dialog-v6 { inset: 0 0 0 auto; width: 100%; height: 100dvh; border-radius: 0; border: 0; }

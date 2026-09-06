@@ -1,6 +1,6 @@
 # PC experience and staff access release
 
-Final follow-up status: source `306c07debf904bac1a871c8919d19fd1acd18006` is pushed, preview `dpl_HsWz92j3gKGcSkeafr9kf5A3P6dZ` is READY, and its hosted CaliRP page serves 2.19.2 styles plus real feature-tag links. Promotion remains pending because browser control stopped working before the final publish action. Production was last confirmed on `6928111`, not `306c07d`. Recheck live source before resuming promotion. These checkpoint notes are local documentation only and need no independent deployment.
+Final follow-up published: source `306c07debf904bac1a871c8919d19fd1acd18006` is live in production deployment `dpl_HgJ1j3o37TG7TafmEnWrMDp3wdbf`, https://browserp-hobby-1jalhvuou-browserp.vercel.app, READY at 14:30 UTC on 6 September. Build 2m36s, 12 functions. Live health matched the source, backend/auth/security ready, payments disabled. Browser review at 2503px and 390px showed no overflow; california opened its matching one-result directory. Anonymous requests to six staff endpoints returned 401/no private data/no-store; the browser recovered to the Continue with Discord signed-out gate. This supersedes the earlier pending-promotion checkpoint. A subsequent navigation-layout defect and CSS-only 2.19.3 fix are recorded in `NAVIGATION_STABILITY_2026-09-06.md`.
 
 Based on `98d7de9` (latest launch handoff), preserving deployed application `445a852` and the existing four launch games. Asset release: 2.19.0. Main is intentionally unchanged.
 

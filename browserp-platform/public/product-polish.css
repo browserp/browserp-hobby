@@ -31,6 +31,8 @@
 .account-popover-v3 a,.account-popover-v3 button { border-radius: 7px; min-height: 44px; font-size: 14px; }
 .account-avatar-v3,.account-initials-v3 { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex: none; }
 .content-with-rail-v3 { grid-template-columns: clamp(200px,15vw,280px) minmax(0,1fr); gap: clamp(24px,2.2vw,44px); }
+.content-with-rail-v3 > .side-ad-v3 { grid-column: 1; grid-row: 1; }
+.content-with-rail-v3 > :not(.side-ad-v3) { grid-column: 2; grid-row: 1; min-width: 0; }
 .side-ad-v3 { border: 0; border-radius: 12px; background: none; padding: 0; box-shadow: none; }
 .side-ad-stage-v3 { min-height: clamp(400px, calc(100svh - 260px), 680px); border: 1px solid #ffffff14; border-radius: 12px; overflow: hidden; }
 .ad-label-v3 { display: block; padding: 0 2px 8px; font-size: 10px; letter-spacing: .13em; color: #938d9f; }
@@ -86,7 +88,9 @@
 @media(max-width:1100px) { .hero-grid-v3 { grid-template-columns: minmax(0,1fr); } .game-showcase-v3 { max-width: none; } .content-with-rail-v3 { grid-template-columns: 180px minmax(0,1fr); gap: 24px; } .recommendation-results { grid-template-columns: minmax(0,1fr); } .recommendation-heading { align-items: start; flex-direction: column; gap: 14px; } }
 @media(max-width:760px) {
   .content-with-rail-v3 { display: flex; flex-direction: column; gap: 28px; }
-  .content-with-rail-v3 > .side-ad-v3 { width: 100%; }
+  .content-with-rail-v3 > .side-ad-v3,.content-with-rail-v3 > :not(.side-ad-v3) { grid-column: auto; grid-row: auto; width: 100%; }
+  .content-with-rail-v3 > .side-ad-v3 { order: 2; }
+  .content-with-rail-v3 > :not(.side-ad-v3) { order: 1; }
   .side-ad-stage-v3 { min-height: 210px; }
   .side-ad-copy-v3 { padding: 20px 48px; max-width: 520px; }
   .side-ad-copy-v3 strong { font-size: 23px; }

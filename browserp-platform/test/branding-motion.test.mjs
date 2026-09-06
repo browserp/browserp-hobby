@@ -122,7 +122,8 @@ test("scroll reveals start early and avoid paint-heavy transition work", () => {
   assert.match(reveal, /opacity:\s*1/);
   assert.match(reveal, /120ms/);
   assert.doesNotMatch(reveal, /filter/);
-  assert.match(css, /main \{ animation: page-enter-v3 \.16s/);
+  assert.match(css, /main \{ animation: none;/);
+  assert.doesNotMatch(css, /@keyframes page-enter-v3/);
   assert.doesNotMatch(brandPulse, /filter|drop-shadow/);
   assert.match(css, /@media \(pointer: coarse\)[\s\S]*?\.header-v3 \{[^}]*backdrop-filter: none/);
   assert.match(js, /rootMargin: "0px 0px 35% 0px"/);
