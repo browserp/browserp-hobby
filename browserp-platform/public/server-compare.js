@@ -160,7 +160,9 @@
     await Promise.all(selected.map(async item => {
       if (cache.get(item.slug)?.server && !force) return;
       try {
-        const response = await fetch(`/api/servers?slug=${encodeURIComponent(item.slug)}`, { headers: { Accept: "application/json" }, credentials: "omit", signal: requestController.signal });
+        // Keep same-origin deployment/security cookies on protected previews.
+        // Only the public listing fields below are retained or displayed.
+        const response = await fetch(`/api/servers?slug=${encodeURIComponent(item.slug)}`, { headers: { Accept: "application/json" }, credentials: "same-origin", signal: requestController.signal });
         if (response.status === 404) { if (current === generation) cache.set(item.slug, { error: "This listing is no longer available." }); return; }
         if (!response.ok) throw new Error("Unavailable");
         const payload = await response.json();

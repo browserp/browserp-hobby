@@ -75,7 +75,7 @@ test("shared comparison loads only three sanitized public listings through the e
   const { dom, w, requests } = await setup("https://www.browserp.com/compare?servers=first,first,../private,second,third,fourth");
   try {
     assert.deepEqual(requests.map(request => request.path), ["/api/servers?slug=first", "/api/servers?slug=second", "/api/servers?slug=third"]);
-    for (const request of requests) { assert.equal(request.options.credentials, "omit"); assert.equal(Object.keys(request.options.headers).join(","), "Accept"); }
+    for (const request of requests) { assert.equal(request.options.credentials, "same-origin"); assert.equal(Object.keys(request.options.headers).join(","), "Accept"); }
     assert.equal(w.document.querySelectorAll(".compare-server-heading").length, 3);
     assert.equal(w.document.querySelector("#compare-count").textContent, "3 of 3 selected");
     assert.equal(w.document.querySelector("#compare-results").getAttribute("aria-busy"), "false");
