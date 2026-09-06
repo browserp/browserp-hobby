@@ -70,7 +70,9 @@
     if (["platform", "region"].includes(key)) for (const name of ["online", "verified", "beginner"]) filters[name] = false;
   }
   function mount({ root, list, empty, count, render, fixedGame }) {
+    let initialDocument = list.dataset.publicRendered === "true";
     let filters = read(fixedGame), facets = {}, nextOffset = null, requestId = 0, controller, timer = null, shown = [], retryAppend = false;
+    let firstOffset = filters.offset;
     let loading = false, refreshAt = 0, lastLoadedAt = 0;
     root.classList.add("smart-discovery");
     const searchRow = node("div", "smart-search-row");
@@ -116,10 +118,15 @@
     const chips = node("div", "smart-filter-chips"); chips.setAttribute("aria-label", "Selected filters"); root.append(chips);
     const feedback = node("p", "smart-filter-feedback"); feedback.setAttribute("role", "status"); root.append(feedback);
     const refreshNotice = node("p", "smart-filter-feedback smart-refresh-feedback"); refreshNotice.setAttribute("role", "status"); root.append(refreshNotice);
-    const more = node("button", "button-v3 button-secondary-v3 smart-load-more", "Show more servers"); more.type = "button"; more.hidden = true; list.after(more);
+    const more = node("a", "button-v3 button-secondary-v3 smart-load-more", "Show more servers"); more.hidden = true; list.after(more);
     const retry = node("button", "button-v3 button-secondary-v3", "Try again"); retry.type = "button"; retry.hidden = true; empty.append(retry); retry.addEventListener("click", () => load(retryAppend));
     const clearEmpty = node("button", "button-v3 button-secondary-v3", "Clear filters"); clearEmpty.type = "button"; empty.append(clearEmpty); clearEmpty.addEventListener("click", () => clear.click());
-    more.addEventListener("click", () => { if (nextOffset !== null) { filters.offset = nextOffset; load(true); } });
+    more.addEventListener("click", event => {
+      if (loading || more.getAttribute("aria-disabled") === "true") { event.preventDefault(); return; }
+      if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      if (nextOffset !== null) { filters.offset = nextOffset; load(true); }
+    });
     const suggest = suggestions(search, () => filters, () => facets, choice => { filters.query = ""; change(choice.key, choice.value); });
     function sync() {
       const focusedChip = chips.contains(document.activeElement) ? document.activeElement.getAttribute("aria-label") : null;
@@ -148,7 +155,8 @@
     }
     function invalidate() { requestId++; controller?.abort(); clearTimeout(timer); timer = null; loading = false; }
     function update(delay = 0) {
-      invalidate(); filters.offset = 0; more.disabled = true; list.setAttribute("aria-busy", "true"); sync(); url(); suggest.close();
+      initialDocument = false; list.querySelector("[data-public-pagination]")?.remove();
+      invalidate(); filters.offset = 0; firstOffset = 0; more.setAttribute("aria-disabled", "true"); list.setAttribute("aria-busy", "true"); sync(); url(); suggest.close();
       timer = setTimeout(() => { timer = null; load(false); }, delay);
     }
     function change(key, value) {
@@ -160,7 +168,7 @@
     search.addEventListener("input", () => { filters.query = search.value.slice(0, 120); update(220); suggest.render(); });
     search.addEventListener("keydown", event => { if (event.key === "Enter" && !event.defaultPrevented) { event.preventDefault(); update(); } });
     document.querySelectorAll(".game-strip-v3 [data-game]").forEach(link => link.addEventListener("click", event => { if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); change("platform", link.dataset.game); }));
-    window.addEventListener("popstate", () => { invalidate(); filters = read(fixedGame); sync(); load(false); });
+    window.addEventListener("popstate", () => { invalidate(); filters = read(fixedGame); firstOffset = filters.offset; initialDocument = false; sync(); load(false); });
     function draw() {
       const active = document.activeElement;
       const href = list.contains(active) ? active.closest("a[href]")?.getAttribute("href") : null;
@@ -182,11 +190,11 @@
       const requestController = controller; let timedOut = false;
       const timeout = window.setTimeout(() => { timedOut = true; requestController.abort(); }, 15_000);
       loading = true; refreshAt = Date.now() + 60_000;
-      list.setAttribute("aria-busy", "true"); if (!background) count.textContent = "Updating servers…"; more.disabled = true; retry.hidden = true;
+      list.setAttribute("aria-busy", "true"); if (!background) count.textContent = "Updating servers…"; more.setAttribute("aria-disabled", "true"); retry.hidden = true;
       try {
         // Refresh all previously loaded cards, in API-bounded pages, without losing pagination.
         const desired = background ? Math.max(snapshot.limit, shown.length) : snapshot.limit;
-        let offset = background ? 0 : snapshot.offset, received = [], payload;
+        let offset = background ? firstOffset : snapshot.offset, received = [], payload;
         do {
           const params = M.params({ ...snapshot, offset, limit: background ? Math.min(100, desired - received.length) : snapshot.limit });
           params.set("discover", "true"); if (params.has("q")) { params.set("query", params.get("q")); params.delete("q"); }
@@ -201,6 +209,7 @@
           if (!background || payload.nextOffset == null || payload.nextOffset <= offset || !payload.servers.length) break;
           offset = payload.nextOffset;
         } while (received.length < desired);
+        initialDocument = false;
         facets = payload.facets || {}; nextOffset = payload.nextOffset ?? null;
         shown = append ? [...shown, ...received] : received;
         shown = [...new Map(shown.map(server => [server.slug, server])).values()];
@@ -210,13 +219,23 @@
         count.textContent = `${payload.total} ${payload.total === 1 ? "server" : "servers"}${shown.length < payload.total ? ` · Showing ${shown.length}` : ""}`;
         empty.querySelector("h3").textContent = "No servers match your search.";
         empty.querySelector("p").textContent = "Remove a selected filter or try another game or region.";
-        more.hidden = nextOffset === null; more.disabled = false; clearEmpty.hidden = false; sync();
+        more.hidden = nextOffset === null;
+        if (nextOffset !== null) {
+          const nextParams = M.params({ ...filters, offset: nextOffset });
+          if (fixedGame) nextParams.delete("platform");
+          more.href = `${location.pathname}?${nextParams}`;
+        } else more.removeAttribute("href");
+        more.setAttribute("aria-disabled", "false"); clearEmpty.hidden = false; sync();
       } catch (error) {
         if (id !== requestId || (error.name === "AbortError" && !timedOut)) return;
         if (background && shown.length) {
           expireCounts();
           refreshNotice.textContent = `Live refresh is unavailable. Results last loaded at ${new Date(lastLoadedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}. We’ll retry automatically.`;
-          more.disabled = false; return;
+          more.setAttribute("aria-disabled", "false"); return;
+        }
+        if (initialDocument) {
+          refreshNotice.textContent = "Live updates are unavailable. You can still open the listings below or try again.";
+          count.textContent = "Reviewed listings"; retry.hidden = false; more.hidden = true; return;
         }
         list.hidden = true; empty.hidden = false; more.hidden = true; retry.hidden = false; clearEmpty.hidden = true;
         count.textContent = "Servers unavailable"; empty.querySelector("h3").textContent = "We couldn’t load the directory."; empty.querySelector("p").textContent = "Your filters are saved. Try again in a moment.";

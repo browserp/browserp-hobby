@@ -6,7 +6,7 @@
   const labels = { pending_review: "Waiting for review", changes_requested: "Changes requested", approved: "Approved", rejected: "Not approved", withdrawn: "Withdrawn" };
   const date = value => { const time = new Date(value); return Number.isFinite(time.getTime()) ? time.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : ""; };
 
-  async function mount({ id, accountId, form, api, updatePlatformFields, readRoblox, setFormStatus, toast }) {
+  async function mount({ id, listingId = null, accountId, form, api, updatePlatformFields, readRoblox, setFormStatus, toast }) {
     const submit = form.querySelector("#submit-listing");
     const fields = form.querySelector(".form-grid-v3");
     const gate = document.querySelector("#listing-auth-gate");
@@ -19,7 +19,7 @@
     const dashboard = make("a", "Back to My account", "button-v3 button-quiet-v3"); dashboard.href = "/dashboard#submissions";
     actions.append(refresh, dashboard); notice.append(feedback, status, actions); form.before(notice);
     const abort = new AbortController();
-    let record, busy = false, ended = false, attempt = null, uncertain = false, conflict = false, dirty = false;
+    let record, ownerUpdate = null, preservedTags = [], busy = false, ended = false, attempt = null, uncertain = false, conflict = false, dirty = false, received = false;
     const active = () => !ended && notice.isConnected;
     const title = document.querySelector(".directory-intro-v3 h1"); if (title) title.textContent = "Give your listing another look.";
     document.title = "Correct your submission — BrowseRP";
@@ -28,11 +28,11 @@
     form.querySelector(".form-heading-v3 .eyebrow-v3").textContent = "Correct your submission";
     form.querySelector(".form-heading-v3 h2").textContent = "Update the details staff asked about.";
     function sync() {
-      const editable = active() && record?.status === "changes_requested";
+      const editable = active() && !received && !ownerUpdate?.unavailable && !ownerUpdate?.pendingStatus && (record?.status === "changes_requested" || (listingId && ownerUpdate?.serverId === listingId && record?.status === "owner_draft"));
       form.hidden = !editable; form.inert = !editable;
       fields.inert = busy || uncertain;
       submit.disabled = !editable || busy || conflict;
-      submit.textContent = busy ? "Sending corrections…" : uncertain ? "Try sending again" : "Send corrections for review";
+      submit.textContent = busy ? "Sending for review…" : uncertain ? "Try sending again" : listingId ? "Send update for review" : "Send corrections for review";
       refresh.disabled = busy;
     }
     function fill(data) {
@@ -59,10 +59,73 @@
       picker.dispatchEvent(new Event("change", { bubbles: true }));
       form.elements.agreement.checked = false;
     }
+    function ownerFields() {
+      if (!ownerUpdate) return;
+      const picker = form.querySelector(".tag-picker-v3");
+      const featureGroup = picker.closest("fieldset");
+      featureGroup.querySelector("legend").textContent = "Community features";
+      featureGroup.querySelector(".field-help-v3").textContent = "Keep the features that still apply. You can add up to eight new features; existing researched keywords stay attached.";
+      const editable = new Set(window.BrowseRPListingFeatures.keys(record.platform_id));
+      const baseline = Array.isArray(ownerUpdate.live?.tags) ? ownerUpdate.live.tags : [];
+      preservedTags = baseline.filter(value => !editable.has(value));
+      picker.dataset.existingFeatures = JSON.stringify(baseline.filter(value => editable.has(value)));
+      picker.dataset.preservedCount = String(preservedTags.length);
+      picker.dataset.maximumFeatures = String(Math.max(30, baseline.length));
+      for (const input of picker.querySelectorAll('input[name="tags"]')) {
+        if (!editable.has(input.value)) input.closest("label").remove();
+        else if (ownerUpdate.baselineVersion && ownerUpdate.baselineVersion !== ownerUpdate.serverVersion
+            && baseline.includes(input.value) && !record.tags?.includes(input.value)) input.checked = true;
+      }
+      form.querySelector(".owner-preserved-features-v3")?.remove();
+      if (preservedTags.length) {
+        const details = make("details", undefined, "owner-preserved-features-v3 field-help-v3");
+        details.append(make("summary", "Existing listing keywords"), make("p", "These researched keywords stay attached to your listing. Staff can review keyword removals."), make("p", preservedTags.join(", ")));
+        picker.after(details);
+      }
+      picker.dispatchEvent(new Event("change", { bubbles: true }));
+      document.title = "Update your listing — BrowseRP";
+      if (title) title.textContent = "Keep your community's listing current.";
+      if (intro) intro.textContent = "Propose a change for staff to review. Your current listing stays live until the update is approved.";
+      form.querySelector(".form-heading-v3 .eyebrow-v3").textContent = "Update your listing";
+      form.querySelector(".form-heading-v3 h2").textContent = "What should players know?";
+      form.elements.description.maxLength = 3000;
+      const privateHeading = form.querySelector(".roblox-private-evidence-v3"); if (privateHeading) privateHeading.hidden = true;
+      // Locks are also checked against the current owner and source in the database.
+      for (const name of ["platform", "cfxJoinUrl", ...(record.platform_id === "roblox" ? ["framework"] : [])]) {
+        const field = form.elements.namedItem(name); field.value = ownerUpdate.live?.[fieldNames[name]] || "";
+        if (field.tagName === "SELECT") field.disabled = true; else field.readOnly = true;
+      }
+      for (const field of form.querySelectorAll("[data-roblox-key]")) {
+        const key = field.dataset.robloxKey;
+        if (["applicantRole", "authorityEvidence"].includes(key)) {
+          field.required = false; field.value = ""; field.closest("label").hidden = true;
+        } else if (key !== "joiningInstructions") {
+          field.value = ownerUpdate.live?.roblox?.[key] || "";
+          if (field.tagName === "SELECT") field.disabled = true; else field.readOnly = true;
+        }
+      }
+    }
     function renderFeedback(payload, showSaved) {
-      feedback.replaceChildren(make("span", labels[record.status] || "Submission status", "eyebrow-v3"), make("h2", record.name));
+      feedback.replaceChildren(make("span", record.status === "owner_draft" ? "Current live listing" : labels[record.status] || "Submission status", "eyebrow-v3"), make("h2", record.name));
       if (record.review_note) feedback.append(make("strong", record.status === "changes_requested" ? "Staff feedback" : "Latest staff feedback"), make("p", record.review_note));
       if (record.reviewed_at) feedback.append(make("p", `Reviewed ${date(record.reviewed_at)}`, "field-help-v3"));
+      if (ownerUpdate) {
+        feedback.append(make("p", "Staff review your proposed public details. Your listing address, artwork, ownership and live player information stay attached to the same listing.", "field-help-v3"));
+        if (ownerUpdate.unavailable) feedback.append(make("p", ownerUpdate.setupRequired ? "Staff need to complete this listing's reviewed Roblox experience details before owner updates can be accepted." : "This listing is no longer published. Ask staff about its status before requesting further changes."));
+        if (ownerUpdate.pendingStatus) {
+          feedback.append(make("p", "An update is already being reviewed. Follow that review instead of sending another."));
+          if (ownerUpdate.pendingId) { const existing = make("a", "Open existing review", "button-v3 button-primary-v3"); existing.href = `/list-server?submission=${encodeURIComponent(ownerUpdate.pendingId)}`; feedback.append(existing); }
+          else feedback.append(make("p", "Staff need to resolve an earlier owner's update first."));
+        }
+        const details = make("details"); details.append(make("summary", "Compare with the current live listing"));
+        const list = make("dl"); const live = ownerUpdate.live || {};
+        for (const [label, value] of [["Name",live.name],["Region",live.region],["Language",live.language],["Setup",live.framework],["Description",live.description],["Community link",live.community_url],["Access",live.access_type],["Features",live.tags?.join(", ")],["Joining instructions",live.roblox?.joiningInstructions]]) if (value) list.append(make("dt",label),make("dd",value));
+        details.append(list); feedback.append(details);
+        if (ownerUpdate.baselineVersion && ownerUpdate.baselineVersion !== ownerUpdate.serverVersion) {
+          details.open = true;
+          feedback.append(make("p", "The live listing changed after this proposal. Compare the current details before sending your corrections. Staff will review your complete proposed text.", "form-status"));
+        }
+      }
       if (showSaved) {
         const details = make("details"); details.append(make("summary", "Compare with the latest saved details")); const list = make("dl");
         for (const [label, value] of [["Name",record.name],["Game",record.platform_id],["Region",record.region],["Language",record.language],["Setup",record.framework],["Access",record.access_type],["Description",record.description],["Community link",record.community_url],["Connect link",record.cfx_join_url],["Features",record.tags?.join(", ")]]) {
@@ -89,17 +152,20 @@
       if (!active() || busy) return;
       busy = true; sync(); status.textContent = "Checking the latest submission and feedback…";
       try {
-        const payload = await api(`/api/submissions?id=${encodeURIComponent(id)}&account=${encodeURIComponent(accountId)}`, { signal: abort.signal });
+        const payload = await api(`/api/submissions?${listingId ? "listing" : "id"}=${encodeURIComponent(id)}&account=${encodeURIComponent(accountId)}`, { signal: abort.signal });
         if (!active()) return;
         const current = payload.submission;
         if (current?.id !== id || !Number.isSafeInteger(current.review_version) || current.review_version < 1 || !Number.isSafeInteger(current.queue_version) || current.queue_version < 0) throw new Error("Your submission could not be loaded safely. Please try again.");
-        record = current; attempt = null; uncertain = false; conflict = false;
+        record = current; ownerUpdate = payload.ownerUpdate || null; attempt = null; uncertain = false; conflict = false;
+        if (listingId && (!ownerUpdate || ownerUpdate.serverId !== listingId)) throw new Error("Your listing's ownership could not be confirmed. Reopen it from My account.");
         status.className = "form-status";
         if (record.status !== "changes_requested") dirty = false;
         if (!preserveDraft) { fill(record); dirty = false; } else form.elements.agreement.checked = false;
+        ownerFields();
         renderFeedback(payload, preserveDraft);
-        refresh.hidden = record.status !== "changes_requested"; refresh.textContent = "Check latest review";
-        status.textContent = record.status === "changes_requested"
+        refresh.hidden = !listingId && record.status !== "changes_requested"; refresh.textContent = listingId ? "Check current listing" : "Check latest review";
+        status.textContent = listingId ? ownerUpdate.pendingStatus ? "Your existing update is shown above." : "Your current details are ready below. Changes to the game, live connection or Roblox experience identity need staff assistance."
+          : record.status === "changes_requested"
           ? preserveDraft ? "Latest review loaded. Your unsent edits are still below. Check the feedback and saved details before sending." : "Your original details are ready to edit below. Sending corrections keeps this submission and its review history together."
           : record.status === "pending_review" ? "Your submission is already waiting for review. You don't need to send it again." : "This review is closed. You can see the decision and your listings in My account.";
         setFormStatus("");
@@ -112,10 +178,12 @@
     }
     function endSession({ showSignIn = true } = {}) {
       if (ended) return;
-      ended = true; abort.abort(); record = null; attempt = null; dirty = false;
+      ended = true; abort.abort(); record = null; ownerUpdate = null; preservedTags = []; attempt = null; dirty = false;
       fields.inert = true; form.reset(); form.hidden = true; form.inert = true;
       for (const field of form.querySelectorAll("input,textarea,select")) { if (field.tagName === "SELECT") field.replaceChildren(); else field.value = ""; if (field.type === "checkbox") field.checked = false; }
       document.querySelector("#listing-account-notice").textContent = "";
+      form.querySelector(".owner-preserved-features-v3")?.remove();
+      const picker = form.querySelector(".tag-picker-v3"); delete picker.dataset.existingFeatures; delete picker.dataset.preservedCount; delete picker.dataset.maximumFeatures;
       feedback.replaceChildren(); notice.hidden = true; notice.inert = true; setFormStatus("");
       gate.hidden = !showSignIn; gate.inert = !showSignIn;
       if (!showSignIn) return;
@@ -129,27 +197,38 @@
     }
     async function send(event) {
       event.preventDefault();
-      if (!active() || busy || conflict || record?.status !== "changes_requested") return;
+      if (!active() || busy || conflict || received || ownerUpdate?.unavailable || ownerUpdate?.pendingStatus
+          || (listingId ? ownerUpdate?.serverId !== listingId || record?.status !== "owner_draft" : record?.status !== "changes_requested")) return;
       if (!attempt) {
         if (!form.reportValidity()) return;
         const data = new FormData(form); const values = Object.fromEntries(data);
+        for (const name of Object.keys(fieldNames)) values[name] = form.elements.namedItem(name).value;
+        const roblox = readRoblox();
+        if (ownerUpdate && roblox) { delete roblox.applicantRole; delete roblox.authorityEvidence; }
         attempt = { key: crypto.randomUUID(), body: JSON.stringify({
-          submissionId: id, expectedVersion: record.review_version, expectedQueueVersion: record.queue_version, expectedAccountId: accountId,
+          ...(listingId ? { listingUpdate: listingId } : { submissionId: id, expectedVersion: record.review_version, expectedQueueVersion: record.queue_version }), expectedAccountId: accountId,
+          ...(ownerUpdate ? { ownerUpdate: true, expectedServerVersion: ownerUpdate.serverVersion } : {}),
           ...Object.fromEntries(Object.keys(fieldNames).map(name => [name, values[name]])),
           cfxJoinUrl: ["fivem","redm"].includes(values.platform) ? values.cfxJoinUrl : "",
-          roblox: readRoblox(),
-          tags: data.getAll("tags"), agreement: values.agreement === "on"
+          roblox,
+          tags: [...new Set([...data.getAll("tags"), ...preservedTags])], agreement: values.agreement === "on"
         }) };
       }
       busy = true; sync(); setFormStatus("Sending your corrections for review…");
       try {
-        const payload = await api("/api/submissions", { method: "PATCH", headers: { "Idempotency-Key": attempt.key }, body: attempt.body, signal: abort.signal });
+        if (ownerUpdate) {
+          const currentSession = await api("/api/auth/session", { signal: abort.signal });
+          if (!active()) return;
+          if (!currentSession.authenticated || currentSession.user?.id !== accountId) { endSession(); return; }
+        }
+        const payload = await api("/api/submissions", { method: listingId ? "POST" : "PATCH", headers: { "Idempotency-Key": attempt.key }, body: attempt.body, signal: abort.signal });
         if (!active()) return;
-        if (payload.submission?.id !== id || !labels[payload.submission.status]) throw new Error("The result couldn't be confirmed. Try again safely or check the latest review.");
+        if ((!listingId && payload.submission?.id !== id) || !payload.submission?.id || !labels[payload.submission.status]) throw new Error("The result couldn't be confirmed. Try again safely or check the latest review.");
         record = { ...record, ...payload.submission }; attempt = null; uncertain = false; dirty = false;
+        if (listingId) received = true;
         status.className = "form-status success";
-        status.textContent = record.status === "pending_review" ? "Corrections received. Your original submission is back with staff for review." : "Your correction was received and the review has since moved on. Check My account for the latest decision.";
-        refresh.hidden = true; feedback.replaceChildren(make("h2", "Your submission is updated."));
+        status.textContent = record.status === "pending_review" ? ownerUpdate ? "Update received. Staff will review it while your current listing stays live." : "Corrections received. Your original submission is back with staff for review." : "Your changes were received and the review has since moved on. Check My account for the latest decision.";
+        refresh.hidden = true; feedback.replaceChildren(make("h2", ownerUpdate ? "Your update is with staff." : "Your submission is updated."));
         toast("Your corrections have been received."); dashboard.focus();
         if (record.status === "changes_requested") { busy = false; await load(); }
       } catch (error) {

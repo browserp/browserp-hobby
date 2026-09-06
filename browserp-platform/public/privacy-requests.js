@@ -1,7 +1,7 @@
 (function () {
   "use strict";
   const kinds = { copy: "A copy of my data", delete: "Account deletion", correction: "A correction to my data" };
-  const statuses = { submitted: "Request received", reviewing: "Under review", information_needed: "More information needed", ready: "Ready for follow-up", declined: "Declined", withdrawn: "Withdrawn" };
+  const statuses = { submitted: "Request received", reviewing: "Under review", information_needed: "More information needed", ready: "Ready for follow-up", declined: "Declined", withdrawn: "Withdrawn", fulfilled: "Follow-up completed" };
   const make = (tag, text, className) => { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; };
   const button = (text, primary = false) => { const node = make("button", text, `button-v3 ${primary ? "button-primary-v3" : "button-secondary-v3"}`); node.type = "button"; return node; };
   const field = (label, input) => { const node = make("label", undefined, "field-v3"); node.append(make("span", label), input); return node; };
@@ -75,20 +75,77 @@
         void run(async () => { await post(body); return api(url()); }, payload => { render(payload); feedback.textContent = "Review recorded. No account data was exported or deleted."; feedback.focus({ preventScroll: true }); }, "Recording your review…");
       }); return form;
     }
+    function requestHistory(item) {
+      const section = make("details", undefined, "privacy-request-history"); section.append(make("summary", "Request history"));
+      const events = make("div", undefined, "privacy-request-history-events"), note = make("p", "Previous messages and decisions are kept here, newest first.");
+      const refreshHistory = button("Refresh history"), older = button("Show earlier messages"); older.hidden = true;
+      const actions = make("div", undefined, "privacy-request-actions"); actions.append(refreshHistory, older); section.append(note, events, actions);
+      let fetched = false, cursor = null;
+      const labels = { legacy_snapshot: "Saved request", submitted: "Request sent", member_update: "Member follow-up", withdrawn: "Request withdrawn", staff_review: "Staff reply", fulfilled: "Completed follow-up recorded" };
+      function loadHistory(append = false) {
+        const query = new URLSearchParams({ id: item.id }); if (append && cursor) query.set("beforeVersion", String(cursor));
+        void run(() => api(`${base}?${query}`), payload => {
+          if (!section.isConnected) return;
+          if (!Array.isArray(payload?.items)) throw new Error("The request history could not be confirmed. Try Refresh history.");
+          const rows = payload.items.map(entry => {
+            const row = make("article", undefined, "privacy-request-history-entry");
+            row.append(make("h4", labels[entry.event] || "Request update"), make("p", `${date(entry.recordedAt)} · ${statuses[entry.status] || "Status unavailable"}`, "privacy-request-date"));
+            if (entry.event === "legacy_snapshot") row.append(make("p", "This is the version saved before message history was introduced. Earlier overwritten messages are not available."));
+            if (entry.details) row.append(make("p", entry.details, "privacy-request-text"));
+            if (entry.reply) row.append(make("p", entry.reply, "privacy-request-text"));
+            return row;
+          });
+          if (append) events.append(...rows); else events.replaceChildren(...rows);
+          if (staff && payload.completion && !append) {
+            const evidence = make("details"); evidence.append(make("summary", "Private completion record"),
+              make("p", `Completed ${date(payload.completion.completedAt)} · Recorded ${date(payload.completion.recordedAt)}`, "privacy-request-date"),
+              make("p", payload.completion.evidence, "privacy-request-text")); events.prepend(evidence);
+          }
+          fetched = true; cursor = payload.next || null; older.hidden = !cursor; feedback.textContent = "";
+        }, "Loading request history…");
+      }
+      section.addEventListener("toggle", () => { if (section.open && !fetched) loadHistory(); });
+      refreshHistory.addEventListener("click", () => loadHistory()); older.addEventListener("click", () => loadHistory(true));
+      return section;
+    }
+    function completionForm(item) {
+      const section = make("details", undefined, "privacy-request-completion"); section.append(make("summary", "Record completed follow-up"));
+      const form = make("form", undefined, "privacy-request-form"), result = textArea("result", 30), evidence = textArea("evidence", 20);
+      const completedAt = make("input"); completedAt.name = "completedAt"; completedAt.type = "datetime-local"; completedAt.step = "1"; completedAt.required = true;
+      const confirmed = make("input"); confirmed.type = "checkbox"; confirmed.name = "confirmed"; confirmed.required = true;
+      const confirmLabel = make("label", undefined, "privacy-request-confirm"); confirmLabel.append(confirmed, make("span", "I verified this follow-up is complete and the result above is accurate."));
+      const method = { copy: "secure_delivery", correction: "data_correction", delete: "account_erasure" }[item.kind];
+      const example = { copy: "Explain which data was securely delivered and how the recipient was verified. Do not paste the data itself.", correction: "Explain which requested information was corrected and what the member should now expect.", delete: "Explain the completed erasure and any records retained with a reason. Do not record a pending deletion as complete." }[item.kind];
+      const send = button("Record completion", true); send.type = "submit";
+      let key = crypto.randomUUID(); form.addEventListener("input", () => { if (!busy) key = crypto.randomUUID(); });
+      form.append(make("p", "Use this only after the follow-up has actually been completed and verified separately. This records the result; it does not export, change or erase data, or send a message outside BrowseRP."),
+        field("Completed result — visible to the member", result), make("p", example), field("Private verification reference and method", evidence),
+        make("p", "Record where and how completion was verified. Keep passwords, private download links, identity documents and the person's data out of this note."),
+        field("When it was completed (your local time)", completedAt), confirmLabel, send);
+      form.addEventListener("submit", event => { event.preventDefault(); if (!form.reportValidity()) return;
+        const actualDate = new Date(completedAt.value);
+        if (!Number.isFinite(actualDate.getTime()) || actualDate.getTime() > Date.now()) { feedback.textContent = "Enter the actual completion date and time, not a future date."; return; }
+        const body = { action: "fulfill", id: item.id, version: item.version, result: result.value, evidence: evidence.value, method, completedAt: actualDate.toISOString(), confirmed: confirmed.checked, key };
+        void run(async () => { await post(body); return api(url()); }, payload => { render(payload); feedback.textContent = "Completed follow-up recorded. This form did not perform a data export, correction or erasure."; feedback.focus({ preventScroll: true }); }, "Recording completed follow-up…");
+      }); section.append(form); return section;
+    }
     function render(payload, append = false) {
       if (!Array.isArray(payload?.items)) throw new Error("Requests could not be confirmed. Try Refresh requests.");
       const rows = payload.items.map(item => {
         const row = make("article", undefined, "privacy-request-card");
         const head = make("div", undefined, "privacy-request-heading"); head.append(make("h3", kinds[item.kind] || "Data request"), make("span", statuses[item.status] || "Status unavailable", "privacy-request-badge")); row.append(head);
         row.append(make("p", `Sent ${date(item.createdAt)} · Updated ${date(item.updatedAt)}`, "privacy-request-date"));
+        if (item.status === "fulfilled") row.append(make("p", "Staff recorded the completed follow-up below. You can send a new request if you need further help.", "privacy-request-note"));
         if (item.status === "ready") row.append(make("p", "Your request has been reviewed and needs follow-up. No data has been exported, corrected or deleted through this form.", "privacy-request-note"));
         const detail = make("details"); detail.append(make("summary", staff ? `View request · ${item.displayName || "Member"}` : "View request details"));
         if (staff) detail.append(make("p", `Account: ${item.accountId}`));
         detail.append(make("p", `Request: ${item.id}`, "privacy-request-reference"));
         if (item.details) detail.append(make("p", item.details, "privacy-request-text"));
         if (item.staffReply) detail.append(make("strong", "Latest staff reply"), make("p", item.staffReply, "privacy-request-text"));
-        const closed = ["declined", "withdrawn"].includes(item.status);
+        detail.append(requestHistory(item));
+        const closed = ["declined", "withdrawn", "fulfilled"].includes(item.status);
         if (staff && !closed) detail.append(staffForm(item));
+        if (staff && item.status === "ready" && payload.canFulfill === true) detail.append(completionForm(item));
         if (!staff && !closed) {
           const actions = make("div", undefined, "privacy-request-actions");
           if (["submitted", "information_needed"].includes(item.status)) { const update = button("Update request details"); update.addEventListener("click", () => editDetails(item, detail)); actions.append(update); }

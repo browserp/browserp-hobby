@@ -636,7 +636,11 @@
         catch { claimRoot.replaceChildren(node("p", "", "Claim requests are unavailable right now. Refresh the page to try again.")); claimRoot.hidden = false; }
       }
       refreshServerPlayers(server, slug);
-    } catch {
+    } catch (error) {
+      if (root.dataset.publicRendered === "true" && error.status !== 404) {
+        const message = node("p", "server-checked-v3", "Live updates are unavailable. The reviewed listing is shown below; refresh to try again.");
+        message.setAttribute("role", "status"); root.prepend(message); return;
+      }
       document.title = "Server unavailable — BrowseRP";
       const empty = node("section", "empty-v3 server-missing-v3");
       empty.append(

@@ -132,7 +132,7 @@ test("a failed background refresh keeps still-valid cards and pagination", async
   assert.equal(h.$("#list").firstElementChild, card);
   assert.match(h.$("#list").textContent, /97 \/ 350 players/);
   assert.equal(h.$(".smart-load-more").hidden, false);
-  assert.equal(h.$(".smart-load-more").disabled, false);
+  assert.equal(h.$(".smart-load-more").getAttribute("aria-disabled"), "false");
   assert.equal(h.$("#empty").hidden, true);
   assert.equal(h.$("#list").getAttribute("aria-busy"), "false");
   assert.doesNotMatch(h.$("#count").textContent, /Servers unavailable/);
@@ -163,4 +163,28 @@ test("a late background response cannot replace a newer debounced search", async
   assert.equal(h.api.getFilters().query, "minecraft");
   assert.match(h.$("#list").textContent, /Minecraft world/);
   assert.doesNotMatch(h.$("#list").textContent, /Cali community/);
+});
+
+test("refreshing a crawlable later directory page retains its starting offset", async t => {
+  const h = harness({ url: "https://browserp.test/servers?offset=24", fetcher: request => response([row(Number(request.params.get("offset")) + 1)], { total: 40 }) });
+  t.after(h.close); await settle();
+  assert.equal(h.requests[0].params.get("offset"), "24");
+  assert.match(h.$("#list").textContent, /Cali community 25/);
+  await h.advance(60_000);
+  assert.equal(h.requests[1].params.get("offset"), "24");
+  assert.match(h.$("#list").textContent, /Cali community 25/);
+});
+
+test("enhanced Show more keeps a crawlable destination and ordinary clicks append results", async t => {
+  const h = harness({ url: "https://browserp.test/servers", fetcher: request => {
+    const offset = Number(request.params.get("offset") || 0);
+    return response([row(offset + 1)], { total: 40, nextOffset: offset ? null : 24 });
+  } });
+  t.after(h.close); await settle();
+  const more = h.$(".smart-load-more");
+  assert.equal(more.tagName, "A"); assert.equal(more.getAttribute("href"), "/servers?offset=24");
+  more.click(); await settle();
+  assert.equal(h.requests[1].params.get("offset"), "24");
+  assert.equal(h.$("#list").querySelectorAll("a").length, 2);
+  assert.equal(more.hidden, true);
 });

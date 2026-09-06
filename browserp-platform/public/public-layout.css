@@ -105,3 +105,8 @@ body select[size="1"]:not([multiple]) {
     padding-inline-end: 14px;
   }
 }
+
+/* Real page links keep the published directory usable before scripts load. */
+[data-public-pagination] { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+[data-public-pagination]:empty { display: none; }
+.smart-load-more { width: max-content; max-width: 100%; }

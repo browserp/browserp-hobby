@@ -111,4 +111,90 @@ test("private data requests are owned, recoverable, permission-scoped and never 
     for(const role of["anon","service_role"]){await db.exec(`reset role;set role ${role}`);await assert.rejects(memberCall(),/permission denied/);await assert.rejects(queue(),/permission denied/);await assert.rejects(review(copy),/permission denied/);await assert.rejects(db.query("select public.staff_data_request_access()"),/permission denied/);}
     await db.exec("reset role");for(const name of ["account_data_requests","account_data_request_review_keys"])assert.equal((await db.query(`select relrowsecurity from pg_class where oid='private.${name}'::regclass`)).rows[0].relrowsecurity,true);
   });
+  await t.test("upgrade preserves a labelled snapshot without inventing lost history",async()=>{
+    await admin(read("20260906002145_private_request_history_and_completion.sql"));
+    await login();
+    const result=(await db.query("select public.member_data_request_history($1) value",[copy.id])).rows[0].value;
+    assert.equal(result.items.length,1); assert.equal(result.items[0].event,"legacy_snapshot");
+    assert.equal(result.items[0].details,copy.details);assert.equal(result.items[0].version,copy.version);
+    assert.equal("completion" in result,false);
+  });
+  const history=async(id,before=null,staff=false)=>(await db.query(`select public.${staff?"staff":"member"}_data_request_history($1,$2) value`,[id,before])).rows[0].value;
+  const fulfill=async(row,change={})=>{
+    const body={result:"A scoped account-data copy was delivered through the verified private account channel.",method:"secure_delivery",evidence:"Private follow-up record COPY-123: recipient and successful delivery verified.",completedAt:new Date().toISOString(),key:randomUUID(),confirmed:true,...change};
+    return (await db.query("select public.staff_fulfill_data_request($1,$2,$3,$4,$5,$6,$7,$8) value",[row.id,body.result,body.method,body.evidence,body.completedAt,row.version,body.key,body.confirmed])).rows[0].value.request;
+  };
+  await t.test("member follow-ups and staff replies append immutable private history",async()=>{
+    await login();copy=(await memberCall("update",null,"Please include my recorded profile and account preferences.",null,copy.id,copy.version)).request;
+    await login({id:owner,session:sid,aal:"aal2"});copy=await review(copy,"information_needed","Please confirm which account preferences you requested.");
+    await login();copy=(await memberCall("update",null,"Include my saved country, visibility and display preferences.",null,copy.id,copy.version)).request;
+    const thread=await history(copy.id);assert.equal(thread.items.length,4);
+    assert.deepEqual(thread.items.map(x=>x.event),["member_update","staff_review","member_update","legacy_snapshot"]);
+    assert.match(thread.items[2].details,/recorded profile/);assert.match(thread.items[1].reply,/confirm which account/);
+    assert.equal(thread.items[0].reply,null);assert.equal(thread.items[1].details,null);
+    assert.doesNotMatch(JSON.stringify(thread),/actor_id|staffId|evidence/);
+    await login({id:other,session:otherSid,aal:"aal2"});await assert.rejects(history(copy.id),/Request not found/);
+    assert.equal((await history(copy.id,null,true)).items.length,4);
+    await admin("select 1");await assert.rejects(db.query("update private.account_data_request_history set reply='changed' where request_id=$1",[copy.id]),/cannot be changed/);
+    await assert.rejects(db.query("delete from private.account_data_request_history where request_id=$1",[copy.id]),/cannot be changed/);
+  });
+  await t.test("completion needs separate current authority, ready state, concrete result, correct action and confirmation",async()=>{
+    await login({id:other,session:otherSid,aal:"aal2"});assert.equal((await queue()).canFulfill,false);
+    await assert.rejects(fulfill(copy),/Completion permission/);
+    await login({id:owner,session:sid,aal:"aal1"});await assert.rejects(fulfill(copy),/Completion permission/);
+    await login({id:owner,session:sid,aal:"aal2",amr:[{method:"oauth"}]});await assert.rejects(fulfill(copy),/Completion permission/);
+    await login({id:owner,session:sid,aal:"aal2"});assert.equal((await queue()).canFulfill,true);
+    await assert.rejects(fulfill(copy),/not ready for follow-up/);
+    copy=await review(copy,"ready","Recipient identity and scope reviewed; secure delivery needs separate follow-up.");
+    for(const change of[{result:"Done"},{evidence:"Checked"},{confirmed:false},{confirmed:null},{completedAt:"2100-01-01"},{completedAt:"infinity"},{completedAt:"2000-01-01"},{method:"account_erasure"}])await assert.rejects(fulfill(copy,change),/Describe the completed|action and date/);
+    await assert.rejects(review(copy,"fulfilled"),/Choose a review decision/);
+    await admin(`delete from auth.sessions where id='${sid}'`);await login({id:owner,session:sid,aal:"aal2"});await assert.rejects(fulfill(copy),/Completion permission/);await assert.rejects(history(copy.id,null,true),/Permission and an authenticator/);
+    await admin(`insert into auth.sessions(id,user_id) values('${sid}','${owner}'); insert into public.staff_permission_overrides values('${other}','privacy.requests.fulfill',true)`);
+  });
+  await t.test("verified manual closure acts once, preserves history and private evidence, and permits a new request",async()=>{
+    await login({id:other,session:otherSid,aal:"aal2"});assert.equal((await queue()).canFulfill,true);
+    const before=copy, key=randomUUID(),completedAt=new Date().toISOString();copy=await fulfill(copy,{key,completedAt});assert.equal(copy.status,"fulfilled");assert.equal(copy.version,before.version+1);
+    assert.equal((await fulfill(before,{key,completedAt})).version,copy.version);
+    await assert.rejects(fulfill(before,{key,completedAt,result:"Different result attached to the same retry key is invalid."}),/completion key was already used/);
+    await assert.rejects(fulfill(before),/changed or is not ready/);await assert.rejects(review(copy),/changed or closed/);
+    const staffThread=await history(copy.id,null,true);assert.match(staffThread.completion.evidence,/COPY-123/);assert.equal(staffThread.items[0].event,"fulfilled");
+    assert.ok((await queue("open")).items.every(x=>x.id!==copy.id));assert.equal((await queue("fulfilled")).items[0].id,copy.id);
+    await login();const memberThread=await history(copy.id);assert.equal("completion" in memberThread,false);assert.doesNotMatch(JSON.stringify(memberThread),/COPY-123|actor_id|fingerprint/);
+    assert.match(memberThread.items[0].reply,/scoped account-data copy/);
+    await assert.rejects(memberCall("update",null,"A request cannot be edited after completed follow-up.",null,copy.id,copy.version),/request is closed/);
+    await assert.rejects(memberCall("withdraw",null,null,null,copy.id,copy.version),/request is closed/);
+    await admin("delete from public.rate_limit_buckets");await login();const fresh=await create("copy","A later request after completed follow-up.");assert.notEqual(fresh.id,copy.id);
+    await admin("select 1");assert.equal((await db.query("select count(*)::int n from private.account_data_request_fulfillments")).rows[0].n,1);
+    assert.equal((await db.query("select count(*)::int n from auth.users")).rows[0].n,3);assert.equal((await db.query("select count(*)::int n from auth.identities")).rows[0].n,3);
+    const audit=JSON.stringify((await db.query("select * from public.staff_audit_events")).rows);assert.doesNotMatch(audit,/COPY-123|scoped account-data copy|saved country|recorded profile/);
+    await assert.rejects(db.query("delete from private.account_data_request_fulfillments"),/cannot be changed/);
+    await assert.rejects(db.query("update private.account_data_request_fulfillments set evidence='edited evidence'"),/cannot be changed/);
+  });
+  await t.test("owner completion handles each request kind and removed custom grants take effect immediately",async()=>{
+    await admin("delete from public.rate_limit_buckets");await login();
+    const correction=(await memberCall()).items.find(x=>x.kind==="correction"&&x.status==="submitted"), erasure=await create("delete","Please review this separate erasure request.");
+    for(const [request,method,result]of [[correction,"data_correction","The requested country setting was corrected and the saved profile was checked."],[erasure,"account_erasure","The requested erasure was completed in the separately verified operation; retained records were explained."]]){
+      await login({id:owner,session:sid,aal:"aal2"});const ready=await review(request,"ready","Scope reviewed and ready for the separately verified follow-up.");
+      const done=await fulfill(ready,{method,result});assert.equal(done.status,"fulfilled");assert.equal(done.staffReply,result);
+    }
+    await admin(`update public.staff_permission_overrides set allowed=false where user_id='${other}' and permission_key='privacy.requests.fulfill'`);
+    await login({id:other,session:otherSid,aal:"aal2"});assert.equal((await queue()).canFulfill,false);await assert.rejects(fulfill(copy),/Completion permission/);
+    await admin(`update public.staff_permission_overrides set allowed=true where user_id='${other}' and permission_key='privacy.requests.fulfill'; update public.staff_memberships set status='removed' where user_id='${other}'`);
+    await login({id:other,session:otherSid,aal:"aal2"});await assert.rejects(fulfill(copy),/Completion permission/);await assert.rejects(history(copy.id,null,true),/Permission and an authenticator/);
+    await admin(`update public.staff_memberships set status='active' where user_id='${other}'`);
+    assert.equal((await db.query("select count(*)::int n from auth.users")).rows[0].n,3);assert.equal((await db.query("select count(*)::int n from auth.identities")).rows[0].n,3);
+  });
+  await t.test("history pagination is bounded and private reads reject expired sessions and raw role access",async()=>{
+    await admin("select 1");
+    // Trusted offline fixture supplies a long history to exercise exact pagination.
+    for(let version=100;version<130;version++)await db.query("insert into private.account_data_request_history(request_id,version,event,status,details,reply) values($1,$2,'staff_review','reviewing','','Fixture earlier message')",[copy.id,version]);
+    await login();const first=await history(copy.id),second=await history(copy.id,first.next);assert.equal(first.items.length,25);assert.ok(first.next);assert.equal(new Set([...first.items,...second.items].map(x=>x.version)).size,first.items.length+second.items.length);
+    await assert.rejects(history(copy.id,0),/Refresh the request history/);
+    await admin(`update auth.sessions set not_after=now()-interval '1 second' where id='${memberSid}'`);await login();await assert.rejects(history(copy.id),/active, unrestricted/);
+    await admin("update auth.sessions set not_after=null");
+    for(const role of ["anon","authenticated","service_role"]){await db.exec(`reset role;set role ${role}`);for(const table of["account_data_request_history","account_data_request_fulfillments"])await assert.rejects(db.query(`select * from private.${table}`),/permission denied/);}
+    for(const role of ["anon","service_role"]){await db.exec(`reset role;set role ${role}`);await assert.rejects(history(copy.id),/permission denied/);await assert.rejects(history(copy.id,null,true),/permission denied/);await assert.rejects(fulfill(copy),/permission denied/);}
+    await admin("select 1");for(const table of["account_data_request_history","account_data_request_fulfillments"])assert.equal((await db.query(`select relrowsecurity from pg_class where oid='private.${table}'::regclass`)).rows[0].relrowsecurity,true);
+  });
+
 });

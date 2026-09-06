@@ -161,3 +161,14 @@ The long-term GTA VI ambition is best served by building a trusted roleplay bran
 5. **Submission and learning:** submit the production sitemap, record acceptance and indexability evidence, then improve the highest-value existing pages and original guides using real data. Roster curation, security, recovery and unfinished functions remain in the overall launch scope.
 
 The launch value comes from a strong directory that people can find and trust. The proposed SEO work makes the current product easier to discover, clearer when shared, and more useful to the players and owners it already serves.
+
+
+## Added priority: people searching for BrowseRP by name
+
+The first branded-search target is the official homepage for **BrowseRP**, **Browse RP** and **browserp.com**. Also monitor **RPBrowse** and likely spelling mistakes as real query variants; keep BrowseRP as the official name. Do not add an invented alternate brand, hidden keyword list or fake social profiles.
+
+A public web search on 6 September 2026 for quoted BrowseRP plus roleplay returned an old third-party domain-information page, while RPBrowse plus roleplay produced unrelated technical results. This is a limited search-provider snapshot, not a Google ranking report or proof that Google has not indexed BrowseRP. It indicates that the official identity needs clearer discoverable evidence. The root task verified the browserp.com domain property in Google Search Console on 6 September 2026; its performance data is still processing. That property will supply the dependable query/impression baseline. The corrected production sitemap must be deployed and checked before submission.
+
+For launch: keep the canonical homepage, visible BrowseRP name, square RP logo, About purpose, real contact routes and actual connected social identities consistent. Add accurate WebSite and Organization information to that public identity, using only facts already visible and supported. Make the main game and community pages link naturally back to BrowseRP. Request indexing of the verified canonical homepage and submit the complete production sitemap through the free webmaster tools. Track branded clicks, impressions, average position, selected canonical and the exact page shown, separately from competitive FiveM/RedM/Minecraft/Roblox discovery searches. No position can be guaranteed, and paid advertising is not required to make this technical foundation sound.
+
+Primary guidance: [Google site names](https://developers.google.com/search/docs/appearance/site-names), [Organization structured data](https://developers.google.com/search/docs/appearance/structured-data/organization), [Search Console performance report](https://support.google.com/webmasters/answer/7576553).

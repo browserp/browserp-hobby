@@ -145,6 +145,8 @@ test("listing tags are canonical, unique and limited in the browser", () => {
   const values = [...tagDefinitions.matchAll(/\["([a-z0-9-]+)", "[^"]+"\]/g)].map((match) => match[1]);
   assert.equal(values.length, new Set(values).size);
   assert.ok(values.includes("economy"));
-  assert.ok(values.includes("whitelisted"));
+  assert.ok(!values.includes("whitelisted"), "joining requirements belong in their dedicated control, not duplicate feature tags");
+  const listingForm = readFileSync(join(root, "public", "list-server.html"), "utf8");
+  assert.match(listingForm, /<select name="accessType"[^>]*>[\s\S]*?<option value="public">Public — no application to join<\/option>[\s\S]*?<option value="allowlisted">Whitelisted — application and approval<\/option>/);
   assert.ok(values.includes("custom-clothing"));
 });

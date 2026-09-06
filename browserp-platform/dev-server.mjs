@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import publicPage, { handlesPublicPage } from "./lib/public-pages.js";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -338,6 +339,7 @@ export function createBrowseRPServer({ environment = process.env } = {}) {
       res.writeHead(405, { Allow: "GET, HEAD", "Content-Type": "text/plain; charset=utf-8" });
       return res.end("Method not allowed");
     }
+    if (handlesPublicPage(url.pathname)) return publicPage(req, res);
     const brandedNotFound = extname(url.pathname) === "" && !/^\/assets(?:\/|$)/.test(url.pathname);
     return serveFile(res, staticRoute(url.pathname), { brandedNotFound });
   });

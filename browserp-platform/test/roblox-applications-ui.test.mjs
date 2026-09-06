@@ -191,3 +191,27 @@ test("a sign-out during initial create loading cannot reveal a late authenticate
   await settle(); h.w.dispatchEvent(new h.w.CustomEvent("browserp:session-ended")); release(); await settle();
   assert.equal(h.form.hidden, true); assert.equal(h.doc.querySelector("#listing-account-notice").textContent, ""); h.send(); await settle(); assert.equal(writes(h).length, 0);
 });
+
+
+test("an older form's contextual-feature 400 keeps its whole draft and account binding for a deliberate corrected retry", async t => {
+  const migration=readFileSync(new URL("../supabase/migrations/20260906001040_contextual_listing_features.sql",import.meta.url),"utf8");
+  const message=migration.match(/raise exception '(Some feature choices have changed\.[^']+)' using errcode='22023'/)[1];
+  let attempts=0;
+  const h=setup(t,call=>call.options.method==="POST" && ++attempts===1 ? reply({error:message},400) : undefined);
+  await settle();fill(h);
+  // Model a checkbox that an already-open 7778 form still offers.
+  const old=h.doc.createElement("input");old.type="checkbox";old.name="tags";old.value="whitelisted";old.checked=true;
+  h.form.querySelector(".tag-picker-v3").append(old);
+  const draft=Array.from(new h.w.FormData(h.form).entries());
+  h.send();await settle();
+  assert.equal(writes(h).length,1);assert.equal(h.doc.querySelector("#listing-status").textContent,message);
+  assert.deepEqual(Array.from(new h.w.FormData(h.form).entries()),draft);
+  assert.equal(h.form.querySelector(".form-grid-v3").inert,false);
+  assert.equal(h.form.elements.robloxAuthorityEvidence.value,roblox.authorityEvidence);
+  assert.equal(h.form.hidden,false);assert.equal(h.navigation.length,0);
+  old.checked=false;h.send();await settle();
+  const [first,retry]=writes(h);assert.equal(retry.body.expectedAccountId,first.body.expectedAccountId);
+  assert.equal(retry.body.description,first.body.description);assert.deepEqual(retry.body.roblox,first.body.roblox);
+  assert.ok(first.body.tags.includes("whitelisted"));assert.ok(!retry.body.tags.includes("whitelisted"));
+  assert.notEqual(retry.options.headers["Idempotency-Key"],first.options.headers["Idempotency-Key"],"a definite 400 permits a deliberate changed payload with a new key");
+});

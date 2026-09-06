@@ -1,6 +1,6 @@
 # Reviewed Roblox community applications
 
-This feature has passed independent root review and is integrated into the launch branch, awaiting hosted verification and deployment. It does not add a live Roblox listing or verify a community automatically.
+This feature is published in production commit `7778a56bba4d16561c9669c255261582f9b53827`, deployment `dpl_AbNMKmpHG323vmMomTFK7CF5sLgq`, after independent root review and hosted verification. Both ordered migrations have been applied and their access grants read back. It does not add a live Roblox listing or verify a community automatically.
 
 Owners apply to list a specific community on BrowseRP. Players follow the approved joining instructions. “Whitelisted” still means players apply and receive approval; a BrowseRP listing application does not make a community whitelisted. Independent communities can use the same Roblox experience without claiming to own it.
 
@@ -34,3 +34,7 @@ The integrated successor (including the directory name relevance fix) passed593 
 - Final focused API, private staff review, public detail and database suite: 46/46 passed; the offered `unknown` joining option was then added to API/database regressions separately.
 - Public/member UI suite: 48/48 passed, including 15 new Roblox cases. Full pre-final unit sweep: 587/589 initially passed; its two old UI expectations were corrected and the affected suites then passed. Do not describe that earlier full sweep as an unchanged clean final-tree run.
 - Chromium, Firefox and WebKit each completed a native form submission at 390×844 and 1280×900 with reduced motion enabled: no overflow or page errors, bound member identity, no Cfx metadata, private evidence cleared. These used local routed fixture responses and are not production sign-in or physical-device evidence.
+
+## Hosted release evidence — 6 September 2026
+
+The exact preview passed12 route checks across Chromium, Firefox and WebKit at390px: Everyday/Cali name search, Roblox application sign-in gate and Roblox game route. Five directory API cases retained joining filters/count enrichment, guest POST to submissions returned401, and all engines had no application page errors or horizontal overflow. The signed-in production owner form loaded the new account-bound Roblox fields. These checks did not create real production applications or substitute for an ordinary external applicant/Discord approval journey. Evidence: `/tmp/browserp-roblox-hosted-preview-check.json`.

@@ -63,8 +63,8 @@
     const requested = location.pathname.split("/").filter(Boolean)[1] || new URLSearchParams(location.search).get("game") || "";
     const game = GAMES.find((item) => item.id === requested);
     const nav = $("#game-page-nav-v4");
-    nav.append(...AVAILABLE_GAMES.map((item) => { const link = node("a", "game-nav-chip-v4", item.name); link.href = `/games/${item.id}`; link.dataset.game = item.id; window.BrowseRPPlatforms.theme(link, item.id); link.prepend(gameMark(item.id, "game-nav-mark-v4")); if (game?.id === item.id) { link.classList.add("is-selected"); link.setAttribute("aria-current", "page"); } return link; }));
-    $("#game-upcoming-grid-v5").append(...UPCOMING_GAMES.map((item) => gameCard(item, true)));
+    nav.replaceChildren(...AVAILABLE_GAMES.map((item) => { const link = node("a", "game-nav-chip-v4", item.name); link.href = `/games/${item.id}`; link.dataset.game = item.id; window.BrowseRPPlatforms.theme(link, item.id); link.prepend(gameMark(item.id, "game-nav-mark-v4")); if (game?.id === item.id) { link.classList.add("is-selected"); link.setAttribute("aria-current", "page"); } return link; }));
+    $("#game-upcoming-grid-v5").replaceChildren(...UPCOMING_GAMES.map((item) => gameCard(item, true)));
     if (!game) {
       nav.hidden = true;
       const allGamesLogo = node("img", "game-page-all-logo-v5");
@@ -72,14 +72,14 @@
       allGamesLogo.alt = "";
       allGamesLogo.width = 140;
       allGamesLogo.height = 140;
-      $("#game-page-mark-v4").append(allGamesLogo);
-      $("#game-hub-grid-v4").append(...AVAILABLE_GAMES.map((item) => gameCard(item)));
+      $("#game-page-mark-v4").replaceChildren(allGamesLogo);
+      $("#game-hub-grid-v4").replaceChildren(...AVAILABLE_GAMES.map((item) => gameCard(item)));
       return;
     }
     window.BrowseRPPlatforms.theme(document.querySelector(".game-page-hero-v4"), game.id);
-    document.title = `${game.name} roleplay servers — BrowseRP`;
-    document.querySelector('meta[name="description"]').content = `Discover reviewed ${game.name} roleplay servers, communities and groups on BrowseRP.`;
-    $("#game-page-mark-v4").append(gameMark(game.id, "game-page-symbol-v4"));
+    if ($("#game-server-list-v4").dataset.publicRendered !== "true") document.title = `${game.name} roleplay servers — BrowseRP`;
+    document.querySelector('meta[name="description"]').content = game.description;
+    $("#game-page-mark-v4").replaceChildren(gameMark(game.id, "game-page-symbol-v4"));
     $("#game-page-eyebrow-v4").textContent = `${game.name} roleplay`;
     $("#game-page-title-v4").textContent = `Find your ${game.name} roleplay community.`;
     $("#game-page-lead-v4").textContent = game.description;

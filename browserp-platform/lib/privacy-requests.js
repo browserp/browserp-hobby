@@ -27,7 +27,11 @@ async function sessionFor(req, res, staff) {
 
 export async function memberPrivacyRequests(req, res) {
   const session = await sessionFor(req, res, false);
-  if (req.method === "GET") return rpc("member_data_requests", { p_action: "list" }, session.accessToken);
+  if (req.method === "GET") {
+    const query = new URL(req.url, "https://browserp.invalid").searchParams;
+    if (query.has("id")) return rpc("member_data_request_history", { p_id: id(query.get("id")), p_before_version: query.has("beforeVersion") ? version(Number(query.get("beforeVersion"))) : null }, session.accessToken);
+    return rpc("member_data_requests", { p_action: "list" }, session.accessToken);
+  }
   const body = await readBody(req, 8192);
   if (!["create", "update", "withdraw"].includes(body.action)) throw fail("Choose a request action.");
   const values = { p_action: body.action };
@@ -45,13 +49,24 @@ export async function staffPrivacyRequests(req, res) {
   if (req.method === "GET" && params.get("access") === "1") return { canReview: session.aal === "aal2" && await rpc("staff_data_request_access", {}, session.accessToken) === true };
   if (session.aal !== "aal2") throw Object.assign(new Error("Verify your authenticator before reviewing private requests."), { status: 403 });
   if (req.method === "GET") {
+    if (params.has("id")) return rpc("staff_data_request_history", { p_id: id(params.get("id")), p_before_version: params.has("beforeVersion") ? version(Number(params.get("beforeVersion"))) : null }, session.accessToken);
     const status = params.get("status") || "open", kind = params.get("kind") || null;
-    if (!["open", "all", "submitted", "reviewing", "information_needed", "ready", "declined", "withdrawn"].includes(status) || (kind && !["copy", "delete", "correction"].includes(kind))) throw fail("Choose valid request filters.");
+    if (!["open", "all", "submitted", "reviewing", "information_needed", "ready", "declined", "withdrawn", "fulfilled"].includes(status) || (kind && !["copy", "delete", "correction"].includes(kind))) throw fail("Choose valid request filters.");
     const time = params.get("before"), beforeId = params.get("beforeId");
     if (Boolean(time) !== Boolean(beforeId) || (time && (time.length > 40 || !Number.isFinite(Date.parse(time))))) throw fail("Refresh the request queue.");
     return rpc("staff_data_requests", { p_status: status, p_kind: kind, p_before_time: time ? new Date(time).toISOString() : null, p_before_id: beforeId ? id(beforeId) : null, p_limit: 25 }, session.accessToken);
   }
   const body = await readBody(req, 8192);
+  if (body.action === "fulfill") {
+    const result = details(body.result), evidence = details(body.evidence);
+    const completed = typeof body.completedAt === "string" && body.completedAt.length <= 40 ? new Date(body.completedAt) : null;
+    if (body.confirmed !== true || result.length < 30 || evidence.length < 20 || !["secure_delivery", "data_correction", "account_erasure"].includes(body.method)
+      || !completed || !Number.isFinite(completed.getTime()) || completed.getTime() > Date.now()) throw fail("Describe the completed result and private reference, give its actual date, and confirm the follow-up was completed.");
+    const values = { p_id: id(body.id), p_result: result, p_method: body.method, p_evidence: evidence, p_completed_at: completed.toISOString(), p_expected_version: version(body.version), p_key: id(body.key), p_confirmed: true };
+    await rateLimit(req, "staff-data-request-completion", 10, 600);
+    return rpc("staff_fulfill_data_request", values, session.accessToken);
+  }
+  if (body.action && body.action !== "review") throw fail("Choose a valid request action.");
   if (!["reviewing", "information_needed", "ready", "declined"].includes(body.status)) throw fail("Choose a review decision. Requests are not fulfilled automatically.");
   const values = { p_id: id(body.id), p_status: body.status, p_reply: details(body.reply), p_expected_version: version(body.version), p_key: id(body.key) };
   await rateLimit(req, "staff-data-requests", 40, 600);

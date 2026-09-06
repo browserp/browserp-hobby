@@ -166,7 +166,9 @@ test("production routes and legacy APIs match the deployed schema", () => {
   const serverRoute = vercel.rewrites.find((rewrite) => rewrite.source === "/server/:slug");
   const resources = readFileSync(join(root, "api", "resources.js"), "utf8");
 
-  assert.equal(serverRoute?.destination, "/server?slug=:slug");
+  assert.equal(serverRoute?.destination, "/api/router?_route=public/document&_path=/server/:slug");
+  assert.equal(vercel.rewrites.find((rewrite) => rewrite.source === "/server")?.destination,
+    "/api/router?_route=public/document&_path=/server", "legacy listing links must still reach the canonical redirect handler");
   assert.match(resources, /resource_directory\?select=\*&order=published_at\.desc/);
   assert.doesNotMatch(resources, /featured\.desc|created_at\.desc/);
 });

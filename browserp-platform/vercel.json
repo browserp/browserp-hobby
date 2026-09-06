@@ -11,7 +11,7 @@
   "functions": {
     "api/router.js": {
       "maxDuration": 60,
-      "includeFiles": "docs/launch-curation/*-candidates.json"
+      "includeFiles": "{docs/launch-curation/*-candidates.json,public/{server,servers,game,blog,blog-post,404}.html}"
     },
     "api/servers.js": {
       "maxDuration": 30
@@ -223,7 +223,7 @@
     },
     {
       "source": "/servers",
-      "destination": "/servers.html"
+      "destination": "/api/router?_route=public/document&_path=/servers"
     },
     {
       "source": "/list-server",
@@ -247,19 +247,19 @@
     },
     {
       "source": "/games",
-      "destination": "/game"
+      "destination": "/api/router?_route=public/document&_path=/games"
     },
     {
       "source": "/games/:slug",
-      "destination": "/game?game=:slug"
+      "destination": "/api/router?_route=public/document&_path=/games/:slug"
     },
     {
       "source": "/blog",
-      "destination": "/blog.html"
+      "destination": "/api/router?_route=public/document&_path=/blog"
     },
     {
       "source": "/blog/:slug",
-      "destination": "/blog-post?slug=:slug"
+      "destination": "/api/router?_route=public/document&_path=/blog/:slug"
     },
     {
       "source": "/appeal",
@@ -311,7 +311,23 @@
     },
     {
       "source": "/server/:slug",
-      "destination": "/server?slug=:slug"
+      "destination": "/api/router?_route=public/document&_path=/server/:slug"
+    },
+    {
+      "source": "/game",
+      "destination": "/api/router?_route=public/document&_path=/game"
+    },
+    {
+      "source": "/server",
+      "destination": "/api/router?_route=public/document&_path=/server"
+    },
+    {
+      "source": "/blog-post",
+      "destination": "/api/router?_route=public/document&_path=/blog-post"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/router?_route=public/document&_path=/sitemap.xml"
     }
   ],
   "headers": [

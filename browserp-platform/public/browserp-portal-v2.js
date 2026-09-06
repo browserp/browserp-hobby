@@ -333,6 +333,7 @@
     servers.forEach((server) => {
       const actions = [];
       if (server.slug && String(server.status).toLowerCase() === "published") actions.push(link(`/server/${encodeURIComponent(server.slug)}`, "small-button", "View listing"));
+      if (server.id && String(server.status).toLowerCase() === "published") actions.push(link(`/list-server?listing=${encodeURIComponent(server.id)}`, "small-button", "Request update"));
       list.append(listItem(server.name || "Roleplay server", `Updated ${dateLabel(server.updated_at)}`, actions, { status: server.status }));
     });
     section.append(list);
@@ -925,14 +926,24 @@
       if (kind === "listing" && (!Number.isSafeInteger(payload.item?.reviewVersion) || !Number.isSafeInteger(payload.item?.queueVersion))) throw new Error("Reopen this submission to load its latest review.");
       form.dataset.reviewVersion = String(payload.item?.reviewVersion ?? ""); form.dataset.queueVersion = String(payload.item?.queueVersion ?? "");
       evidence.replaceChildren(renderEvidence(payload.item));
-      if (kind === "listing" && payload.item?.platform === "roblox") {
+      if (payload.item?.ownerUpdate) {
+        const item = payload.item, update = item.ownerUpdate, live = update.live || {};
+        evidence.replaceChildren(make("p", "portal-help", "Owner request to update an existing listing. Check changed public links and claims. Its address, artwork, ownership and live connection stay attached to the same listing."));
+        for (const [label,before,after] of [["Name",live.name,item.name],["Region",live.region,item.region],["Language",live.language,item.language],["Setup",live.framework,item.framework],["Description",live.description,item.description],["Community link",live.community_url,item.communityUrl],["Access",live.access_type,item.access],["Features",live.tags?.join(", "),item.tags?.join(", ")],["Joining instructions",live.roblox?.joiningInstructions,item.roblox?.joiningInstructions]]) {
+          if (before !== after) evidence.append(make("h3", "", label), make("p", "", `Current: ${before || "Not supplied"}`), make("p", "", `Proposed: ${after || "Not supplied"}`));
+        }
+        const approve = actionBox.querySelector('[data-review-action="approved"]');
+        if (approve) { approve.textContent = "Approve listing update"; approve.dataset.unavailable = String(Boolean(update.changed || update.ownerChanged || update.unavailable || !update.canApprove)); }
+        if (update.changed || update.ownerChanged || update.unavailable || !update.canApprove) evidence.append(make("p", "portal-status", update.ownerChanged ? "The owner changed. Close this proposal and ask the current owner to submit their update." : update.unavailable ? "This listing is no longer published." : update.changed ? "The live details changed. Request corrections so the owner can compare the latest listing before staff approve it." : "Applying this update requires server management permission."));
+      }
+      if (kind === "listing" && payload.item?.platform === "roblox" && !payload.item?.ownerUpdate) {
         form.dataset.roblox = "true";
         const controls = make("fieldset", "portal-panel-v2"); controls.dataset.robloxControlReview = "";
         controls.append(make("legend", "", "Community control — required for approval"), make("p", "portal-help", "Confirm independent evidence that this applicant controls this specific community. An invite or profile link alone is not enough. Keep credentials and private player information out of the note."));
         const label = make("label", "field"), check = make("input"); check.type = "checkbox"; check.name = "robloxControlReviewed"; label.append(check, make("span", "", "I confirmed the applicant controls this community"));
         const noteLabel = make("label", "field"); const note = make("textarea"); note.name = "robloxControlNote"; note.minLength = 20; note.maxLength = 500; noteLabel.append(make("span", "", "How did you confirm their control?"), note); controls.append(label, noteLabel); actionBox.before(controls);
       }
-      actionBox.querySelectorAll("[data-review-action]").forEach(element => { element.disabled = false; });
+      actionBox.querySelectorAll("[data-review-action]").forEach(element => { element.disabled = element.dataset.unavailable === "true"; });
     } catch (error) {
       evidence.replaceChildren(make("p", "portal-status error", error.message));
       actionBox.querySelectorAll("[data-review-action]").forEach((element) => { element.disabled = true; });
@@ -976,7 +987,7 @@
       } catch (error) {
         status.textContent = error.message;
         status.className = "portal-status error";
-        buttons.forEach((element) => { element.disabled = error.status === 409 && form.dataset.kind === "listing"; });
+        buttons.forEach((element) => { element.disabled = element.dataset.unavailable === "true" || (error.status === 409 && form.dataset.kind === "listing"); });
         if (error.status === 409 && form.dataset.kind === "listing") status.textContent += " Close this review and open it again to read the updated details.";
       }
     });

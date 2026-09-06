@@ -485,14 +485,23 @@
       if (generation !== reviewGeneration) return;
       if (kind === "listing" && (!Number.isSafeInteger(item?.reviewVersion) || !Number.isSafeInteger(item?.queueVersion))) throw new Error("Reload the latest submission review before recording a decision.");
       const actionMap = {
-        listing: [["approved","Approve and publish"],["changes_requested","Request changes"],["rejected","Reject"]],
+        listing: [["approved",item.ownerUpdate ? "Approve listing update" : "Approve and publish"],["changes_requested","Request changes"],["rejected","Reject"]],
         report: [["triaged","Mark triaged"],["resolved","Resolve"],["dismissed","Dismiss"]],
         moderation: [["claimed","Claim"],["resolved","Resolve"],["dismissed","Dismiss"]],
         comment: [["approve","Publish comment"],["reject","Reject comment"],["hide","Hide comment"]],
         security: [["resolved","Resolve alert"]]
       };
-      let evidence = Object.entries(item || {}).filter(([key])=>!["moderationReasons","reasons","reviewVersion","queueVersion","history","roblox"].includes(key)).map(([key,value])=>`${key}: ${typeof value === "object" ? JSON.stringify(value) : value}`).join("\n");
-      if (kind === "listing" && item.platform === "roblox") {
+      let evidence = Object.entries(item || {}).filter(([key])=>!["moderationReasons","reasons","reviewVersion","queueVersion","history","roblox","ownerUpdate"].includes(key)).map(([key,value])=>`${key}: ${typeof value === "object" ? JSON.stringify(value) : value}`).join("\n");
+      if (item.ownerUpdate) {
+        const update = item.ownerUpdate, live = update.live || {};
+        const comparisons = [["Name",live.name,item.name],["Region",live.region,item.region],["Language",live.language,item.language],["Setup",live.framework,item.framework],["Description",live.description,item.description],["Community link",live.community_url,item.communityUrl],["Access",live.access_type,item.access],["Features",live.tags?.join(", "),item.tags?.join(", ")],["Joining instructions",live.roblox?.joiningInstructions,item.roblox?.joiningInstructions]];
+        evidence = "Owner request to update an existing listing\nThe live listing keeps its address, artwork, ownership and live connection. Check changed links and claims before approval.\n\n" + comparisons.filter(([,before,after])=>before!==after).map(([label,before,after])=>`${label}\nCurrent: ${before || "Not supplied"}\nProposed: ${after || "Not supplied"}`).join("\n\n");
+        if (update.changed || update.ownerChanged || update.unavailable || !update.canApprove) {
+          actionMap.listing = actionMap.listing.filter(([action])=>action!=="approved");
+          evidence += `\n\n${update.ownerChanged ? "The listing owner changed. Close this proposal and ask the current owner to submit their changes." : update.unavailable ? "This listing is no longer published. Resolve its status before approving an update." : update.changed ? "The live listing changed after this proposal. Request changes so its owner can compare the current details and resubmit." : "Applying a live listing update requires server management permission. You can still provide feedback or reject it."}`;
+        }
+      }
+      if (kind === "listing" && item.platform === "roblox" && !item.ownerUpdate) {
         const application = item.roblox || {};
         evidence += `\n\nRoblox community application\nListing: ${application.kind === "creator_experience" ? "Creator-run experience" : "Independent community using an experience"}\nExperience: ${application.experienceUrl || "Missing"}\nRoblox community: ${application.communityGroupUrl || "Not supplied"}\nHow players join: ${application.joiningInstructions || "Missing"}\n\nPrivate applicant information\nTheir role: ${application.applicantRole || "Missing"}\nEvidence of control: ${application.authorityEvidence || "Missing"}\n\nCheck the applicant controls this specific community. A Discord invite or Roblox profile alone is not proof. This application does not establish player activity or official Roblox endorsement.`;
       }
@@ -503,7 +512,7 @@
       ], submitLabel: "Record decision" });
       if (!input) return;
       let controlReview = {};
-      if (kind === "listing" && item.platform === "roblox" && input.action === "approved") {
+      if (kind === "listing" && item.platform === "roblox" && !item.ownerUpdate && input.action === "approved") {
         const checked = await decision({ title: "Confirm community control", description: "Describe the independent evidence you checked that connects this applicant to this specific community. Keep passwords, tokens and private player information out of this note. Experience ownership and Discord community ownership are different; an independent RP community need not own the experience it uses.", fields: [{ name: "controlNote", label: "How did you confirm their control?", type: "textarea", minlength: 20, maxlength: 500 }], submitLabel: "Confirm and publish" });
         if (!checked) return;
         controlReview = { controlReviewed: true, controlNote: checked.controlNote };

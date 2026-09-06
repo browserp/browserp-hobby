@@ -1,5 +1,16 @@
 # BrowseRP database transport and recovery review
 
+## Successful saved-configuration recovery — 6 September 2026
+
+The owner-entered saved passphrase authenticated the existing encrypted capture. The corrected checker restored six configuration tables into a private socket-only temporary PostgreSQL database and verified exact saved rows and joined role definitions: 14 platforms, 8 categories, 17 filter entries, 5 staff roles, 33 permissions and 79 role-permission links. All 25 constraint rejection checks passed. The complete archive decoded without executing its SQL; the trusted six-table insert completed atomically. The temporary cluster was stopped and removed, with zero production database connections. The run completed in 7.87 seconds at 00:37:57 UTC.
+
+The first attempt exposed an exact quoted-header parsing mismatch in the checker, which was reproduced using the actual archive format and corrected before retrying. Synthetic verification then passed 56 checks. The successful real report has no INCOMPLETE marker. No backup or database password was reset for this check.
+
+Safe local evidence: `configuration-restore-20260906T003749Z-70007b/configuration-restore-report.json` under the private BrowseRP Backups folder. Capture SHA256: `a815f7397b89c6f00bf63ce8a8ac67ed015659080e987d8f10eb09b8c2a41b1c`; corrected helper SHA256: `2f201d240648fb60d8302a9a97b739c9d193203b83737ea7355b4fb42b8960c2`. No row contents or passphrase are in this document.
+
+**Boundary:** this proves recovery of those saved configuration values and constraints. It does not restore account/staff assignments, Auth/MFA, RLS enforcement, application functions, server/private data, Storage service/files, Vault secrets or scheduled jobs, and is not a full isolated Supabase restore. The original historical transaction-mode evidence limitation remains. Off-device recovery and the separately captured media are also separate checks. The owner is finished with the current passphrase step.
+
+
 ## Actual recovery and media checkpoint — 5 September, 23:32 UTC
 
 The owner unlocked the existing saved capture once using the local hidden passphrase prompt. No database password or new production database connection was used. The reviewed adapter authenticated the original encrypted artifacts, decoded the full PostgreSQL custom archive without executing its SQL, and restored the exact captured `public.platforms` data into a fresh local PostgreSQL17 database using only a trusted fixed COPY/table definition. All14 rows, values and constraints matched. The temporary database accepted only its private Unix socket and was stopped and removed. This is a verified partial restore, not full BrowseRP recovery.

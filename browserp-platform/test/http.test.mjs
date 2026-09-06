@@ -81,7 +81,7 @@ test("public pages and fallback API load without external secrets", async () => 
   const home = await fetch(origin);
   assert.equal(home.status, 200);
   assert.match(await home.text(), /Find the world you want to[\s\S]*live in/);
-  for (const path of ["/servers", "/list-server", "/dashboard", "/staffpanel", "/legal", "/privacy", "/terms", "/about", "/blog", "/appeal", "/advertise", "/coins", "/server/northstar-roleplay"]) {
+  for (const path of ["/servers", "/list-server", "/dashboard", "/staffpanel", "/legal", "/privacy", "/terms", "/about", "/blog", "/appeal", "/advertise", "/coins"]) {
     const response = await fetch(`${origin}${path}`);
     assert.equal(response.status, 200, path);
     if (path === "/staffpanel") {
@@ -89,12 +89,12 @@ test("public pages and fallback API load without external secrets", async () => 
     }
   }
 
-  for (const path of ["/", "/servers", "/list-server", "/dashboard", "/legal", "/privacy", "/terms", "/about", "/blog", "/server/northstar-roleplay"]) {
+  for (const path of ["/", "/servers", "/list-server", "/dashboard", "/legal", "/privacy", "/terms", "/about", "/blog"]) {
     const response = await fetch(`${origin}${path}`);
     assert.doesNotMatch(await response.text(), /href=["']\/staffpanel/i, path);
   }
 
-  for (const path of ["/developers", "/resources", "/missing/nested-page"]) {
+  for (const path of ["/developers", "/resources", "/missing/nested-page", "/server/northstar-roleplay", "/games/not-a-supported-game", "/blog/not-a-published-article"]) {
     const missingPage = await fetch(`${origin}${path}`);
     assert.equal(missingPage.status, 404);
     assert.match(missingPage.headers.get("content-type") || "", /text\/html/);

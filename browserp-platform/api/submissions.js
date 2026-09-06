@@ -1,4 +1,5 @@
 import { robloxApplication } from "../lib/roblox-application.js";
+import { ownerUpdateBody } from "../lib/owner-listing-updates.js";
 import { createHash } from "node:crypto";
 import { isIP } from "node:net";
 import { endpoint, ok } from "../lib/api.js";
@@ -117,12 +118,19 @@ function acceptedAgreement(body) {
   );
 }
 
-function submissionInput(body) {
+function submissionInput(body, ownerUpdate = false) {
+  if (ownerUpdate && String(body.description || "").trim().length > 3000) throw Object.assign(new Error("Descriptions must be 3,000 characters or fewer."), { status: 400 });
+  // Existing imported keywords are preserved byte-for-byte. The database checks
+  // them against the actual owned listing and accepts only contextual new features.
+  if (ownerUpdate && (!Array.isArray(body.tags) || body.tags.length > 128
+      || body.tags.some(tag => typeof tag !== "string" || tag.length < 2 || tag.length > 40))) {
+    throw Object.assign(new Error("Load your listing's current features before sending an update."), { status: 400 });
+  }
   const tags = Array.isArray(body.tags)
-    ? [...new Set(body.tags.map((tag) => sanitizePlainText(tag, 40).toLowerCase()).filter(Boolean))]
+    ? [...new Set(ownerUpdate ? body.tags : body.tags.map(tag => sanitizePlainText(tag, 40).toLowerCase()).filter(Boolean))]
     : [];
-  if (tags.length > 8 || tags.some((tag) => !/^[a-z0-9-]{2,40}$/.test(tag))) {
-    throw Object.assign(new Error("Choose up to eight valid server tags."), { status: 400 });
+  if (!ownerUpdate && (tags.length > 8 || tags.some(tag => !/^[a-z0-9-]{2,40}$/.test(tag)))) {
+    throw Object.assign(new Error("Choose up to eight community features."), { status: 400 });
   }
   const accessType = sanitizePlainText(body.accessType || "public", 20).toLowerCase();
   if (!["public", "allowlisted", "application", "unknown"].includes(accessType)) {
@@ -138,7 +146,7 @@ function submissionInput(body) {
     region: sanitizePlainText(body.region, 60),
     language: sanitizePlainText(body.language, 60),
     framework: sanitizePlainText(body.framework, 80),
-    description: sanitizePlainText(body.description, 1_500),
+    description: sanitizePlainText(body.description, ownerUpdate ? 3_000 : 1_500),
     communityUrl: canonicalCommunityUrl(body.communityUrl),
     accessType,
     tags,
@@ -162,6 +170,13 @@ export default endpoint(["GET", "POST", "PATCH"], async (req, res, requestId) =>
 
   if (req.method === "GET") {
     await rateLimit(req, "owner-submissions-read", 30, 60);
+    const listingId = new URL(req.url, "http://local").searchParams.get("listing");
+    if (listingId !== null) {
+      const account = new URL(req.url, "http://local").searchParams.get("account");
+      if (!UUID.test(listingId)) throw Object.assign(new Error("Choose one of your listings from My account."), { status: 400 });
+      if (account !== session.user.id) throw Object.assign(new Error("Your signed-in account changed. Reopen your listing."), { status: 403 });
+      return ok(res, await rpc("member_owned_listing_update", { p_server_id: listingId }, session.accessToken));
+    }
     const id = new URL(req.url, "http://local").searchParams.get("id");
     if (id !== null) {
       if (!UUID.test(id)) throw Object.assign(new Error("Choose a valid submission from My account."), { status: 400 });
@@ -200,7 +215,15 @@ export default endpoint(["GET", "POST", "PATCH"], async (req, res, requestId) =>
     throw Object.assign(new Error("Your signed-in account changed. Reopen the application before sending it."), { status: 403 });
   }
   if (req.method === "POST" && !req.headers?.["idempotency-key"]) throw Object.assign(new Error("Start a new application attempt and try again."), { status: 400 });
-  const input = submissionInput(body);
+  const ownerUpdate = req.method === "POST" ? body.listingUpdate != null : body.ownerUpdate === true;
+  if (ownerUpdate && (!Number.isSafeInteger(body.expectedServerVersion) || body.expectedServerVersion < 1
+      || (req.method === "POST" && !UUID.test(String(body.listingUpdate || ""))))) {
+    throw Object.assign(new Error("Load your listing's latest details before requesting an update."), { status: 400 });
+  }
+  const input = submissionInput(ownerUpdate ? ownerUpdateBody(body) : body, ownerUpdate);
+  if (req.method === "POST" && !ownerUpdate && !["fivem", "redm", "minecraft", "roblox"].includes(input.platform)) {
+    throw Object.assign(new Error("Applications are open for FiveM, RedM, Minecraft and Roblox."), { status: 400 });
+  }
   const moderation = assessContent({ ...input, ...(input.roblox || {}) });
   if (moderation.action === "reject") {
     throw Object.assign(new Error("This submission contains a high-risk link or pattern and cannot be accepted."), { status: 422 });
@@ -219,12 +242,13 @@ export default endpoint(["GET", "POST", "PATCH"], async (req, res, requestId) =>
     if (access?.active !== true || access.userId !== session.user.id || !UUID.test(String(access.sessionId || ""))) {
       throw Object.assign(new Error("Sign in again before correcting your submission."), { status: 401 });
     }
-    const submission = await rpc(SERVER_SUBMISSION_CORRECTION_RPC, {
+    const submission = await rpc(ownerUpdate ? "correct_owned_listing_update_server" : SERVER_SUBMISSION_CORRECTION_RPC, {
       p_user_id: session.user.id,
       p_session_id: access.sessionId,
       p_submission_id: body.submissionId,
       p_expected_version: body.expectedVersion,
       p_expected_queue_version: body.expectedQueueVersion,
+      ...(ownerUpdate ? { p_expected_server_version: body.expectedServerVersion } : {}),
       p_idempotency_key: idempotencyHash(req, session.user.id, requestId),
       p_data: input,
       p_moderation_confidence: moderation.confidence,
@@ -236,10 +260,11 @@ export default endpoint(["GET", "POST", "PATCH"], async (req, res, requestId) =>
     return ok(res, { submission }, 202);
   }
 
-  const submission = await rpc(SERVER_APPLICATION_RPC, {
+  const submission = await rpc(ownerUpdate ? "propose_owned_listing_update_server" : SERVER_APPLICATION_RPC, {
     p_user_id: session.user.id,
     p_session_id: creationAccess.sessionId,
     p_expected_user_id: body.expectedAccountId,
+    ...(ownerUpdate ? { p_server_id: body.listingUpdate, p_expected_server_version: body.expectedServerVersion } : {}),
     p_data: input,
     p_moderation_confidence: moderation.confidence,
     p_moderation_score: moderation.score,

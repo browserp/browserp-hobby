@@ -233,21 +233,57 @@
   }
 
   const LISTING_TAGS = Object.freeze([
-    ["economy", "Economy"], ["whitelisted", "Whitelisted"], ["public-access", "Public access"],
-    ["serious-roleplay", "Serious RP"], ["semi-serious", "Semi-serious RP"],
-    ["beginner-friendly", "Beginner friendly"], ["custom-clothing", "Custom clothing"],
-    ["custom-cars", "Custom vehicles"], ["custom-jobs", "Custom jobs"],
-    ["player-businesses", "Player businesses"], ["housing", "Housing"], ["police", "Police"],
-    ["ems", "EMS"], ["gangs", "Gangs"], ["civilian-jobs", "Civilian jobs"],
-    ["controller-friendly", "Controller friendly"], ["streamer-friendly", "Streamer friendly"]
+    ["economy", "Economy"],
+    ["serious-roleplay", "Serious RP"],
+    ["semi-serious", "Semi-serious RP"],
+    ["beginner-friendly", "Beginner friendly"],
+    ["custom-clothing", "Custom clothing"],
+    ["custom-cars", "Custom vehicles"],
+    ["custom-jobs", "Custom jobs"],
+    ["player-businesses", "Player businesses"],
+    ["housing", "Housing"],
+    ["police", "Police"],
+    ["ems", "EMS"],
+    ["gangs", "Gangs"],
+    ["civilian-jobs", "Civilian jobs"],
+    ["outlaw-rp", "Outlaw RP"],
+    ["lawmen", "Lawmen"],
+    ["ranching", "Ranching"],
+    ["horses", "Horses"],
+    ["hunting", "Hunting"],
+    ["crafting", "Crafting"],
+    ["java", "Java Edition"],
+    ["bedrock", "Bedrock Edition"],
+    ["crossplay", "Crossplay"],
+    ["modded", "Modded"],
+    ["vanilla", "Vanilla"],
+    ["land-claims", "Land claims"],
+    ["pve", "PvE"],
+    ["pvp", "PvP"],
+    ["quests", "Quests"],
+    ["custom-worlds", "Custom worlds"],
+    ["voice-chat", "Voice chat"],
+    ["events", "Community events"],
+    ["custom-avatars", "Custom avatars"],
+    ["vehicles", "Vehicles"],
+    ["jobs", "Jobs"],
+    ["mobile-friendly", "Mobile friendly"],
+    ["controller-support", "Controller support"]
   ]);
+  const LISTING_TAGS_BY_GAME = Object.freeze({
+    fivem: Object.freeze(["serious-roleplay", "semi-serious", "beginner-friendly", "economy", "custom-cars", "custom-clothing", "custom-jobs", "player-businesses", "housing", "police", "ems", "civilian-jobs", "gangs"]),
+    redm: Object.freeze(["serious-roleplay", "semi-serious", "beginner-friendly", "economy", "outlaw-rp", "lawmen", "ranching", "horses", "hunting", "crafting", "player-businesses", "housing"]),
+    minecraft: Object.freeze(["beginner-friendly", "java", "bedrock", "crossplay", "modded", "vanilla", "land-claims", "pve", "pvp", "quests", "custom-worlds", "voice-chat", "economy"]),
+    roblox: Object.freeze(["beginner-friendly", "serious-roleplay", "semi-serious", "events", "voice-chat", "custom-avatars", "vehicles", "housing", "jobs", "mobile-friendly", "controller-support"])
+  });
+  window.BrowseRPListingFeatures = Object.freeze({ keys: platform => [...(LISTING_TAGS_BY_GAME[platform] || [])] });
 
   function setupTagPicker(form, platform = "fivem") {
     const picker = select(".tag-picker-v3", form);
     if (!picker) return;
     const selectedValues = new Set([...picker.querySelectorAll('input:checked')].map(input => input.value));
-    const cityOnly = new Set(["custom-clothing", "custom-cars", "police", "ems", "gangs", "civilian-jobs"]);
-    const available = LISTING_TAGS.filter(([value]) => (platform !== "minecraft" || !cityOnly.has(value)) && (platform !== "redm" || value !== "custom-cars"));
+    const keys = LISTING_TAGS_BY_GAME[platform] || [];
+    const available = keys.map(key => LISTING_TAGS.find(([value]) => value === key)).filter(Boolean);
     picker.replaceChildren(...available.map(([value, labelText]) => {
       const label = element("label", "check-v3");
       const input = document.createElement("input");
@@ -259,9 +295,12 @@
       return label;
     }));
     const updateLimit = () => {
-      const selected = picker.querySelectorAll('input[name="tags"]:checked').length;
+      const baseline = new Set(JSON.parse(picker.dataset.existingFeatures || "[]"));
+      const selected = [...picker.querySelectorAll('input[name="tags"]:checked')].filter(input => !baseline.has(input.value)).length;
+      const total = picker.querySelectorAll('input[name="tags"]:checked').length + Number(picker.dataset.preservedCount || 0);
+      const full = total >= Number(picker.dataset.maximumFeatures || 8);
       picker.querySelectorAll('input[name="tags"]:not(:checked)').forEach((input) => {
-        input.disabled = selected >= 8;
+        input.disabled = full || (selected >= 8 && !baseline.has(input.value));
       });
     };
     picker.onchange = updateLimit;
@@ -275,8 +314,9 @@
     const providerNote = select("#provider-note");
     const query = new URLSearchParams(location.search);
     const correctionId = query.get("submission");
+    const ownerListingId = correctionId === null ? query.get("listing") : null;
     const requestedPlatform = DISCOVER_GAME_IDS.includes(query.get("platform")) ? query.get("platform") : "";
-    const returnTo = correctionId !== null ? `/list-server?submission=${encodeURIComponent(correctionId)}` : requestedPlatform ? `/list-server?platform=${requestedPlatform}` : "/list-server";
+    const returnTo = correctionId !== null ? `/list-server?submission=${encodeURIComponent(correctionId)}` : ownerListingId !== null ? `/list-server?listing=${encodeURIComponent(ownerListingId)}` : requestedPlatform ? `/list-server?platform=${requestedPlatform}` : "/list-server";
     document.querySelectorAll("[data-auth-provider]").forEach(link => { link.href = `/api/auth/${link.dataset.authProvider}?returnTo=${encodeURIComponent(returnTo)}`; });
     const fields = select(".form-grid-v3", form);
     const submit = select("#submit-listing", form);
@@ -300,7 +340,7 @@
         providerNote.hidden = available; providerNote.textContent = "Sign-in is temporarily unavailable. Please try again later.";
       }).catch(() => { providerNote.hidden = false; providerNote.textContent = "Sign-in is temporarily unavailable. Please try again later."; });
     }
-    if (correctionId === null) {
+    if (correctionId === null && ownerListingId === null) {
       window.addEventListener("browserp:session-ended", endCreateSession);
       window.addEventListener("pagehide", () => endCreateSession({ showSignIn: false }));
       window.addEventListener("pageshow", event => { if (event.persisted) { endCreateSession({ showSignIn: false }); location.reload(); } });
@@ -308,7 +348,7 @@
     }
     setupTagPicker(form);
     const platformSelect = select('[name="platform"]', form);
-    await loadPlatforms(platformSelect, false);
+    await loadPlatforms(platformSelect, false, true);
     if (ended) return;
     if (requestedPlatform) platformSelect.value = requestedPlatform;
     const cfxField = select('[data-cfx-field]', form);
@@ -398,8 +438,8 @@
       accountId = state.session.user.id;
       gate.hidden = true;
       gate.inert = true;
-      form.hidden = correctionId !== null;
-      form.inert = correctionId !== null;
+      form.hidden = correctionId !== null || ownerListingId !== null;
+      form.inert = correctionId !== null || ownerListingId !== null;
       const name = state.session.user?.profile?.display_name || state.session.user?.email || "your account";
       accountNotice.textContent = `Signed in as ${name}. Review updates will appear in My account.`;
     } else {
@@ -425,10 +465,10 @@
       }
     }
 
-    if (correctionId !== null) {
+    if (correctionId !== null || ownerListingId !== null) {
       if (accountId) {
         if (!window.BrowseRPSubmissionCorrection) { form.before(element("p", "form-status error", "The correction form could not be loaded. Refresh this page to try again.")); return; }
-        await window.BrowseRPSubmissionCorrection.mount({ id: correctionId, accountId: state.session.user.id, form, api, updatePlatformFields, readRoblox, setFormStatus, toast });
+        await window.BrowseRPSubmissionCorrection.mount({ id: correctionId || ownerListingId, listingId: ownerListingId, accountId: state.session.user.id, form, api, updatePlatformFields, readRoblox, setFormStatus, toast });
       }
       return;
     }

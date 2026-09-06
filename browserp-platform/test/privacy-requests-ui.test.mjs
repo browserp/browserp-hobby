@@ -44,3 +44,33 @@ test("staff pagination carries the cursor and filter changes reset it",async t=>
  const h=await harness(t,async path=>({items:[item],next:path.includes("before=")?null:{createdAt:item.createdAt,id:item.id}}),{staff:true});h.button("Load more requests").click();await tick();assert.match(h.calls[1].path,/beforeId=22222222/);
  const filter=h.$('select[name="kind"]');filter.value="copy";filter.dispatchEvent(new h.w.Event("change"));await tick();assert.match(h.calls.at(-1).path,/kind=copy/);assert.doesNotMatch(h.calls.at(-1).path,/before=/);
 });
+
+test("completion is a separate ready-only permitted action, attests a concrete result and preserves safe retry",async t=>{
+ for(const [status,canFulfill]of[["submitted",true],["ready",false],["fulfilled",true]]){
+  const denied=await harness(t,async()=>({items:[{...item,status}],canFulfill}),{staff:true});assert.equal(denied.$(".privacy-request-completion"),null);
+ }
+ let attempts=0;const bodies=[];const h=await harness(t,async(path,options)=>{
+  if(options?.method==="POST"){bodies.push(JSON.parse(options.body));if(++attempts===1)throw new Error("Interrupted. Try again.");}
+  return{items:[{...item,kind:"copy",status:attempts>1?"fulfilled":"ready",staffReply:attempts>1?"Your requested data was delivered through the verified account channel.":""}],canFulfill:true};
+ },{staff:true});
+ const form=h.$(".privacy-request-completion form");assert.ok(form);assert.match(form.textContent,/does not export, change or erase/);
+ form.elements.result.value="Your requested data was delivered through the verified account channel.";form.elements.evidence.value="Private verified delivery record COPY-789.";form.elements.completedAt.value="2026-01-01T12:00";
+ h.submit(form);await tick();assert.equal(bodies.length,0);
+ form.elements.confirmed.checked=true;h.submit(form);await tick();assert.match(h.text(),/Interrupted/);assert.equal(form.elements.evidence.value,"Private verified delivery record COPY-789.");
+ h.submit(form);await tick();assert.equal(bodies.length,2);assert.deepEqual(bodies[0],bodies[1]);assert.equal(bodies[0].method,"secure_delivery");assert.equal(bodies[0].action,"fulfill");assert.equal(bodies[0].version,1);assert.equal(bodies[0].confirmed,true);
+ assert.match(h.text(),/Completed follow-up recorded/);assert.equal(h.$(".privacy-request-completion"),null);assert.equal(h.$("article form"),null);
+});
+test("fulfilled members see the actual result and can start another request without editing the closed one",async t=>{
+ const h=await harness(t,async()=>({items:[{...item,status:"fulfilled",staffReply:"Your display name correction was completed as requested."}]}));
+ assert.match(h.text(),/Follow-up completed/);assert.match(h.text(),/display name correction was completed/);assert.equal(h.button("Withdraw request"),undefined);assert.equal(h.button("Update request details"),undefined);assert.ok(h.button("Send request"));
+});
+test("history loads on demand, preserves escaped messages and paginates without exposing staff-only notes to members",async t=>{
+ const h=await harness(t,async path=>path.includes("?id=")?{items:[{version:path.includes("beforeVersion=")?1:2,event:path.includes("beforeVersion=")?"legacy_snapshot":"staff_review",status:"reviewing",reply:'First reply <img src=x onerror="alert(1)">',details:path.includes("beforeVersion=")?"Original saved request":null,recordedAt:item.createdAt}],next:path.includes("beforeVersion=")?null:2,completion:{evidence:"Private staff record",completedAt:item.createdAt,recordedAt:item.createdAt}}:{items:[item]});
+ assert.equal(h.calls.some(c=>c.path.includes("?id=")),false);const history=h.$(".privacy-request-history");history.open=true;history.dispatchEvent(new h.w.Event("toggle"));await tick();
+ assert.match(h.text(),/First reply <img/);assert.equal(h.$("img"),null);assert.doesNotMatch(h.text(),/Private staff record/);assert.equal(h.calls.find(c=>c.path.includes("?id=")).options.headers["X-BrowseRP-Account"],"fixture-account");
+ h.button("Show earlier messages").click();await tick();assert.match(h.calls.at(-1).path,/beforeVersion=2/);assert.match(h.text(),/Earlier overwritten messages are not available/);assert.equal(h.$(".privacy-request-history-events").children.length,2);
+});
+test("a late private history response cannot restore content after account end",async t=>{
+ let release;const h=await harness(t,async path=>path.includes("?id=")?new Promise(resolve=>{release=()=>resolve({items:[{event:"staff_review",reply:"Private delayed reply"}]});}):{items:[item]});
+ const history=h.$(".privacy-request-history");history.open=true;history.dispatchEvent(new h.w.Event("toggle"));await tick();h.w.dispatchEvent(new h.w.Event("browserp:session-ended"));release();await tick();assert.equal(h.text(),"");
+});

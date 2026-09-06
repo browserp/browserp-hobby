@@ -14,7 +14,7 @@ async function fixture(run,handler=()=>{}){
   if(call.path.endsWith("/rpc/check_security_ban_server"))return response(null);
   if(call.path.endsWith("/rpc/consume_rate_limit"))return response(true);
   if(call.path.endsWith("/rpc/staff_data_request_access"))return response(true);
-  if(/\/(member_data_requests|staff_data_requests|staff_review_data_request)$/.test(call.path))return response({items:[],request:{id,status:"submitted"}});
+  if(/\/(member_data_requests|staff_data_requests|staff_review_data_request|staff_fulfill_data_request|member_data_request_history|staff_data_request_history)$/.test(call.path))return response({items:[],request:{id,status:"submitted"}});
   throw new Error(`Unexpected request ${call.path}`);
  };try{await run(calls);}finally{globalThis.fetch=original;for(const[k,v]of previous)v===undefined?delete process.env[k]:process.env[k]=v;}
 }
@@ -46,4 +46,24 @@ test("queue availability can be checked without returning private request rows",
  const request=req(null,"aal2");request.url="/api/admin/data-requests?access=1";
  assert.deepEqual(await staffPrivacyRequests(request,output()),{canReview:true});
  assert.equal(calls.some(c=>c.path.endsWith("/rpc/staff_data_requests")),false);
+}));
+
+const completion = { action: "fulfill", id, key, version: 4, method: "secure_delivery", result: "A scoped copy was securely delivered to the verified requester.", evidence: "Verified delivery in private case record COPY-456.", completedAt: "2026-01-01T12:00:00Z", confirmed: true };
+test("completion requires a concrete attested result and sends only safe fields on the current staff token", async()=>fixture(async calls=>{
+ for(const change of [{confirmed:false},{result:"Done"},{evidence:"yes"},{method:"deleteEverything"},{completedAt:"bad"},{completedAt:"2999-01-01"},{version:0},{key:undefined}])await assert.rejects(staffPrivacyRequests(req({...completion,...change},"aal2"),output()),{status:400});
+ assert.equal(calls.some(c=>c.path.endsWith("/staff_fulfill_data_request")),false);
+ await staffPrivacyRequests(req({...completion,userId:"someone-else",eraseNow:true},"aal2"),output());
+ const call=calls.find(c=>c.path.endsWith("/staff_fulfill_data_request"));assert.deepEqual(call.body,{p_id:id,p_key:key,p_expected_version:4,p_method:completion.method,p_result:completion.result,p_evidence:completion.evidence,p_completed_at:"2026-01-01T12:00:00.000Z",p_confirmed:true});assert.equal(call.options.headers.Authorization,`Bearer ${token("aal2")}`);
+ assert.equal(calls.some(c=>c.options.method==="DELETE"||c.path.includes("/storage/")),false);
+}));
+test("completion rechecks authority and does not swallow stale/revoked denials",async()=>{
+ for(const status of[403,409])await fixture(async()=>{await assert.rejects(staffPrivacyRequests(req(completion,"aal2"),output()),{status});},call=>call.path.endsWith("/staff_fulfill_data_request")?response({message:status===403?"Completion permission required":"Request changed"},status):undefined);
+ await fixture(async calls=>{const request=req(completion,"aal2");request.headers["x-browserp-account"]="different";await assert.rejects(staffPrivacyRequests(request,output()),{status:401});assert.equal(calls.some(c=>c.path.endsWith("/staff_fulfill_data_request")),false);});
+} );
+test("request history uses owned/authenticated RPCs, bounded cursor and no private cross-account read",async()=>fixture(async calls=>{
+ const member=req();member.url=`/api/me/data-requests?id=${id}&beforeVersion=25`;await memberPrivacyRequests(member,output());
+ let call=calls.find(c=>c.path.endsWith("/member_data_request_history"));assert.deepEqual(call.body,{p_id:id,p_before_version:25});assert.equal(call.options.headers.Authorization,`Bearer ${token("aal1")}`);
+ const staff=req(null,"aal2");staff.url=`/api/admin/data-requests?id=${id}`;await staffPrivacyRequests(staff,output());assert.deepEqual(calls.find(c=>c.path.endsWith("/staff_data_request_history")).body,{p_id:id,p_before_version:null});
+ for(const cursor of["0","-1","NaN","1.5"]){member.url=`/api/me/data-requests?id=${id}&beforeVersion=${cursor}`;await assert.rejects(memberPrivacyRequests(member,output()),{status:400});}
+ staff.headers["x-browserp-account"]="another-account";await assert.rejects(staffPrivacyRequests(staff,output()),{status:401});
 }));
