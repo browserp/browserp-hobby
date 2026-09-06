@@ -158,6 +158,8 @@ function staticRoute(pathname) {
   if (pathname === "/list-server") return "list-server.html";
   if (pathname === "/dashboard") return "dashboard.html";
   if (pathname === "/profile") return "profile.html";
+  if (pathname === "/find-server") return "find-server.html";
+  if (pathname === "/compare") return "compare.html";
   if (pathname === "/legal") return "legal.html";
   if (pathname === "/privacy") return "privacy.html";
   if (pathname === "/terms") return "terms.html";

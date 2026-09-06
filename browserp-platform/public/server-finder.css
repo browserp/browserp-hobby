@@ -1,0 +1,56 @@
+/* The finder extends the shared visual language without moving whole pages. */
+.finder-page { padding: clamp(30px, 4vw, 64px) 0 88px; }
+.finder-shell { max-width: 1280px; }
+.finder-heading { max-width: 800px; margin-bottom: 32px; }
+.finder-directory-link { display: inline-flex; align-items: center; min-height: 44px; margin-bottom: 18px; color: var(--muted); font-size: .875rem; text-decoration: underline; text-underline-offset: 4px; }
+.finder-heading .eyebrow-v3 { margin-bottom: 10px; }
+.finder-heading h1 { margin: 0; font-size: clamp(2rem, 3.7vw, 3rem); line-height: 1.13; letter-spacing: -.045em; }
+.finder-heading > p { margin: 16px 0 0; color: var(--copy); font-size: 1rem; line-height: 1.7; }
+.finder-progress { margin-bottom: 24px; }
+.finder-progress ol { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; list-style: none; padding: 0; margin: 0; }
+.finder-progress button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--muted); font: inherit; font-size: .875rem; font-weight: 650; cursor: pointer; }
+.finder-progress button > span { display: grid; place-items: center; flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--panel-2); font-size: .8125rem; }
+.finder-progress button[aria-current="step"] { color: var(--text); border-color: var(--pink); background: color-mix(in srgb, var(--pink) 8%, var(--panel)); }
+.finder-progress button[aria-current="step"] > span { background: var(--pink); color: #140913; }
+.finder-layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 28px; align-items: start; }
+.finder-form { min-width: 0; padding: clamp(22px, 3vw, 36px); border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
+.finder-step-count { margin: 0 0 15px; color: var(--pink-strong); font-size: .8125rem; font-weight: 650; }
+.finder-question { min-width: 0; margin: 0 0 30px; padding: 0; border: 0; }
+.finder-question legend { display: block; max-width: 100%; padding: 0; color: var(--text); font-size: clamp(1.5rem, 2.4vw, 1.875rem); font-weight: 750; line-height: 1.25; letter-spacing: -.03em; }
+.finder-question legend:focus { outline: none; }
+.finder-help { margin: 12px 0 24px; font-size: .9375rem; line-height: 1.7; color: var(--copy); }
+.finder-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.finder-choice { position: relative; display: flex; align-items: center; gap: 12px; min-width: 0; min-height: 70px; margin: 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-soft); cursor: pointer; transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
+.finder-choice input { flex: none; width: 18px; height: 18px; margin: 0; accent-color: var(--pink); cursor: pointer; }
+.finder-choice:has(input:checked) { border-color: var(--pink-strong); background: color-mix(in srgb, var(--pink) 8%, var(--bg-soft)); box-shadow: inset 0 1px 0 #ffffff0d; }
+.finder-choice:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 3px; }
+.finder-choice-copy { min-width: 0; display: grid; gap: 5px; }
+.finder-choice-copy strong { font-size: .9375rem; line-height: 1.4; font-weight: 650; overflow-wrap: anywhere; }
+.finder-choice-copy small { color: var(--muted); font-size: .8125rem; line-height: 1.55; overflow-wrap: anywhere; }
+.finder-game-choices .finder-choice:has(input[value="all"]) { grid-column: 1 / -1; min-height: 64px; }
+.finder-game-choices .finder-choice { flex-wrap: wrap; align-content: start; }
+.finder-game-choices .finder-choice input { order: 2; align-self: center; }
+.finder-game-choices .finder-choice-copy { order: 3; flex: 1; }
+.finder-game-art { flex: 0 0 100%; order: 1; display: block; width: 100%; aspect-ratio: 460 / 180; background-size: cover; background-position: center; border-radius: 7px; margin-bottom: 3px; }
+.finder-option-note { color: var(--muted); font-size: .875rem; line-height: 1.6; margin: 18px 0 0; }
+.finder-option-note:empty { display: none; }
+.finder-actions { display: flex; justify-content: space-between; gap: 12px; padding-top: 20px; border-top: 1px solid var(--line-soft); }
+.finder-actions [data-finder-next], .finder-actions [data-finder-submit] { margin-left: auto; }
+.finder-feedback { margin-top: 16px; }
+.finder-feedback p { color: var(--muted); font-size: .875rem; line-height: 1.6; margin: 0; }
+.finder-feedback p:empty { display: none; }
+.finder-feedback button { margin-top: 12px; }
+.finder-summary { min-width: 0; padding: 26px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(140deg, #27152330, transparent 70%), var(--panel); }
+.finder-summary .eyebrow-v3 { font-size: .75rem; margin-bottom: 12px; }
+.finder-summary h2 { margin: 0; font-size: 1.35rem; line-height: 1.35; letter-spacing: -.025em; }
+.finder-summary dl { display: grid; gap: 0; margin: 22px 0; }
+.finder-summary dl > div { display: grid; gap: 5px; padding: 14px 0; border-bottom: 1px solid var(--line-soft); }
+.finder-summary dt { color: var(--muted); font-size: .8125rem; }
+.finder-summary dd { margin: 0; font-size: .9375rem; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.finder-summary > p { color: var(--muted); font-size: .875rem; line-height: 1.7; }
+.finder-summary > button { width: 100%; margin-top: 8px; }
+@media (hover: hover) and (pointer: fine) { .finder-choice:hover { background-color: var(--panel-2); border-color: var(--pink); } }
+@media (max-width: 900px) { .finder-layout { grid-template-columns: minmax(0, 1fr); gap: 22px; } .finder-summary dl { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; } .finder-summary > button { width: auto; } }
+@media (max-width: 560px) { .finder-page { padding-top: 24px; } .finder-heading { margin-bottom: 24px; } .finder-progress ol { gap: 6px; } .finder-progress button { flex-direction: column; padding: 10px 4px; gap: 6px; font-size: .8125rem; } .finder-form { padding: 22px 18px; border-radius: 14px; } .finder-choices { grid-template-columns: minmax(0, 1fr); } .finder-choice { padding: 15px; } .finder-game-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; } .finder-game-choices .finder-choice { padding: 11px; gap: 8px; } .finder-game-choices .finder-choice-copy { flex: 1 1 100%; } .finder-game-choices .finder-choice input { order: 1; } .finder-game-art { flex-basis: calc(100% - 26px); } .finder-summary { padding: 22px; } .finder-summary dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .finder-choice { transition: none; } }
+@media (forced-colors: active) { .finder-choice:has(input:checked) { border-color: Highlight; outline: 1px solid Highlight; } .finder-progress button[aria-current="step"] { border-color: Highlight; } }

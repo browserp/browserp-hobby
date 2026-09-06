@@ -124,7 +124,7 @@
       : "Player count unavailable";
     bottom.append(element("strong", "", playerText), element("span", "server-card-action", "View listing"));
     card.append(bottom);
-    return card;
+    return window.BrowseRPShortlist?.wrap(card, server) || card;
   }
 
   function renderServers(list, servers) {

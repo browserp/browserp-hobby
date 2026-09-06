@@ -172,8 +172,12 @@
     function draw() {
       const active = document.activeElement;
       const href = list.contains(active) ? active.closest("a[href]")?.getAttribute("href") : null;
+      const action = list.contains(active) ? active.closest(".server-shortlist-actions") : null;
+      const slug = action?.dataset.serverSlug;
+      const key = ["data-shortlist-save", "data-shortlist-compare", "data-shortlist-open"].find(name => active?.hasAttribute(name));
       render(list, window.BrowseRPRecommendations?.rank(shown, filters) || shown);
-      if (href) [...list.querySelectorAll("a[href]")].find(item => item.getAttribute("href") === href)?.focus({ preventScroll: true });
+      if (slug && key) [...list.querySelectorAll(".server-shortlist-actions")].find(item => item.dataset.serverSlug === slug)?.querySelector(`[${key}]`)?.focus({ preventScroll: true });
+      else if (href) [...list.querySelectorAll("a[href]")].find(item => item.getAttribute("href") === href)?.focus({ preventScroll: true });
     }
     window.addEventListener("browserp:recommendations-changed", () => { if (shown.length) draw(); });
     function expireCounts(renderChanges = true) {

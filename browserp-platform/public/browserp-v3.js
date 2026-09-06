@@ -196,6 +196,7 @@
       document.addEventListener("navigation:close", () => setOpen(false));
       menu.append(...menuItems, logout); wrap.append(button, menu); link.replaceWith(wrap); applyTheme(preferredTheme());
     });
+    window.BrowseRPShortlist?.setSession(state.session);
     return state.session;
   }
 
@@ -601,6 +602,7 @@
       const server = payload.servers?.[0];
       if (!server) throw Object.assign(new Error("Server not found"), { status: 404 });
       window.BrowseRPRecommendations?.record(server);
+      window.BrowseRPShortlist?.mountDetail(root, server);
       try {
         const recent = JSON.parse(localStorage.getItem("browserp-recent-servers") || "[]");
         const next = [{ slug: server.slug, name: server.name, platform: server.platform_name || server.platform_short || "Roleplay" }, ...recent.filter((item) => item?.slug !== server.slug)].slice(0, 8);

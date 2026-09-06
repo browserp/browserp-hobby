@@ -73,7 +73,7 @@
     (Array.isArray(server.tags) ? server.tags : []).slice(0, 3).forEach(tag => tags.append(node("span", "", tag)));
     link.append(tags);
     const bottom = node("div", "server-card-bottom"); bottom.append(node("strong", "", applicationOnly ? "Live player count not provided" : server.online ? `${Number(server.players || 0).toLocaleString()} players${server.count_scope === "network" ? " across the network" : ""}` : "Player count unavailable"), node("span", "server-card-action", "View listing")); link.append(bottom);
-    return link;
+    return window.BrowseRPShortlist?.wrap(link, server) || link;
   }
 
   function render() {

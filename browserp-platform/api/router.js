@@ -525,6 +525,11 @@ const routes = {
     assertSameOrigin(req);
     await rateLimit(req, "favorite-toggle", 40, 300);
     const body = await readBody(req, 8 * 1024);
+    // Bind new clients to the account that rendered the control, even if another
+    // tab changed the browser's session between its preflight and this request.
+    if (Object.hasOwn(body, "accountId") && body.accountId !== session.user.id) {
+      throw Object.assign(new Error("Your signed-in account changed. Refresh before changing saved servers."), { status: 409 });
+    }
     const serverId = sanitizePlainText(body.serverId, 40);
     if (!/^[0-9a-f-]{36}$/i.test(serverId)) {
       throw Object.assign(new Error("Choose a valid server."), { status: 400 });

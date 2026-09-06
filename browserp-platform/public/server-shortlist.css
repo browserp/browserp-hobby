@@ -1,0 +1,17 @@
+.server-shortlist-card { display: flex; flex-direction: column; min-width: 0; }
+.server-shortlist-card > .server-card { flex: 1; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.server-shortlist-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--line); border-top: 0; border-radius: 0 0 14px 14px; background: var(--panel); }
+.shortlist-button-v9 { min-height: 44px; padding: 8px 12px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: var(--copy); font: inherit; font-size: 13px; font-weight: 650; cursor: pointer; transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease; }
+.shortlist-button-v9[aria-pressed="true"] { color: #ff9dce; background: #ed53a512; border-color: #ed53a530; }
+.shortlist-button-v9:disabled { cursor: default; opacity: .6; }
+.shortlist-open-v9 { display: inline-flex; align-items: center; min-height: 44px; margin-left: auto; color: #dfb4ff; font-size: 12px; font-weight: 650; }
+.shortlist-open-v9[hidden] { display: none; }
+.shortlist-detail-v9 { border: 0; border-radius: 0; padding: 8px 0 0; background: transparent; width: fit-content; gap: 12px; }
+.shortlist-status-v9 { position: fixed; z-index: 90; left: 50%; bottom: 18px; transform: translateX(-50%); width: max-content; max-width: min(560px, calc(100% - 32px)); margin: 0; padding: 12px 18px; border: 1px solid var(--line); border-radius: 10px; background: #201a26; color: #f5effa; font-size: 14px; box-shadow: 0 8px 30px #0006; pointer-events: none; }
+.shortlist-status-v9:empty { display: none; }
+.shortlist-button-v9:focus-visible,.shortlist-open-v9:focus-visible { outline: 2px solid var(--pink-strong); outline-offset: 2px; }
+.discovery-tools-v9 { display: flex; flex-wrap: wrap; gap: 12px; margin-block: 18px; }
+.navigation-extra-v6 .discovery-link-v9 { color: #e0b9fc; }
+@media (hover: hover) and (pointer: fine) { .shortlist-button-v9:not(:disabled):hover { color: #fff; background: #ffffff09; border-color: #ffffff1a; } .shortlist-open-v9:hover { text-decoration: underline; } }
+@media (max-width: 600px) { .server-shortlist-actions { padding-inline: 10px; gap: 4px; } .shortlist-button-v9 { padding-inline: 9px; } .shortlist-open-v9 { font-size: 11px; } }
+@media (prefers-reduced-motion: reduce) { .shortlist-button-v9 { transition: none; } }
