@@ -129,6 +129,7 @@ test("scroll reveals start early and avoid paint-heavy transition work", () => {
   assert.match(css, /@media \(hover: none\), \(pointer: coarse\)[\s\S]*?brightness\(1\.12\)/);
   assert.match(css, /@media \(hover: none\), \(pointer: coarse\)[\s\S]*?html \{ scroll-behavior: auto; \}/);
   assert.match(css, /@keyframes touch-sweep-v3/);
-  assert.match(js, /function touchPolish\(\)/);
+  assert.match(read("public/touch-feedback.js"), /function touchPolish\(\)/);
+  assert.doesNotMatch(js, /function touchPolish\(\)/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 });

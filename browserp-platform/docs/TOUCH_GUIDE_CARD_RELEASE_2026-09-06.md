@@ -1,0 +1,9 @@
+# BrowseRP 2.18 — consistent cards, touch feedback and useful guide links
+
+Source base e4e923987266c5ffd44c0cb4de77cfc611936d8e; branch launch/complete-inherited-work. No migration or provider configuration change.
+
+Shared cancellable touch colour feedback now loads independently on public and staff pages. Existing desktop effects and Menu/Close positions remain intact. Directory/game cards show the published logo, then banner fallback, then initials; retain the first three existing features; and use Community listing for application-only Roblox entries. Metadata stays platform, region, language, framework, access. Initial HTML reflects the same card cues without pretending to have measured live status.
+
+Labelled HTTPS and same-site article links render consistently in staff preview, initial HTML and public enhancement. HTML, image markup, code and rejected destinations remain readable literal text. No current article has been edited automatically. One homepage WebSite identity declares BrowseRP and its actual canonical URL; no ranking guarantee or invented alternative brand.
+
+Verification: all 813 repository tests passed (778 application plus 35 additional database), no failures/skips; syntax187 files and function-count gate passed. Two initial tests hardcoded the helper's development v=1 URL; after versioning assets to2.18 they correctly failed, and now verify a versioned single include and load order without hardcoding a release number. Full gate rerun passed. Independent link/SSR security review found no blocking/high/medium finding. Focused agent tests:29 touch/card and28 guide/SSR; isolated native Chromium390 public/staff touch fixture2/2 passed. Hosted final preview/production and additional-engine touch checks follow before release. Physical devices, external-link reputation and provider approval are not established by these tests.

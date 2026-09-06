@@ -49,12 +49,24 @@
     const link = node("a", "server-card"); link.href = `/server/${encodeURIComponent(server.slug || "")}`;
     window.BrowseRPPlatforms.theme(link, window.BrowseRPPlatforms.idFor(server));
     const media = node("div", "server-card-media");
-    const imageUrl = String(server.logo_url || server.banner_url || "");
-    if (/^https?:\/\/|^\//i.test(imageUrl)) { const image = new Image(); image.src = imageUrl; image.alt = ""; image.loading = "lazy"; image.className = "server-card-media-image"; image.addEventListener("error", () => image.replaceWith(node("span", "server-initials", String(server.name || "RP").split(/\s+/).slice(0,2).map(part => part[0]).join("").toUpperCase())), { once: true }); media.append(image); }
-    else media.append(node("span", "server-initials", String(server.name || "RP").split(/\s+/).slice(0,2).map((part) => part[0]).join("").toUpperCase()));
+    const initial = node("span", "server-initials", String(server.name || "RP").trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase());
+    const artwork = [...new Set([server.logo_url, server.banner_url].map(value => String(value || "").trim()))]
+      .filter(value => /^(?:https?:\/\/[^/]+|\/(?!\/))/i.test(value));
+    if (artwork.length) {
+      const image = new Image(); image.alt = ""; image.loading = "lazy"; image.className = "server-card-media-image";
+      let sourceIndex = 0;
+      image.addEventListener("error", () => {
+        if (++sourceIndex < artwork.length) image.src = artwork[sourceIndex];
+        else image.replaceWith(initial);
+      });
+      image.src = artwork[0]; media.append(image);
+    } else media.append(initial);
     const applicationOnly = server.applicationOnly === true;
-    const top = node("div", "server-card-top"); top.append(media, node("span", `status${!applicationOnly && server.online ? " online" : ""}`, applicationOnly ? "Reviewed community" : server.online ? "Online now" : "Status unavailable"));
+    const top = node("div", "server-card-top"); top.append(media, node("span", `status${!applicationOnly && server.online ? " online" : ""}`, applicationOnly ? "Community listing" : server.online ? "Online now" : "Status unavailable"));
     link.append(top, node("h3", "", server.name || "Roleplay server"), window.BrowseRPPlatforms.metadata(server), node("p", "server-description", server.description || "Open the listing to learn more."));
+    const tags = node("div", "server-tags");
+    (Array.isArray(server.tags) ? server.tags : []).slice(0, 3).forEach(tag => tags.append(node("span", "", tag)));
+    link.append(tags);
     const bottom = node("div", "server-card-bottom"); bottom.append(node("strong", "", applicationOnly ? "Live player count not provided" : server.online ? `${Number(server.players || 0).toLocaleString()} players${server.count_scope === "network" ? " across the network" : ""}` : "Player count unavailable"), node("span", "server-card-action", "View listing")); link.append(bottom);
     return link;
   }

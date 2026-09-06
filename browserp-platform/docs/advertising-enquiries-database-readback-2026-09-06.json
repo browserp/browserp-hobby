@@ -1,0 +1,112 @@
+{
+  "metadataOnly": true,
+  "checks": [
+    [
+      {
+        "schema_name": "private",
+        "relname": "advertising_enquiries",
+        "relrowsecurity": true,
+        "anon_denied": true,
+        "member_raw_denied": true,
+        "service_raw_denied": true
+      },
+      {
+        "schema_name": "private",
+        "relname": "advertising_enquiry_keys",
+        "relrowsecurity": true,
+        "anon_denied": true,
+        "member_raw_denied": true,
+        "service_raw_denied": true
+      }
+    ],
+    [
+      {
+        "function_name": "private.advertising_enquiry_json(private.advertising_enquiries)",
+        "prosecdef": false,
+        "member_execute": false,
+        "anon_execute": false,
+        "service_execute": false
+      },
+      {
+        "function_name": "private.advertising_enquiry_page(uuid,text,timestamp with time zone,uuid,integer,boolean)",
+        "prosecdef": true,
+        "member_execute": false,
+        "anon_execute": false,
+        "service_execute": false
+      },
+      {
+        "function_name": "private.can_review_advertising_enquiries()",
+        "prosecdef": true,
+        "member_execute": false,
+        "anon_execute": false,
+        "service_execute": false
+      },
+      {
+        "function_name": "private.member_export_records(uuid)",
+        "prosecdef": true,
+        "member_execute": false,
+        "anon_execute": false,
+        "service_execute": false
+      },
+      {
+        "function_name": "private.member_export_records_before_advertising(uuid)",
+        "prosecdef": true,
+        "member_execute": false,
+        "anon_execute": false,
+        "service_execute": false
+      },
+      {
+        "function_name": "member_advertising_enquiries(text,jsonb,uuid,uuid,bigint,timestamp with time zone,uuid,integer)",
+        "prosecdef": true,
+        "member_execute": true,
+        "anon_execute": false,
+        "service_execute": false
+      },
+      {
+        "function_name": "staff_advertising_enquiries(text,timestamp with time zone,uuid,integer)",
+        "prosecdef": true,
+        "member_execute": true,
+        "anon_execute": false,
+        "service_execute": false
+      },
+      {
+        "function_name": "staff_advertising_enquiry_access()",
+        "prosecdef": true,
+        "member_execute": true,
+        "anon_execute": false,
+        "service_execute": false
+      },
+      {
+        "function_name": "staff_review_advertising_enquiry(uuid,bigint,text,text,uuid)",
+        "prosecdef": true,
+        "member_execute": true,
+        "anon_execute": false,
+        "service_execute": false
+      }
+    ],
+    [
+      {
+        "indexname": "advertising_enquiries_member"
+      },
+      {
+        "indexname": "advertising_enquiries_pkey"
+      },
+      {
+        "indexname": "advertising_enquiries_queue"
+      },
+      {
+        "indexname": "advertising_enquiry_keys_pkey"
+      }
+    ],
+    [
+      {
+        "export_includes_enquiries": true,
+        "combined_row_cap": true,
+        "final_byte_cap": true,
+        "existing_advert_permission": true,
+        "totp_required": true
+      }
+    ]
+  ],
+  "recordedAt": "2026-09-06T02:34:43.497838+00:00"
+}

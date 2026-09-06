@@ -1,0 +1,331 @@
+{
+  "origin": "https://browserp-hobby-oiwck2uhz-browserp.vercel.app",
+  "sha": "e4e923987266c5ffd44c0cb4de77cfc611936d8e",
+  "at": "2026-09-06T02:23:32.094Z",
+  "checks": [
+    {
+      "kind": "asset",
+      "file": "browserp-v3.js",
+      "exact": true
+    },
+    {
+      "kind": "asset",
+      "file": "staffpanel-v3.js",
+      "exact": true
+    },
+    {
+      "kind": "asset",
+      "file": "staff-adverts.js",
+      "exact": true
+    },
+    {
+      "kind": "asset",
+      "file": "server-claims.js",
+      "exact": true
+    },
+    {
+      "kind": "asset",
+      "file": "advertising-enquiries.js",
+      "exact": true
+    },
+    {
+      "kind": "asset",
+      "file": "advertising-enquiries.css",
+      "exact": true
+    },
+    {
+      "kind": "guest-enquiry-denial",
+      "path": "/api/me/advertising-enquiries",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "kind": "guest-enquiry-denial",
+      "path": "/api/admin/advertising-enquiries",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "kind": "guest-enquiry-denial",
+      "path": "/api/admin/advertising-enquiries?access=1",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "kind": "public-claim-context",
+      "guest": true,
+      "privateHistory": false
+    },
+    {
+      "kind": "guest-page",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/",
+      "status": 200,
+      "stationaryMenu": true,
+      "menuDelta": 0,
+      "input": "touch",
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/advertise",
+      "status": 200,
+      "realSignInChoices": true,
+      "privateQueries": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/staffpanel/overview",
+      "status": 200,
+      "staffGate": true,
+      "privateQueries": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/server/summit-rp-javxzp",
+      "status": 200,
+      "publicClaimOptions": true,
+      "privateHistory": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/",
+      "status": 200,
+      "stationaryMenu": true,
+      "menuDelta": 0,
+      "input": "mouse",
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/advertise",
+      "status": 200,
+      "realSignInChoices": true,
+      "privateQueries": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/staffpanel/overview",
+      "status": 200,
+      "staffGate": true,
+      "privateQueries": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/server/summit-rp-javxzp",
+      "status": 200,
+      "publicClaimOptions": true,
+      "privateHistory": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/",
+      "status": 200,
+      "stationaryMenu": true,
+      "menuDelta": 0,
+      "input": "touch",
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/advertise",
+      "status": 200,
+      "realSignInChoices": true,
+      "privateQueries": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/staffpanel/overview",
+      "status": 200,
+      "staffGate": true,
+      "privateQueries": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/server/summit-rp-javxzp",
+      "status": 200,
+      "publicClaimOptions": true,
+      "privateHistory": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "firefox",
+      "width": 1280,
+      "path": "/",
+      "status": 200,
+      "stationaryMenu": true,
+      "menuDelta": 0,
+      "input": "mouse",
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "firefox",
+      "width": 1280,
+      "path": "/advertise",
+      "status": 200,
+      "realSignInChoices": true,
+      "privateQueries": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "firefox",
+      "width": 1280,
+      "path": "/staffpanel/overview",
+      "status": 200,
+      "staffGate": true,
+      "privateQueries": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "firefox",
+      "width": 1280,
+      "path": "/server/summit-rp-javxzp",
+      "status": 200,
+      "publicClaimOptions": true,
+      "privateHistory": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "webkit",
+      "width": 390,
+      "path": "/",
+      "status": 200,
+      "stationaryMenu": true,
+      "menuDelta": 0,
+      "input": "touch",
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "webkit",
+      "width": 390,
+      "path": "/advertise",
+      "status": 200,
+      "realSignInChoices": true,
+      "privateQueries": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "webkit",
+      "width": 390,
+      "path": "/staffpanel/overview",
+      "status": 200,
+      "staffGate": true,
+      "privateQueries": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "webkit",
+      "width": 390,
+      "path": "/server/summit-rp-javxzp",
+      "status": 200,
+      "publicClaimOptions": true,
+      "privateHistory": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "webkit",
+      "width": 1280,
+      "path": "/",
+      "status": 200,
+      "stationaryMenu": true,
+      "menuDelta": 0,
+      "input": "mouse",
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "webkit",
+      "width": 1280,
+      "path": "/advertise",
+      "status": 200,
+      "realSignInChoices": true,
+      "privateQueries": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "webkit",
+      "width": 1280,
+      "path": "/staffpanel/overview",
+      "status": 200,
+      "staffGate": true,
+      "privateQueries": false,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-page",
+      "engine": "webkit",
+      "width": 1280,
+      "path": "/server/summit-rp-javxzp",
+      "status": 200,
+      "publicClaimOptions": true,
+      "privateHistory": false,
+      "overflow": false,
+      "broken": []
+    }
+  ],
+  "ok": true
+}

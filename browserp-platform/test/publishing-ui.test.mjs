@@ -5,6 +5,8 @@ import vm from "node:vm";
 
 class Element {
   constructor(tag = "div") { this.tagName = tag.toUpperCase(); this.children = []; this.attributes = {}; this.dataset = {}; this.listeners = {}; this.textContent = ""; this.value = ""; this.hidden = false; this.classList = { add() {}, contains() { return false; } }; }
+  get textContent() { return this._text + this.children.map(child => child.textContent).join(""); }
+  set textContent(value) { this._text = value; this.children = []; }
   append(...items) { for (const item of items) { if (item.tagName === "FRAGMENT") this.append(...item.children); else this.children.push(item); } }
   replaceChildren(...items) { this.children = []; this.append(...items); }
   setAttribute(name, value) { this.attributes[name] = value; }
@@ -17,8 +19,8 @@ class Element {
 const source = (name) => readFileSync(new URL(`../public/${name}`, import.meta.url), "utf8");
 function contentRuntime() {
   const window = { addEventListener() {} };
-  const document = { createElement: (tag) => new Element(tag), createDocumentFragment: () => new Element("fragment") };
-  vm.runInNewContext(source("publishing-content.js"), { window, document });
+  const document = { createElement: (tag) => new Element(tag), createDocumentFragment: () => new Element("fragment"), createTextNode: text => { const node = new Element("text"); node.textContent = text; return node; } };
+  vm.runInNewContext(source("publishing-content.js"), { window, document, URL });
   return { window, document, content: window.BrowseRPContent };
 }
 

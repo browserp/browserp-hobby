@@ -3,13 +3,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { JSDOM } from "jsdom";
 
-const source = readFileSync(new URL("../public/browserp-v3.js", import.meta.url), "utf8");
-const start = source.indexOf("  function touchPolish() {");
-const end = source.indexOf("\n  async function init()", start);
-assert.ok(start >= 0 && end > start);
-function harness(t, { coarse = true, reduced = false } = {}) {
+const source = readFileSync(new URL("../public/touch-feedback.js", import.meta.url), "utf8");
+function harness(t, { coarse = true, reduced = false, staff = false } = {}) {
   const dom = new JSDOM('<div id="scroller"><button class="button-primary-v3"><span>Search</span></button></div>', { runScripts: "outside-only" });
-  const w = dom.window; t.after(() => w.close()); const frames = new Map(); let serial = 0;
+  const w = dom.window; if (staff) w.document.body.className = "staff-v3"; t.after(() => w.close()); const frames = new Map(); let serial = 0;
   const queries = new Map();
   w.requestAnimationFrame = callback => { const id = ++serial; frames.set(id, callback); return id; };
   w.cancelAnimationFrame = id => frames.delete(id);
@@ -21,7 +18,7 @@ function harness(t, { coarse = true, reduced = false } = {}) {
   };
   const button = w.document.querySelector("button"), child = button.querySelector("span");
   button.getBoundingClientRect = () => ({ left: 10, right: 210, top: 10, bottom: 60 });
-  w.eval(source.slice(start, end) + "\ntouchPolish();");
+  w.eval(source);
   const pointer = (type, properties = {}, target = child) => {
     const event = new w.MouseEvent(type, { clientX: 100, clientY: 30, bubbles: true, cancelable: true, ...properties });
     Object.defineProperties(event, { pointerId: { value: properties.pointerId ?? 7 }, pointerType: { value: properties.pointerType ?? "touch" }, isPrimary: { value: properties.isPrimary ?? true } });
@@ -99,4 +96,20 @@ test("unrelated pointers do not cancel a valid tap, and a new press clears the p
   h.frame(); h.frame(); assert.equal(h.shining(), true);
   h.pointer("pointerdown"); assert.equal(h.shining(), false);
   h.pointer("pointercancel"); h.frame(); h.frame(); assert.equal(h.shining(), false);
+});
+
+test("the standalone helper reaches dynamic staff primary actions but excludes navigation and inert controls", t => {
+  for (const className of ["button-primary-v3", "button-primary", "small-button-primary"]) {
+    const h = harness(t, { staff: true }); const control = h.w.document.createElement("button"); control.className = className;
+    h.w.document.body.append(control); control.getBoundingClientRect = () => ({ left: 10, right: 210, top: 10, bottom: 60 });
+    h.pointer("pointerdown", {}, control); h.frame(); h.frame(); assert.equal(control.classList.contains("touch-sweep-v3"), true);
+    h.w.dispatchEvent(new h.w.Event("pagehide")); assert.equal(control.classList.contains("touch-sweep-v3"), false);
+  }
+  for (const selector of ["#staff-menu-v3", ".staff-navigation-toggle", ".navigation-toggle-v6", ".navigation-close-v6", "[data-menu-v3]", "[inert]"]) {
+    const h = harness(t, { staff: true });
+    if (selector.startsWith("#")) h.button.id = selector.slice(1);
+    else if (selector.startsWith(".")) h.button.classList.add(selector.slice(1));
+    else h.button.setAttribute(selector.slice(1, -1), "");
+    h.pointer("pointerdown"); h.frame(); h.frame(); assert.equal(h.shining(), false, selector);
+  }
 });

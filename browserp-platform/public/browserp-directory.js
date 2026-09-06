@@ -82,31 +82,31 @@
 
   function serverCard(server) {
     const slug = String(server.slug || "").trim();
-    const platformId = String(server.platform_id || "other").toLowerCase();
     const card = element("a", "server-card");
     window.BrowseRPPlatforms.theme(card, window.BrowseRPPlatforms.idFor(server));
     card.href = `/server/${encodeURIComponent(slug)}`;
     card.setAttribute("aria-label", `View ${String(server.name || "server")}`);
     const media = element("div", "server-card-media");
     const initial = element("span", "server-initials", initials(server.name));
-    const logo = String(server.banner_url || server.logo_url || "").trim();
-    if (logo && /^\/|^https?:\/\/[^/]+/i.test(logo)) {
+    const artwork = [...new Set([server.logo_url, server.banner_url].map(value => String(value || "").trim()))]
+      .filter(value => /^(?:https?:\/\/[^/]+|\/(?!\/))/i.test(value));
+    if (artwork.length) {
       const image = new Image();
       image.className = "server-card-media-image";
       image.loading = "lazy";
-      image.src = logo;
       image.alt = "";
-      image.addEventListener("error", () => image.replaceWith(initial), { once: true });
+      let sourceIndex = 0;
+      image.addEventListener("error", () => {
+        if (++sourceIndex < artwork.length) image.src = artwork[sourceIndex];
+        else image.replaceWith(initial);
+      });
+      image.src = artwork[0];
       media.append(image);
-    } else {
-      media.append(initial);
-    }
-    const imageFallback = /[a-z]/i.test(platformId) ? element("span", "server-card-media-fallback", platformId.charAt(0).toUpperCase()) : null;
-    if (imageFallback && !logo) media.append(imageFallback);
+    } else media.append(initial);
 
     const top = element("div", "server-card-top");
     top.append(media);
-    const status = element("span", `status${server.online ? " online" : ""}`, server.applicationOnly ? "Community listing" : server.online ? "Online now" : "Status unavailable");
+    const status = element("span", `status${!server.applicationOnly && server.online ? " online" : ""}`, server.applicationOnly ? "Community listing" : server.online ? "Online now" : "Status unavailable");
     top.append(status);
     card.append(top);
 
@@ -119,9 +119,9 @@
     card.append(tags);
 
     const bottom = element("div", "server-card-bottom");
-    const playerText = server.online
+    const playerText = server.applicationOnly ? "Live player count not provided" : server.online
       ? `${Number(server.players || 0).toLocaleString()}${server.capacity ? ` / ${Number(server.capacity).toLocaleString()}` : ""} players${server.count_scope === "network" ? " across the network" : ""}`
-      : server.applicationOnly ? "Live player count not provided" : "Player count unavailable";
+      : "Player count unavailable";
     bottom.append(element("strong", "", playerText), element("span", "server-card-action", "View listing"));
     card.append(bottom);
     return card;

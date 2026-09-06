@@ -1,0 +1,24 @@
+[
+  {
+    "staff": false,
+    "width": 390,
+    "tap": true,
+    "panCancel": true,
+    "pointerCancel": true,
+    "disabledExcluded": true,
+    "menuUnchanged": true,
+    "reducedMotion": true,
+    "pageErrors": 0
+  },
+  {
+    "staff": true,
+    "width": 390,
+    "tap": true,
+    "panCancel": true,
+    "pointerCancel": true,
+    "disabledExcluded": true,
+    "menuUnchanged": true,
+    "reducedMotion": true,
+    "pageErrors": 0
+  }
+]

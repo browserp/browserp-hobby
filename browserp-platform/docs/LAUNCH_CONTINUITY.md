@@ -4,6 +4,22 @@ Updated 6 September 2026. This is the working scope and evidence ledger, not a c
 
 ## Current release and overnight coordination — 6 September 2026
 
+### Current engineering checkpoint — 2026-09-06T02:50:23.528867+00:00
+
+2.17 remains verified live on e4e9239. 2.18 integrates shared public/staff touch feedback, consistent logo/features/application-only card identity, safe labelled article links and canonical WebSite identity. All813 repository tests passed; no migration required. Next: exact preview, bounded three-engine touch/served checks, production promotion and readback. See TOUCH_GUIDE_CARD_RELEASE_2026-09-06.md. Do not mark 2.18 live until that evidence exists.
+
+Discord Community mode and private safety routing now completed; see DISCORD_COMMUNITY_SETUP_2026-09-06.md for saved settings and remaining roles/onboarding/voice/music/moderator2FA. No public invite. Prior paragraph stating Community setup wizard was unfinished is superseded.
+
+Latest allowance read86% weekly used/14% remaining. Complete current checked site release before expanding scope; preserve quality and clean checkpoints. Full recovery, erasure/file delivery, real ordinary-member external consent, Google branding approval, Discord completion and remaining planned SEO/refinement tasks remain open.
+
+### Latest live checkpoint — 6 September, 02:34 UTC
+
+Production e4e923987266c5ffd44c0cb4de77cfc611936d8e (2.17), deployment dpl_GXG25DFhgMtZFHc4SZdwzDjhDDZm, is READY on both canonical domains. Final799 tests,34 exact preview checks,34 production checks and enquiry schema privilege readback passed. Real signed-in member/staff enquiry queues loaded. Main is unchanged. Advertising enquiries/replies, bounded PNG raster validation, private claim session cleanup/account-bound retries and precise queue pagination are live. See ENQUIRY_UPLOAD_CLAIM_RELEASE_2026-09-06.md.
+
+BrowseRP’s community Discord has been created under the master account: server1545981135409123409. Its RP emblem, pink banner, description and game traits are saved. Medium verification, all-member media filtering and administrator-only bulk member pruning are saved. Moderator2FA requires a fresh owner passkey/authenticator check and remains OFF; no new moderator has been assigned. No invitation has been published. Rules are posted in channel1545983932338667561 and member posting/thread/app/invite permissions are denied there. Community-mode setup is not finished; stopped its wizard before attesting until rules/private update channels are prepared. Remaining channels, roles, AutoMod, onboarding, voice/music and ordinary-member permission checks are open. Do not inspect recovery codes or ask again tonight.
+
+Weekly allowance last read02:30UTC:78% used/22% remaining, shared account. Preserve test quality, use small functional releases and close owned browser contexts. All three completed engineering agents are idle except Mill’s bounded research/inspiration note. Full recovery/erasure/file delivery, real ordinary-member external identity flows, Google branding approval, community completion and targeted remaining site improvements remain open.
+
 ### Latest live checkpoint — 6 September, 01:59 UTC
 
 Production `406d5688f6eb81d7e43790d5e027e95f07024ec4` is READY on www.browserp.com through `dpl_9xfG27uYZVRuYHnfbr6bE7H4D7f7`. All739 local checks, exact preview20 checks, production20 checks and live database privilege readback passed. The three account-export/private-record/joined-name migrations are applied. Profile/Your data loaded in the existing signed-in session. Main remains untouched. See ACCOUNT_PRIVACY_RELEASE_2026-09-06.md for exact evidence and limits.

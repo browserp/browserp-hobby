@@ -27,3 +27,13 @@ See ADVERTISING_ENQUIRIES_UI.md, AVATAR_RASTER_REVIEW_2026-09-06.md and OWNERSHI
 Exact preview verification, application of20260906020500_private_advertising_enquiries.sql, metadata-only privilege readback, production promotion and exact production verification follow the reviewed commit. No candidate content is claimed live in this record until those results are appended. Main is not advanced. The additive database objects may remain if code is rolled back; do not drop real enquiry records.
 
 This batch does not claim full account/file recovery, completed erasure, ordinary-member external consent checks, physical-device testing, a community Discord or approved Google consent branding. Existing open items remain in LAUNCH_CONTINUITY.md.
+
+## Published and verified
+
+Recorded 2026-09-06T02:34:43.497838+00:00. Production commit e4e923987266c5ffd44c0cb4de77cfc611936d8e is READY through dpl_GXG25DFhgMtZFHc4SZdwzDjhDDZm, with www.browserp.com and browserp.com aliases. Exact preview dpl_SVuFeFdDX6g1BruNZvifqFYtV3u5 and production each passed34 hosted checks across Chromium/Firefox/WebKit at390/1280 CSS pixels, including6 exact served assets, guest private-enquiry denials, public claim context, stationary touch/mouse Menu/Close, provider return links, visible image decoding, layout and application errors. Native browser emulation is not a physical phone test.
+
+The first preview probe had an incorrect expected return link: the intended claim return includes ?claim=1. The probe was corrected to require that claim-resume flag; the application was unchanged. The complete corrected preview and production runs passed.
+
+Migration20260906020500_private_advertising_enquiries.sql applied successfully. Metadata-only readback confirms2 private tables with RLS and no raw anon/member/service access,9 function ACLs,4 indexes, bounded account exports and existing staff permission/TOTP requirements. See advertising-enquiries-database-readback-2026-09-06.json.
+
+The existing signed-in production browser loaded the member enquiry form with its empty private history and Overview’s independently authorised enquiry queue with no matching records. No synthetic production enquiry, reply, avatar upload or claim was created. Full controlled write tests are separate from these live read checks. Main remains unchanged at7fe1f17c25ce4bad8a44f258442671be159122d6.
