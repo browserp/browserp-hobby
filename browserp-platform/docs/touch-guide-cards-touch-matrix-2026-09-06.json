@@ -1,0 +1,85 @@
+{
+  "at": "2026-09-06T02:53:46.993Z",
+  "scope": "Native taps and CSS; controlled pointer/scroll cancellation. No production/API requests or physical-device claim.",
+  "checks": [
+    {
+      "engine": "chromium",
+      "staff": false,
+      "width": 390,
+      "nativeTap": true,
+      "nativeClick": true,
+      "controlledPanCancel": true,
+      "controlledPointerCancel": true,
+      "scrollCancel": true,
+      "disabledExcluded": true,
+      "menuUnchanged": true,
+      "reducedMotion": true
+    },
+    {
+      "engine": "chromium",
+      "staff": true,
+      "width": 390,
+      "nativeTap": true,
+      "nativeClick": true,
+      "controlledPanCancel": true,
+      "controlledPointerCancel": true,
+      "scrollCancel": true,
+      "disabledExcluded": true,
+      "menuUnchanged": true,
+      "reducedMotion": true
+    },
+    {
+      "engine": "firefox",
+      "staff": false,
+      "width": 390,
+      "nativeTap": true,
+      "nativeClick": true,
+      "controlledPanCancel": true,
+      "controlledPointerCancel": true,
+      "scrollCancel": true,
+      "disabledExcluded": true,
+      "menuUnchanged": true,
+      "reducedMotion": true
+    },
+    {
+      "engine": "firefox",
+      "staff": true,
+      "width": 390,
+      "nativeTap": true,
+      "nativeClick": true,
+      "controlledPanCancel": true,
+      "controlledPointerCancel": true,
+      "scrollCancel": true,
+      "disabledExcluded": true,
+      "menuUnchanged": true,
+      "reducedMotion": true
+    },
+    {
+      "engine": "webkit",
+      "staff": false,
+      "width": 390,
+      "nativeTap": true,
+      "nativeClick": true,
+      "controlledPanCancel": true,
+      "controlledPointerCancel": true,
+      "scrollCancel": true,
+      "disabledExcluded": true,
+      "menuUnchanged": true,
+      "reducedMotion": true
+    },
+    {
+      "engine": "webkit",
+      "staff": true,
+      "width": 390,
+      "nativeTap": true,
+      "nativeClick": true,
+      "controlledPanCancel": true,
+      "controlledPointerCancel": true,
+      "scrollCancel": true,
+      "disabledExcluded": true,
+      "menuUnchanged": true,
+      "reducedMotion": true
+    }
+  ],
+  "ok": true
+}

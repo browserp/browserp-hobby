@@ -1,0 +1,309 @@
+{
+  "origin": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app",
+  "path": "/games/fivem?q=cali",
+  "at": "2026-09-06T02:58:05.926Z",
+  "imageResponses": [
+    {
+      "url": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/browserp-logo-v5.png",
+      "status": 200
+    },
+    {
+      "url": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/games/redm-roleplay.webp",
+      "status": 200
+    },
+    {
+      "url": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/games/minecraft-roleplay.webp",
+      "status": 200
+    },
+    {
+      "url": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/games/roblox-roleplay.webp",
+      "status": 200
+    },
+    {
+      "url": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/games/fivem-roleplay.webp",
+      "status": 200
+    },
+    {
+      "url": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/games/forza-roleplay.webp",
+      "status": 200
+    },
+    {
+      "url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png",
+      "status": 200
+    },
+    {
+      "url": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/apple-touch-icon.png?v=2.12.1",
+      "status": 200
+    },
+    {
+      "url": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/favicon.ico?v=2.12.1",
+      "status": 200
+    }
+  ],
+  "imageFailures": [],
+  "pageErrors": [],
+  "ok": true,
+  "documentStatus": 200,
+  "directoryStatus": 200,
+  "originalLayout": {
+    "before": [
+      {
+        "connected": true,
+        "src": "/assets/browserp-logo-v5.png",
+        "currentSrc": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/browserp-logo-v5.png",
+        "complete": true,
+        "naturalWidth": 1400,
+        "naturalHeight": 358,
+        "loading": "eager",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 14,
+          "y": 10,
+          "width": 165,
+          "height": 48
+        },
+        "outerHTML": "<img src=\"/assets/browserp-logo-v5.png\" alt=\"BrowseRP\" width=\"190\" height=\"54\">"
+      },
+      {
+        "connected": true,
+        "src": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png",
+        "currentSrc": "",
+        "complete": false,
+        "naturalWidth": 0,
+        "naturalHeight": 0,
+        "loading": "lazy",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 33.68333435058594,
+          "y": 270.933349609375,
+          "width": 62.616668701171875,
+          "height": 62.616668701171875
+        },
+        "outerHTML": "<img alt=\"\" loading=\"lazy\" class=\"server-card-media-image\" src=\"https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png\">"
+      },
+      {
+        "connected": true,
+        "src": "/assets/browserp-logo-v5.png",
+        "currentSrc": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/browserp-logo-v5.png",
+        "complete": true,
+        "naturalWidth": 1400,
+        "naturalHeight": 358,
+        "loading": "eager",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 14,
+          "y": 731.566650390625,
+          "width": 240,
+          "height": 61.366668701171875
+        },
+        "outerHTML": "<img src=\"/assets/browserp-logo-v5.png\" alt=\"BrowseRP\" class=\"logo-full-v5\">"
+      }
+    ],
+    "decode": [
+      {
+        "state": "decoded"
+      },
+      {
+        "state": "rejected",
+        "name": "EncodingError",
+        "message": "Invalid image request."
+      },
+      {
+        "state": "decoded"
+      }
+    ],
+    "after": [
+      {
+        "connected": true,
+        "src": "/assets/browserp-logo-v5.png",
+        "currentSrc": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/browserp-logo-v5.png",
+        "complete": true,
+        "naturalWidth": 1400,
+        "naturalHeight": 358,
+        "loading": "eager",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 14,
+          "y": 10,
+          "width": 165,
+          "height": 48
+        },
+        "outerHTML": "<img src=\"/assets/browserp-logo-v5.png\" alt=\"BrowseRP\" width=\"190\" height=\"54\">"
+      },
+      {
+        "connected": true,
+        "src": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png",
+        "currentSrc": "",
+        "complete": false,
+        "naturalWidth": 0,
+        "naturalHeight": 0,
+        "loading": "lazy",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 33.68333435058594,
+          "y": 270.933349609375,
+          "width": 62.616668701171875,
+          "height": 62.616668701171875
+        },
+        "outerHTML": "<img alt=\"\" loading=\"lazy\" class=\"server-card-media-image\" src=\"https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png\">"
+      },
+      {
+        "connected": true,
+        "src": "/assets/browserp-logo-v5.png",
+        "currentSrc": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/browserp-logo-v5.png",
+        "complete": true,
+        "naturalWidth": 1400,
+        "naturalHeight": 358,
+        "loading": "eager",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 14,
+          "y": 731.566650390625,
+          "width": 240,
+          "height": 61.366668701171875
+        },
+        "outerHTML": "<img src=\"/assets/browserp-logo-v5.png\" alt=\"BrowseRP\" class=\"logo-full-v5\">"
+      }
+    ],
+    "broken": [
+      {
+        "connected": true,
+        "src": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png",
+        "currentSrc": "",
+        "complete": false,
+        "naturalWidth": 0,
+        "naturalHeight": 0,
+        "loading": "lazy",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 33.68333435058594,
+          "y": 270.933349609375,
+          "width": 62.616668701171875,
+          "height": 62.616668701171875
+        },
+        "outerHTML": "<img alt=\"\" loading=\"lazy\" class=\"server-card-media-image\" src=\"https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png\">",
+        "index": 1
+      }
+    ],
+    "laterSameObjects": [
+      {
+        "connected": true,
+        "src": "/assets/browserp-logo-v5.png",
+        "currentSrc": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/browserp-logo-v5.png",
+        "complete": true,
+        "naturalWidth": 1400,
+        "naturalHeight": 358,
+        "loading": "eager",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 14,
+          "y": 10,
+          "width": 165,
+          "height": 48
+        },
+        "outerHTML": "<img src=\"/assets/browserp-logo-v5.png\" alt=\"BrowseRP\" width=\"190\" height=\"54\">"
+      },
+      {
+        "connected": true,
+        "src": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png",
+        "currentSrc": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png",
+        "complete": true,
+        "naturalWidth": 96,
+        "naturalHeight": 96,
+        "loading": "lazy",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 33.68333435058594,
+          "y": 270.933349609375,
+          "width": 62.616668701171875,
+          "height": 62.616668701171875
+        },
+        "outerHTML": "<img alt=\"\" loading=\"lazy\" class=\"server-card-media-image\" src=\"https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png\">"
+      },
+      {
+        "connected": true,
+        "src": "/assets/browserp-logo-v5.png",
+        "currentSrc": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/browserp-logo-v5.png",
+        "complete": true,
+        "naturalWidth": 1400,
+        "naturalHeight": 358,
+        "loading": "eager",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 14,
+          "y": 731.566650390625,
+          "width": 240,
+          "height": 61.366668701171875
+        },
+        "outerHTML": "<img src=\"/assets/browserp-logo-v5.png\" alt=\"BrowseRP\" class=\"logo-full-v5\">"
+      }
+    ],
+    "laterCurrentImages": [
+      {
+        "connected": true,
+        "src": "/assets/browserp-logo-v5.png",
+        "currentSrc": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/browserp-logo-v5.png",
+        "complete": true,
+        "naturalWidth": 1400,
+        "naturalHeight": 358,
+        "loading": "eager",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 14,
+          "y": 10,
+          "width": 165,
+          "height": 48
+        },
+        "outerHTML": "<img src=\"/assets/browserp-logo-v5.png\" alt=\"BrowseRP\" width=\"190\" height=\"54\">"
+      },
+      {
+        "connected": true,
+        "src": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png",
+        "currentSrc": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png",
+        "complete": true,
+        "naturalWidth": 96,
+        "naturalHeight": 96,
+        "loading": "lazy",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 33.68333435058594,
+          "y": 270.933349609375,
+          "width": 62.616668701171875,
+          "height": 62.616668701171875
+        },
+        "outerHTML": "<img alt=\"\" loading=\"lazy\" class=\"server-card-media-image\" src=\"https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ajv9r5/8b3dad879bebe2bd83b0e0285459ab72c8e731aa216cf02078eaa96c35a6e952.png\">"
+      },
+      {
+        "connected": true,
+        "src": "/assets/browserp-logo-v5.png",
+        "currentSrc": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app/assets/browserp-logo-v5.png",
+        "complete": true,
+        "naturalWidth": 1400,
+        "naturalHeight": 358,
+        "loading": "eager",
+        "display": "block",
+        "visibility": "visible",
+        "bounds": {
+          "x": 14,
+          "y": 731.566650390625,
+          "width": 240,
+          "height": 61.366668701171875
+        },
+        "outerHTML": "<img src=\"/assets/browserp-logo-v5.png\" alt=\"BrowseRP\" class=\"logo-full-v5\">"
+      }
+    ],
+    "overflow": false
+  }
+}

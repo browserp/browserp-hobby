@@ -1,0 +1,164 @@
+{
+  "origin": "https://browserp-hobby-8wnpxtzr4-browserp.vercel.app",
+  "sha": "445a85218f23b697e12bfaceb5e681f7172e0df9",
+  "at": "2026-09-06T02:54:13.884Z",
+  "checks": [
+    {
+      "kind": "asset",
+      "file": "browserp-v3.js",
+      "exact": true
+    },
+    {
+      "kind": "asset",
+      "file": "browserp-directory.js",
+      "exact": true
+    },
+    {
+      "kind": "asset",
+      "file": "browserp-games.js",
+      "exact": true
+    },
+    {
+      "kind": "asset",
+      "file": "publishing-content.js",
+      "exact": true
+    },
+    {
+      "kind": "asset",
+      "file": "touch-feedback.js",
+      "exact": true
+    },
+    {
+      "kind": "page",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/",
+      "status": 200,
+      "sharedTouchHelper": true,
+      "menuDelta": 0,
+      "samePointCloses": true,
+      "siteIdentity": true,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "page",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/servers?q=cali",
+      "status": 200,
+      "sharedTouchHelper": true,
+      "cards": 1,
+      "initialCardsCompared": 1,
+      "logoFeaturesMetadata": true,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "page",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/games/fivem?q=cali",
+      "status": 200,
+      "sharedTouchHelper": true,
+      "comparedCards": 1,
+      "cards": 1,
+      "initialCardsCompared": 1,
+      "logoFeaturesMetadata": true,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "page",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/staffpanel/overview",
+      "status": 200,
+      "sharedTouchHelper": true,
+      "staffGate": true,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "page",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/",
+      "status": 200,
+      "sharedTouchHelper": true,
+      "menuDelta": 0,
+      "samePointCloses": true,
+      "siteIdentity": true,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "page",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/servers?q=cali",
+      "status": 200,
+      "sharedTouchHelper": true,
+      "cards": 1,
+      "initialCardsCompared": 1,
+      "logoFeaturesMetadata": true,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "page",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/games/fivem?q=cali",
+      "status": 200,
+      "sharedTouchHelper": true,
+      "comparedCards": 1,
+      "cards": 1,
+      "initialCardsCompared": 1,
+      "logoFeaturesMetadata": true,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "page",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/blog/how-to-choose-a-fivem-roleplay-server",
+      "status": 200,
+      "sharedTouchHelper": true,
+      "initialArticle": true,
+      "linkParity": 0,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "page",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/",
+      "status": 200,
+      "sharedTouchHelper": true,
+      "menuDelta": 0,
+      "samePointCloses": true,
+      "siteIdentity": true,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "page",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/servers?q=cali",
+      "status": 200,
+      "sharedTouchHelper": true,
+      "cards": 1,
+      "initialCardsCompared": 1,
+      "logoFeaturesMetadata": true,
+      "overflow": false,
+      "broken": []
+    }
+  ],
+  "ok": false,
+  "stage": "firefox/390: /games/fivem?q=cali",
+  "error": "/games/fivem?q=cali\n+ actual - expected\n\n+ [\n+   '(unavailable image)'\n+ ]\n- []\n"
+}

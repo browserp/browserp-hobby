@@ -4,6 +4,16 @@ Updated 6 September 2026. This is the working scope and evidence ledger, not a c
 
 ## Current release and overnight coordination — 6 September 2026
 
+### Latest verified live checkpoint — 2026-09-06T03:13:37.576932+00:00
+
+Production2.18:445a85218f23b697e12bfaceb5e681f7172e0df9, dpl_6jemV4Ha1NZeVqXqxhVhEZu54dsu, www.browserp.com and apex READY. Source813 tests, exact preview29, production29 and three-engine touch6 all passed. Actual signed-in staff queue read verified after deployment. Main unchanged. See TOUCH_GUIDE_CARD_RELEASE_2026-09-06.md and evidence JSON. All earlier pending2.18 release statements below are superseded.
+
+Community Discord now has saved branding, Community safety defaults, posted rules/read-only announcements, private alerts, four game chats, three voice spaces and four matching game-interest roles with51 additional permissions each independently verified OFF. No public invitation, new staff assignment or music bot. See DISCORD_COMMUNITY_SETUP_2026-09-06.md. Automatic spam settings need final re-entry readback and ordinary-member testing; moderator2FA needs fresh owner authentication.
+
+Next work in priority order: complete inherited privacy erasure/retention and full account/file-delivery handling; finish full recovery beyond the proven six configuration tables; ordinary-member Google/Discord login/link/unlink and ownership proof checks; finish community roles/onboarding/support/showcase/music and member-view tests; pending SEO plan tasks and remaining evidence-backed design/refinement work. Google branding is externally under review and Google/Bing sitemap submissions are accepted, not ranking guarantees. Roster40/20/3 is already complete and vetted; maintain health and evidence rather than restart bulk research. Physical-device checks remain separate. Do not ask again for passwords/passphrases tonight or touch the deferred Discord recovery codes.
+
+Latest usage check03:02UTC92% weekly used/8% remaining; later shared usage may differ. No usage reset purchased/redeemed. Current site release is complete, independently checked and rollback-addressable; do not trade away its tests or safety to use the remaining allowance. All three agents are idle. No background browser batch remains running.
+
 ### Current engineering checkpoint — 2026-09-06T02:50:23.528867+00:00
 
 2.17 remains verified live on e4e9239. 2.18 integrates shared public/staff touch feedback, consistent logo/features/application-only card identity, safe labelled article links and canonical WebSite identity. All813 repository tests passed; no migration required. Next: exact preview, bounded three-engine touch/served checks, production promotion and readback. See TOUCH_GUIDE_CARD_RELEASE_2026-09-06.md. Do not mark 2.18 live until that evidence exists.
