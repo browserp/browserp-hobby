@@ -58,7 +58,7 @@
   }
 
   async function init({ api, permissions = {}, prepareImage = prepareArtwork } = {}) {
-    const root = document.querySelector("#overview-adverts");
+    const root = document.querySelector("#overview-adverts [data-advert-campaigns]") || document.querySelector("#overview-adverts");
     if (!root || root.dataset.initialized === "true" || typeof api !== "function") return;
     root.dataset.initialized = "true"; root.classList.add("staff-adverts");
     const header = make("div", undefined, "adverts-heading"); const headingCopy = make("div");

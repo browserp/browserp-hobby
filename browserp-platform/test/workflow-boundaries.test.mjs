@@ -19,7 +19,7 @@ const server={id:serverId,name:'Fixture server',slug:'fixture-server',status:'pu
 const source=()=>({EndPoint:'6myr996',Data:{hostname:'A source fixture',clients:8,svMaxclients:64,lastSeen:new Date().toISOString(),vars:{gamename:'gta5',sv_projectDesc:'An accurate source description that staff can review before importing.',locale:'en-US',tags:'roleplay,economy',sv_appearAllowlisted:'false'}}});
 const response=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'content-type':'application/json'}});
 function res(){const headers=new Map();return {setHeader:(key,value)=>headers.set(key,value),getHeader:key=>headers.get(key)};}
-function req(method='GET',body,url='/api/server-claims'){return {method,url,body,headers:{host:'localhost:8080',origin:'http://localhost:8080','content-type':'application/json',cookie:`brp_access=${token}; brp_csrf=${csrf}`,'x-browserp-csrf':csrf},socket:{remoteAddress:'127.0.0.1'}};}
+function req(method='GET',body,url='/api/server-claims'){return {method,url,body,headers:{host:'localhost:8080',origin:'http://localhost:8080','content-type':'application/json',cookie:`brp_access=${token}; brp_csrf=${csrf}`,'x-browserp-csrf':csrf,'x-browserp-account':userId,'idempotency-key':candidateId},socket:{remoteAddress:'127.0.0.1'}};}
 async function backend(handler,run){
  const environment={SUPABASE_URL:'https://fixture.supabase.co',SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture',SUPABASE_SECRET_KEY:'sb_secret_fixture',PRIVACY_HASH_SECRET:'fixture-only-secret',NODE_ENV:'test',VERCEL:'0'};
  const before=new Map(Object.keys(environment).map(key=>[key,process.env[key]]));const original=globalThis.fetch;const calls=[];

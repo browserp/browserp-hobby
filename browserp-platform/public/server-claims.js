@@ -6,12 +6,17 @@
   const labels = { pending_check: "Discord ownership not checked", verified: "Discord owner verified", not_owner: "Discord ownership not confirmed", unavailable: "Discord check unavailable", needs_discord: "Discord permission needed" };
   function sameOriginPath(value) { return typeof value === "string" && /^\/(?!\/)/.test(value) && !/[\\\u0000-\u0020\u007f]/.test(value) ? value : null; }
   function https(value) { if (!value) return true; try { const url = new URL(value); return url.protocol === "https:" && !url.username && !url.password && !/\s/.test(value); } catch { return false; } }
-  async function init({ server, root } = {}) {
+  const controllers = new WeakMap();
+  async function init({ server, root, accountId = null } = {}) {
     if (typeof root === "string") root = document.querySelector(root);
     const serverId = server?.id || server?.serverId;
     if (!root || !serverId) return null;
+    controllers.get(root)?.destroy();
+    const owner = typeof accountId === "string" && accountId ? accountId : null;
+    const abort = new AbortController();
     root.classList.add("server-claims"); root.hidden = false;
     let csrf = ""; let context = {}; let claims = []; let busy = false; let destroyed = false; let generation = 0;
+    let attempt = null; let uncertain = false;
     const header = make("div", undefined, "claims-heading"); header.append(make("span", "Community ownership", "eyebrow-v3"), make("h2", "Claim this listing"));
     const intro = make("p", "If you own this community, submit a claim for BrowseRP staff to review.", "claims-copy");
     const status = make("p", "Loading claim options…", "claims-status"); status.setAttribute("role", "status");
@@ -24,17 +29,66 @@
     form.append(messageLabel, evidenceLabel, make("p", "Discord verification checks whether you own the Discord community linked to this listing. It does not automatically approve the server claim.", "claims-help"), submit, formStatus);
     root.replaceChildren(header, intro, status, retry, entry, form, history);
     const feedback = (element, text, error = false) => { element.textContent = text; element.dataset.error = String(error); };
-    const setBusy = (value) => { busy = value; root.setAttribute("aria-busy", String(value)); root.querySelectorAll("button,input,textarea").forEach((el) => { el.disabled = value; }); };
-    async function api(path, options = {}) {
-      const response = await fetch(path, { credentials: "same-origin", ...options, headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json", "X-BrowseRP-CSRF": csrf } : {}), ...(options.headers || {}) } });
+    function setBusy(value) {
+      if (destroyed) return;
+      busy = value; root.setAttribute("aria-busy", String(value));
+      root.querySelectorAll("button,input,textarea").forEach(el => { el.disabled = value; });
+      message.readOnly = uncertain; evidence.readOnly = uncertain;
+      submit.textContent = uncertain ? "Retry the same claim" : "Submit ownership claim";
+    }
+    function clearPrivate() {
+      csrf = ""; context = {}; claims = []; attempt = null; uncertain = false;
+      message.value = ""; evidence.value = ""; formStatus.textContent = "";
+      form.hidden = true; form.inert = true; entry.replaceChildren(); history.replaceChildren();
+    }
+    function destroy() {
+      if (destroyed) return;
+      destroyed = true; generation += 1; abort.abort(); clearPrivate();
+      window.removeEventListener("browserp:session-ended", endSession);
+      window.removeEventListener("pagehide", leavePage);
+      window.removeEventListener("pageshow", restorePage);
+      if (controllers.get(root) === controller) {
+        controllers.delete(root); root.replaceChildren(); root.removeAttribute("aria-busy");
+      }
+    }
+    function endSession() {
+      if (destroyed) return;
+      destroy();
+      const notice = make("p", "Your session changed. Reload this page to view claim options for your current account.", "claims-status"); notice.setAttribute("role", "status");
+      const reload = make("a", "Reload claim options", "button-v3 button-secondary-v3"); reload.href = location.pathname + location.search;
+      root.append(notice, reload);
+    }
+    function leavePage(event) {
+      destroy();
+      // A restored page must obtain a new session before any private UI returns.
+      if (event.persisted) window.addEventListener("pageshow", restorePage, { once: true });
+    }
+    function restorePage(event) {
+      if (event.persisted) { destroy(); location.reload(); }
+    }
+    const controller = { refresh, destroy, endSession };
+    controllers.set(root, controller);
+    window.addEventListener("browserp:session-ended", endSession);
+    window.addEventListener("pagehide", leavePage);
+    window.addEventListener("pageshow", restorePage);
+    async function api(path, options = {}, current = () => true) {
+      if (destroyed || !current()) throw new DOMException("Claim options closed.", "AbortError");
+      const response = await fetch(path, { credentials: "same-origin", cache: "no-store", ...options, signal: abort.signal,
+        headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json", "X-BrowseRP-CSRF": csrf } : {}), ...(options.headers || {}), "X-BrowseRP-Account": owner || "" } });
       const payload = await response.json().catch(() => ({}));
+      if (destroyed || !current()) throw new DOMException("Claim options closed.", "AbortError");
+      if ([401, 403].includes(response.status)) { endSession(); throw new DOMException("Claim options closed.", "AbortError"); }
       if (!response.ok) throw Object.assign(new Error(payload.error || "The ownership request could not be completed."), { status: response.status });
+      if (payload.context?.accountId !== owner || payload.context?.authenticated !== Boolean(owner)) {
+        endSession(); throw new DOMException("Claim account changed.", "AbortError");
+      }
       return payload;
     }
     function connectLink(text) { const url = sameOriginPath(context.reconnectUrl); if (!url) return null; const link = make("a", text, "button-v3 button-secondary-v3"); link.href = url; return link; }
     function render() {
       entry.replaceChildren(); history.replaceChildren();
       const pending = claims.some((claim) => claim.status === "pending");
+      if (pending || context.isOwner) { attempt = null; uncertain = false; message.value = ""; evidence.value = ""; formStatus.textContent = ""; }
       header.children[1].textContent = context.isOwner ? "You manage this listing" : "Claim this listing";
       form.hidden = !context.claimable || context.isOwner || !context.authenticated || context.provider !== "discord" || pending;
       if (context.isOwner) { entry.append(make("p", "Your ownership claim is approved. Manage your community from your dashboard.", "claims-copy")); const link = make("a", "Open dashboard", "button-v3 button-primary-v3"); link.href = "/dashboard"; entry.append(link); }
@@ -59,15 +113,16 @@
       }
     }
     async function refresh() {
+      if (destroyed) return false;
       const current = ++generation;
       try {
-        const payload = await api(`/api/server-claims?serverId=${encodeURIComponent(serverId)}`); if (destroyed || current !== generation) return false;
+        const payload = await api(`/api/server-claims?serverId=${encodeURIComponent(serverId)}`, {}, () => current === generation); if (destroyed || current !== generation) return false;
         context = payload.context || {}; csrf = payload.csrfToken || csrf; claims = Array.isArray(payload.claims) ? payload.claims : Array.isArray(payload.claims?.items) ? payload.claims.items : [];
-        render(); feedback(status, ""); return true;
+        render(); setBusy(busy); feedback(status, ""); return true;
       } catch (error) { if (!destroyed && current === generation) feedback(status, error.message, true); return false; }
     }
     async function verifyClaim(claimId) {
-      if (busy) return; if (!csrf) { feedback(status, "Refresh claim status before checking ownership.", true); return; } setBusy(true); feedback(status, "Checking linked Discord ownership…");
+      if (destroyed || busy) return; if (!csrf) { feedback(status, "Refresh claim status before checking ownership.", true); return; } setBusy(true); feedback(status, "Checking linked Discord ownership…");
       try {
         await api("/api/server-claims", { method: "POST", body: JSON.stringify({ action: "verify", claimId }) }); if (destroyed) return;
         if (await refresh()) { const claim = claims.find((item) => item.id === claimId); feedback(status, claim?.verificationStatus === "verified" ? "Discord ownership verified. Your claim still awaits the staff decision." : claim?.verificationStatus === "needs_discord" ? "Discord consent is needed to complete this check. Use the link on your request." : "Ownership check finished. See your request for the result."); }
@@ -75,21 +130,29 @@
       finally { setBusy(false); }
     }
     form.addEventListener("submit", async (event) => {
-      event.preventDefault(); if (busy || !form.reportValidity()) return;
+      event.preventDefault(); if (destroyed || busy || form.hidden || !form.reportValidity()) return;
       if (!https(evidence.value.trim())) { feedback(formStatus, "Use a secure https:// evidence link without credentials.", true); evidence.focus(); return; }
       if (!csrf) { feedback(formStatus, "Refresh claim status before submitting.", true); return; }
+      if (!attempt) attempt = { key: crypto.randomUUID(), body: JSON.stringify({ action: "request", serverId, message: message.value.trim(), evidenceUrl: evidence.value.trim() || null }) };
       setBusy(true); feedback(formStatus, "Submitting your claim…");
       try {
-        await api("/api/server-claims", { method: "POST", body: JSON.stringify({ action: "request", serverId, message: message.value.trim(), evidenceUrl: evidence.value.trim() || null }) }); if (destroyed) return;
-        message.value = ""; evidence.value = ""; form.hidden = true;
+        const payload = await api("/api/server-claims", { method: "POST", headers: { "Idempotency-Key": attempt.key }, body: attempt.body }); if (destroyed) return;
+        if (!payload.claim?.id) throw new Error("The submission result could not be confirmed.");
+        attempt = null; uncertain = false; message.value = ""; evidence.value = ""; form.hidden = true;
         if (await refresh()) feedback(status, "Claim submitted for staff review. Check Discord ownership to support your request.");
-        else feedback(status, "Your claim was submitted, but its status could not refresh. Refresh claim status to see it.", true);
-      } catch (error) { if (!destroyed) feedback(formStatus, error.message, true); }
+        else if (!destroyed) feedback(status, "Your claim was submitted, but its status could not refresh. Refresh claim status to see it.", true);
+      } catch (error) {
+        if (!destroyed) {
+          uncertain = !error.status || error.status >= 500 || (uncertain && [408, 425, 429].includes(error.status));
+          if (!uncertain) attempt = null;
+          feedback(formStatus, uncertain ? "We couldn't confirm whether your claim arrived. Retry the same claim safely, or refresh its status before editing further." : error.message, true);
+        }
+      }
       finally { setBusy(false); }
     });
     retry.addEventListener("click", () => { if (!busy) void refresh(); });
     await refresh();
-    return { refresh, destroy() { destroyed = true; generation += 1; root.replaceChildren(); } };
+    return controller;
   }
   window.BrowseRPServerClaims = Object.freeze({ init, sameOriginPath, https });
 })();

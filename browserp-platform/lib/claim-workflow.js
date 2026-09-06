@@ -29,7 +29,7 @@ function contextFor(server, session) {
   return {
     serverId: server.id, serverName: server.name, communityUrl: server.community_url,
     claimable: !server.owner_id, isOwner: Boolean(session && server.owner_id === session.user.id),
-    authenticated: Boolean(session), provider: memberIdentityProviders(session?.user).includes("discord") ? "discord" : session?.provider || null,
+    accountId: session?.user.id || null, authenticated: Boolean(session), provider: memberIdentityProviders(session?.user).includes("discord") ? "discord" : session?.provider || null,
     reconnectUrl: `/api/auth/discord?claimGuilds=1&returnTo=${encodeURIComponent(returnTo)}`
   };
 }
@@ -45,6 +45,10 @@ async function checkClaim(req, session, claim, server) {
 export async function memberClaims(req, res, requestId) {
   if (req.method === "POST") assertSameOrigin(req);
   const session = await getSession(req, res, { required: req.method === "POST" });
+  const expectedAccount = req.headers?.["x-browserp-account"];
+  if (session ? expectedAccount !== session.user.id : expectedAccount !== undefined && expectedAccount !== "") {
+    throw Object.assign(new Error("Your account has changed. Reload this page before viewing or sending claim requests."), { status: 401 });
+  }
   const hasDiscord = memberIdentityProviders(session?.user).includes("discord");
   if (req.method === "POST" && !hasDiscord) throw Object.assign(new Error("Connect Discord to request or verify a server claim."), { status: 403 });
   if (req.method === "GET") {
@@ -56,6 +60,10 @@ export async function memberClaims(req, res, requestId) {
   await rateLimit(req, "server-claims", 10, 300);
   const body = await readBody(req, 8 * 1024);
   if (body.action === "request") {
+    const attemptId = req.headers?.["idempotency-key"];
+    if (typeof attemptId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(attemptId)) {
+      throw Object.assign(new Error("Reload claim options before submitting your request."), { status: 400 });
+    }
     const server = await serverForClaim(body.serverId);
     const message = sanitizePlainText(body.message, 2000);
     if (message.length < 20) throw Object.assign(new Error("Explain your connection to this server in at least 20 characters."), { status: 400 });
@@ -64,7 +72,7 @@ export async function memberClaims(req, res, requestId) {
       try { const url = new URL(body.evidenceUrl); if (url.protocol !== "https:" || url.username || url.password || url.href.length > 1000) throw new Error(); evidenceUrl = url.href; }
       catch { throw Object.assign(new Error("Use a valid HTTPS evidence link."), { status: 400 }); }
     }
-    const claim = await rpc("member_server_claim", { p_server_id: server.id, p_message: message, p_evidence_url: evidenceUrl, p_request_id: requestId }, session.accessToken);
+    const claim = await rpc("member_server_claim", { p_server_id: server.id, p_message: message, p_evidence_url: evidenceUrl, p_request_id: attemptId }, session.accessToken);
     const checked = await checkClaim(req, session, claim, server);
     return { claim: checked, verificationStatus: checked.verificationStatus, context: contextFor(server, session) };
   }

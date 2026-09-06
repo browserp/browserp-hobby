@@ -190,6 +190,7 @@
 
   window.addEventListener("browserp:session-ended", () => {
     state.sessionGeneration++;
+    state.claimsController?.endSession(); state.claimsController = null;
     state.session = { authenticated: false, csrfToken: "" };
     document.dispatchEvent(new Event("navigation:close"));
     $$(".account-menu-v3").forEach(menu => {
@@ -632,8 +633,15 @@
       document.title = `${server.name} — ${platform} roleplay — BrowseRP`;
       const claimRoot = $("#server-claim-panel");
       if (claimRoot && window.BrowseRPServerClaims?.init) {
-        try { await window.BrowseRPServerClaims.init({ server, root: claimRoot }); }
-        catch { claimRoot.replaceChildren(node("p", "", "Claim requests are unavailable right now. Refresh the page to try again.")); claimRoot.hidden = false; }
+        const claimGeneration = state.sessionGeneration;
+        state.claimsController?.destroy(); state.claimsController = null;
+        try {
+          const controller = await window.BrowseRPServerClaims.init({ server, root: claimRoot, accountId: state.session?.authenticated ? state.session.user?.id : null });
+          if (claimGeneration !== state.sessionGeneration) controller?.destroy();
+          else state.claimsController = controller;
+        } catch {
+          if (claimGeneration === state.sessionGeneration) { claimRoot.replaceChildren(node("p", "", "Claim requests are unavailable right now. Refresh the page to try again.")); claimRoot.hidden = false; }
+        }
       }
       refreshServerPlayers(server, slug);
     } catch (error) {
@@ -730,6 +738,7 @@
     $$('[data-year-v3]').forEach((element) => { element.textContent = String(new Date().getFullYear()); });
     reveal.scan();
     await session();
+    window.BrowseRPAdvertisingEnquiries?.initMember({ api, session: state.session, root: document.querySelector("#advertising-enquiries") });
     adverts();
     if (!document.body.hasAttribute("data-blog-page")) {
       blogIndex();

@@ -7,6 +7,7 @@ import { beginOAuth, finishOAuth, getSession, setSession } from "../lib/supabase
 import { parseCookies, readBody } from "../lib/http.js";
 import { createBrowseRPServer } from "../dev-server.mjs";
 import router from "../api/router.js";
+import { preparedPngRaster } from "../lib/prepared-png.js";
 
 const csrf = "c".repeat(43);
 const user = { id: "00000000-0000-4000-8000-000000000001", app_metadata: { provider: "discord", providers: ["discord"] }, identities: [{ provider: "discord", provider_id: "111111111111111111" }] };
@@ -21,6 +22,69 @@ async function isolated(fetcher, run, extra = {}) {
   Object.assign(process.env, values); if (fetcher) globalThis.fetch = fetcher;
   try { await run(); } finally { globalThis.fetch = realFetch; for (const [key, value] of previous) value === undefined ? delete process.env[key] : process.env[key] = value; }
 }
+
+function rasterChunk(type, data = Buffer.alloc(0)) {
+  const bytes = Buffer.alloc(data.length + 12); bytes.writeUInt32BE(data.length); bytes.write(type, 4); data.copy(bytes, 8);
+  let crc = 0xffffffff;
+  for (const byte of bytes.subarray(4, -4)) { crc ^= byte; for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0); }
+  bytes.writeUInt32BE((crc ^ 0xffffffff) >>> 0, bytes.length - 4); return bytes;
+}
+function avatarRaster({ channels = 3, raw, compressed, compression = 0, filter = 0, interlace = 0, chunks } = {}) {
+  const header = Buffer.alloc(13); header.writeUInt32BE(512); header.writeUInt32BE(512, 4); header[8] = 8; header[9] = channels === 3 ? 2 : 6;
+  header[10] = compression; header[11] = filter; header[12] = interlace;
+  return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]), rasterChunk("IHDR", header),
+    ...(chunks || [rasterChunk("IDAT", compressed || deflateSync(raw || Buffer.alloc(512 * (512 * channels + 1))))]), rasterChunk("IEND")]);
+}
+
+test("avatar validation decodes pixels and rejects malformed PNGs before any storage or profile write", async () => {
+  const expected = 512 * (512 * 3 + 1), packed = deflateSync(Buffer.alloc(expected));
+  const damagedCrc = avatarRaster(); damagedCrc[damagedCrc.length - 1] ^= 1;
+  const invalidFilter = Buffer.alloc(expected); invalidFilter[511 * (512 * 3 + 1)] = 5;
+  const cases = [
+    ["damaged checksum", damagedCrc],
+    ["valid CRC but invalid deflate", avatarRaster({ compressed: Buffer.from("This is not a zlib-compressed raster.") })],
+    ["truncated deflate", avatarRaster({ compressed: packed.subarray(0, -1) })],
+    ["short raster", avatarRaster({ raw: Buffer.alloc(expected - 1) })],
+    ["long raster", avatarRaster({ raw: Buffer.alloc(expected + 1) })],
+    ["bounded expansion", avatarRaster({ raw: Buffer.alloc(16 * 1024 * 1024) })],
+    ["invalid scanline filter", avatarRaster({ raw: invalidFilter })],
+    ["unsupported compression", avatarRaster({ compression: 1 })],
+    ["unsupported filter method", avatarRaster({ filter: 1 })],
+    ["unexpected interlacing", avatarRaster({ interlace: 1 })],
+    ["compressed trailing bytes", avatarRaster({ compressed: Buffer.concat([packed, Buffer.from("trailing")]) })],
+    ["second compressed stream", avatarRaster({ compressed: Buffer.concat([packed, packed]) })],
+    ["duplicate header", avatarRaster({ chunks: [avatarRaster().subarray(8, 33), rasterChunk("IDAT", packed)] })],
+    ["separated data chunks", avatarRaster({ chunks: [rasterChunk("IDAT", packed.subarray(0, 10)), rasterChunk("sRGB", Buffer.from([0])), rasterChunk("IDAT", packed.subarray(10))] })],
+    ["trailing file bytes", Buffer.concat([avatarRaster(), Buffer.from([0])])]
+  ];
+  const writes = [];
+  await isolated(async value => {
+    const path = new URL(value).pathname;
+    if (path === "/auth/v1/user") return response(user);
+    if (path.endsWith("/rpc/check_security_ban_server")) return response(null);
+    if (path.endsWith("/rpc/member_connection_status")) return response({ active: true, userId: user.id, sessionId: "fixture-active-session" });
+    if (path.endsWith("/rpc/consume_rate_limit")) return response(true);
+    writes.push(path); throw new Error("Malformed avatar must not reach storage or profile updates");
+  }, async () => {
+    for (const [label, png] of cases) {
+      const req = { ...request(`brp_access=${access}; brp_csrf=${csrf}`), browserpRoute: "me/avatar", method: "POST", url: "/api/me/avatar", body: { imageData: `data:image/png;base64,${png.toString("base64")}` }, socket: { remoteAddress: "127.0.0.1" } };
+      req.headers = { ...req.headers, "content-type": "application/json", origin: "http://localhost:8080", "x-browserp-csrf": csrf };
+      const res = output(); res.end = value => { res.body = JSON.parse(value); };
+      await router(req, res); assert.equal(res.statusCode, 400, label); assert.deepEqual(writes, [], label);
+    }
+  }, { SUPABASE_SECRET_KEY: "sb_secret_fixture", PRIVACY_HASH_SECRET: "fixture-private-hash" });
+});
+
+test("prepared profile rasters accept RGB, RGBA, every scanline filter and consecutive split data", () => {
+  for (const channels of [3, 4]) {
+    const raw = Buffer.alloc(512 * (512 * channels + 1));
+    for (let row = 0; row < 512; row++) raw[row * (512 * channels + 1)] = row % 5;
+    const packed = deflateSync(raw);
+    const png = avatarRaster({ channels, chunks: [rasterChunk("IDAT", packed.subarray(0, 10)), rasterChunk("IDAT", packed.subarray(10))] });
+    const result = preparedPngRaster(png, { minWidth: 512, minHeight: 512, maxWidth: 512, maxHeight: 512 });
+    assert.deepEqual(result, { bytes: png, width: 512, height: 512 });
+  }
+});
 
 test("production sessions use host-only secure HttpOnly cookies and a Strict CSRF token", async () => isolated(null, async () => {
   const res = output(); setSession(res, { access_token: access, refresh_token: "fixture-refresh", expires_in: 3600 }, { csrfToken: csrf });

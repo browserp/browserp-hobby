@@ -1,0 +1,41 @@
+.advertising-enquiries { --enquiry-gap: 18px; min-width: 0; padding: clamp(18px, 3vw, 28px); border: 1px solid var(--line, #35293f); border-radius: 16px; background: var(--panel, #100c15); }
+.legal-v3 > .advertising-enquiries { margin-top: 36px; padding: clamp(18px, 3vw, 28px); }
+.advertising-enquiries h2,.advertising-enquiries h3,.advertising-enquiries h4 { margin: 0 0 12px; }
+.advertising-enquiries p { color: var(--copy, #cec6d2); line-height: 1.65; margin: 10px 0; overflow-wrap: anywhere; }
+.advertising-enquiries small,.enquiry-date { color: var(--muted, #a89bb1); font-size: .82rem; line-height: 1.6; }
+.enquiry-form { display: grid; gap: var(--enquiry-gap); margin-block: 24px; }
+.enquiry-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--enquiry-gap); }
+.enquiry-wide { grid-column: 1/-1; }
+.advertising-enquiries .field-v3 { display: grid; gap: 8px; min-width: 0; }
+.advertising-enquiries :is(input:not([type="checkbox"]),textarea,select) { width: 100%; min-width: 0; padding: 12px 14px; color: var(--text, #fff); background: var(--bg-soft, #0b080f); border: 1px solid var(--line, #35293f); border-radius: 10px; font: inherit; }
+.advertising-enquiries textarea { resize: vertical; min-height: 130px; }
+.enquiry-form > .button-v3 { justify-self: start; }
+.enquiry-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-block: 20px; }
+.enquiry-actions > .field-v3 { min-width: 180px; }
+.enquiry-feedback { min-height: 1.6em; }
+.enquiry-list { display: grid; gap: 12px; }
+.enquiry-card { overflow: hidden; min-width: 0; border: 1px solid var(--line, #35293f); border-radius: 12px; background: var(--bg-soft, #0b080f); }
+.enquiry-card > summary { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 16px; cursor: pointer; list-style: none; }
+.enquiry-card > summary::-webkit-details-marker { display: none; }
+.enquiry-card > summary::before { content: "›"; width: 16px; flex-shrink: 0; font-size: 1.4rem; line-height: 1; text-align: center; color: var(--accent, #dc55cc); }
+.enquiry-card[open] > summary::before { transform: rotate(90deg); }
+.enquiry-subject { flex: 1; min-width: 0; overflow-wrap: anywhere; font-weight: 700; }
+.enquiry-state { flex: 0 0 auto; color: var(--muted, #bda9c8); font-size: .78rem; }
+.enquiry-card-body { padding: 0 20px 20px; border-top: 1px solid var(--line, #35293f); }
+.enquiry-card-body a { overflow-wrap: anywhere; }
+.enquiry-message { white-space: pre-wrap; }
+.enquiry-reply { border-left: 3px solid #b95fd4; padding: 12px 16px; margin-block: 18px; background: rgba(153,72,175,.08); }
+.enquiry-confirm { display: flex; gap: 10px; align-items: start; margin-block: 18px; line-height: 1.6; cursor: pointer; }
+.enquiry-confirm input { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 3px; accent-color: #cf3eaa; }
+.advertising-enquiries :is(button,input,select,textarea,summary,a):focus-visible { outline: 2px solid #dc8cef; outline-offset: 3px; }
+.advertising-enquiries :disabled { opacity: .6; cursor: not-allowed; }
+.advertising-enquiries [hidden] { display: none !important; }
+.staff-v3 #overview-adverts > .advertising-enquiries { margin: 0 24px 24px; padding: 22px 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; }
+@media (max-width: 600px) {
+ .enquiry-fields { grid-template-columns: 1fr; }
+ .enquiry-card > summary { flex-wrap: wrap; gap: 8px; }
+ .enquiry-state { padding-left: 24px; flex-basis: 100%; }
+ .enquiry-card-body { padding-inline: 16px; }
+ .enquiry-actions > button { flex: 1 1 150px; }
+ .staff-v3 #overview-adverts > .advertising-enquiries { margin-inline: 18px; }
+}

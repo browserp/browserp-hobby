@@ -6,6 +6,7 @@
   const make = (tag, text, className = "") => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = String(text); return el; };
   const pendingForms = new WeakSet();
   let staffNavigation = null;
+  let advertisingEnquiries = null;
   let reviewGeneration = 0;
   window.addEventListener("browserp:session-ended", () => { reviewGeneration++; });
   window.addEventListener("pagehide", () => { reviewGeneration++; });
@@ -239,6 +240,7 @@
   }
 
   function showLogin() {
+    advertisingEnquiries?.destroy(); advertisingEnquiries = null;
     const root = $("#staff-app-v3");
     if (!root) return;
     const card = make("section", undefined, "staff-login-card-v3");
@@ -600,6 +602,7 @@
     if (pageKey === "content") { location.replace("/staffpanel/overview#overview-adverts"); return; }
     if (pageKey === "overview" && location.hash === "#overview-roles") { location.replace("/staffpanel/moderation#staff"); return; }
     mobile();applyTheme(document.documentElement.dataset.theme||preferredTheme());if(!await ensureStaff())return;void window.BrowseRPStaffRefreshHealth?.init({api});window.BrowseRPStaffScrapers?.init({api});try{const page=document.body.dataset.staffPage;if(page==="overview") {
+      advertisingEnquiries = window.BrowseRPAdvertisingEnquiries?.initStaff({ api, accountId: state.session?.user?.id, root: $("#advertising-enquiries"), onAuthFailure: showLogin });
       let toolsMounted = false;
       await window.BrowseRPStaffOverview.init({ api, onAuthFailure: showLogin, onLoad: async (website) => {
         if (toolsMounted) return;

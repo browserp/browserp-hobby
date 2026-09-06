@@ -1,0 +1,356 @@
+{
+  "at": "2026-09-06T01:47:34.339Z",
+  "commit": "406d5688f6eb81d7e43790d5e027e95f07024ec4",
+  "migrations": [
+    {
+      "name": "20260906004454_structured_member_data_export.sql",
+      "success": true
+    },
+    {
+      "name": "20260906012210_joined_rp_name_search.sql",
+      "success": true
+    },
+    {
+      "name": "20260906012500_restrict_private_record_reads.sql",
+      "success": true
+    }
+  ],
+  "privateRecords": [
+    [
+      {
+        "name": "account_trust",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "ad_campaigns",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "applications",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "ban_appeals",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "bans",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "boosts",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "favorites",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "notifications",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "profiles",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "promotion_credit_ledger",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "promotion_orders",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "reports",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "server_endpoints",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "server_submissions",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "staff_memberships",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      },
+      {
+        "name": "uploaded_assets",
+        "relrowsecurity": true,
+        "anon_any_table": false,
+        "anon_any_column": false,
+        "member_any_table": false,
+        "member_any_column": false,
+        "service_read": true
+      }
+    ],
+    [
+      {
+        "relname": "developer_directory",
+        "owner": "postgres",
+        "reloptions": [
+          "security_invoker=false",
+          "security_barrier=true"
+        ],
+        "anon_read": true,
+        "member_read": true,
+        "anon_write": false,
+        "member_write": false,
+        "definition": " SELECT dp.user_id AS id,\n    p.display_name,\n    p.username,\n        CASE\n            WHEN p.avatar_review_status = 'approved'::text THEN p.approved_avatar_url\n            ELSE NULL::text\n        END AS avatar_url,\n    dp.headline,\n    dp.specialties,\n    dp.portfolio_url,\n    dp.verified,\n    dp.created_at\n   FROM developer_profiles dp\n     JOIN profiles p ON p.id = dp.user_id\n  WHERE dp.status = 'published'::text AND p.profile_visibility = 'public'::text;"
+      },
+      {
+        "relname": "resource_directory",
+        "owner": "postgres",
+        "reloptions": [
+          "security_invoker=false",
+          "security_barrier=true"
+        ],
+        "anon_read": true,
+        "member_read": true,
+        "anon_write": false,
+        "member_write": false,
+        "definition": " SELECT r.id,\n    r.title,\n    r.slug,\n    r.summary,\n    r.resource_type,\n    r.download_count AS downloads,\n    r.published_at,\n    p.name AS platform_name,\n    pr.display_name AS author_name\n   FROM resources r\n     JOIN profiles pr ON pr.id = r.author_id AND pr.profile_visibility = 'public'::text\n     LEFT JOIN platforms p ON p.id = r.platform_id AND p.enabled\n  WHERE r.status = 'published'::text;"
+      }
+    ],
+    [
+      {
+        "signature": "public.member_dashboard_overview()",
+        "member_execute": true
+      },
+      {
+        "signature": "public.member_update_profile(text,text,text)",
+        "member_execute": true
+      },
+      {
+        "signature": "public.member_set_profile_avatar(text,uuid)",
+        "member_execute": true
+      },
+      {
+        "signature": "public.member_favorite_ids()",
+        "member_execute": true
+      },
+      {
+        "signature": "public.mark_notifications_read()",
+        "member_execute": true
+      },
+      {
+        "signature": "public.member_server_claims(uuid)",
+        "member_execute": true
+      },
+      {
+        "signature": "public.staff_profile_review_queue()",
+        "member_execute": true
+      }
+    ]
+  ],
+  "exports": [
+    [
+      {
+        "schema": "private",
+        "proname": "data_export_summary",
+        "signature": "private.data_export_summary(private.member_data_exports)",
+        "anon_execute": false,
+        "member_execute": false,
+        "service_execute": false
+      },
+      {
+        "schema": "private",
+        "proname": "data_request_history_page",
+        "signature": "private.data_request_history_page(uuid,bigint,boolean)",
+        "anon_execute": false,
+        "member_execute": false,
+        "service_execute": false
+      },
+      {
+        "schema": "private",
+        "proname": "data_request_json",
+        "signature": "private.data_request_json(private.account_data_requests)",
+        "anon_execute": false,
+        "member_execute": false,
+        "service_execute": false
+      },
+      {
+        "schema": "private",
+        "proname": "export_recent_member",
+        "signature": "private.export_recent_member()",
+        "anon_execute": false,
+        "member_execute": false,
+        "service_execute": false
+      },
+      {
+        "schema": "private",
+        "proname": "member_export_records",
+        "signature": "private.member_export_records(uuid)",
+        "anon_execute": false,
+        "member_execute": false,
+        "service_execute": false
+      },
+      {
+        "schema": "private",
+        "proname": "readable_member_export",
+        "signature": "private.readable_member_export(uuid)",
+        "anon_execute": false,
+        "member_execute": false,
+        "service_execute": false
+      },
+      {
+        "schema": "public",
+        "proname": "member_generate_data_export",
+        "signature": "member_generate_data_export(uuid,bigint,uuid)",
+        "anon_execute": false,
+        "member_execute": true,
+        "service_execute": false
+      },
+      {
+        "schema": "public",
+        "proname": "member_read_data_export",
+        "signature": "member_read_data_export(uuid,boolean)",
+        "anon_execute": false,
+        "member_execute": true,
+        "service_execute": false
+      },
+      {
+        "schema": "public",
+        "proname": "member_receive_data_export",
+        "signature": "member_receive_data_export(uuid,text,boolean)",
+        "anon_execute": false,
+        "member_execute": true,
+        "service_execute": false
+      },
+      {
+        "schema": "public",
+        "proname": "service_prune_data_exports",
+        "signature": "service_prune_data_exports()",
+        "anon_execute": false,
+        "member_execute": false,
+        "service_execute": true
+      },
+      {
+        "schema": "public",
+        "proname": "staff_approve_data_export",
+        "signature": "staff_approve_data_export(uuid,bigint,uuid,boolean,text,boolean)",
+        "anon_execute": false,
+        "member_execute": true,
+        "service_execute": false
+      }
+    ],
+    [
+      {
+        "relname": "data_export_approvals",
+        "relrowsecurity": true,
+        "anon_any": false,
+        "member_any": false,
+        "service_any": false
+      },
+      {
+        "relname": "member_data_exports",
+        "relrowsecurity": true,
+        "anon_any": false,
+        "member_any": false,
+        "service_any": false
+      }
+    ],
+    [
+      {
+        "tgname": "immutable_data_export_approval",
+        "tgenabled": "O"
+      }
+    ],
+    [
+      {
+        "indexname": "member_data_exports_pkey",
+        "indexdef": "CREATE UNIQUE INDEX member_data_exports_pkey ON private.member_data_exports USING btree (id)"
+      },
+      {
+        "indexname": "member_data_exports_user_id_generation_key_key",
+        "indexdef": "CREATE UNIQUE INDEX member_data_exports_user_id_generation_key_key ON private.member_data_exports USING btree (user_id, generation_key)"
+      },
+      {
+        "indexname": "member_data_exports_approval",
+        "indexdef": "CREATE INDEX member_data_exports_approval ON private.member_data_exports USING btree (approval_id, created_at DESC)"
+      },
+      {
+        "indexname": "member_data_exports_expiry",
+        "indexdef": "CREATE INDEX member_data_exports_expiry ON private.member_data_exports USING btree (expires_at) WHERE (payload IS NOT NULL)"
+      }
+    ]
+  ]
+}

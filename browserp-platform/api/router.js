@@ -17,7 +17,9 @@ import { moderationMutation, moderationQuery } from "../lib/staff-moderation.js"
 import { staffAuthenticators } from "../lib/staff-authenticators.js";
 import { prepareInitialStaffAuthenticator, verifyInitialStaffAuthenticator } from "../lib/staff-initial-authenticator.js";
 import { memberPrivacyRequests, staffPrivacyRequests } from "../lib/privacy-requests.js";
+import { memberAdvertisingEnquiries, staffAdvertisingEnquiries } from "../lib/advertising-enquiries.js";
 import { staffAdvertMedia } from "../lib/staff-advert-media.js";
+import { preparedPngRaster } from "../lib/prepared-png.js";
 import {
   authCapabilities,
   beginOAuth,
@@ -150,7 +152,7 @@ function profilePictureBytes(value) {
   if (!match || source.length > 1_450_000) throw Object.assign(new Error("Choose a cropped PNG profile picture under 1 MB."), { status: 400 });
   const bytes = Buffer.from(match[1], "base64");
   const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
-  if (bytes.length < 70 || bytes.length > 1_048_576 || !bytes.subarray(0, 8).equals(signature)) {
+  if (bytes.length < 70 || bytes.length > 1_048_576 || bytes.toString("base64") !== match[1] || !bytes.subarray(0, 8).equals(signature)) {
     throw Object.assign(new Error("The uploaded profile picture is not a valid PNG image."), { status: 400 });
   }
   let offset = 8;
@@ -183,6 +185,11 @@ function profilePictureBytes(value) {
     offset = end;
   }
   if (!sawHeader || !sawImageData || !sawEnd) throw Object.assign(new Error("The uploaded profile picture is incomplete."), { status: 400 });
+  try {
+    preparedPngRaster(bytes, { minWidth: 512, minHeight: 512, maxWidth: 512, maxHeight: 512 });
+  } catch {
+    throw Object.assign(new Error("The profile picture could not be decoded. Crop the image again and retry."), { status: 400 });
+  }
   return bytes;
 }
 
@@ -415,6 +422,8 @@ const routes = {
     return ok(res, { authorizationUrl });
   }),
 
+  "me/advertising-enquiries": endpoint(["GET", "POST"], async (req, res) => ok(res, await memberAdvertisingEnquiries(req, res))),
+  "admin/advertising-enquiries": endpoint(["GET", "POST"], async (req, res) => ok(res, await staffAdvertisingEnquiries(req, res))),
   "me/data-requests": endpoint(["GET", "POST"], async (req, res) => ok(res, await memberPrivacyRequests(req, res))),
   "admin/data-requests": endpoint(["GET", "POST"], async (req, res) => ok(res, await staffPrivacyRequests(req, res))),
 

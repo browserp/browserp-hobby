@@ -1,0 +1,13 @@
+# Search and branding submissions — 6 September 2026
+
+Submitted https://www.browserp.com/sitemap.xml once in the verified Google Search Console domain property. Google reported “Sitemap submitted successfully.” Submitted the same canonical sitemap once in verified Bing Webmaster Tools; its row reported Submitted / Processing with no current sitemap errors or warnings. Keep both DNS verification records and the unchanged mail records. These are successful submissions, not promises of indexing, discovery totals or search ranking.
+
+Google Auth Platform had the BrowseRP name, logo and canonical homepage/privacy/terms saved, but its Verification Center explicitly said the branding was not yet being shown to users. Ran its branding check. The automated result alleged an insufficient privacy policy and a homepage behind login.
+
+Unauthenticated, no-cookie HTTP checks of both exact URLs returned200 with no redirect or challenge page. The initial homepage describes the public directory and links to the privacy policy. The initial privacy HTML names the Google data requested, its use/storage/sharing, service providers, security information and access/correction/deletion route. The signed-out site also has existing three-engine browser evidence. Sent those specific facts through the built-in additional-review form, asking for the precise missing disclosure or inaccessible URL/time if the reviewer still finds a problem. No login credentials or recovery codes were supplied; no scopes, firewall protections or live authentication callbacks were changed.
+
+The final Google Verification Center now states **“Your branding is currently under review.”** Data access verification is not required because there are no sensitive/restricted scopes. Approval is pending with Google. The owner may need to respond to Google's verification contact later. Ordinary-member consent/linking still needs its separate real-account check; a submitted branding review does not establish completion of that flow.
+
+The submission answered that BrowseRP is a public production application, not personal-only, internal-only, staging-only or a Gmail SMTP plugin. Read the current verification requirements and acknowledged the submission requirements and conditional restricted-scope assessment statement. No restricted scope or paid assessment was requested.
+
+References: [Google homepage requirements](https://support.google.com/cloud/answer/13807376), [Google verification requirements](https://support.google.com/cloud/answer/13464321), [Supabase Google branding guidance](https://supabase.com/docs/guides/auth/social-login/auth-google). Public response evidence: `google-branding-public-page-check-2026-09-06.json`.

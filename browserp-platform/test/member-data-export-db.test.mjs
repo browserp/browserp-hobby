@@ -118,4 +118,25 @@ test("structured private copies enforce approval, isolation, expiry and truthful
   await admin();assert.equal((await db.query("select count(*)::int n from private.account_data_request_fulfillments")).rows[0].n,0);
   assert.doesNotMatch(JSON.stringify((await db.query('select * from public.staff_audit_events')).rows),/My private biography|OWN_NOTICE|Uploaded files will/);
  });
+ await t.test("enquiry migration extends an already-used collector and generation path without exposing other accounts",async()=>{
+  await admin(read("20260906020500_private_advertising_enquiries.sql"));
+  await admin(`delete from public.rate_limit_buckets;insert into private.advertising_enquiries(user_id,subject,destination_url,placement,message,status,reply)
+   values('${a}','Own campaign','https://example.com/','directory','OWN_PRIVATE_ENQUIRY_MESSAGE','closed','OWN_PRIVATE_STAFF_REPLY'),('${b}','Other campaign','https://example.com/','any','FORBIDDEN_OTHER_ENQUIRY_MESSAGE','replied','FORBIDDEN_OTHER_STAFF_REPLY');`);
+  await login();copy=await generate(request);const result=await call('member_read_data_export',[copy.id]),data=JSON.parse(result.content);
+  assert.equal(data.counts.advertisingEnquiries,1);assert.equal(data.collections.advertisingEnquiries[0].message,'OWN_PRIVATE_ENQUIRY_MESSAGE');assert.equal(data.collections.advertisingEnquiries[0].reply,'OWN_PRIVATE_STAFF_REPLY');
+  assert.equal(data.collections.account[0].email,'a@example.test');assert.doesNotMatch(result.content,/FORBIDDEN_OTHER_ENQUIRY|FORBIDDEN_OTHER_STAFF_REPLY/);assert.doesNotMatch(JSON.stringify(data.collections.advertisingEnquiries),/actor|user_id|accountId|fingerprint/);
+  for(const role of['anon','authenticated','service_role']){await admin(`set role ${role}`);await assert.rejects(db.query('select private.member_export_records_before_advertising($1)',[a]),/permission denied/);}
+ });
+ await t.test("enquiry category and combined byte budgets reject oversized copies without silent truncation",async()=>{
+  await admin(`delete from public.rate_limit_buckets;update private.member_data_exports set expires_at=now()-interval '1 second';
+   insert into private.advertising_enquiries(user_id,subject,destination_url,placement,message) select '${a}','Enquiry bound fixture','https://example.com/','any','A complete enquiry message fixture.' from generate_series(1,2001);`);
+  await login();await assert.rejects(generate(request),/larger export/);
+  await admin(`delete from private.advertising_enquiries where subject='Enquiry bound fixture';
+   insert into public.notifications(user_id,kind,title,body) values('${a}','notice','Combined bound fixture',repeat('x',1200000));
+   insert into private.advertising_enquiries(user_id,subject,destination_url,placement,message) select '${a}','Enquiry byte fixture','https://example.com/','any',repeat('y',2000) from generate_series(1,600);`);
+  await login();await assert.rejects(generate(request),/larger export/);
+  await admin(`delete from public.notifications where title='Combined bound fixture';delete from private.advertising_enquiries where subject='Enquiry byte fixture';`);
+  await login();copy=await generate(request);assert.equal(JSON.parse((await call('member_read_data_export',[copy.id])).content).counts.advertisingEnquiries,1);
+ });
+
 });

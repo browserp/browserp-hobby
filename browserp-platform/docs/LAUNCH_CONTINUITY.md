@@ -4,6 +4,14 @@ Updated 6 September 2026. This is the working scope and evidence ledger, not a c
 
 ## Current release and overnight coordination — 6 September 2026
 
+### Latest live checkpoint — 6 September, 01:59 UTC
+
+Production `406d5688f6eb81d7e43790d5e027e95f07024ec4` is READY on www.browserp.com through `dpl_9xfG27uYZVRuYHnfbr6bE7H4D7f7`. All739 local checks, exact preview20 checks, production20 checks and live database privilege readback passed. The three account-export/private-record/joined-name migrations are applied. Profile/Your data loaded in the existing signed-in session. Main remains untouched. See ACCOUNT_PRIVACY_RELEASE_2026-09-06.md for exact evidence and limits.
+
+Google and Bing accepted the canonical sitemap submission. Google's consent branding is now under manual review after a documented response to its public-page findings; it is not approved yet. See SEARCH_AND_BRANDING_SUBMISSIONS_2026-09-06.md. No scope, callback or firewall protection was weakened.
+
+The2.17 candidate now integrates functional member/staff advertising enquiries, the malformed-avatar acceptance fix, private claim session/account binding and precise queue pagination. Final full verification passed799 tests, no failures/skips. Enquiry native fixtures passed18/18 and valid canvas crops passed all three engines. Exact hosted checks, additive enquiry migration/readback and production promotion are the remaining release gates. See ENQUIRY_UPLOAD_CLAIM_RELEASE_2026-09-06.md. The 40/20/3 roster remains complete with evidence. Full recovery/erasure/file bytes, ordinary-member external consent, community Discord, remaining meaningful design/refinement work and broader SEO remain open. User reiterated that efficiency must not compromise quality.
+
 ### Latest live checkpoint — 6 September, 01:22 UTC
 
 This checkpoint supersedes older pending statuses below. Production commit `478ae90702c34febb2f8323cef7f0aec2f21764c`, deployment `dpl_GbPJz766DrLgCYvHiuti5jiYA7SA`, is READY on `www.browserp.com`. Its reviewed preview is `https://browserp-hobby-b1ztpzl9p-browserp.vercel.app` (`dpl_Cz9txzGn4pZ53E3jAeo69y1Rz3Nz`). Main remains untouched.

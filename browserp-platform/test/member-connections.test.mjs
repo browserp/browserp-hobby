@@ -126,7 +126,7 @@ test("a member's connected Discord identity works for claims but never authorize
   if (call.url.pathname === "/rest/v1/servers") return response([{ id: otherId, slug: "fixture-server", status: "published", name: "Fixture server", owner_id: null, community_url: "https://discord.gg/fixture" }]);
   if (call.url.pathname.endsWith("/rpc/member_server_claims")) return response({ items: [{ id: "fixture-claim" }] });
 }, async () => {
-  const result = await memberClaims({ ...request(), url: `/api/server-claims?serverId=${otherId}` }, output(), "fixture-request");
+  const result = await memberClaims({ ...request(), headers: { ...request().headers, "x-browserp-account": userId }, url: `/api/server-claims?serverId=${otherId}` }, output(), "fixture-request");
   assert.equal(result.context.provider, "discord"); assert.equal(result.claims.length, 1);
   await assert.rejects(staffClaims(request(), output(), "fixture-request"), { status: 403 });
 }));

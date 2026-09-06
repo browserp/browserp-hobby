@@ -76,7 +76,8 @@ export async function staffPrivacyRequests(req, res) {
     if (!["open", "all", "submitted", "reviewing", "information_needed", "ready", "declined", "withdrawn", "fulfilled"].includes(status) || (kind && !["copy", "delete", "correction"].includes(kind))) throw fail("Choose valid request filters.");
     const time = params.get("before"), beforeId = params.get("beforeId");
     if (Boolean(time) !== Boolean(beforeId) || (time && (time.length > 40 || !Number.isFinite(Date.parse(time))))) throw fail("Refresh the request queue.");
-    return rpc("staff_data_requests", { p_status: status, p_kind: kind, p_before_time: time ? new Date(time).toISOString() : null, p_before_id: beforeId ? id(beforeId) : null, p_limit: 25 }, session.accessToken);
+    // Keep the database cursor intact; Date serialization drops microseconds.
+    return rpc("staff_data_requests", { p_status: status, p_kind: kind, p_before_time: time || null, p_before_id: beforeId ? id(beforeId) : null, p_limit: 25 }, session.accessToken);
   }
   const body = await readBody(req, 8192);
   if (body.action === "approve_export") {

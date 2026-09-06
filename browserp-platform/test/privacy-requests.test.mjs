@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { PGlite } from "@electric-sql/pglite";
 import { memberPrivacyRequests,staffPrivacyRequests } from "../lib/privacy-requests.js";
 const uid="00000000-0000-4000-8000-000000000001",key="11111111-0000-4000-8000-000000000001",id="22222222-0000-4000-8000-000000000002",csrf="c".repeat(43);
 const token=aal=>`fixture.${Buffer.from(JSON.stringify({sub:uid,aal})).toString("base64url")}.fixture`;
@@ -92,3 +94,30 @@ test("receipt requires a hash and explicit confirmation; check-only request cann
  assert.deepEqual(calls.find(x=>x.path.endsWith('/member_receive_data_export')).body,{p_id:id,p_sha256:'a'.repeat(64),p_confirmed:true});
  assert.deepEqual(calls.find(x=>x.path.endsWith('/member_read_data_export')).body,{p_id:id,p_check_only:true});
 },call=>/\/(member_receive_data_export|member_read_data_export)$/.test(call.path)?response({allowed:true,sha256:'a'.repeat(64)}):undefined));
+
+test("staff data-request API keeps PostgreSQL microseconds when paginating closely timed requests",async t=>{
+ const db=new PGlite();t.after(()=>db.close());
+ // The existing permission suite covers the guards; this fixture isolates the
+ // API cursor round-trip through the real queue SQL and timestamp projection.
+ await db.exec(`create schema auth;create schema private;create table auth.users(id uuid primary key);create table public.profiles(id uuid primary key,display_name text);
+  create function private.can_review_data_requests() returns boolean language sql as $$select true$$;
+  create function private.can_fulfill_data_requests() returns boolean language sql as $$select false$$;`);
+ const read=name=>readFileSync(new URL(`../supabase/migrations/${name}`,import.meta.url),"utf8"),initial=read("20260905210347_member_data_requests.sql"),latest=read("20260906002145_private_request_history_and_completion.sql");
+ const fn=(source,name)=>source.match(new RegExp(`create or replace function ${name.replaceAll(".","\\.")}\\([\\s\\S]*?\n\\$\\$;`))[0];
+ await db.exec(initial.match(/create table private\.account_data_requests \([\s\S]*?\n\);/)[0]);
+ await db.exec(fn(initial,"private.data_request_json"));await db.exec(fn(latest,"public.staff_data_requests"));
+ await db.exec(`insert into auth.users select gen_random_uuid() from generate_series(1,61);insert into public.profiles select id,'Fixture member' from auth.users;
+  insert into private.account_data_requests(user_id,submission_key,submission_fingerprint,kind,details,created_at)
+  select id,gen_random_uuid(),sha256(convert_to(id::text,'UTF8')),'copy','My own account copy request.',timestamptz '2026-09-06T12:00:00.123451+00:00'+(row_number()over()%9)*interval '1 microsecond' from auth.users;`);
+ const expected=(await db.query("select id::text id from private.account_data_requests order by created_at desc,id desc")).rows.map(x=>x.id);
+ await fixture(async()=>{
+  const seen=[];let next=null,pages=0;
+  do{const request=req(null,"aal2"),params=new URLSearchParams({kind:"copy"});if(next){params.set("before",next.createdAt);params.set("beforeId",next.id);}
+   request.url=`/api/admin/data-requests?${params}`;const page=await staffPrivacyRequests(request,output());seen.push(...page.items.map(x=>x.id));next=page.next;if(next)assert.match(next.createdAt,/\.12345[1-9]/);pages++;
+  }while(next&&pages<5);
+  assert.deepEqual(seen,expected,"no requests may be skipped or repeated when timestamp precision exceeds JavaScript milliseconds");assert.equal(pages,3);
+ },async call=>{
+  if(!call.path.endsWith("/rpc/staff_data_requests"))return undefined;
+  const b=call.body,result=await db.query("select public.staff_data_requests($1,$2,$3,$4,$5) value",[b.p_status,b.p_kind,b.p_before_time,b.p_before_id,b.p_limit]);return response(result.rows[0].value);
+ });
+});

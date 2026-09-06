@@ -1,0 +1,30 @@
+{
+  "at": "2026-09-06T01:54:44.910Z",
+  "authenticated": false,
+  "checks": [
+    {
+      "path": "/",
+      "status": 200,
+      "location": null,
+      "cloudflareMitigated": null,
+      "title": "BrowseRP — FiveM, RedM, Roblox and Minecraft roleplay servers",
+      "bytes": 9597,
+      "hasHomepageContent": true,
+      "hasPrivacyContent": false,
+      "linksPrivacy": true,
+      "hasChallengePage": false
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "location": null,
+      "cloudflareMitigated": null,
+      "title": "Privacy policy — BrowseRP",
+      "bytes": 7123,
+      "hasHomepageContent": false,
+      "hasPrivacyContent": true,
+      "linksPrivacy": false,
+      "hasChallengePage": false
+    }
+  ]
+}

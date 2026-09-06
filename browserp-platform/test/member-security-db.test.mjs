@@ -123,6 +123,25 @@ test("member RPCs enforce session, account-ban, ownership and rate boundaries in
     });
     await admin(read("20260906012500_restrict_private_record_reads.sql"));
 
+    await t.test("ownership retries use the same claim, reject changed evidence and remain bound to a live member session", async () => {
+      const key = crypto.randomUUID();
+      const args = [server, "I own this community and can provide its hosting records.", "https://example.test/ownership", key];
+      await login();
+      const first = await call("member_server_claim($1,$2,$3,$4)", args);
+      assert.equal((await call("member_server_claim($1,$2,$3,$4)", args)).id, first.id);
+      for (const replacement of [[secondServer, ...args.slice(1)], [server, "Different ownership evidence that must not replace the request.", ...args.slice(2)], [server, args[1], "https://example.test/different", key]]) {
+        await assert.rejects(call("member_server_claim($1,$2,$3,$4)", replacement), /request identifier was already used/);
+      }
+      await login(other, otherSid);
+      const second = await call("member_server_claim($1,$2,$3,$4)", args);
+      assert.notEqual(second.id, first.id, "another member cannot receive the original member's replay");
+      await admin(`delete from auth.sessions where id='${sid}'`); await login();
+      await assert.rejects(call("member_server_claim($1,$2,$3,$4)", args), /active, unrestricted/);
+      await admin(`insert into auth.sessions(id,user_id) values('${sid}','${member}')`);
+      assert.equal((await db.query("select count(*)::int n from public.server_claim_requests where request_id=$1", [key])).rows[0].n, 2);
+      await db.query("delete from public.server_claim_requests where request_id=$1", [key]);
+    });
+
     await t.test("all sixteen raw-table privileges are denied to guests and valid or stale members while service reads survive", async () => {
       for (const role of ["anon", "authenticated"]) {
         await login();await db.exec(`reset role;set role ${role}`);

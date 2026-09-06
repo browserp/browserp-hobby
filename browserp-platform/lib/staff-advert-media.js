@@ -1,10 +1,9 @@
 import { createHash, randomUUID } from "node:crypto";
-import { inflateSync } from "node:zlib";
 import { ok } from "./api.js";
 import { supabaseConfig } from "./config.js";
 import { assertCsrf, assertSameOrigin, readBody } from "./http.js";
 import { rateLimit } from "./rate-limit.js";
-import { staticServerPng } from "./server-media.js";
+import { preparedPngRaster } from "./prepared-png.js";
 import { getSession, rest, rpc, uploadStorageObject } from "./supabase.js";
 
 const MAX_BYTES = 1_048_576;
@@ -20,26 +19,7 @@ export function advertImage(value) {
   if (!match) throw invalid("Choose a PNG, JPG or WebP image in the advert editor.");
   const bytes = Buffer.from(match[1], "base64");
   if (bytes.length < 70 || bytes.length > MAX_BYTES || bytes.toString("base64") !== match[1]) throw invalid();
-  let checked;
-  try { checked = staticServerPng(bytes); } catch { throw invalid(); }
-  const width = checked.readUInt32BE(16), height = checked.readUInt32BE(20);
-  const channels = checked[25] === 2 ? 3 : checked[25] === 6 ? 4 : 0;
-  if (width < 320 || height < 180 || width > 1600 || height > 1600 || checked[24] !== 8 || !channels || checked[28] !== 0) throw invalid("Use an image at least 320 × 180 pixels and no larger than 1600 pixels on either side after preparation.");
-  const chunks = [checked.subarray(0, 8)], compressed = [];
-  for (let offset = 8; offset < checked.length;) {
-    const size = checked.readUInt32BE(offset), end = offset + size + 12;
-    const type = checked.toString("ascii", offset + 4, offset + 8);
-    if (type === "IDAT") compressed.push(checked.subarray(offset + 8, end - 4));
-    if (["IHDR", "IDAT", "IEND"].includes(type)) chunks.push(checked.subarray(offset, end));
-    offset = end;
-  }
-  const packed = Buffer.concat(compressed), rowBytes = width * channels + 1, expected = height * rowBytes;
-  try {
-    const result = inflateSync(packed, { maxOutputLength: expected + 1, info: true });
-    if (result.buffer.length !== expected || result.engine.bytesWritten !== packed.length) throw invalid();
-    for (let offset = 0; offset < expected; offset += rowBytes) if (result.buffer[offset] > 4) throw invalid();
-  } catch { throw invalid("The image could not be decoded. Choose another image and try again."); }
-  return { bytes: Buffer.concat(chunks), width, height };
+  return preparedPngRaster(bytes, { minWidth: 320, minHeight: 180, maxWidth: 1600, maxHeight: 1600 });
 }
 
 async function removeObject(objectPath, { signal } = {}) {

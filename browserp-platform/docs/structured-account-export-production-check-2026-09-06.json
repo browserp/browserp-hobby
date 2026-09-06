@@ -1,0 +1,156 @@
+{
+  "origin": "https://www.browserp.com",
+  "sha": "406d5688f6eb81d7e43790d5e027e95f07024ec4",
+  "at": "2026-09-06T01:49:02.988Z",
+  "checks": [
+    {
+      "kind": "asset",
+      "file": "privacy-requests.js",
+      "exact": true
+    },
+    {
+      "kind": "asset",
+      "file": "privacy-requests.css",
+      "exact": true
+    },
+    {
+      "kind": "disabled-product-boundary",
+      "route": "/api/developers",
+      "status": 403
+    },
+    {
+      "kind": "disabled-product-boundary",
+      "route": "/api/resources",
+      "status": 403
+    },
+    {
+      "kind": "guest-export-denial",
+      "action": "generate_export",
+      "status": 403
+    },
+    {
+      "kind": "guest-export-denial",
+      "action": "read_export",
+      "status": 403
+    },
+    {
+      "kind": "guest-export-denial",
+      "action": "check_export",
+      "status": 403
+    },
+    {
+      "kind": "guest-export-denial",
+      "action": "receive_export",
+      "status": 403
+    },
+    {
+      "kind": "guest-private-page",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/profile",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-private-page",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/staffpanel/moderation",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-private-page",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/profile",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-private-page",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/staffpanel/moderation",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-private-page",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/profile",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-private-page",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/staffpanel/moderation",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-private-page",
+      "engine": "firefox",
+      "width": 1280,
+      "path": "/profile",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-private-page",
+      "engine": "firefox",
+      "width": 1280,
+      "path": "/staffpanel/moderation",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-private-page",
+      "engine": "webkit",
+      "width": 390,
+      "path": "/profile",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-private-page",
+      "engine": "webkit",
+      "width": 390,
+      "path": "/staffpanel/moderation",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-private-page",
+      "engine": "webkit",
+      "width": 1280,
+      "path": "/profile",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "guest-private-page",
+      "engine": "webkit",
+      "width": 1280,
+      "path": "/staffpanel/moderation",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    }
+  ],
+  "ok": true
+}

@@ -19,7 +19,7 @@ function harness(name, fetch) {
 const candidate = { joinCode: "abc123", name: "Community fixture", description: "A friendly roleplay community with detailed stories and regular community events.", region: "Europe", language: "English", framework: "QBCore", accessType: "public", discordUrl: "https://discord.gg/example", websiteUrl: "", joinUrl: "https://cfx.re/join/abc123", tags: ["serious roleplay"], keywords: ["city stories"], logoUrl: "", bannerUrl: "", players: null, capacity: null, online: null, checkedAt: null, warnings: [{ severity: "warning", field: "description", message: "Source text is self-reported." }], evidence: [{ field: "name", value: "Community fixture", source: "FiveM listing", confidence: "high" }], sourceUrl: "https://servers.fivem.net/servers/detail/abc123" };
 const record = (data = {}) => ({ id: "import-fixture", joinCode: "abc123", status: "pending", version: 7, candidate: { ...candidate }, serverId: null, ...data });
 const claim = (data = {}) => ({ id: "claim-fixture", serverId: "server-fixture", serverName: "Community fixture", serverSlug: "community-fixture", status: "pending", verificationStatus: "pending_check", version: 4, message: "I own this community and can provide the server host records.", evidenceUrl: "https://example.com/proof", claimantName: "Community owner", discordUserId: "123456789012345678", createdAt: "2026-09-04T00:00:00Z", ...data });
-const memberContext = { claimable: true, authenticated: true, isOwner: false, provider: "discord", reconnectUrl: "/api/auth/discord?claim=server-fixture" };
+const memberContext = { accountId: "00000000-0000-4000-8000-000000000001", claimable: true, authenticated: true, isOwner: false, provider: "discord", reconnectUrl: "/api/auth/discord?claim=server-fixture" };
 const json = payload => ({ ok: true, status: 200, json: async () => payload });
 
 test("FiveM sources are fetched one at a time; partial errors remain visible and featured suggestions never publish", async t => {
@@ -97,7 +97,7 @@ test("published live-count checks preserve unsaved listing edits and do not publ
 test("ownership forms use the supplied CSRF token and keep a failed request editable", async t => {
   const calls = [];
   const h = harness("server-claims", async (path, options) => { if (options.body) { calls.push({ path, ...options }); return { ok: false, status: 409, json: async () => ({ error: "Please review the supplied evidence." }) }; } return json({ claims: [], csrfToken: "fixture-csrf", context: memberContext }); });
-  t.after(() => h.dom.window.close()); await h.w.BrowseRPServerClaims.init({ server: { id: "server-fixture" }, root: h.root });
+  t.after(() => h.dom.window.close()); await h.w.BrowseRPServerClaims.init({ accountId: memberContext.accountId, server: { id: "server-fixture" }, root: h.root });
   assert.equal(h.$(".claims-form").hidden, false);
   h.$('[name="message"]').value = "I own this community and have the hosting account."; h.$('[name="evidenceUrl"]').value = "https://example.com/ownership"; h.submit(".claims-form"); await tick();
   assert.equal(calls.length, 1); assert.equal(calls[0].headers["X-BrowseRP-CSRF"], "fixture-csrf"); assert.equal(calls[0].credentials, "same-origin");
@@ -107,8 +107,8 @@ test("ownership forms use the supplied CSRF token and keep a failed request edit
 
 test("Discord verification is explicitly separate from staff approval, including private claim history", async t => {
   let verified = false; const posts = [];
-  const h = harness("server-claims", async (_path, options) => { if (options.body) { posts.push(JSON.parse(options.body)); verified = true; return json({}); } return json({ csrfToken: "fixture-csrf", claims: [claim({ verificationStatus: verified ? "verified" : "pending_check", guildName: "Fixture Discord" })], context: { ...memberContext, claimable: false } }); });
-  t.after(() => h.dom.window.close()); await h.w.BrowseRPServerClaims.init({ server: { id: "server-fixture" }, root: h.root });
+  const h = harness("server-claims", async (_path, options) => { if (options.body) { posts.push(JSON.parse(options.body)); verified = true; return json({ context: memberContext, claim: claim() }); } return json({ csrfToken: "fixture-csrf", claims: [claim({ verificationStatus: verified ? "verified" : "pending_check", guildName: "Fixture Discord" })], context: { ...memberContext, claimable: false } }); });
+  t.after(() => h.dom.window.close()); await h.w.BrowseRPServerClaims.init({ accountId: memberContext.accountId, server: { id: "server-fixture" }, root: h.root });
   assert.equal(h.$(".claims-form").hidden, true); h.click("Verify Discord ownership"); await tick();
   assert.deepEqual(posts, [{ action: "verify", claimId: "claim-fixture" }]);
   assert.match(h.$(".claims-history").textContent, /Discord owner verified/); assert.match(h.$(".claims-history").textContent, /staff still need to approve/); assert.match(h.$(".claims-history").textContent, /Awaiting staff review/);
@@ -116,8 +116,8 @@ test("Discord verification is explicitly separate from staff approval, including
 
 test("ownership consent links stay on this site and successful requests cannot be accidentally resubmitted after a refresh error", async t => {
   let submitted = false;
-  const h = harness("server-claims", async (_path, options) => { if (options.body) { submitted = true; return json({}); } if (submitted) throw new Error("Status offline"); return json({ csrfToken: "fixture-csrf", claims: [], context: memberContext }); });
-  t.after(() => h.dom.window.close()); await h.w.BrowseRPServerClaims.init({ server: { id: "server-fixture" }, root: h.root });
+  const h = harness("server-claims", async (_path, options) => { if (options.body) { submitted = true; return json({ context: memberContext, claim: claim() }); } if (submitted) throw new Error("Status offline"); return json({ csrfToken: "fixture-csrf", claims: [], context: memberContext }); });
+  t.after(() => h.dom.window.close()); await h.w.BrowseRPServerClaims.init({ accountId: memberContext.accountId, server: { id: "server-fixture" }, root: h.root });
   for (const value of ["//example.com", "/\\example.com", "javascript:alert(1)", "/api/auth/discord\n"]) assert.equal(h.w.BrowseRPServerClaims.sameOriginPath(value), null);
   assert.equal(h.w.BrowseRPServerClaims.sameOriginPath(memberContext.reconnectUrl), memberContext.reconnectUrl);
   h.$('[name="message"]').value = "I own this community and manage its hosting."; h.submit(".claims-form"); await tick();

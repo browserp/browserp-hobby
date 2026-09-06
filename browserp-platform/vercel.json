@@ -138,6 +138,14 @@
       "destination": "/api/router?_route=me/connections"
     },
     {
+      "source": "/api/me/advertising-enquiries",
+      "destination": "/api/router?_route=me/advertising-enquiries"
+    },
+    {
+      "source": "/api/admin/advertising-enquiries",
+      "destination": "/api/router?_route=admin/advertising-enquiries"
+    },
+    {
       "source": "/api/me/data-requests",
       "destination": "/api/router?_route=me/data-requests"
     },

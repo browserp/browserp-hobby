@@ -1,0 +1,27 @@
+{
+  "at": "2026-09-06T02:03:00.651Z",
+  "fixtureOnly": true,
+  "results": [
+    {
+      "engine": "chromium",
+      "width": 512,
+      "height": 512,
+      "encodedBytes": 299510,
+      "valid": true
+    },
+    {
+      "engine": "firefox",
+      "width": 512,
+      "height": 512,
+      "encodedBytes": 60640,
+      "valid": true
+    },
+    {
+      "engine": "webkit",
+      "width": 512,
+      "height": 512,
+      "encodedBytes": 312765,
+      "valid": true
+    }
+  ]
+}
