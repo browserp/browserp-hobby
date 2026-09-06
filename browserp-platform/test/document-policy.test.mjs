@@ -73,3 +73,22 @@ test("the middleware helper version is exact and agrees with the installed lockf
   assert.equal(lock.packages["node_modules/@vercel/functions"].version, "3.9.5");
   assert.equal(config.runtime, "nodejs");
 });
+
+test("public document routing precedes clean HTML files and preserves search without trusting internal routes", () => {
+  for (const path of ["/servers", "/games", "/game", "/server", "/blog", "/blog-post", "/games/fivem", "/server/cali-rp", "/blog/choosing-a-community"]) {
+    const response = middleware(new Request(`https://browserp.test${path}?q=cali&offset=24&_route=admin/overview&_path=/staffpanel/overview`));
+    const destination = new URL(response.headers.get("x-middleware-rewrite"));
+    assert.equal(destination.origin, "https://browserp.test");
+    assert.equal(destination.pathname, "/api/router");
+    assert.equal(destination.searchParams.get("q"), "cali");
+    assert.equal(destination.searchParams.get("offset"), "24");
+    assert.equal(destination.searchParams.get("_route"), "public/document");
+    assert.equal(destination.searchParams.get("_path"), path);
+    assert.equal(response.headers.get("x-middleware-next"), null);
+    assert.match(response.headers.get("cache-control"), /no-store/);
+    assert.ok(nonceFrom(response.headers.get("content-security-policy")));
+  }
+  for (const path of ["/", "/profile", "/staffpanel/overview", "/api/router"]) {
+    assert.equal(middleware(new Request(`https://browserp.test${path}`)).headers.get("x-middleware-rewrite"), null);
+  }
+});
