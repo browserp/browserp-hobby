@@ -299,6 +299,65 @@ test("staff menu eligibility requires a current role decision and the live MFA p
   }
 });
 
+test("legacy invalid refresh responses recover to a signed-out session without exposing provider errors", async () => {
+  const invalidResponses = [
+    { code: 400, error_code: "refresh_token_not_found", msg: "Invalid Refresh Token: Refresh Token Not Found" },
+    { code: "400", error_code: "refresh_token_already_used", msg: "Invalid Refresh Token: Already Used" },
+    { code: 400, error: "invalid_grant", error_description: "Invalid Refresh Token: Refresh Token Not Found" },
+    { code: 400, msg: "Invalid Refresh Token: Refresh Token Not Found" },
+    { message: "Invalid Refresh Token: Already Used" }
+  ];
+  for (const payload of invalidResponses) {
+    let attempts = 0;
+    await isolated(async url => {
+      if (new URL(url).pathname === "/auth/v1/user") return response({ code: "bad_jwt" }, 401);
+      attempts += 1; return response(payload, 400);
+    }, async () => {
+      const req = request(); req.browserpRoute = "auth/session";
+      const res = output(); res.end = value => { res.body = JSON.parse(value); };
+      await router(req, res);
+      assert.equal(res.statusCode, 200);
+      assert.equal(res.body.authenticated, false); assert.equal(res.body.staff, false); assert.equal(res.body.staffAccess, false);
+      assert.equal(res.body.user, null); assert.equal(res.body.error, undefined);
+      assert.equal(res.getHeader("Cache-Control"), "no-store");
+      assert.match(cookies(res), /brp_access=;[^\n]*Max-Age=0/);
+      assert.match(cookies(res), /brp_refresh=;[^\n]*Max-Age=0/);
+      assert.equal(attempts, 1);
+    });
+  }
+});
+
+test("invalid refresh recovery clears every production cookie alias and still blocks staff endpoints", async () => isolated(async url => {
+  if (new URL(url).pathname === "/auth/v1/user") return response({ code: "bad_jwt" }, 401);
+  return response({ code: 400, error_code: "refresh_token_not_found", msg: "Invalid Refresh Token: Refresh Token Not Found" }, 400);
+}, async () => {
+  const req = request(`__Host-brp_access=expired; __Host-brp_refresh=fixture-refresh; __Host-brp_csrf=${csrf}; brp_access=legacy-expired; brp_refresh=legacy-expired`);
+  req.browserpRoute = "admin/overview"; req.url = "/api/admin/overview";
+  const res = output(); res.end = value => { res.body = JSON.parse(value); };
+  await router(req, res);
+  assert.equal(res.statusCode, 401); assert.equal(res.body.error, "Sign in to continue.");
+  assert.equal(res.body.overview, undefined); assert.equal(res.getHeader("Cache-Control"), "no-store");
+  for (const name of ["brp_access", "brp_refresh", "__Host-brp_access", "__Host-brp_refresh"]) {
+    assert.ok(res.getHeader("Set-Cookie").some(header => header.startsWith(`${name}=;`) && header.includes("Max-Age=0")), name);
+  }
+}, { NODE_ENV: "production" }));
+
+test("unknown refresh errors and server failures never masquerade as expired sessions", async () => {
+  for (const [status, payload] of [
+    [400, { code: 400, msg: "Refresh token check temporarily unavailable" }],
+    [401, { code: "invalid_api_key", message: "Invalid API key" }],
+    [403, { code: "provider_blocked", message: "Gateway rejected request" }],
+    [429, { error_code: "refresh_token_not_found", message: "Rate limited" }],
+    [500, { code: "unexpected_failure", message: "Invalid Refresh Token: Refresh Token Not Found" }]
+  ]) {
+    await isolated(async url => new URL(url).pathname === "/auth/v1/user" ? response({ code: "bad_jwt" }, 401) : response(payload, status), async () => {
+      const res = output();
+      await assert.rejects(getSession(request(), res, { required: true }), error => error.status === status);
+      assert.doesNotMatch(cookies(res), /brp_(?:access|refresh)=[^\n]*Max-Age=0/);
+    });
+  }
+});
+
 test("private admin routes propagate authorization failures without a successful fallback", async () => {
   for (const route of ["admin/overview", "admin/moderation", "admin/staff", "admin/roles", "admin/permissions", "admin/security", "admin/profiles", "admin/adverts", "admin/blogs", "admin/bans"]) {
     const requests = [];

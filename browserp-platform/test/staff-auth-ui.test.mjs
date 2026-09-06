@@ -27,6 +27,20 @@ test("staff session outages show a retry state rather than pretending the user s
   h.$(".skip-link").click(); assert.equal(h.w.document.activeElement, h.$(".staff-login-card-v3"));
 });
 
+test("a server-invalidated stale session displays Discord sign-in without any staff content", async t => {
+  const calls = [];
+  const h = await harness(t, async path => {
+    calls.push(path);
+    return json({ authenticated: false, staff: false, staffAccess: false, user: null, csrfToken: "fixture-anonymous-csrf" });
+  });
+  assert.ok(h.$('a[href^="/api/auth/discord"]'));
+  assert.match(h.text(), /Continue with Discord/);
+  assert.doesNotMatch(h.text(), /Invalid Refresh Token|Staff access could not be checked/);
+  assert.equal(h.$(".staff-sidebar-v3"), null);
+  assert.equal(h.$(".staff-mobile-bar-v3").hidden, true);
+  assert.deepEqual(calls, ["/api/auth/session"]);
+});
+
 test("staff navigation and controls remain hidden and inert for a delayed unauthorized session", async t => {
   let finish; const calls = [];
   const h = await harness(t, (path, options) => { calls.push({ path, options }); return new Promise(resolve => { finish = resolve; }); });

@@ -1,0 +1,16 @@
+/* These links filter discovery; directory-card tags deliberately remain plain text. */
+#server-tags-v3 { gap: 8px; margin-top: 20px; }
+#server-tags-v3 .server-tag-link-v8 { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; max-width: 100%; padding: 7px 11px; border: 1px solid var(--line-strong, #39323f); border-radius: 8px; background: var(--panel-2, #201b25); color: var(--copy, #ddd5e2); font-size: 13px; font-weight: 650; line-height: 1.4; text-decoration: none; overflow-wrap: anywhere; cursor: pointer; touch-action: manipulation; transition: transform 160ms ease, border-color 160ms ease, color 160ms ease, background-color 160ms ease; }
+#server-tags-v3 .server-tag-link-v8::before { content: "#"; color: var(--pink-strong, #f880c3); font-weight: 750; opacity: .85; }
+#server-tags-v3 .server-tag-link-v8::after { content: "→"; color: var(--pink-strong, #f880c3); font-weight: 750; transition: transform 160ms ease; }
+@media (hover: hover) and (pointer: fine) {
+  #server-tags-v3 .server-tag-link-v8:hover { transform: translateY(-2px); border-color: var(--pink, #ec4fa6); background: color-mix(in srgb, var(--pink, #ec4fa6) 12%, var(--panel-2, #201b25)); color: var(--text, #fff); }
+  #server-tags-v3 .server-tag-link-v8:hover::after { transform: translateX(2px); }
+}
+#server-tags-v3 .server-tag-link-v8:focus-visible { outline: 2px solid var(--pink-strong, #f880c3); outline-offset: 3px; border-color: transparent; color: var(--text, #fff); }
+#server-tags-v3 .server-tag-link-v8:active { transform: scale(.97); background: color-mix(in srgb, var(--pink, #ec4fa6) 20%, var(--panel-2, #201b25)); }
+@media (pointer: coarse) { #server-tags-v3 .server-tag-link-v8 { min-height: 44px; padding-inline: 13px; } }
+@media (prefers-reduced-motion: reduce) {
+  #server-tags-v3 .server-tag-link-v8,#server-tags-v3 .server-tag-link-v8::after { transition: none; }
+  #server-tags-v3 .server-tag-link-v8:hover,#server-tags-v3 .server-tag-link-v8:active,#server-tags-v3 .server-tag-link-v8:hover::after { transform: none; }
+}

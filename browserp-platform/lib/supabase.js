@@ -28,6 +28,26 @@ const OAUTH_COOKIE_BASES = [
   "brp_oauth_nonce"
 ];
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43,128}$/;
+const INVALID_REFRESH_CODES = new Set([
+  "refresh_token_not_found", "refresh_token_already_used", "session_not_found",
+  "session_expired", "invalid_grant", "invalid_credentials", "user_not_found", "user_banned"
+]);
+
+function invalidRefreshSession(error) {
+  // Only explicit credential rejection can erase a session. Gate errors and
+  // outages (including rate limits) must stay retryable and fail closed.
+  if (![400, 401, 403, 422].includes(error?.status)) return false;
+  const payload = error?.payload;
+  // Older GoTrue payloads put the HTTP status in `code`, with the actual
+  // reason in `error_code` or `error`. A truthy numeric code must not hide it.
+  if ([error?.code, payload?.error_code, payload?.code, payload?.error]
+    .some(code => typeof code === "string" && INVALID_REFRESH_CODES.has(code))) return true;
+  // Legacy Auth versions sometimes return only these exact invalid-token
+  // messages. Never treat an arbitrary 400/401/403 or fuzzy message as logout.
+  const message = payload?.message || payload?.msg || payload?.error_description || error?.message;
+  return error.status === 400 && typeof message === "string"
+    && /^Invalid Refresh Token: (?:Refresh Token Not Found|Already Used)$/i.test(message.trim());
+}
 
 function randomToken(bytes = 32) {
   return randomBytes(bytes).toString("base64url");
@@ -314,11 +334,9 @@ export async function getSession(req, res, { required = false, provider } = {}) 
       accessToken = data.access_token;
       user = data.user;
     } catch (error) {
-      const code = error?.code || error?.payload?.error_code || error?.payload?.error;
-      const invalidSession = new Set(["refresh_token_not_found", "refresh_token_already_used", "session_not_found", "session_expired", "invalid_grant", "invalid_credentials", "user_not_found", "user_banned"]);
       // An outage or rate limit does not invalidate a session. Preserve the
       // existing cookies so a later request can retry without another sign-in.
-      if (!invalidSession.has(code) && ![401, 403].includes(error?.status)) throw error;
+      if (!invalidRefreshSession(error)) throw error;
       clearSession(res);
     }
   }

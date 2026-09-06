@@ -8,7 +8,7 @@ Application commit `69281112a4c369c071541ac796df282a282a57b5` was published on 6
 
 This release adds fail-closed staff UI/menu visibility, real profile avatars, separated provider reauthentication, modern public pickers and unclipped search, wider server details with two desktop advert rails, authentic publisher game artwork, GTA VI/6M Coming Soon, a transparent favicon and optional browser-only regional recommendations. Verification: 815 application tests plus 35 database tests, Node 24, 12 functions. See `browserp-platform/docs/PC_EXPERIENCE_2026-09-06.md` for evidence and boundaries.
 
-The next commit contains a verified CSS-only advert-arrow spacing correction (stylesheet cache 2.19.1). Check its final deployment status against live health; do not assume this historical deployment ID includes that follow-up. Main and the shared launch branch were not changed. Another collaborator's `collab/enquiry-shared-ip-20260906` preview was not merged or promoted.
+Follow-up work on this same branch (asset cache 2.19.2) responds to the owner's wide-monitor screenshot: viewport-proportional advert rails and server frame up to 2400px, safe short-screen/mobile layout, clickable same-game feature tags with restrained motion, and graceful recovery from explicitly invalid legacy refresh tokens. The preceding 2.19.1 arrow-only preview was superseded, not separately promoted. Check final deployment status against live health; do not assume the historical deployment ID above includes these follow-ups. Main and the shared launch branch were not changed. Another collaborator's `collab/enquiry-shared-ip-20260906` preview was not merged or promoted.
 
 ## Read this first: revised scope
 

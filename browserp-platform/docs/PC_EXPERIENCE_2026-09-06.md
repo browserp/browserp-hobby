@@ -34,3 +34,13 @@ Based on `98d7de9` (latest launch handoff), preserving deployed application `445
 - Final live visual review caught narrow advert arrows over text. A CSS-only follow-up moves those controls into clear artwork space, retains 44px targets and bumps only the relevant stylesheet cache to 2.19.1. Five carousel regression tests passed; local browser geometry verified both control bottoms above both advert titles. No API or database changes in that follow-up. Confirm its final deployment SHA before declaring the follow-up live.
 
 Do not publish the local visual fixture as a live listing. Provider login rehearsals and physical-device tests were not performed in this pass. Google controls favicon recrawling; cross-site typing carets may need the user to disable browser caret browsing.
+
+## Wide-monitor follow-up (2.19.2 assets)
+
+The owner supplied a 2503px-wide screenshot and requested proportional adverts plus useful animated tags. The server frame now grows to a maximum 2400px with two rails scaling from 160px on smaller desktops to 300px on very wide screens. Rail height responds to viewport height, capped at 760px; copy remains in layout flow rather than clipping. Short laptops disable sticky rails. Tablets/phones use one compact banner after the listing. Paragraph lengths are constrained for readability.
+
+Local browser checks at 320x640, 390x844, 768x1024, 1366x640 and 2503x1222 showed no horizontal overflow. At 2503px, the frame measures 2388px and rails 299px; at 1366x640, rails use non-sticky positioning and a 393px advert stage. At 390px there is one 224px stage. All copy and controls remain within their banners.
+
+Server-detail tags are real same-game feature links in both initial HTML and refreshed content. They have hover lift, arrow/press feedback, keyboard focus and reduced-motion support. The browser click test selected Economy and reached `/servers?platform=fivem&feature=Economy` with the actual feature picker set to `economy`. Directory-card tags remain spans to avoid nested links.
+
+A concrete live stale-cookie error (`Invalid Refresh Token: Refresh Token Not Found`) was also reproduced and fixed. Explicitly invalid legacy refresh responses clear stale cookies and return the existing signed-out gate. Unknown failures, rate limits and outages remain locked and retryable. All 53 focused auth/staff regressions and 17 tag/public-page tests passed. Final Node 24 release gate: 821 application tests plus 35 database tests, no failures/skips; 195 JavaScript syntax checks and 12 functions. There are no role/MFA, database, provider or function-count changes.
