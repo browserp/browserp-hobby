@@ -139,13 +139,6 @@
   [["FiveM", "fivem"], ["RedM", "redm"], ["Minecraft", "minecraft"], ["Roblox", "roblox"]].forEach(([label, id]) => {
     const anchor = link(label, `/games/${id}`, "navigation-game-v6");
     anchor.dataset.platform = id;
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", "0 0 48 48");
-    svg.setAttribute("aria-hidden", "true");
-    const use = document.createElementNS(svg.namespaceURI, "use");
-    use.setAttribute("href", `/assets/game-marks-v4.svg#mark-${id}`);
-    svg.append(use);
-    anchor.prepend(svg);
     gameLinks.append(anchor);
   });
   games.append(gamesHeading, gameLinks);

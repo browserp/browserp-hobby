@@ -17,6 +17,8 @@ test("published game/directory pages arrive with unique content and crawlable se
     const response = await request(path), doc = response.document();
     assert.equal(response.statusCode, 200, path);
     assert.equal(doc.querySelectorAll('a[href="/server/cali-rp"]').length, 1);
+    assert.equal(doc.querySelector(".platform-badge-v5")?.textContent, "FiveM");
+    assert.equal(doc.querySelectorAll(".platform-badge-v5 svg").length, 0);
     assert.equal(doc.querySelector('link[rel="canonical"]').href, `https://www.browserp.com${path === "/servers" ? path : "/games/fivem"}`);
     assert.doesNotMatch(response.body, /PRIVATE_|quality_score|owner_id|123 players/);
     assert.equal(doc.querySelector(".server-meta").textContent, "FiveMUnited StatesEnglishvMenuOpen to everyone");

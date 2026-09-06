@@ -37,6 +37,18 @@ test("rendered info cards and compact metadata retain platform region language f
   assert.equal(text(platforms.facts({ platform_id: "minecraft" }).children[2].children[1]), "Not specified");
 });
 
+test("game badges use readable text without unrelated illustrative icons", () => {
+  for (const [id, name] of Object.entries(platforms.names)) {
+    const badge = platforms.badge(id);
+    assert.equal(text(badge), name);
+    assert.equal(badge.dataset.platform, id);
+    assert.equal(badge.children.length, 1);
+    assert.equal(badge.children[0].tagName, "span");
+  }
+  assert.doesNotMatch(read("lib/public-pages.js"), /game-marks-v4\.svg/);
+  assert.doesNotMatch(read("public/navigation.js"), /game-marks-v4\.svg/);
+});
+
 test("all game accents are distinct and meet AA contrast on info cards and badges", () => {
   const css = read("public/browserp-v3.css");
   const luminance = (rgb) => rgb.map((v) => v / 255).map((v) => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4).reduce((sum, v, i) => sum + v * [.2126, .7152, .0722][i], 0);

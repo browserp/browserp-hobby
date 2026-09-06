@@ -24,12 +24,7 @@
   }
   function badge(value, label = names[resolve(value)] || "Roleplay") {
     const item = theme(node("span", "platform-badge-v5"), value);
-    const mark = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    mark.setAttribute("aria-hidden", "true");
-    const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
-    use.setAttribute("href", `/assets/game-marks-v4.svg#mark-${resolve(value)}`);
-    mark.append(use);
-    item.append(mark, node("span", "", label));
+    item.append(node("span", "", label));
     return item;
   }
   // Preserve this public metadata order: platform, region, language, framework, access.

@@ -89,7 +89,7 @@ function head(html, { title, description, path, noindex = false, type = "website
   const tags = `<meta name="description" content="${escapeHTML(description)}"><meta name="robots" content="${noindex ? "noindex,follow" : "index,follow"}">${path ? `<link rel="canonical" href="${escapeHTML(ORIGIN + path)}"><meta property="og:url" content="${escapeHTML(ORIGIN + path)}">` : ""}<meta property="og:type" content="${type}"><meta property="og:title" content="${escapeHTML(title)}"><meta property="og:description" content="${escapeHTML(description)}"><meta name="twitter:title" content="${escapeHTML(title)}"><meta name="twitter:description" content="${escapeHTML(description)}">`;
   return html.replace("</head>", `${tags}${structured ? `<script type="application/ld+json">${scriptJSON(structured)}</script>` : ""}</head>`);
 }
-function badge(server) { return `<span class="platform-badge-v5" data-platform="${server.platform_id}"><svg aria-hidden="true"><use href="/assets/game-marks-v4.svg#mark-${server.platform_id}"></use></svg><span>${server.platform_name}</span></span>`; }
+function badge(server) { return `<span class="platform-badge-v5" data-platform="${server.platform_id}"><span>${server.platform_name}</span></span>`; }
 function entries(server) {
   return [["Game", server.platform_name], ["Region", server.region], ["Language", server.language], [server.platform_id === "roblox" ? "Roblox experience" : "Server setup", server.framework], ["Access", ({ public: "Open to everyone", allowlisted: "Approval required", application: "Application required", whitelisted: "Whitelisted", unknown: "Not confirmed" })[server.access_type] || server.access_type || "Not confirmed"]];
 }
