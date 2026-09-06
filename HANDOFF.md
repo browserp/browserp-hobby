@@ -1,5 +1,15 @@
 # BrowseRP — PC development handoff, 6 September 2026
 
+## Latest PC release — read before the historical starting point below
+
+The current development branch is `fix/pc-experience-2026-09-06`, descended from launch handoff `98d7de9`. Continue from this branch, not the older application source or main. The revised scope and deliberately disabled features below remain in force.
+
+Application commit `69281112a4c369c071541ac796df282a282a57b5` was published on 6 September at 14:02 UTC: production deployment `dpl_31AFT7Y2H8n8QZFKpHAYk1hn8Q8X`, https://browserp-hobby-2jl036v1c-browserp.vercel.app, with www/apex aliases READY. Live health confirmed the exact SHA, ready backend/auth/security, and disabled payments. All six anonymously probed staff endpoints denied access (401, no private data, no-store); the session response reported staff=false and staffAccess=false.
+
+This release adds fail-closed staff UI/menu visibility, real profile avatars, separated provider reauthentication, modern public pickers and unclipped search, wider server details with two desktop advert rails, authentic publisher game artwork, GTA VI/6M Coming Soon, a transparent favicon and optional browser-only regional recommendations. Verification: 815 application tests plus 35 database tests, Node 24, 12 functions. See `browserp-platform/docs/PC_EXPERIENCE_2026-09-06.md` for evidence and boundaries.
+
+The next commit contains a verified CSS-only advert-arrow spacing correction (stylesheet cache 2.19.1). Check its final deployment status against live health; do not assume this historical deployment ID includes that follow-up. Main and the shared launch branch were not changed. Another collaborator's `collab/enquiry-shared-ip-20260906` preview was not merged or promoted.
+
 ## Read this first: revised scope
 
 The owner is moving from the Mac to a PC, using the same account and working with a friend. Development is resuming; the earlier instruction to pause for a week is superseded. The owner is arranging additional usage. Do not purchase or redeem usage on their behalf from this note.

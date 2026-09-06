@@ -21,4 +21,16 @@ Based on `98d7de9` (latest launch handoff), preserving deployed application `445
 - Browser review used a local-only synthetic fixture, never published listings/accounts. Desktop 1600px: no horizontal overflow, server frame 1521px with 1078px content and two rails. Mobile 390px: no overflow, stacked profile, one server rail. Connected-account sign-in group sits below cards; search choices update the region picker; three distinct UK views yield UK recommendations.
 - The typing caret reported across unrelated websites is consistent with browser caret browsing (F7), not editable BrowseRP content. No blanket suppression of selection or accessibility features was added.
 
-Release must compare current production SHA before promotion and verify health, protected APIs, icon/artwork, future pages and source SHA after promotion. Do not publish the local visual fixture as a live listing.
+## Production release evidence
+
+- URL: https://www.browserp.com
+- Target/status: production, READY at 14:02 UTC on 6 September 2026.
+- Application commit: `69281112a4c369c071541ac796df282a282a57b5`.
+- Deployment: `dpl_31AFT7Y2H8n8QZFKpHAYk1hn8Q8X`; https://browserp-hobby-2jl036v1c-browserp.vercel.app.
+- Framework: multipage HTML/CSS/JavaScript with Node functions. Build duration: 2m42s. Exactly 12 Node functions.
+- Live health matched the SHA; backend/authentication/security ready, payments disabled. Apex redirects to www. GTA VI and 6M pages return 200 with Coming Soon text; published artwork, recommendation script and CSS return 200. Live favicon SHA-256 matches the tested transparent source.
+- Anonymous session reports staff=false/staffAccess=false. Six staff endpoints (overview, staff, security, profiles, roles, permissions) return 401 with error/requestId only, no-store and cache MISS.
+- Observability: no errors returned in the deployment-scoped production error scan since five minutes. Drains were not reviewed or changed; this is a smoke check, not continuous monitoring or a penetration test.
+- Final live visual review caught narrow advert arrows over text. A CSS-only follow-up moves those controls into clear artwork space, retains 44px targets and bumps only the relevant stylesheet cache to 2.19.1. Five carousel regression tests passed; local browser geometry verified both control bottoms above both advert titles. No API or database changes in that follow-up. Confirm its final deployment SHA before declaring the follow-up live.
+
+Do not publish the local visual fixture as a live listing. Provider login rehearsals and physical-device tests were not performed in this pass. Google controls favicon recrawling; cross-site typing carets may need the user to disable browser caret browsing.
