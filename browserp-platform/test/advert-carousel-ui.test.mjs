@@ -8,19 +8,22 @@ const tick = async () => { for (let i = 0; i < 4; i += 1) await new Promise(reso
 const artwork = ["serious-roleplay", "custom-cars", "community-stories"].map(name => `/assets/adverts/${name}.jpg`);
 const adverts = artwork.map((imageUrl, i) => ({ headline: `Reviewed advert ${i + 1}`, body: `Community information ${i + 1}`, imageUrl, destinationUrl: `/servers?campaign=${i + 1}`, ctaLabel: "Explore" }));
 
-async function harness(t, { outcomes = {}, reduced = false } = {}) {
+async function harness(t, { outcomes = {}, reduced = false, decoding = false } = {}) {
   const dom = new JSDOM('<body><aside class="side-ad-v3" data-ad-placement="side" hidden></aside></body>', { url: "https://browserp.test/", runScripts: "outside-only" });
   const w = dom.window; t.after(() => w.close());
   const style = w.document.createElement("style");
   style.textContent = read("browserp-v3.css").split("\n").filter(line => /^\.side-ad-(?:stage|copy)-v3 \{/.test(line) || line.includes("artwork-unavailable") || line.startsWith(".side-ad-image-notice-v3")).join("\n");
   w.document.head.append(style);
   w.matchMedia = () => ({ matches: reduced });
-  const requests = [], images = [], timers = new Map(); let timerId = 0;
+  const requests = [], images = [], decodes = [], timers = new Map(); let timerId = 0;
   w.setInterval = (callback, delay) => { timers.set(++timerId, { callback, delay }); return timerId; };
   w.clearInterval = id => timers.delete(id);
   w.Image = function () {
     const image = w.document.createElement("img"); let complete = false, width = 0;
     image.finishPendingLoad = () => { complete = true; width = 800; image.dispatchEvent(new w.Event("load")); };
+    if (decoding) image.decode = () => new Promise((resolve, reject) => {
+      decodes.push({ image, fail() { complete = true; width = 0; reject(new w.DOMException("Image request failed", "EncodingError")); }, succeed() { complete = true; width = 800; resolve(); } });
+    });
     Object.defineProperties(image, {
       complete: { get: () => complete }, naturalWidth: { get: () => width },
       src: { get: () => image.getAttribute("src") || "", set(value) {
@@ -49,7 +52,7 @@ async function harness(t, { outcomes = {}, reduced = false } = {}) {
   root.removeEventListener = (type, callback, options) => { activeListeners.get(type)?.delete(callback); remove(type, callback, options); };
   w.eval(read("browserp-v3.js")); await tick();
   assert.equal(typeof release, "function");
-  return { w, root, requests, images, timers, activeListeners, $: selector => root.querySelector(selector), async hydrate(items = adverts) { release(items); await tick(); } };
+  return { w, root, requests, images, decodes, timers, activeListeners, $: selector => root.querySelector(selector), async hydrate(items = adverts) { release(items); await tick(); } };
 }
 
 test("blocked artwork renders a compact labelled advert, does not retry failures, and recovers on a healthy slide", async t => {
@@ -77,6 +80,15 @@ test("blocked artwork renders a compact labelled advert, does not retry failures
   assert.ok(h.requests.every(request => artwork.includes(request.src)), "No alternate paths or hosts bypass artwork blocking");
 });
 
+test("reviewed advert links are sponsored while house links retain their ordinary relationship", async t => {
+  const h = await harness(t);
+  assert.equal(h.$("[data-ad-copy] a").relList.contains("sponsored"), false);
+  await h.hydrate([{ ...adverts[0], destinationUrl: "https://community.example/join" }, adverts[1]]);
+  assert.equal(h.$("[data-ad-copy] a").rel, "sponsored noopener noreferrer");
+  h.$('[data-ad-direction="next"]').click();
+  assert.equal(h.$("[data-ad-copy] a").rel, "sponsored");
+});
+
 test("already-cached images complete without a load event and cosmetic image blocking keeps the compact fallback", async t => {
   const h = await harness(t, { outcomes: { [artwork[0]]: "cached", [artwork[1]]: "hidden" } }); await h.hydrate();
   assert.equal(h.root.classList.contains("artwork-unavailable"), false);
@@ -88,6 +100,34 @@ test("already-cached images complete without a load event and cosmetic image blo
   assert.equal(h.$("[data-ad-copy] strong").textContent, "Reviewed advert 2");
   h.$('[data-ad-direction="next"]').click();
   assert.equal(h.root.classList.contains("artwork-unavailable"), false);
+});
+
+test("an image that fails without an error event uses the labelled fallback and never retries its address", async t => {
+  const h = await harness(t, { decoding: true, outcomes: { [artwork[0]]: "pending" } }); await h.hydrate();
+  const image = h.$("img");
+  h.decodes.findLast(item => item.image === image).fail(); await tick();
+  assert.equal(image.complete, true); assert.equal(image.naturalWidth, 0);
+  assert.equal(h.root.classList.contains("artwork-unavailable"), true);
+  assert.equal(h.$(".side-ad-image-notice-v3").hidden, false);
+  assert.equal(h.$("[data-ad-copy] strong").textContent, "Reviewed advert 1");
+  const requests = h.requests.length;
+  h.$('[data-ad-direction="next"]').click();
+  assert.equal(h.root.classList.contains("artwork-unavailable"), false);
+  h.$('[data-ad-direction="previous"]').click();
+  assert.equal(h.root.classList.contains("artwork-unavailable"), true);
+  assert.equal(h.requests.length, requests + 1, "Only the healthy next slide starts a new request");
+});
+
+test("late image decoding cannot change a newer slide or a replacement carousel", async t => {
+  const h = await harness(t, { decoding: true, outcomes: { [artwork[0]]: "pending" } });
+  const houseDecode = h.decodes.at(-1); await h.hydrate();
+  houseDecode.fail(); await tick();
+  assert.equal(h.root.classList.contains("artwork-unavailable"), false);
+  const currentDecode = h.decodes.at(-1);
+  h.$('[data-ad-direction="next"]').click(); currentDecode.fail(); await tick();
+  assert.equal(h.root.classList.contains("artwork-unavailable"), false);
+  assert.equal(h.$(".side-ad-image-notice-v3").hidden, true);
+  assert.equal(h.$("[data-ad-copy] strong").textContent, "Reviewed advert 2");
 });
 
 test("a late load from another slide cannot reveal old artwork over a failed current slide", async t => {

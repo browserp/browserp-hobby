@@ -294,6 +294,7 @@
     let dots;
     let markArtworkUnavailable;
     let imageSource = "";
+    let imageRequest = 0;
     const failedImages = new Set();
     const listeners = [];
     const listen = (type, handler) => {
@@ -354,6 +355,7 @@
       const advert = list[index];
       if (!copy) return;
       if (image) {
+        const request = ++imageRequest;
         imageSource = safeAdvertImage(advert.imageUrl, index);
         if (failedImages.has(imageSource)) markArtworkUnavailable();
         else {
@@ -362,6 +364,14 @@
           if (image.complete) {
             if (image.naturalWidth) image.onload();
             else image.onerror();
+          } else if (typeof image.decode === "function") {
+            // WebKit can finish a blocked image without delivering its error event.
+            // Decode observes the same request; it does not retry the blocked URL.
+            image.decode().then(() => {
+              if (request === imageRequest) image.onload?.();
+            }, () => {
+              if (request === imageRequest) markArtworkUnavailable();
+            });
           }
         }
       }
@@ -372,7 +382,7 @@
       if (destination) {
         const link = node("a", "", advert.ctaLabel || "Learn more");
         link.href = destination;
-        if (destination.startsWith("https://")) link.rel = "noopener noreferrer";
+        link.rel = [!HOUSE_ADVERTS.includes(advert) ? "sponsored" : "", destination.startsWith("https://") ? "noopener noreferrer" : ""].filter(Boolean).join(" ");
         copy.append(link);
       }
       $$('button', dots || document.createElement("div")).forEach((dot, position) => {
@@ -384,6 +394,7 @@
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     function stop() { window.clearInterval(timer); }
     root._browserpAdvertCleanup = () => {
+      imageRequest++;
       stop();
       document.removeEventListener("visibilitychange", visibilityChanged);
       listeners.forEach((remove) => remove());

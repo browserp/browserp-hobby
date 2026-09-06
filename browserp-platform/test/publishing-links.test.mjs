@@ -87,11 +87,24 @@ test("initial directory cards use logo first, three existing features and honest
     } finally { dom.window.close(); }
   }
 });
-test("homepage declares BrowseRP once with the canonical site identity and loads coordinated touch feedback once", () => {
+test("homepage declares BrowseRP once with its canonical publisher identity and loads coordinated touch feedback once", () => {
   const dom = new JSDOM(read("public/index.html"));
   try {
     const doc = dom.window.document, identities = [...doc.querySelectorAll('script[type="application/ld+json"]')].map(node => JSON.parse(node.textContent));
-    assert.deepEqual(identities, [{ "@context": "https://schema.org", "@type": "WebSite", name: "BrowseRP", url: "https://www.browserp.com/" }]);
+    assert.equal(identities.length, 1, "The homepage must publish one consistent site identity");
+    const identity = identities[0], canonical = doc.querySelector('link[rel="canonical"]').href;
+    assert.equal(identity["@context"], "https://schema.org");
+    assert.equal(identity["@type"], "WebSite");
+    assert.equal(identity["@id"], `${canonical}#website`);
+    assert.equal(identity.name, "BrowseRP");
+    assert.equal(identity.url, canonical);
+    assert.equal(identity.publisher["@type"], "Organization");
+    assert.equal(identity.publisher["@id"], `${canonical}#organization`);
+    assert.equal(identity.publisher.name, identity.name);
+    assert.equal(identity.publisher.url, canonical);
+    assert.equal(identity.publisher.logo["@type"], "ImageObject");
+    assert.equal(identity.publisher.logo.url, doc.querySelector('meta[property="og:image"]').content);
+    for (const dimension of ["width", "height"]) assert.equal(identity.publisher.logo[dimension], Number(doc.querySelector(`meta[property="og:image:${dimension}"]`).content));
     const scripts = [...doc.querySelectorAll("script[src]")].map(node => node.getAttribute("src"));
     assert.equal(scripts.filter(src => /^\/touch-feedback\.js\?v=[0-9.]+$/.test(src)).length, 1);
     assert.ok(scripts.findIndex(src => src.startsWith("/touch-feedback.js?")) < scripts.findIndex(src => src.startsWith("/browserp-v3.js")));

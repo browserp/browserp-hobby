@@ -37,8 +37,23 @@ test("directory pagination is real links and uses distinct canonical pages; arbi
   for (const path of ["/servers?q=cali", "/servers?access=public", "/games/fivem?mode=esx", "/servers?platform=fivem"]) {
     response = await request(path, { data }); doc = response.document();
     assert.equal(doc.querySelector('meta[name="robots"]').content, "noindex,follow", path);
-    assert.doesNotMatch(doc.querySelector('link[rel="canonical"]').href, /q=|access=|mode=/);
+    assert.equal(doc.querySelector('link[rel="canonical"]').href, `https://www.browserp.com${path}`, "Distinct filtered results must not claim to duplicate the unfiltered page");
   }
+});
+
+test("pagination rejects empty continuations, excludes arbitrary offsets, and removes tracking duplicates", async () => {
+  const data = { ...defaultData, directory: async filters => ({ total: 60, servers: filters.offset < 60 ? [server] : [] }) };
+  for (const path of ["/servers?offset=60", "/servers?offset=999999", "/games/fivem?offset=72", "/servers?q=missing&offset=72"]) {
+    const response = await request(path, { data }); assert.equal(response.statusCode, 404, path); assert.match(response.headers["x-robots-tag"], /noindex/);
+  }
+  const irregular = (await request("/servers?offset=1", { data })).document();
+  assert.equal(irregular.querySelector('meta[name="robots"]').content, "noindex,follow");
+  const doc = (await request("/games/fivem?platform=fivem&offset=24&utm_source=share", { data })).document();
+  assert.equal(doc.querySelector('link[rel="canonical"]').href, "https://www.browserp.com/games/fivem?offset=24");
+  assert.deepEqual([...doc.querySelectorAll("[data-public-pagination] a")].map(a => a.getAttribute("href")), ["/games/fivem", "/games/fivem?offset=48"]);
+  const first = (await request("/servers?utm_source=share", { data })).document();
+  assert.equal(first.querySelector('link[rel="canonical"]').href, "https://www.browserp.com/servers");
+  assert.equal(first.querySelector('meta[name="robots"]').content, "index,follow");
 });
 
 test("GTA VI and 6M pages arrive as upcoming information without listings, counts or submission actions", async () => {
@@ -96,7 +111,7 @@ test("unknown, unpublished, malformed and missing pages return 404; dependency o
   assert.equal((await request("/servers", { method: "POST" })).statusCode, 405);
 });
 test("legacy template URLs permanently redirect to the public page, never a user supplied host", async () => {
-  for (const [from, to] of [["/game?game=fivem", "/games/fivem"], ["/game", "/games"], ["/server?slug=cali-rp", "/server/cali-rp"], ["/blog-post?slug=choosing-a-community", "/blog/choosing-a-community"]]) {
+  for (const [from, to] of [["/game?game=fivem", "/games/fivem"], ["/game", "/games"], ["/game?game=fivem&access=public&offset=24&utm_source=old", "/games/fivem?access=public&offset=24"], ["/game?region=United+Kingdom", "/servers?region=United+Kingdom"], ["/server?slug=cali-rp", "/server/cali-rp"], ["/blog-post?slug=choosing-a-community", "/blog/choosing-a-community"]]) {
     const response = await request(from, { headers: { host: "evil.test", cookie: "private-session" } }); assert.equal(response.statusCode, 308); assert.equal(response.headers.location, to);
   }
 });
@@ -107,8 +122,49 @@ test("published article text, social identity and safe structured data are prese
   assert.equal(doc.querySelectorAll("#journal-article-v6 li").length, 2);
   assert.equal(doc.querySelector('meta[property="og:type"]').content, "article");
   assert.equal(JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent).publisher.name, "BrowseRP");
+  const structured = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent);
+  assert.equal(structured["@type"], "BlogPosting");
+  assert.equal(structured.datePublished, doc.querySelector("#journal-date-v6").getAttribute("datetime"));
+  assert.equal(structured.dateModified, undefined, "A publication date is not evidence of the last edit");
+  assert.equal(structured.author, undefined, "Private author IDs cannot become an invented public byline");
+  assert.deepEqual(structured.mainEntityOfPage.breadcrumb.itemListElement.map(item => item.item), ["https://www.browserp.com/", "https://www.browserp.com/blog", "https://www.browserp.com/blog/choosing-a-community"]);
   assert.doesNotMatch(response.body, /PRIVATE_AUTHOR|aggregateRating|reviewRating/);
   const index = await request("/blog"); assert.ok(index.document().querySelector('a[href="/blog/choosing-a-community"]'));
+});
+
+test("game and server share images identify the public page and retain the RP fallback without invented dimensions", async () => {
+  for (const [id, width, height, ext] of [["fivem", 460, 215, "jpg"], ["redm", 460, 215, "jpg"], ["minecraft", 1170, 500, "jpg"], ["roblox", 1200, 675, "webp"]]) {
+    const doc = (await request(`/games/${id}`)).document();
+    assert.equal(doc.querySelector('meta[property="og:image"]').content, `https://www.browserp.com/assets/games/${id}-official.${ext}`);
+    assert.equal(doc.querySelector('meta[property="og:image:width"]').content, String(width));
+    assert.equal(doc.querySelector('meta[property="og:image:height"]').content, String(height));
+    assert.equal(doc.querySelector('meta[name="twitter:card"]').content, "summary_large_image");
+    const structured = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent);
+    assert.equal(structured.breadcrumb.itemListElement.at(-1).item, `https://www.browserp.com/games/${id}`);
+  }
+  for (const [overrides, expected] of [[{}, server.logo_url], [{ banner_url: server.logo_url.replace("logo.png", "banner.webp") }, server.logo_url.replace("logo.png", "banner.webp")], [{ logo_url: "/api/public/server-image?url=https://evil.test/secret.png" }, "https://www.browserp.com/browserp-mark-v3.png"], [{ logo_url: "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/sign/server-media/private.png?token=SECRET" }, "https://www.browserp.com/browserp-mark-v3.png"]]) {
+    const doc = (await request("/server/cali-rp", { data: { ...defaultData, server: async () => ({ server: { ...server, ...overrides } }) } })).document();
+    assert.equal(doc.querySelectorAll('meta[property="og:image"]').length, 1);
+    assert.equal(doc.querySelector('meta[property="og:image"]').content, expected);
+    assert.equal(doc.querySelector('meta[name="twitter:image"]').content, expected);
+    if (expected === server.logo_url) assert.equal(doc.querySelector('meta[property="og:image:width"]'), null);
+    assert.equal(doc.querySelector('meta[property="og:site_name"]').content, "BrowseRP");
+    const structured = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent);
+    assert.equal(structured.breadcrumb.itemListElement.at(-1).name, doc.querySelector("h1").textContent);
+    assert.equal(structured.primaryImageOfPage.url, expected);
+  }
+});
+
+test("preview public documents and sitemaps explicitly prohibit indexing", async () => {
+  const prior = process.env.VERCEL_ENV;
+  try {
+    process.env.VERCEL_ENV = "preview";
+    for (const path of ["/server/cali-rp", "/games/fivem", "/sitemap.xml"]) {
+      const response = await request(path); assert.equal(response.statusCode, 200);
+      assert.equal(response.headers["x-robots-tag"], "noindex, nofollow");
+      if (path !== "/sitemap.xml") assert.equal(response.document().querySelector('meta[name="robots"]').content, "noindex,nofollow");
+    }
+  } finally { if (prior === undefined) delete process.env.VERCEL_ENV; else process.env.VERCEL_ENV = prior; }
 });
 test("HTML, attribute, JSON and unsafe image inputs cannot break out into executable markup", async () => {
   const malicious = '<script>alert(1)</script> & "quote"';
@@ -136,6 +192,7 @@ test("deployment uses the existing router and exposes templates only through con
   assert.match(config.functions["api/router.js"].includeFiles, /public\//);
   assert.equal(existsSync(new URL("../public/sitemap.xml", import.meta.url)), false);
   assert.doesNotMatch(read("lib/public-pages.js"), /refresh:\s*true|useSecret:\s*true|getSession\(/);
+  for (const page of ["find-server", "compare"]) assert.equal(new JSDOM(read(`public/${page}.html`)).window.document.querySelector('meta[name="robots"]').content, "noindex,follow");
 });
 
 test("real public data reader uses anonymous published RPCs and never forwards member cookies or triggers scrapers", async () => {

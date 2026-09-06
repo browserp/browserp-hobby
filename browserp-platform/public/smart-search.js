@@ -261,19 +261,79 @@
   }
   function home() {
     const form = document.querySelector("#home-search-form"); const input = document.querySelector("#home-search"); if (!form || !input) return;
+    const games = document.querySelector(".home-game-discovery .game-showcase-v3"); if (!games) return;
     let filters = M.normalize(), facets = {}, id = 0, controller;
-    const row = node("div", "smart-home-filters"); form.after(row);
+    const panel = node("div", "home-game-filters"); panel.id = "home-game-filters"; panel.hidden = true;
+    const headingRow = node("div", "home-game-filter-heading");
+    const heading = node("h2"); heading.id = "home-game-filter-title"; panel.setAttribute("aria-labelledby", heading.id);
+    const clear = node("button", "button-v3 button-quiet-v3", "Clear game"); clear.type = "button";
+    headingRow.append(heading, clear);
+    const row = node("div", "smart-home-filters");
     const selects = {};
-    for (const key of ["platform", "region"]) {
-      const label = node("label", "field-v3"); label.append(node("span", "", M.labels[key])); const select = node("select"); label.append(select); row.append(label); selects[key] = select;
-      select.addEventListener("change", () => { filters[key] = select.value; resetChildren(filters, key); refresh(); });
+    for (const key of ["region", "mode", "feature", "access"]) {
+      const label = node("label", "field-v3"); label.append(node("span", "", M.labels[key])); const select = node("select"); select.id = `home-${key}-filter`; label.append(select); row.append(label); selects[key] = select;
+      select.addEventListener("change", () => change(key, select.value));
     }
-    function sync() { for (const [key, select] of Object.entries(selects)) selectOptions(select, key, facets, filters); }
+    const actions = node("div", "home-game-filter-actions");
+    const submit = node("button", "button-v3 button-primary-v3"); submit.type = "submit"; submit.setAttribute("form", form.id);
+    const gamePage = node("a", "button-v3 button-secondary-v3");
+    actions.append(submit, gamePage);
+    const feedback = node("p", "home-game-filter-status"); feedback.setAttribute("role", "status");
+    panel.append(headingRow, row, actions, feedback); games.append(panel);
+    const choices = [...games.querySelectorAll(".game-grid-v3 [data-platform]")];
+    for (const choice of choices) {
+      // Preserve each real game URL for new tabs and for visitors without JavaScript.
+      choice.setAttribute("role", "button"); choice.setAttribute("aria-pressed", "false"); choice.setAttribute("aria-controls", panel.id);
+      choice.addEventListener("click", event => {
+        if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault(); change("platform", choice.dataset.platform);
+      });
+      choice.addEventListener("keydown", event => { if (event.key === " ") { event.preventDefault(); choice.click(); } });
+    }
+    clear.addEventListener("click", () => {
+      const previous = choices.find(choice => choice.dataset.platform === filters.platform);
+      change("platform", "all"); previous?.focus({ preventScroll: true });
+    });
+    function sync() {
+      const selected = filters.platform !== "all";
+      panel.hidden = !selected;
+      for (const choice of choices) choice.setAttribute("aria-pressed", String(choice.dataset.platform === filters.platform));
+      if (selected) {
+        const game = M.display("platform", filters.platform);
+        heading.textContent = `Find ${game} servers`; submit.textContent = `Find ${game} servers`;
+        gamePage.textContent = `About ${game}`; gamePage.href = `/games/${filters.platform}`;
+      }
+      for (const [key, select] of Object.entries(selects)) selectOptions(select, key, facets, filters);
+    }
+    function change(key, value) {
+      if (filters[key] === value) return;
+      filters[key] = value; resetChildren(filters, key);
+      if (["platform", "region"].includes(key)) facets = {};
+      refresh();
+    }
     async function refresh() {
       sync(); const current = ++id; controller?.abort(); controller = new AbortController();
-      try { const params = M.params(filters); params.set("discover", "true"); params.set("limit", "1"); const response = await fetch(`/api/servers?${params}`, { signal: controller.signal }); if (!response.ok) return; const data = await response.json(); if (current !== id) return; facets = data.facets || {}; sync(); } catch { /* Search remains usable during an outage. */ }
+      const requestController = controller; let timedOut = false;
+      const timeout = window.setTimeout(() => { timedOut = true; requestController.abort(); }, 15_000);
+      row.setAttribute("aria-busy", "true"); for (const select of Object.values(selects)) select.disabled = true;
+      feedback.textContent = filters.platform === "all" ? "" : "Updating choices…";
+      try {
+        const params = M.params(filters); params.set("discover", "true"); params.set("limit", "1");
+        const response = await fetch(`/api/servers?${params}`, { signal: controller.signal }); if (!response.ok) throw new Error("Choices unavailable");
+        const data = await response.json(); if (current !== id) return; facets = data.facets || {}; sync(); feedback.textContent = "";
+      } catch (error) {
+        if (current !== id || (error.name === "AbortError" && !timedOut)) return;
+        feedback.textContent = "Filter choices are unavailable. You can still search for servers.";
+      } finally {
+        window.clearTimeout(timeout);
+        if (current === id) { row.setAttribute("aria-busy", "false"); for (const select of Object.values(selects)) select.disabled = false; }
+      }
     }
-    suggestions(input, () => filters, () => facets, choice => { filters[choice.key] = choice.value; resetChildren(filters, choice.key); input.value = ""; filters.query = ""; if (!["platform", "region"].includes(choice.key)) { const params = M.params(filters); location.assign(`/servers?${params}`); } else refresh(); });
+    suggestions(input, () => filters, () => facets, choice => {
+      filters[choice.key] = choice.value; resetChildren(filters, choice.key); input.value = ""; filters.query = "";
+      if (choice.key !== "platform" && filters.platform === "all") { const params = M.params(filters); location.assign(`/servers?${params}`); }
+      else { if (["platform", "region"].includes(choice.key)) facets = {}; refresh(); }
+    });
     form.addEventListener("submit", event => { event.preventDefault(); filters.query = input.value.trim().slice(0, 120); const params = M.params(filters); location.assign(`/servers${params.size ? `?${params}` : ""}`); });
     refresh();
   }

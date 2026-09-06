@@ -204,14 +204,90 @@ test("retrying a failed second page keeps the first page and prevents duplicate 
   assert.equal(h.$("#list").textContent, "first,second"); h.dom.window.close();
 });
 
-test("homepage game and region selectors share live facets and upcoming games stay absent", async () => {
-  const dom = new JSDOM('<body data-page="home"><form id="home-search-form"><input id="home-search" type="search"></form></body>', { url: "https://browserp.test/", runScripts: "outside-only" });
-  const w = dom.window; w.BrowseRPPlatforms = { theme() {} }; w.fetch = async url => ({ ok: true, json: async () => payload(Object.fromEntries(new URL(url, w.location).searchParams)) });
-  w.eval(read("public/discovery-model.js")); w.eval(read("public/smart-search.js")); w.BrowseRPSearch.home(); await pause(10);
-  const [game, region] = w.document.querySelectorAll("select"); assert.equal(game.options.length, 5);
-  game.value = "minecraft"; game.dispatchEvent(new w.Event("change")); await pause(10);
-  assert.deepEqual([...region.options].map(item => item.value), ["all", "Europe"]);
-  dom.window.close();
+function homeHarness(fetcher) {
+  const dom = new JSDOM(read("public/index.html"), { url: "https://browserp.test/", runScripts: "outside-only" });
+  const w = dom.window, destinations = [];
+  w.BrowseRPPlatforms = { theme() {} };
+  w.fetch = fetcher || (async url => ({ ok: true, json: async () => payload(Object.fromEntries(new URL(url, w.location).searchParams)) }));
+  w.testNavigation = { pathname: "/", search: "", assign: url => destinations.push(new URL(url, w.location)) };
+  w.eval(read("public/discovery-model.js"));
+  w.eval(`((location) => { ${read("public/smart-search.js")} })(window.testNavigation);`);
+  w.BrowseRPSearch.home();
+  const $ = selector => w.document.querySelector(selector);
+  const change = async (selector, value) => { $(selector).value = value; $(selector).dispatchEvent(new w.Event("change")); await pause(10); };
+  const submit = () => $("#home-search-form").dispatchEvent(new w.Event("submit", { cancelable: true }));
+  return { dom, w, $, destinations, change, submit };
+}
+
+test("homepage ordinary searches do not require a game selection", async () => {
+  const h = homeHarness(); await pause(10);
+  assert.equal(h.$("#home-game-filters").hidden, true);
+  assert.equal(h.w.document.querySelectorAll(".game-grid-v3 [data-platform]").length, 4);
+  h.$("#home-search").value = "San Andreas"; h.submit();
+  assert.equal(h.destinations.at(-1).searchParams.get("q"), "San Andreas");
+  assert.equal(h.destinations.at(-1).searchParams.has("platform"), false);
+  h.dom.window.close();
+});
+
+test("homepage game cards reveal live, game-specific choices and clearing restores an ordinary search", async () => {
+  const h = homeHarness(); await pause(10); h.$("#home-search").value = "San Andreas";
+  const minecraft = h.$('.game-grid-v3 [data-platform="minecraft"]'); minecraft.focus();
+  minecraft.dispatchEvent(new h.w.KeyboardEvent("keydown", { key: " ", cancelable: true })); await pause(10);
+  assert.equal(h.$("#home-game-filters").hidden, false);
+  assert.equal(minecraft.getAttribute("aria-pressed"), "true");
+  assert.equal(h.$("#home-search").value, "San Andreas");
+  assert.deepEqual([...h.$("#home-region-filter").options].map(item => item.value), ["all", "Europe"]);
+  assert.equal(h.$("#home-mode-filter").parentElement.querySelector("span").textContent, "Game mode");
+  assert.equal([...h.$("#home-mode-filter").options].some(item => item.value === "qbcore"), false);
+  assert.equal(h.$(".home-game-filter-actions a").getAttribute("href"), "/games/minecraft");
+  await h.change("#home-region-filter", "Europe"); await h.change("#home-mode-filter", "towny");
+  h.$('.home-game-filter-actions [type="submit"]').click();
+  const destination = h.destinations.at(-1);
+  assert.equal(destination.searchParams.get("platform"), "minecraft");
+  assert.equal(destination.searchParams.get("region"), "Europe");
+  assert.equal(destination.searchParams.get("mode"), "towny");
+  assert.equal(destination.searchParams.get("q"), "San Andreas");
+  h.$(".home-game-filter-heading button").click(); await pause(10); h.submit();
+  assert.equal(h.w.document.activeElement, minecraft);
+  assert.equal(h.$("#home-game-filters").hidden, true);
+  assert.deepEqual([...h.destinations.at(-1).searchParams], [["q", "San Andreas"]]);
+  h.dom.window.close();
+});
+
+test("homepage game changes discard unrelated refinements and stale responses cannot replace current choices", async () => {
+  const h = homeHarness(); await pause(10);
+  h.$('.game-grid-v3 [data-platform="minecraft"]').click(); await pause(10);
+  await h.change("#home-region-filter", "Europe"); await h.change("#home-mode-filter", "towny");
+  const pending = []; h.w.fetch = url => new Promise(resolve => pending.push({ url, resolve }));
+  h.$('.game-grid-v3 [data-platform="fivem"]').click();
+  h.$('.game-grid-v3 [data-platform="redm"]').click();
+  assert.equal(h.$("#home-mode-filter").value, "all"); assert.equal(h.$("#home-region-filter").value, "all");
+  pending[1].resolve({ ok: true, json: async () => payload({ platform: "redm" }) }); await pause(10);
+  pending[0].resolve({ ok: true, json: async () => payload({ platform: "fivem" }) }); await pause(10);
+  assert.equal(h.$("#home-mode-filter").parentElement.querySelector("span").textContent, "Framework");
+  assert.deepEqual([...h.$("#home-region-filter").options].map(item => item.value), ["all", "United States"]);
+  assert.equal([...h.$("#home-mode-filter").options].find(item => item.value === "vorp").disabled, false);
+  assert.equal([...h.$("#home-mode-filter").options].some(item => item.value === "qbcore"), false);
+  h.submit(); assert.equal(h.destinations.at(-1).searchParams.get("platform"), "redm");
+  assert.equal(h.destinations.at(-1).searchParams.has("mode"), false);
+  h.dom.window.close();
+});
+
+test("homepage search suggestions can select a game, and searching remains available when facets fail", async () => {
+  const h = homeHarness(); await pause(10);
+  h.$("#home-search").value = "Mine"; h.$("#home-search").focus();
+  h.$("#home-search").dispatchEvent(new h.w.KeyboardEvent("keydown", { key: "ArrowDown", cancelable: true }));
+  h.$("#home-search").dispatchEvent(new h.w.KeyboardEvent("keydown", { key: "Enter", cancelable: true })); await pause(10);
+  assert.equal(h.$('.game-grid-v3 [data-platform="minecraft"]').getAttribute("aria-pressed"), "true");
+  assert.equal(h.$("#home-search").value, "");
+  h.w.fetch = async () => ({ ok: false });
+  h.$('.game-grid-v3 [data-platform="fivem"]').click(); await pause(10);
+  assert.match(h.$(".home-game-filter-status").textContent, /still search/);
+  assert.equal(h.$("#home-region-filter").disabled, false);
+  h.$("#home-search").value = "City Life"; h.submit();
+  assert.equal(h.destinations.at(-1).searchParams.get("q"), "City Life");
+  assert.equal(h.destinations.at(-1).searchParams.get("platform"), "fivem");
+  h.dom.window.close();
 });
 
 

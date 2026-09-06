@@ -2,6 +2,8 @@
 
 Prepared 6 September 2026. This is a plan for review, not a claim that these changes are already live.
 
+**Implementation reconciliation, later 6 September:** the initial audit below is historical. Server-rendered public pages, the complete published sitemap, real missing-page responses and safe article links are already implemented. Google and Bing sitemap submissions were accepted. The remaining launch metadata, page-address and advert-link fixes are recorded in [SEO completion](SEO_COMPLETION_2026-09-06.md); that record separates source completion, release checks and external search/branding outcomes. Do not reopen the historical gaps without checking current code and production.
+
 BrowseRP should become the place where someone finds a roleplay community that actually suits them, then returns when they want another world. Search should bring in those players and the owners of good communities. The strongest foundation is the research already being done: reliable English-speaking listings, clear joining requirements, useful differences between communities, and a website that feels good to use.
 
 My recommendation is to fix how the existing public pages reach search engines first, then improve the information those pages offer. Preserve BrowseRP’s pink/violet identity, RP logo, game colours, photographs, responsive layouts and distinctive interactions. This work does not call for a visual redesign, keyword-stuffed headings or extra controls in the staff panel.

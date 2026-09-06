@@ -18,6 +18,24 @@ const games = {
 };
 const upcoming = { forza: "Forza", gmod: "Garry's Mod", arma: "ARMA", vrchat: "VRChat", dayz: "DayZ", "project-zomboid": "Project Zomboid", ets2: "Euro Truck Simulator 2", "assetto-corsa": "Assetto Corsa", beamng: "BeamNG.drive", gta6: "GTA VI Roleplay", "6m": "6M" };
 const gameArtwork = id => `/assets/games/${id === "6m" ? "gta6" : id}-official.${id === "roblox" ? "webp" : "jpg"}`;
+const gameImageSizes = { fivem: [460, 215], redm: [460, 215], minecraft: [1170, 500], roblox: [1200, 675] };
+const brandImage = { url: `${ORIGIN}/browserp-mark-v3.png`, alt: "BrowseRP RP logo", type: "image/png", width: 1254, height: 1254, card: "summary" };
+const publisher = { "@type": "Organization", "@id": `${ORIGIN}/#organization`, name: "BrowseRP", url: `${ORIGIN}/`, logo: { "@type": "ImageObject", url: brandImage.url, width: 1254, height: 1254 } };
+const website = { "@type": "WebSite", "@id": `${ORIGIN}/#website`, name: "BrowseRP", url: `${ORIGIN}/`, publisher };
+function breadcrumbs(items) { return { "@type": "BreadcrumbList", itemListElement: [["BrowseRP", "/"], ...items].map(([name, path], index) => ({ "@type": "ListItem", position: index + 1, name, item: ORIGIN + path })) }; }
+function gameImage(id) { const [width, height] = gameImageSizes[id]; return { url: ORIGIN + gameArtwork(id), alt: `${games[id][0]} artwork`, type: id === "roblox" ? "image/webp" : "image/jpeg", width, height, card: "summary_large_image" }; }
+function serverImage(server) {
+  for (const [value, label, card] of [[server.banner_url, "community artwork", "summary_large_image"], [server.logo_url, "community logo", "summary"]]) {
+    const approved = value && safeURL(value, true);
+    if (!approved) continue;
+    const url = new URL(approved, ORIGIN);
+    // API URLs are crawl-blocked and private objects must never become share images.
+    if (url.origin === ORIGIN && !/^\/(?:assets\/|browserp-mark-v3\.png$)/.test(url.pathname)) continue;
+    const type = ({ png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", webp: "image/webp", gif: "image/gif", avif: "image/avif" })[url.pathname.split(".").at(-1).toLowerCase()];
+    return { url: url.href, alt: `${server.name} ${label}`, card, ...(type ? { type } : {}) };
+  }
+  return brandImage;
+}
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const validSlug = value => typeof value === "string" && value.length <= 160 && slugPattern.test(value);
 const text = (value, limit = 20000) => typeof value === "string" ? value.slice(0, limit) : "";
@@ -82,12 +100,13 @@ function attribute(html, id, attrs) {
   }
   return html.slice(0, opening.index) + tag + html.slice(opening.index + opening[0].length);
 }
-function head(html, { title, description, path, noindex = false, type = "website", structured }) {
+function head(html, { title, description, path, noindex = false, type = "website", structured, image = brandImage }) {
   html = html.replace(/<title>[^]*?<\/title>/i, `<title>${escapeHTML(title)}</title>`)
-    .replace(/<meta\b[^>]*(?:name="(?:description|robots|twitter:title|twitter:description)"|property="(?:og:title|og:description|og:url|og:type)")[^>]*>/gi, "")
+    .replace(/<meta\b[^>]*(?:name="(?:description|robots|twitter:title|twitter:description|twitter:card|twitter:image(?::alt)?)"|property="(?:og:title|og:description|og:url|og:type|og:image(?::(?:alt|type|width|height))?)")[^>]*>/gi, "")
     .replace(/<link\b[^>]*rel="canonical"[^>]*>/gi, "");
   const tags = `<meta name="description" content="${escapeHTML(description)}"><meta name="robots" content="${noindex ? "noindex,follow" : "index,follow"}">${path ? `<link rel="canonical" href="${escapeHTML(ORIGIN + path)}"><meta property="og:url" content="${escapeHTML(ORIGIN + path)}">` : ""}<meta property="og:type" content="${type}"><meta property="og:title" content="${escapeHTML(title)}"><meta property="og:description" content="${escapeHTML(description)}"><meta name="twitter:title" content="${escapeHTML(title)}"><meta name="twitter:description" content="${escapeHTML(description)}">`;
-  return html.replace("</head>", `${tags}${structured ? `<script type="application/ld+json">${scriptJSON(structured)}</script>` : ""}</head>`);
+  const social = `<meta property="og:image" content="${escapeHTML(image.url)}"><meta property="og:image:alt" content="${escapeHTML(image.alt)}">${["type", "width", "height"].filter(key => image[key]).map(key => `<meta property="og:image:${key}" content="${escapeHTML(image[key])}">`).join("")}<meta name="twitter:card" content="${image.card}"><meta name="twitter:image" content="${escapeHTML(image.url)}"><meta name="twitter:image:alt" content="${escapeHTML(image.alt)}">`;
+  return html.replace("</head>", `${tags}${social}${structured ? `<script type="application/ld+json">${scriptJSON(structured)}</script>` : ""}</head>`);
 }
 function badge(server) { return `<span class="platform-badge-v5" data-platform="${server.platform_id}"><span>${server.platform_name}</span></span>`; }
 function entries(server) {
@@ -103,7 +122,7 @@ function card(server) {
 function gameCard(id) { const [name, line] = games[id]; return `<a class="game-hub-card-v4 game-official-card-v6" data-platform="${id}" href="/games/${id}"><span class="game-hub-mark-v4"><img src="${gameArtwork(id)}" alt="" width="460" height="215" class="game-artwork-v5 game-card-artwork-v5 game-official-artwork-v6"></span><span class="game-hub-copy-v4"><strong>${name}</strong><small>${line}</small></span><b>Explore servers</b></a>`; }
 function navGames(current) { return Object.entries(games).map(([id, [name]]) => `<a class="game-nav-chip-v4${id === current ? " is-selected" : ""}" data-platform="${id}" data-game="${id}" href="/games/${id}"${id === current ? ' aria-current="page"' : ""}><img class="game-artwork-v5 game-nav-mark-v4 game-official-artwork-v6" src="${gameArtwork(id)}" alt="" width="160" height="80">${name}</a>`).join(""); }
 function pagination(path, filters, total) {
-  const link = (offset, label) => { const query = model.params({ ...filters, offset }); return `<a class="button-v3 button-secondary-v3" href="${escapeHTML(path + (query.size ? `?${query}` : ""))}">${label}</a>`; };
+  const link = (offset, label) => { const query = model.params({ ...filters, offset }); if (path.startsWith("/games/")) query.delete("platform"); return `<a class="button-v3 button-secondary-v3" href="${escapeHTML(path + (query.size ? `?${query}` : ""))}">${label}</a>`; };
   return `<nav data-public-pagination aria-label="Directory pages">${filters.offset ? link(Math.max(0, filters.offset - filters.limit), "Previous servers") : ""}${filters.offset + filters.limit < total ? link(filters.offset + filters.limit, "Next servers") : ""}</nav>`;
 }
 export function articleBody(body) { return globalThis.BrowseRPContent.articleHTML(body); }
@@ -145,13 +164,24 @@ export function createPublicPageHandler({ data = source, readTemplate = template
     const url = new URL(req.url || "/", ORIGIN), path = publicPagePath(url);
     Object.entries(documentSecurityHeaders()).forEach(([key, value]) => res.setHeader(key, value));
     res.setHeader("Content-Type", "text/html; charset=utf-8"); res.setHeader("X-Content-Type-Options", "nosniff");
-    const send = (status, body) => { res.statusCode = status; res.end(req.method === "HEAD" ? undefined : body); };
+    const send = (status, body) => {
+      if (process.env.VERCEL_ENV === "preview") {
+        res.setHeader("X-Robots-Tag", "noindex, nofollow");
+        body = body?.replace(/<meta name="robots" content="[^"]*">/, '<meta name="robots" content="noindex,nofollow">');
+      }
+      res.statusCode = status; res.end(req.method === "HEAD" ? undefined : body);
+    };
     if (!["GET", "HEAD"].includes(req.method)) { res.setHeader("Allow", "GET, HEAD"); return send(405, "Method not allowed"); }
     try {
       if (["/game", "/server", "/blog-post"].includes(path)) {
         const id = url.searchParams.get(path === "/game" ? "game" : "slug");
         if (id && !validSlug(id)) throw notFound();
-        const target = path === "/game" ? `/games${id ? `/${id}` : ""}` : id ? `${path === "/server" ? "/server" : "/blog"}/${id}` : null;
+        let target = path === "/game" ? `/games${id ? `/${id}` : ""}` : id ? `${path === "/server" ? "/server" : "/blog"}/${id}` : null;
+        if (path === "/game") {
+          const filters = model.params(model.normalize({ ...Object.fromEntries(url.searchParams), ...(id ? { platform: id } : {}) }));
+          if (id) filters.delete("platform");
+          if (filters.size) target = `${id ? target : "/servers"}?${filters}`;
+        }
         if (!target) throw notFound(); res.setHeader("Location", target); return send(308, "");
       }
       if (path === "/sitemap.xml") {
@@ -173,11 +203,11 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         return send(200, `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...new Set(paths)].map(item => `<url><loc>${escapeHTML(ORIGIN + item)}</loc></url>`).join("")}</urlset>`);
       }
       if (path === "/servers" || path === "/games" || path.startsWith("/games/")) {
-        const id = path.split("/")[2], isDirectory = path === "/servers", game = id && games[id], coming = id && upcoming[id];
+        const id = path.split("/")[2], isDirectory = path === "/servers", game = Object.hasOwn(games, id) && games[id], coming = Object.hasOwn(upcoming, id) && upcoming[id];
         if (id && !game && !coming) throw notFound();
         let html = await readTemplate(isDirectory ? "servers" : "game");
         let title = isDirectory ? "Discover roleplay servers — BrowseRP" : "Roleplay games — BrowseRP", description = isDirectory ? "Find roleplay communities in FiveM, RedM, Roblox and Minecraft. Compare region, language, joining requirements and play style." : "Find your next community in FiveM, RedM, Roblox or Minecraft. More worlds are on the way.";
-        let canonicalPath = path, noindex = Boolean(coming);
+        let canonicalPath = path, noindex = Boolean(coming), pageName = game ? `${game[0]} roleplay servers` : isDirectory ? "Discover roleplay servers" : "Roleplay games";
         if (!isDirectory) {
           html = slot(html, "game-page-nav-v4", navGames(id), { hidden: !id ? "" : false });
           html = slot(html, "game-hub-grid-v4", Object.keys(games).map(gameCard).join(""), { hidden: id ? "" : false });
@@ -202,6 +232,7 @@ export function createPublicPageHandler({ data = source, readTemplate = template
           const filters = model.normalize({ ...Object.fromEntries(url.searchParams), ...(game ? { platform: id } : {}), limit: 24 });
           const result = await data.directory(filters);
           if (!Array.isArray(result?.servers) || !Number.isSafeInteger(result.total) || result.total < 0) throw new Error("Invalid public directory response");
+          if (filters.offset && filters.offset >= result.total) throw notFound();
           const servers = result.servers.map(publicServer).filter(Boolean);
           const count = `${result.total} ${result.total === 1 ? "server" : "servers"}`;
           html = slot(html, isDirectory ? "server-list" : "game-server-list-v4", servers.map(card).join(""), { "aria-busy": "false", "data-public-rendered": "true" });
@@ -210,13 +241,15 @@ export function createPublicPageHandler({ data = source, readTemplate = template
           const listID = isDirectory ? "server-list" : "game-server-list-v4";
           html = slot(html, listID, servers.map(card).join("") + pagination(path, filters, result.total), { "aria-busy": "false", "data-public-rendered": "true" });
           if (game) { html = attribute(html, "game-results-v4", { hidden: false }); html = slot(html, "game-results-title-v4", id === "roblox" ? "Roblox communities" : `${game[0]} servers`); html = slot(html, "game-results-lead-v4", `Reviewed ${game[1].toLowerCase()} listings appear below.`); html = attribute(html, "game-directory-link-v4", { href: `/servers?platform=${id}` }); }
-          const clean = model.params(filters); clean.delete("platform"); clean.delete("offset");
-          noindex = noindex || clean.size > 0 || (isDirectory && filters.platform !== "all");
-          canonicalPath = !noindex && filters.offset ? `${path}?offset=${filters.offset}` : path;
-          if (isDirectory && filters.platform !== "all" && clean.size === 0 && !filters.offset) canonicalPath = `/games/${filters.platform}`;
-          if (filters.offset && !noindex) { title = `${title.replace(" — BrowseRP", "")} — Page ${Math.floor(filters.offset / 24) + 1} — BrowseRP`; }
+          const canonicalQuery = model.params(filters); if (game) canonicalQuery.delete("platform");
+          const facets = new URLSearchParams(canonicalQuery); facets.delete("offset");
+          noindex = noindex || facets.size > 0 || filters.offset % filters.limit !== 0;
+          // Distinct filtered results keep their own address; tracking and ignored parameters disappear.
+          canonicalPath = path + (canonicalQuery.size ? `?${canonicalQuery}` : "");
+          if (filters.offset && !noindex) { pageName += ` — Page ${Math.floor(filters.offset / 24) + 1}`; title = `${pageName} — BrowseRP`; }
         }
-        return send(200, head(html, { title, description, path: canonicalPath, noindex }));
+        const trail = game ? [["Games", "/games"], [pageName, canonicalPath]] : [[pageName, canonicalPath]];
+        return send(200, head(html, { title, description, path: canonicalPath, noindex, ...(game ? { image: gameImage(id) } : {}), ...(!coming ? { structured: { "@context": "https://schema.org", "@type": "CollectionPage", name: pageName, url: ORIGIN + canonicalPath, isPartOf: website, breadcrumb: breadcrumbs(trail) } } : {}) }));
       }
       if (path.startsWith("/server/")) {
         const slug = path.slice(8); if (!validSlug(slug)) throw notFound();
@@ -229,7 +262,8 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         const joining = server.roblox ? `<section class="server-community-joining" id="server-roblox-joining"><h2>How to join</h2><p>${escapeHTML(server.roblox.joiningInstructions)}</p><a class="button-v3 button-secondary-v3" href="${escapeHTML(server.roblox.experienceUrl)}" target="_blank" rel="noopener noreferrer">View Roblox experience</a></section>` : server.minecraft_address ? `<div class="server-minecraft-address" id="server-minecraft-address"><strong>Minecraft ${server.minecraft_edition === "bedrock" ? "Bedrock" : "Java"} address</strong><code>${escapeHTML(server.minecraft_address)}</code></div>` : "";
         if (server.banner_url) html = html.replace('class="detail-banner-v3">', `class="detail-banner-v3 has-server-artwork-v3"><img class="server-import-banner-v3" src="${escapeHTML(server.banner_url)}" alt="">`);
         if (joining) html = slot(html, "server-joining-v7", joining);
-        return send(200, head(html, { title: `${server.name} — ${server.platform_name} roleplay — BrowseRP`, description: `${server.name}: ${server.description}`.slice(0, 180), path, structured: { "@context": "https://schema.org", "@type": "WebPage", name: server.name, url: ORIGIN + path, description: server.description.slice(0, 500), isPartOf: { "@type": "WebSite", name: "BrowseRP", url: ORIGIN } } }));
+        const image = serverImage(server);
+        return send(200, head(html, { title: `${server.name} — ${server.platform_name} roleplay — BrowseRP`, description: `${server.name}: ${server.description}`.slice(0, 180), path, image, structured: { "@context": "https://schema.org", "@type": "WebPage", name: server.name, url: ORIGIN + path, description: server.description.slice(0, 500), isPartOf: website, primaryImageOfPage: { "@type": "ImageObject", url: image.url }, breadcrumb: breadcrumbs([["Games", "/games"], [server.platform_name, `/games/${server.platform_id}`], [server.name, path]]) } }));
       }
       if (path === "/blog" || path.startsWith("/blog/")) {
         const slug = path.slice(6); if (slug && !validSlug(slug)) throw notFound();
@@ -238,13 +272,13 @@ export function createPublicPageHandler({ data = source, readTemplate = template
           let html = await readTemplate("blog");
           html = slot(html, "journal-posts-v6", posts.map((post, index) => postCard(post, index === 0)).join(""), { "aria-busy": "false" });
           html = slot(html, "journal-status-v6", ""); html = slot(html, "journal-count-v6", `${posts.length} article${posts.length === 1 ? "" : "s"}`); html = attribute(html, "journal-empty-v6", { hidden: posts.length ? "" : false });
-          return send(200, head(html, { title: "Roleplay guides and community news — BrowseRP", description: "BrowseRP news, community stories and practical guides to finding your next roleplay server.", path }));
+          return send(200, head(html, { title: "Roleplay guides and community news — BrowseRP", description: "BrowseRP news, community stories and practical guides to finding your next roleplay server.", path, structured: { "@context": "https://schema.org", "@type": "CollectionPage", name: "BrowseRP journal", url: ORIGIN + path, isPartOf: website, breadcrumb: breadcrumbs([["Journal", path]]) } }));
         }
         const post = postView(await data.posts(slug), true); if (!post || post.slug !== slug) throw notFound();
         let html = await readTemplate("blog-post");
         for (const [id, value] of [["journal-title-v6", escapeHTML(post.title)], ["journal-excerpt-v6", escapeHTML(post.excerpt)], ["journal-date-v6", escapeHTML(date(post.publishedAt))], ["journal-reading-v6", `${Math.max(1, Math.ceil(post.body.trim().split(/\s+/).length / 220))} min read`], ["journal-status-v6", ""], ["journal-article-v6", articleBody(post.body)]]) html = slot(html, id, value);
         html = attribute(html, "journal-date-v6", { datetime: post.publishedAt }); html = attribute(html, "journal-article-v6", { "aria-busy": "false", "data-public-rendered": "true" });
-        return send(200, head(html, { title: post.seoTitle || `${post.title} — BrowseRP`, description: post.seoDescription || post.excerpt, path, type: "article", structured: { "@context": "https://schema.org", "@type": "Article", headline: post.title, description: post.excerpt, url: ORIGIN + path, ...(post.publishedAt ? { datePublished: post.publishedAt } : {}), publisher: { "@type": "Organization", name: "BrowseRP", url: ORIGIN, logo: { "@type": "ImageObject", url: ORIGIN + "/browserp-mark-v3.png" } } } }));
+        return send(200, head(html, { title: post.seoTitle || `${post.title} — BrowseRP`, description: post.seoDescription || post.excerpt, path, type: "article", structured: { "@context": "https://schema.org", "@type": "BlogPosting", headline: post.title, description: post.excerpt, url: ORIGIN + path, mainEntityOfPage: { "@type": "WebPage", "@id": ORIGIN + path, breadcrumb: breadcrumbs([["Journal", "/blog"], [post.title, path]]) }, ...(post.publishedAt ? { datePublished: post.publishedAt } : {}), publisher, isPartOf: website } }));
       }
       throw notFound();
     } catch (error) {
