@@ -41,13 +41,12 @@
 .side-ad-copy-v3 strong { max-width: none; font-size: clamp(20px,1.5vw,25px); line-height: 1.2; letter-spacing: -.025em; }
 .side-ad-copy-v3 span { font-size: 13px; line-height: 1.6; color: #e0dce6; }
 .side-ad-copy-v3 a { min-height: 44px; display: inline-flex; align-items: center; font-size: 13px; }
-.ad-arrow-v3 { width: 36px; min-height: 44px; border-radius: 7px; background: #0c0c12b8; backdrop-filter: blur(8px); }
 /* Narrow desktop rails keep controls in the artwork, clear of wrapping copy. */
 @media(min-width:761px) {
-  .content-with-rail-v3 > .side-ad-v3 .ad-arrow-v3 { top: 16px; margin-top: 0; }
+  .content-with-rail-v3 > .side-ad-v3:not(.artwork-unavailable) .ad-arrow-v3 { top: 16px; margin-top: 0; }
 }
 @media(min-width:1101px) {
-  #server-detail-v3.server-page-v7 .server-ad-rail-v7 .side-ad-stage-v3 .ad-arrow-v3 { top: 16px; margin-top: 0; width: 44px; height: 44px; }
+  #server-detail-v3.server-page-v7 .server-ad-rail-v7:not(.artwork-unavailable) .side-ad-stage-v3 .ad-arrow-v3 { top: 16px; margin-top: 0; }
 }
 .ad-dots-v3 { gap: 0; justify-content: center; padding: 0; }
 .ad-dot-v3 { width: 44px; height: 44px; border: 0; background: transparent; display: grid; place-items: center; }
