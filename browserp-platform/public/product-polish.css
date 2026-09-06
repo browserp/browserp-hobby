@@ -104,3 +104,42 @@
   .recommendation-settings { padding: 20px; }
 }
 @media(prefers-reduced-motion:reduce) { .game-grid-v3 a { transition: none; } .game-grid-v3 a:hover { transform: none; } }
+
+/* Premium interaction detail: contained highlights, never page-wide movement. */
+:is(.server-card:not(.server-card-skeleton), .game-grid-v3 > a, .game-official-card-v6) { position: relative; }
+:is(.server-card:not(.server-card-skeleton), .game-grid-v3 > a, .game-official-card-v6)::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(ellipse at 85% 0%, rgb(155 108 255 / .09), transparent 65%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), inset 0 0 24px rgb(236 79 166 / .045);
+  opacity: 0; transition: opacity 180ms ease;
+}
+:is(.server-card:not(.server-card-skeleton), .game-grid-v3 > a, .game-official-card-v6):focus-visible::after { opacity: 1; }
+.public-nav-links-v6 > a::after { background: linear-gradient(90deg, var(--pink-strong), var(--violet)); }
+.navigation-link-icon-v6 { transition: color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, transform 240ms var(--motion-ease); }
+.navigation-link-v6:focus-visible .navigation-link-icon-v6 { background: rgb(236 79 166 / .16); box-shadow: 0 0 18px rgb(236 79 166 / .15), inset 0 1px 0 #ffffff20; }
+.navigation-game-v6 { transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
+.navigation-game-v6:focus-visible { box-shadow: inset 0 1px 0 #ffffff20, 0 4px 16px #0003; }
+.account-popover-v3 :is(a, button) { transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease; }
+.account-popover-v3 :is(a, button):focus-visible {
+  background: rgb(236 79 166 / .09); color: var(--text); box-shadow: inset 2px 0 var(--pink-strong);
+}
+.account-popover-v3 .account-danger-v3:focus-visible { color: var(--danger); box-shadow: inset 2px 0 var(--danger); }
+.search-suggestion-v3[aria-selected="true"] { background: linear-gradient(100deg, #342333, #272138); box-shadow: inset 2px 0 var(--pink-strong); }
+
+@media (hover: hover) and (pointer: fine) {
+  :is(.server-card:not(.server-card-skeleton), .game-grid-v3 > a, .game-official-card-v6):hover::after { opacity: 1; }
+  .navigation-link-v6:hover .navigation-link-icon-v6 { background: rgb(236 79 166 / .16); box-shadow: 0 0 18px rgb(236 79 166 / .15), inset 0 1px 0 #ffffff20; }
+  .navigation-game-v6:hover { box-shadow: inset 0 1px 0 #ffffff20, 0 4px 16px #0003; }
+  .account-popover-v3 :is(a, button):hover { background: rgb(236 79 166 / .09); color: var(--text); box-shadow: inset 2px 0 var(--pink-strong); }
+  .account-popover-v3 .account-danger-v3:hover { color: var(--danger); box-shadow: inset 2px 0 var(--danger); }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :is(.button-primary-v3, .button-primary, .small-button-primary):is(:hover, :focus-visible):not(:disabled):not([aria-disabled="true"])::after { animation: touch-sweep-v3 650ms var(--motion-ease) 1; }
+  .navigation-link-v6:is(:hover, :focus-visible) .navigation-link-icon-v6 { transform: scale(1.04); }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.server-card:not(.server-card-skeleton), .game-grid-v3 > a, .game-official-card-v6)::after,
+  .navigation-link-icon-v6, .navigation-game-v6, .account-popover-v3 :is(a, button) { transition: none; animation: none; }
+  .navigation-link-v6:is(:hover, :focus-visible) .navigation-link-icon-v6 { transform: none; }
+  :is(.button-primary-v3, .button-primary, .small-button-primary)::after { animation: none !important; }
+}

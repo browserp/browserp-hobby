@@ -13,4 +13,8 @@ The owner requested removal of unrelated game symbols and repair of the rectangu
 
 Actual Chrome at 1366px and 390px verified text-only directory/detail badges, four text-only menu game links, a transparent natural-width GAME label, non-overlapping row text and clicking FiveM setting the actual platform filter. No uncaught browser errors. The mobile suggestion screenshot was inspected.
 
-Production deployment evidence is appended after exact-source confirmation. This is a scoped UI fix, not a hosting change or load test.
+## Published
+
+Source `3af8c796f008f8f8514920cca88fae58bcc37a4a` reached READY on 6 September 2026 at approximately 15:10 UTC. Production deployment: `dpl_CRPgsfEpm4to5j54Bc1Kz8Qq993u`, https://browserp-hobby-a3b62ss1x-browserp.vercel.app . Build: 2m38s, 12 functions. Preview: `dpl_5RhEaae8BuMUJZcAh5wWvEFkxMUs`.
+
+Live health at 15:11:38 UTC matched the exact source SHA and reported backend/auth/security ready, payments disabled. Live directory checks confirmed text-only badges and 2.19.4 assets. Deployment-scoped five-minute runtime error scan returned no errors. This is a scoped UI fix, not a hosting change or load test.
