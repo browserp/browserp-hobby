@@ -1,4 +1,5 @@
 import publicPage from "../lib/public-pages.js";
+import staffDocument from "../lib/staff-documents.js";
 import health from "../lib/health.js";
 import { staffMinecraft } from "../lib/minecraft-workflow.js";
 import { scheduledStatusRefresh } from "../lib/status-refresh-workflow.js";
@@ -227,6 +228,7 @@ function providerRoute(provider) {
 
 const routes = {
   "public/document": publicPage,
+  "staff/document": staffDocument,
   health,
   "auth/providers": endpoint("GET", async (_req, res) => {
     try {

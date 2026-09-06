@@ -560,8 +560,9 @@ main { animation: none; }
 .account-menu-v3.open .account-chevron-v3 { transform: rotate(180deg); }
 .account-popover-v3 { position: absolute; top: calc(100% + 10px); right: 0; min-width: 220px; padding: 8px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); box-shadow: 0 22px 60px rgba(0,0,0,.34); opacity: 0; transform: translateY(-7px) scale(.985); transform-origin: top right; pointer-events: none; transition: opacity .18s var(--motion-ease), transform .18s var(--motion-ease); }
 .account-popover-v3[data-open="true"] { opacity: 1; transform: none; pointer-events: auto; }
-.account-popover-v3 a,.account-popover-v3 button { width: 100%; min-height: 44px; display: flex; align-items: center; padding: 9px 11px; border: 0; border-radius: 7px; background: transparent; color: var(--copy); text-align: left; cursor: pointer; }
-.account-popover-v3 a:hover,.account-popover-v3 button:hover { background: var(--panel-2); color: var(--text); }
+.account-popover-v3 :is(a,button) { width: 100%; min-height: 44px; display: flex; align-items: center; padding: 9px 11px; border: 0; border-radius: 7px; text-align: left; cursor: pointer; }
+.account-popover-v3 :is(a,button):not(.button-primary-v3) { background: transparent; color: var(--copy); }
+.account-popover-v3 :is(a,button):not(.button-primary-v3):hover { background: var(--panel-2); color: var(--text); }
 .account-popover-v3 .account-danger-v3 { color: var(--danger); }
 
 .qr-frame-v3 { width: fit-content; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }

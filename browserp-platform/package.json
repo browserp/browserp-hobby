@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node dev-server.mjs",
+    "dev:public": "node public-preview.mjs",
     "start": "node dev-server.mjs",
     "check": "node test/check.mjs",
     "test": "node --test --test-concurrency=2 test/*.test.mjs",

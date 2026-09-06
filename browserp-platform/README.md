@@ -46,6 +46,8 @@ npm run dev
 
 The local site is served at `http://127.0.0.1:8080`. Synthetic development data is allowed only on loopback, only with its explicit development flag, and never in Vercel or production.
 
+To preview current local code with the real published directory and journal, run `npm run dev:public` and open `http://127.0.0.1:8082`. No credentials are needed. See [Public-data preview](docs/PUBLIC_PREVIEW.md) for its scope and limitations. Normal `npm run dev` retains its existing unconfigured behaviour.
+
 ## Release rules
 
 1. Never deploy the historical GitHub `main` branch over v1.3.0.

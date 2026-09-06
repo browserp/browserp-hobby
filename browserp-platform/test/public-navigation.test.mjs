@@ -573,7 +573,7 @@ test("Staff Panel links require verified staff eligibility, not membership await
       await sessionHydration(h, { session: { ...member, staff: fixture.staff, staffAccess: fixture.staffAccess } });
       const links = [...h.w.document.querySelectorAll('.account-popover-v3 a[href="/staffpanel"]')];
       assert.equal(links.length, fixture.expected);
-      assert.ok(links.every(link => link.textContent === "Staff Panel"));
+      assert.ok(links.every(link => link.textContent === "Staff panel" && link.classList.contains("button-primary-v3") && link.classList.contains("button-v3")));
     } finally { h.dom.window.close(); }
   }
 });

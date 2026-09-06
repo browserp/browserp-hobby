@@ -11,7 +11,7 @@
   "functions": {
     "api/router.js": {
       "maxDuration": 60,
-      "includeFiles": "{docs/launch-curation/*-candidates.json,public/{server,servers,game,blog,blog-post,404}.html}"
+      "includeFiles": "{docs/launch-curation/*-candidates.json,public/{server,servers,game,blog,blog-post,404,staffpanel,staffpanel-*}.html}"
     },
     "api/servers.js": {
       "maxDuration": 30

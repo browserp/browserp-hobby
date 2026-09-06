@@ -73,7 +73,7 @@
     let initialDocument = list.dataset.publicRendered === "true";
     let filters = read(fixedGame), facets = {}, nextOffset = null, requestId = 0, controller, timer = null, shown = [], retryAppend = false;
     let firstOffset = filters.offset;
-    let loading = false, refreshAt = 0, lastLoadedAt = 0;
+    let loading = false, refreshAt = 0, lastLoadedAt = 0, directoryControls;
     root.classList.add("smart-discovery");
     const searchRow = node("div", "smart-search-row");
     const searchLabel = node("label", "field-v3 field-search-v3"); searchLabel.append(node("span", "", "Search servers"));
@@ -114,7 +114,7 @@
     const clear = node("button", "button-v3 button-quiet-v3", "Clear filters"); clear.type = "button"; clear.id = "clear-filters"; checks.append(clear);
     clear.addEventListener("click", () => { filters = M.normalize({ platform: fixedGame || "all" }); update(); });
     refinements.append(checks); root.append(primary, access, refinements);
-    toggle.addEventListener("click", () => { const open = toggle.getAttribute("aria-expanded") !== "true"; toggle.setAttribute("aria-expanded", String(open)); root.classList.toggle("show-refinements", open); toggle.textContent = open ? "Fewer filters" : "More filters"; });
+    toggle.addEventListener("click", () => { if (directoryControls) return directoryControls.toggle(); const open = toggle.getAttribute("aria-expanded") !== "true"; toggle.setAttribute("aria-expanded", String(open)); root.classList.toggle("show-refinements", open); toggle.textContent = open ? "Fewer filters" : "More filters"; });
     const chips = node("div", "smart-filter-chips"); chips.setAttribute("aria-label", "Selected filters"); root.append(chips);
     const feedback = node("p", "smart-filter-feedback"); feedback.setAttribute("role", "status"); root.append(feedback);
     const refreshNotice = node("p", "smart-filter-feedback smart-refresh-feedback"); refreshNotice.setAttribute("role", "status"); root.append(refreshNotice);
@@ -147,6 +147,7 @@
       }
       document.querySelectorAll(".game-strip-v3 [data-game]").forEach(link => { const selected = link.dataset.game === filters.platform; link.classList.toggle("is-selected", selected); if (selected) link.setAttribute("aria-current", "page"); else link.removeAttribute("aria-current"); });
       const directoryLink = document.querySelector("#game-directory-link-v4"); if (directoryLink) directoryLink.href = `/servers?${M.params({ ...filters, offset: 0 })}`;
+      directoryControls?.sync(filters);
       if (focusedChip) [...chips.querySelectorAll("button")].find(item => item.getAttribute("aria-label") === focusedChip)?.focus({ preventScroll: true });
     }
     function url() {
@@ -256,6 +257,7 @@
     document.addEventListener("visibilitychange", refreshIfDue);
     // Browsers suspend this interval in their back/forward cache; retain it on restoration.
     window.addEventListener("pagehide", () => { controller?.abort(); });
+    if (!fixedGame && document.body.dataset.page === "servers") directoryControls = window.BrowseRPDirectoryControls?.mount({ root, searchRow, primary, access, refinements, toggle, selects, getFilters: () => filters, change });
     sync(); load(false);
     return { getFilters: () => ({ ...filters }) };
   }

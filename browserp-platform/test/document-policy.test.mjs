@@ -88,7 +88,7 @@ test("public document routing precedes clean HTML files and preserves search wit
     assert.match(response.headers.get("cache-control"), /no-store/);
     assert.ok(nonceFrom(response.headers.get("content-security-policy")));
   }
-  for (const path of ["/", "/profile", "/staffpanel/overview", "/api/router"]) {
+  for (const path of ["/", "/profile", "/api/router"]) {
     assert.equal(middleware(new Request(`https://browserp.test${path}`)).headers.get("x-middleware-rewrite"), null);
   }
 });

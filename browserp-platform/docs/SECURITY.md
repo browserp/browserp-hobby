@@ -30,6 +30,16 @@ The Content Security Policy allows scripts, stylesheets, fonts and connections o
 - Ban-check failures deny the authenticated request. A transient backend error preserves credentials for a later retry; a confirmed restriction clears the application session.
 - Staff MFA is mandatory in the production configuration verified on 4 September 2026. The owner has a verified authenticator; initial owner verification automatically activated enforcement, and authenticated staff access was checked afterwards. Keep recovery access documented and require authenticator verification for future staff sessions.
 
+### Staff entry document boundary — 6 September 2026 candidate
+
+The profile menu's **Staff panel** action uses the shared Search gradient and appears only for the strict server-returned `staff: true` flag. Membership awaiting MFA does not expose that action. The earlier PC release already hid and cleared private browser views; its notes do not identify a separate currently reproducible private-record leak.
+
+The remaining static-document gap is now guarded on the server. Before returning a staff workspace template, the existing router validates the Discord account and queries the live `staff_mfa_policy` RPC, which checks current membership, allowlist assignment and the active account session. Required MFA additionally needs AAL2, a TOTP authentication method and a currently verified TOTP factor. Canonical nested routes, flat clean URLs and direct `.html` aliases all pass through this guard. Anonymous/denied requests receive only the generic sign-in shell (401/403); failed or malformed permission checks return that shell with 503. Provider error text, account identifiers and role mappings are not reflected in denied HTML. All responses are private/no-store, including CDN controls, and noindex. Existing permission-specific RPCs still authorize every private data operation.
+
+Validation: 90 targeted authorization/navigation/document tests passed, including every document alias, anonymous HTTP/HEAD, non-staff role spoofing, revoked-session denial, required MFA, policy failures and authorized template preservation. Six local HTTPS browser cases passed across Chromium, Firefox and WebKit at 390px/1440px; they checked the gradient, minimum control height and generic denied sign-in gate. No provider login rehearsal, production mutation, database change or additional function is involved. Hosted route/header verification and the coordinated full release gate remain pending for this candidate.
+
+The generic login page and application source remain public; this change does not claim URL or source-code secrecy. Actual staff identities, assignments and internal records remain behind their server/database authorization boundaries. Supabase's current guidance supports [server validation and private cache handling](https://supabase.com/docs/guides/auth/server-side/advanced-guide) and [database authorization through RLS](https://supabase.com/docs/guides/database/postgres/row-level-security).
+
 ## HTTP and input handling
 
 Functions reject unsupported methods, non-JSON writes, oversized bodies and malformed JSON. Reads and writes use bounded fields. Listing descriptions are plain text; community links are canonical public HTTPS URLs with credentials, fragments, custom ports, local/reserved hosts and common shorteners rejected.

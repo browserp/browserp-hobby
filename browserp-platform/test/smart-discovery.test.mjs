@@ -18,7 +18,7 @@ function harness({ url = "https://browserp.test/servers", fetcher, fixedGame } =
   const w = dom.window; const requests = [];
   w.BrowseRPPlatforms = { theme() {} };
   w.fetch = async (url, options) => { requests.push({ url, options }); return fetcher ? fetcher(url, options) : { ok: true, json: async () => payload(M.normalize(Object.fromEntries(new URL(url, "https://browserp.test").searchParams))) }; };
-  w.eval(read("public/discovery-model.js")); w.eval(read("public/smart-search.js"));
+  w.eval(read("public/discovery-model.js")); w.eval(read("public/directory-controls.js")); w.eval(read("public/smart-search.js"));
   const $ = selector => w.document.querySelector(selector);
   const api = w.BrowseRPSearch.mount({ root: $("#controls"), list: $("#list"), count: $("#count"), empty: $("#empty"), fixedGame, render: (list, servers) => { list.textContent = servers.map(server => server.slug).join(","); } });
   const change = (selector, value) => { const control = $(selector); if (control.type === "checkbox") control.checked = value; else control.value = value; control.dispatchEvent(new w.Event(control.type === "search" ? "input" : "change", { bubbles: true })); };
@@ -34,6 +34,48 @@ test("full dataset facets follow game and region, and literal multiword search n
   assert.equal(M.matches(sample("offline"), { online: true }), false);
   const state = M.normalize({ platform: "forza", sort: "invalid", region: "Unknown", offset: -20 });
   assert.equal(state.platform, "all"); assert.equal(state.sort, "recommended"); assert.equal(state.region, "Unknown"); assert.equal(state.offset, 0);
+});
+
+test("Discover starts unfiltered and its disclosure never changes results or requests", async t => {
+  const h = harness(); t.after(() => h.dom.window.close()); await pause(10);
+  assert.equal(h.api.getFilters().platform, "all");
+  assert.equal(h.$("#directory-filter-panel").hidden, true);
+  assert.equal(h.$(".directory-control-row").children.length, 5);
+  assert.equal(h.$("#mode-filter").parentElement.hidden, true);
+  const before = { url: h.w.location.href, requests: h.requests.length, results: h.$("#list").textContent, filters: JSON.stringify(h.api.getFilters()) };
+  for (const open of [true, false, true]) {
+    h.$(".smart-filter-toggle").click(); await pause(5);
+    assert.equal(h.$("#directory-filter-panel").hidden, !open);
+    assert.equal(h.$(".smart-filter-toggle").getAttribute("aria-expanded"), String(open));
+    assert.equal(h.$(".smart-filter-toggle").textContent, "Filters");
+  }
+  assert.deepEqual({ url: h.w.location.href, requests: h.requests.length, results: h.$("#list").textContent, filters: JSON.stringify(h.api.getFilters()) }, before);
+});
+
+test("Discover game choices reveal contextual filters while preserving a search", async t => {
+  const h = harness({ url: "https://browserp.test/servers?q=community&platform=fivem&mode=qbcore" }); t.after(() => h.dom.window.close()); await pause(10);
+  h.$('[data-directory-game="minecraft"]').click(); await pause(10);
+  assert.equal(h.$("#directory-filter-panel").hidden, false);
+  assert.equal(h.$("#mode-filter").parentElement.hidden, false);
+  assert.equal(h.$("#mode-filter").parentElement.querySelector("span").textContent, "Game mode");
+  assert.equal(h.$("#directory-search").value, "community");
+  assert.equal(h.api.getFilters().mode, "all");
+  assert.equal(h.$('[data-directory-game="minecraft"]').getAttribute("aria-pressed"), "true");
+  h.$('[data-directory-game="minecraft"]').click(); await pause(10);
+  assert.equal(h.api.getFilters().platform, "all");
+  assert.equal(h.$("#directory-search").value, "community");
+  assert.equal(h.$("#mode-filter").parentElement.hidden, true);
+});
+
+test("Discover retains intentional handoff filters when the panel is closed and reopened", async t => {
+  const h = harness({ url: "https://browserp.test/servers?q=city&platform=fivem&region=Europe&access=public" }); t.after(() => h.dom.window.close()); await pause(10);
+  assert.equal(h.$("#directory-filter-panel").hidden, false);
+  const before = JSON.stringify(h.api.getFilters()), requests = h.requests.length;
+  h.$(".smart-filter-toggle").click(); h.$(".smart-filter-toggle").click(); await pause(5);
+  assert.equal(JSON.stringify(h.api.getFilters()), before);
+  assert.equal(h.requests.length, requests);
+  assert.equal(h.$("#access-public").checked, true);
+  assert.equal(h.$("#region-filter").value, "Europe");
 });
 
 test("game suggestions apply structured filters, keyboard selection keeps focus, regions update", async () => {

@@ -201,7 +201,7 @@
         ["Recently viewed", "/dashboard#recent"], ["Reviews", "/dashboard#submissions"], ["Settings", "/dashboard#account"]
       ].map(([label, href]) => { const item=node("a","",label);item.href=href;return item; });
       if (state.session.staff === true) {
-        const staff = node("a", "account-staff-v3", "Staff Panel"); staff.href = "/staffpanel"; menuItems.push(staff);
+        const staff = node("a", "account-staff-v3 button-v3 button-primary-v3", "Staff panel"); staff.href = "/staffpanel"; menuItems.push(staff);
       }
       const logout = node("button", "account-danger-v3", "Sign out"); logout.type = "button";
       let menuCloseTimer;
