@@ -15,4 +15,21 @@ Isolated Chrome checked home sidebar and banner, plus server-detail adverts at 1
 
 Node 24 final release gate passed: 202 JavaScript files syntax checked, 12 functions, 834 application tests and 35 database tests. Four new control-cascade tests and the unchanged carousel/premium tests passed separately (14 focused tests). Whitespace validation passed.
 
-Deployment evidence will be appended after exact-source confirmation.
+## Deploy Result
+
+- URL: https://www.browserp.com
+- Target: production
+- Status: READY, 6 September 2026 at 16:05:44 UTC
+- Commit: `e54b02db36a11f695813560476af26f70d885fab`
+- Framework: existing multipage HTML/CSS/JavaScript with Node API functions
+- Build duration: 2m44s, 12 functions
+- Deployment: `dpl_61X9YCjN74VSceqhDvEkLBgmxzk7`, https://browserp-hobby-gwwke3cvv-browserp.vercel.app
+- Verified preview: `dpl_EjSLE2zgVzNuoMnd5Ei3GjCkuA4Y`, https://browserp-hobby-6pc6ky2et-browserp.vercel.app (2m36s)
+
+Live health at 16:06:41 UTC matched the exact SHA and reported backend/authentication/security ready, payments disabled. Hosted preview and live Chrome readbacks confirmed 2.19.6 CSS, transparent 44px hosts, 6px face inset, 7px corner radius and hidden legacy text glyph. Live previous/next actions passed with no uncaught page errors. The live check waits for advert hydration and targets the stable banner, not a first-visible-ad locator whose identity changes while the home page initializes.
+
+### Post-deploy observability
+
+- Deployment-scoped five-minute runtime error scan: no errors returned.
+- Monitoring/drains: unchanged; this pass did not configure or audit continuous monitoring.
+- Final release notes are documentation only; do not redeploy solely for them.
