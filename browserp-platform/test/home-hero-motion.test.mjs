@@ -19,6 +19,9 @@ test("hero movement pauses offscreen, in hidden pages and for reduced motion, th
   w.eval(readFileSync(new URL("../public/browserp-v3.js", import.meta.url), "utf8"));
   const rows = pattern.querySelectorAll(".home-hero-wordmark-row").length;
   assert.ok(rows > 0);
+  const plane = pattern.querySelector(".home-hero-wordmarks");
+  assert.equal(plane.style.getPropertyValue("--wave-duration"), (rows * .26 + 2.4).toFixed(2) + "s");
+  assert.deepEqual([...plane.children].map(row => Number(row.style.getPropertyValue("--wave-index"))), Array.from({ length: rows }, (_, index) => index));
   assert.equal(pattern.getAttribute("aria-hidden"), "true");
   assert.equal(pattern.dataset.motion, "running");
   intersect([{ isIntersecting: false }]);

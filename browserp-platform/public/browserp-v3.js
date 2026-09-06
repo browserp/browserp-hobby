@@ -90,7 +90,12 @@
       const style = getComputedStyle(pattern);
       const rowPitch = (parseFloat(style.getPropertyValue("--wordmark-width")) || 120) * 358 / 1400 + (parseFloat(style.getPropertyValue("--wordmark-gap")) || 16);
       const rows = Math.ceil(extent / rowPitch) + 1;
-      while (plane.children.length < rows) plane.append(node("div", "home-hero-wordmark-row"));
+      plane.style.setProperty("--wave-duration", (rows * .26 + 2.4).toFixed(2) + "s");
+      while (plane.children.length < rows) {
+        const row = node("div", "home-hero-wordmark-row");
+        row.style.setProperty("--wave-index", plane.children.length);
+        plane.append(row);
+      }
       while (plane.children.length > rows) plane.lastElementChild.remove();
       inView = rect.bottom > 0 && rect.top < window.innerHeight;
       sync();

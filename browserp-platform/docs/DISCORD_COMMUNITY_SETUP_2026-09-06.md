@@ -9,17 +9,33 @@ The retained Xenon backup reference is `FN56MIOZIYZK`. Keep this recovery refere
 | Area | Verified state | Still required |
 | --- | --- | --- |
 | Security bot | Installed by the owner; presence verified | Review its granted permissions, configure protection and owner-controlled command access, then prove the intended limits. Installation alone establishes no anti-raid or anti-nuke protection. |
-| Staff category | Renamed **Staff**; `@everyone` View Channels **Deny** and Connect **Deny** were saved and read back | Audit every child channel's sync/overrides, new staff roles, direct member grants and app access. This category check does not prove all staff/support/owner spaces private. |
+| Staff category | Renamed **Staff**; `@everyone` View Channels **Deny** and Connect **Deny** were saved and read back; locks recorded on three Staff text channels | `moderators-only` was found unsynced with a public exception; correction is in progress, not yet verified. Audit every child channel's overrides, direct member grants and app access. Category denies do not prove all staff/support/owner spaces private. |
+| Staff roles | Six existing template roles renamed and coloured; public role mentions off; dangerous native permissions verified off for all six | Roles remain unassigned. Hierarchy, other imported roles, channel exceptions and allowed bot commands still need work. |
 | Emoji | **40 static emoji** complete: the original RP mark and 39 Twemoji; the root task read **10 of 50 static slots remaining** | Publish the emoji credit in member-facing help/FAQ; check use in finished posts and workflows. |
 | Member and booster counters | Imported labels **Members 30** and **Boosters 0** are fixed template text | Configure and verify automatic counters. These labels are **not live counts** and must not be described as such. |
 | Community structure | Full template imported; BrowseRP server name restored | Review the 51 channels and 56 roles, remove or adapt irrelevant template material, and finish BrowseRP content and permissions. |
 
 Emoji attribution, the upstream graphics license and the exact 40-entry source/hash manifest are retained under [discord-assets](discord-assets/CREDITS.md). The manifest records uploaded assets, not a proof that suggestion voting, moderation or other bot actions work. Images themselves are not duplicated into the repository.
 
+### Saved staff role names and colours
+
+| Role | Saved colour |
+| --- | --- |
+| Ownership | `#ec4fa6` |
+| Management | `#dc65b0` |
+| Admin | `#c065d0` |
+| Junior Admin | `#9568d5` |
+| Moderator | `#a98ae4` |
+| Trial Moderator | `#bfa9ef` |
+
+For each role, the root task verified public role mentions off and dangerous native permissions off: Administrator; managing the server, roles, channels, webhooks or expressions; ban/kick/timeout; nickname management; mass mentions; message/thread deletion and management; TTS; and voice moderation. Only **Ownership** retains View Audit Log and Server Insights; these are off for the other five. The actual Discord server owner's intrinsic rights are unchanged; naming a role Ownership does not transfer server ownership.
+
+All six roles are **unassigned**. Cosmetic/game roles currently sit above staff roles, so the hierarchy still needs review. Other imported roles and channel-specific exceptions have not been cleared, and bot-mediated punishments/command limits are not configured or proven. The role checks do not establish effective permissions for a future member holding multiple roles.
+
 ## Work still required before opening the community
 
 1. **Make the imported server fit BrowseRP.** Finish welcome, rules, FAQ, updates, game discussion, help and voice areas; remove irrelevant in-game jobs, donation offers and unused template material. Preserve the user-selected design while checking each change.
-2. **Prove privacy and staff authority.** Audit every private child channel and its role/member/app overrides, including Staff, support cases and the owner's office. Configure support and moderation roles so ordinary staff use explicitly allowed bot commands instead of broad Administrator, Manage Roles or direct destructive permissions. Test command target restrictions and revocation; no general staff or bot whitelist.
+2. **Prove privacy and staff authority.** Finish the unsynced `moderators-only` exception and audit every private child channel's role/member/app overrides, including support cases and the owner's office. The six staff roles have safe native defaults saved; finish their hierarchy, unused template-role audit and assignments, then configure explicitly allowed bot commands. Test effective access, command target restrictions and revocation; no general staff or bot whitelist.
 3. **Configure and test security.** Security is installed but unconfigured and unproven. Review its permissions, logging destinations, command access, action limits and recovery behaviour. Re-enter native AutoMod, profanity/spam/mention filters, raid controls, verification and moderator 2FA after the import; prior settings do not establish their current state. Use bounded checks, never attack traffic or destructive tests on members.
 4. **Finish member entry and community decisions.** Configure rules acceptance, game-role self-selection and ordinary-member access. Website suggestions must reach a private review queue before public voting, with clear decisions/statuses. Existing-bot selection is researched; the workflow has not been installed or tested. Native staff-created polls can support approved questions once channel permissions are checked.
 5. **Finish private help, official posts and music.** Configure the chosen ticket workflow and trusted support access, then test requester isolation. Prepare BrowseRP-branded welcome/rules/FAQ/updates without claiming a running custom bot. Install and test any chosen free music integration in its designated channels only. These functions are pending.
