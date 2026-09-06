@@ -1,8 +1,18 @@
-import test from "node:test";
+import test, { beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { JSDOM } from "jsdom";
 import { createPublicPageHandler, publicServer, articleBody, scriptJSON, slot } from "../lib/public-pages.js";
+// Production metadata is the baseline even when this suite runs in a preview build.
+// The preview-specific case below explicitly exercises the stricter deployment policy.
+beforeEach(t => {
+  const prior = process.env.VERCEL_ENV;
+  process.env.VERCEL_ENV = "production";
+  t.after(() => {
+    if (prior === undefined) delete process.env.VERCEL_ENV;
+    else process.env.VERCEL_ENV = prior;
+  });
+});
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const server = { id: "01234567-1234-1234-1234-0123456789ab", name: "Cali RP", slug: "cali-rp", platform_id: "fivem", region: "United States", language: "English", framework: "vMenu", access_type: "public", description: "A character-led community with public services.", tags: ["serious rp"], online: true, players: 123, capacity: 500, owner_id: "PRIVATE_OWNER", review_note: "PRIVATE_NOTE", quality_score: 999, logo_url: "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/logo.png" };
 const post = { title: "Choosing a community", slug: "choosing-a-community", excerpt: "Read the rules before joining.", body: "## Before you join\n\nRead the rules.\n\n- Be respectful\n- Ask for help", publishedAt: "2026-09-01T12:00:00Z", author_id: "PRIVATE_AUTHOR" };
@@ -16,6 +26,7 @@ test("published game/directory pages arrive with unique content and crawlable se
   for (const path of ["/servers", "/games/fivem", "/api/router?_route=public/document&_path=/games/fivem"]) {
     const response = await request(path), doc = response.document();
     assert.equal(response.statusCode, 200, path);
+    assert.equal(response.headers["x-robots-tag"], undefined, "Published production pages must remain crawlable");
     assert.equal(doc.querySelectorAll('a[href="/server/cali-rp"]').length, 1);
     assert.equal(doc.querySelector(".platform-badge-v5")?.textContent, "FiveM");
     assert.equal(doc.querySelectorAll(".platform-badge-v5 svg").length, 0);
@@ -159,7 +170,7 @@ test("preview public documents and sitemaps explicitly prohibit indexing", async
   const prior = process.env.VERCEL_ENV;
   try {
     process.env.VERCEL_ENV = "preview";
-    for (const path of ["/server/cali-rp", "/games/fivem", "/sitemap.xml"]) {
+    for (const path of ["/servers", "/servers?q=cali", "/server/cali-rp", "/games/fivem", "/games/gta6", "/blog/choosing-a-community", "/sitemap.xml"]) {
       const response = await request(path); assert.equal(response.statusCode, 200);
       assert.equal(response.headers["x-robots-tag"], "noindex, nofollow");
       if (path !== "/sitemap.xml") assert.equal(response.document().querySelector('meta[name="robots"]').content, "noindex,nofollow");
