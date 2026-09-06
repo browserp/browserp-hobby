@@ -1,0 +1,40 @@
+{
+  "recommended": [
+    {
+      "joinCode": "ak44p9",
+      "platform": "fivem",
+      "status": "review",
+      "name": "FREE2RP 2.0",
+      "description": "FREE2RP 2.0 is an English-speaking FiveM community for players aged 18 and over, with character-led stories across civilian businesses, emergency services, the justice system and criminal crews. Players must apply and be approved before joining. Its public rules set expectations for roleplay, personal boundaries and reporting, and its moderation policy describes coaching, escalating penalties and appeals. Read the current rules and joining guidance on the official website. Application review can take time, and optional paid packages offer faster review and queue priority without guaranteeing approval.",
+      "region": "United States",
+      "language": "English",
+      "framework": "Ox Core",
+      "accessType": "allowlisted",
+      "discordUrl": "https://discord.gg/free2rp",
+      "websiteUrl": "https://free2rp.com/",
+      "cfxJoinUrl": "https://cfx.re/join/ak44p9",
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/ak44p9/-725141511.png",
+      "bannerUrl": null,
+      "tags": [
+        "roleplay",
+        "serious rp",
+        "economy",
+        "businesses",
+        "police",
+        "ems",
+        "gangs"
+      ],
+      "keywords": [
+        "free2rp",
+        "free 2 rp",
+        "f2rp",
+        "english",
+        "whitelisted",
+        "application required",
+        "character stories",
+        "civilian careers",
+        "justice system"
+      ]
+    }
+  ]
+}

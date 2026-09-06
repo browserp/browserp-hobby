@@ -1,0 +1,345 @@
+{
+  "ak44p9": {
+    "name": "FREE2RP 2.0",
+    "slug": "free2rp-2-0-ak44p9",
+    "publicSnapshot": {
+      "players": 50,
+      "capacity": 210,
+      "checked_at": "2026-09-06T00:48:26.312+00:00",
+      "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ak44p9/9e2591222c019732aced372958d6a4ccca6b7707a60e8f6b0b71699848509573.png",
+      "community_url": "https://discord.gg/free2rp",
+      "website_url": "https://free2rp.com/"
+    },
+    "source": {
+      "name": "Free2.0RP",
+      "players": {
+        "online": 50,
+        "max": 210,
+        "observedAt": "2026-09-06T00:48:26.312Z",
+        "status": "online"
+      },
+      "links": {
+        "cfxJoinUrl": "https://cfx.re/join/ak44p9",
+        "communityUrl": "https://discord.gg/free2rp",
+        "websiteUrl": "https://free2rp.com/"
+      },
+      "images": {
+        "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/ak44p9/-725141511.png",
+        "bannerUrl": null
+      },
+      "source": {
+        "provider": "cfx",
+        "url": "https://frontend.cfx-services.net/api/servers/single/ak44p9",
+        "listingUrl": "https://servers.fivem.net/servers/detail/ak44p9",
+        "fetchedAt": "2026-09-06T00:53:24.651Z",
+        "lastSeen": "2026-09-06T00:48:26.312Z"
+      },
+      "issueCodes": [
+        "short_description",
+        "self_reported_metadata",
+        "locale_region",
+        "untrusted_image_host"
+      ]
+    }
+  },
+  "ayoz35": {
+    "name": "Starlight Community Roleplay",
+    "slug": "starlight-community-roleplay-ayoz35",
+    "publicSnapshot": {
+      "players": 35,
+      "capacity": 100,
+      "checked_at": "2026-09-06T00:47:32.883+00:00",
+      "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ayoz35/10e2a0b2eb0d6db5bb7ce962c4f51d43a9703fca5f63542a5464a2e0771f822a.png",
+      "community_url": "https://discord.gg/starlightcommunity",
+      "website_url": "https://www.starlightcommunityrp.com/"
+    },
+    "source": {
+      "name": "Starlight Community Roleplay",
+      "players": {
+        "online": 37,
+        "max": 100,
+        "observedAt": "2026-09-06T00:50:17.912Z",
+        "status": "online"
+      },
+      "links": {
+        "cfxJoinUrl": "https://cfx.re/join/ayoz35",
+        "communityUrl": "https://discord.gg/starlightcommunity",
+        "websiteUrl": null
+      },
+      "images": {
+        "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/ayoz35/929626424.png",
+        "bannerUrl": "https://i.postimg.cc/50jzXspb/Untitled-design-11.png"
+      },
+      "source": {
+        "provider": "cfx",
+        "url": "https://frontend.cfx-services.net/api/servers/single/ayoz35",
+        "listingUrl": "https://servers.fivem.net/servers/detail/ayoz35",
+        "fetchedAt": "2026-09-06T00:53:24.713Z",
+        "lastSeen": "2026-09-06T00:50:17.912Z"
+      },
+      "issueCodes": [
+        "self_reported_metadata",
+        "locale_region"
+      ]
+    }
+  },
+  "88q583": {
+    "name": "We The People RP",
+    "slug": "we-the-people-rp-88q583",
+    "publicSnapshot": {
+      "players": 306,
+      "capacity": 320,
+      "checked_at": "2026-09-06T00:47:34.603+00:00",
+      "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/88q583/8538ac22760cd9e4059e4004da5380bdce03879bcb7d59c3e71ad4c3e5067620.png",
+      "community_url": "https://discord.gg/wethepeoplerp",
+      "website_url": "https://wtprp.com/"
+    },
+    "source": {
+      "name": "We The People RP",
+      "players": {
+        "online": 306,
+        "max": 320,
+        "observedAt": "2026-09-06T00:50:45.928Z",
+        "status": "online"
+      },
+      "links": {
+        "cfxJoinUrl": "https://cfx.re/join/88q583",
+        "communityUrl": "https://discord.gg/wethepeoplerp",
+        "websiteUrl": null
+      },
+      "images": {
+        "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/88q583/904326473.png",
+        "bannerUrl": null
+      },
+      "source": {
+        "provider": "cfx",
+        "url": "https://frontend.cfx-services.net/api/servers/single/88q583",
+        "listingUrl": "https://servers.fivem.net/servers/detail/88q583",
+        "fetchedAt": "2026-09-06T00:53:24.740Z",
+        "lastSeen": "2026-09-06T00:50:45.928Z"
+      },
+      "issueCodes": [
+        "self_reported_metadata",
+        "locale_region",
+        "untrusted_image_host"
+      ]
+    }
+  },
+  "d9eyr3": {
+    "name": "The Rift Trails",
+    "slug": "the-rift-trails-d9eyr3",
+    "publicSnapshot": {
+      "players": 47,
+      "capacity": 200,
+      "checked_at": "2026-09-06T00:48:40.883+00:00",
+      "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/d9eyr3/3591247ab1dafe83da8a4fdec984998c1fd3d5e0364f09fa1346626149c2d103.png",
+      "community_url": "https://discord.gg/rifttrails",
+      "website_url": "https://www.rifttrails.com/"
+    },
+    "source": {
+      "name": "The Rift Trails",
+      "players": {
+        "online": 47,
+        "max": 200,
+        "observedAt": "2026-09-06T00:51:41.278Z",
+        "status": "online"
+      },
+      "links": {
+        "cfxJoinUrl": "https://cfx.re/join/d9eyr3",
+        "communityUrl": "https://discord.gg/rifttrails",
+        "websiteUrl": null
+      },
+      "images": {
+        "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/d9eyr3/397345550.png",
+        "bannerUrl": null
+      },
+      "source": {
+        "provider": "cfx",
+        "url": "https://frontend.cfx-services.net/api/servers/single/d9eyr3",
+        "listingUrl": "https://servers.redm.net/servers/detail/d9eyr3",
+        "fetchedAt": "2026-09-06T00:53:24.765Z",
+        "lastSeen": "2026-09-06T00:51:41.278Z"
+      },
+      "issueCodes": [
+        "invalid_link",
+        "self_reported_metadata",
+        "locale_region",
+        "invalid_image",
+        "invalid_image"
+      ]
+    }
+  },
+  "ex853d": {
+    "name": "Legit RP",
+    "slug": "legit-rp-ex853d",
+    "publicSnapshot": {
+      "players": null,
+      "capacity": null,
+      "checked_at": "2026-09-06T00:46:24.163+00:00",
+      "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ex853d/ed6edf04685908ca47028d0e20ec798e46764f1303583d28dc10d0b70fe1a7a2.png",
+      "community_url": "https://discord.gg/LegitRP",
+      "website_url": "https://legitrp.gg/"
+    },
+    "source": {
+      "name": "Legit RP",
+      "players": {
+        "online": 131,
+        "max": 150,
+        "observedAt": "2026-09-06T00:50:16.953Z",
+        "status": "online"
+      },
+      "links": {
+        "cfxJoinUrl": "https://cfx.re/join/ex853d",
+        "communityUrl": "https://discord.gg/LegitRP",
+        "websiteUrl": null
+      },
+      "images": {
+        "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/ex853d/-2035864745.png",
+        "bannerUrl": null
+      },
+      "source": {
+        "provider": "cfx",
+        "url": "https://frontend.cfx-services.net/api/servers/single/ex853d",
+        "listingUrl": "https://servers.fivem.net/servers/detail/ex853d",
+        "fetchedAt": "2026-09-06T00:53:24.790Z",
+        "lastSeen": "2026-09-06T00:50:16.953Z"
+      },
+      "issueCodes": [
+        "invalid_link",
+        "short_description",
+        "self_reported_metadata",
+        "locale_region",
+        "untrusted_image_host"
+      ]
+    }
+  },
+  "o6oodx": {
+    "name": "San Andreas Department of Roleplay (SADRP)",
+    "slug": "san-andreas-department-of-roleplay-sadrp-o6oodx",
+    "publicSnapshot": {
+      "players": null,
+      "capacity": null,
+      "checked_at": "2026-09-06T00:45:18.533+00:00",
+      "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/o6oodx/6597f049e94283a8faa385685653f5ee12fd015c5fab168c3bb27a9c60678202.png",
+      "community_url": "https://discord.gg/sadrp",
+      "website_url": "https://www.sadrp.net/"
+    },
+    "source": {
+      "name": "San Andreas Department of Roleplay SADRP",
+      "players": {
+        "online": 36,
+        "max": 64,
+        "observedAt": "2026-09-06T00:49:31.076Z",
+        "status": "online"
+      },
+      "links": {
+        "cfxJoinUrl": "https://cfx.re/join/o6oodx",
+        "communityUrl": null,
+        "websiteUrl": null
+      },
+      "images": {
+        "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/o6oodx/-1077508540.png",
+        "bannerUrl": null
+      },
+      "source": {
+        "provider": "cfx",
+        "url": "https://frontend.cfx-services.net/api/servers/single/o6oodx",
+        "listingUrl": "https://servers.fivem.net/servers/detail/o6oodx",
+        "fetchedAt": "2026-09-06T00:53:24.813Z",
+        "lastSeen": "2026-09-06T00:49:31.076Z"
+      },
+      "issueCodes": [
+        "conflicting_links",
+        "self_reported_metadata",
+        "locale_region",
+        "untrusted_image_host"
+      ]
+    }
+  },
+  "bpjzpp": {
+    "name": "Westhaven: The Hush RP",
+    "slug": "westhaven-the-hush-rp-bpjzpp",
+    "publicSnapshot": {
+      "players": null,
+      "capacity": null,
+      "checked_at": "2026-09-06T00:46:25.184+00:00",
+      "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/bpjzpp/a5816996b1d5cedd2d20c00f2ee403fa94932d11addbb32830bd478e71f49c77.png",
+      "community_url": "https://discord.gg/dspvFue8Sr",
+      "website_url": "https://www.westhavenrp.com/"
+    },
+    "source": {
+      "name": "Westhaven: The Hush RP",
+      "players": {
+        "online": 60,
+        "max": 128,
+        "observedAt": "2026-09-06T00:51:09.848Z",
+        "status": "online"
+      },
+      "links": {
+        "cfxJoinUrl": "https://cfx.re/join/bpjzpp",
+        "communityUrl": "https://discord.gg/dspvFue8Sr",
+        "websiteUrl": "https://www.westhavenrp.com/"
+      },
+      "images": {
+        "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/bpjzpp/-1539167677.png",
+        "bannerUrl": "https://i.postimg.cc/jqy9zbdg/westhavenbanner.png"
+      },
+      "source": {
+        "provider": "cfx",
+        "url": "https://frontend.cfx-services.net/api/servers/single/bpjzpp",
+        "listingUrl": "https://servers.redm.net/servers/detail/bpjzpp",
+        "fetchedAt": "2026-09-06T00:53:24.840Z",
+        "lastSeen": "2026-09-06T00:51:09.848Z"
+      },
+      "issueCodes": [
+        "invalid_link",
+        "reclassified_link",
+        "mislabeled_field",
+        "self_reported_metadata",
+        "locale_region"
+      ]
+    }
+  },
+  "5xdqg7": {
+    "name": "San Andreas Valley Roleplay",
+    "slug": "san-andreas-valley-roleplay-5xdqg7",
+    "publicSnapshot": {
+      "players": null,
+      "capacity": null,
+      "checked_at": "2026-09-06T00:45:54.824+00:00",
+      "logo_url": null,
+      "community_url": "https://discord.gg/SAVRP",
+      "website_url": "https://fivem.strengthonlinellc.com/"
+    },
+    "source": {
+      "name": "SAVRP: A Strength Online World",
+      "players": {
+        "online": 114,
+        "max": 184,
+        "observedAt": "2026-09-06T00:50:57.862Z",
+        "status": "online"
+      },
+      "links": {
+        "cfxJoinUrl": "https://cfx.re/join/5xdqg7",
+        "communityUrl": "https://discord.gg/SAVRP",
+        "websiteUrl": "https://fivem.strengthonlinellc.com/"
+      },
+      "images": {
+        "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/5xdqg7/-416334642.png",
+        "bannerUrl": null
+      },
+      "source": {
+        "provider": "cfx",
+        "url": "https://frontend.cfx-services.net/api/servers/single/5xdqg7",
+        "listingUrl": "https://servers.fivem.net/servers/detail/5xdqg7",
+        "fetchedAt": "2026-09-06T00:53:24.868Z",
+        "lastSeen": "2026-09-06T00:50:57.862Z"
+      },
+      "issueCodes": [
+        "self_reported_metadata",
+        "locale_region",
+        "untrusted_image_host"
+      ]
+    }
+  }
+}

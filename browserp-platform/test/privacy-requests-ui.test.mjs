@@ -74,3 +74,31 @@ test("a late private history response cannot restore content after account end",
  let release;const h=await harness(t,async path=>path.includes("?id=")?new Promise(resolve=>{release=()=>resolve({items:[{event:"staff_review",reply:"Private delayed reply"}]});}):{items:[item]});
  const history=h.$(".privacy-request-history");history.open=true;history.dispatchEvent(new h.w.Event("toggle"));await tick();h.w.dispatchEvent(new h.w.Event("browserp:session-ended"));release();await tick();assert.equal(h.text(),"");
 });
+
+const copyItem={...item,kind:'copy',status:'ready',export:{approved:true,scopeComplete:false,supplementNote:'Original uploads still need a separate copy.',copy:null}};
+async function downloadHarness(t,handler){
+ const {webcrypto}=await import('node:crypto');const h=await harness(t,handler);h.w.TextEncoder=TextEncoder;h.w.Blob=Blob;Object.defineProperty(h.w.crypto,'subtle',{value:webcrypto.subtle});const files=[],revoked=[];
+ h.w.URL.createObjectURL=blob=>{files.push(blob);return `blob:https://browserp.test/private-${files.length}`;};h.w.URL.revokeObjectURL=value=>revoked.push(value);
+ h.root.addEventListener('click',event=>{if(event.target.tagName==='A')event.preventDefault();});t.after(()=>h.controller.destroy());return{...h,files,revoked};
+}
+async function drain(){for(let i=0;i<10;i++)await new Promise(r=>setTimeout(r,5));}
+test('private copy is checked, downloaded and confirmed separately without closing the wider request',async t=>{
+ const {createHash}=await import('node:crypto'),content='{"profile":{"name":"Only this member"}}',sha256=createHash('sha256').update(content).digest('hex'),copy={id:'private-copy',sha256,byteSize:Buffer.byteLength(content),available:true,pending:[]};const writes=[];
+ const h=await downloadHarness(t,async(path,options)=>{if(options?.method!=='POST')return{items:[copyItem]};const body=JSON.parse(options.body);writes.push(body);if(body.action==='generate_export')return{copy};if(body.action==='read_export')return{copy,content};if(body.action==='check_export')return{allowed:true,sha256};return{copy:{...copy,receivedAt:item.createdAt},request:copyItem};});
+ assert.equal(h.button('Confirm I received this copy'),undefined);h.button('Prepare and download my copy').click();await drain();assert.equal(h.files.length,1);assert.equal(await h.files[0].text(),content);assert.deepEqual(writes.map(x=>x.action),['generate_export','read_export','check_export']);assert.ok(h.calls.every(x=>x.options.headers['X-BrowseRP-Account']==='fixture-account'));
+ const confirm=h.button('Confirm I received this copy');assert.equal(confirm.disabled,true);const checkbox=h.$('.privacy-request-copy input[type="checkbox"]');checkbox.checked=true;checkbox.dispatchEvent(new h.w.Event('change'));confirm.click();await drain();assert.equal(writes.at(-1).action,'receive_export');assert.match(h.text(),/request stays open/);assert.match(h.text(),/Original uploads/);
+ h.w.dispatchEvent(new h.w.Event('pagehide'));assert.equal(h.text(),'');assert.equal(h.revoked.length,1);
+});
+test('a corrupt file or account change during final check never creates a download',async t=>{
+ const {createHash}=await import('node:crypto'),content='{"name":"Private content"}',sha256=createHash('sha256').update(content).digest('hex'),copy={id:'private-copy',sha256,byteSize:Buffer.byteLength(content)};
+ for(const failure of['hash','account']){const h=await downloadHarness(t,async(path,options)=>{if(options?.method!=='POST')return{items:[copyItem]};const {action}=JSON.parse(options.body);if(action==='generate_export')return{copy};if(action==='read_export')return{copy,content:failure==='hash'?content+'x':content};throw Object.assign(new Error('Account changed'),{status:401});});
+ h.button('Prepare and download my copy').click();await drain();assert.equal(h.files.length,0);assert.match(h.text(),failure==='hash'?/integrity check/:/Sign in again/);if(failure==='account')assert.doesNotMatch(h.text(),/Private fixture account request/);}
+});
+test('a late private copy cannot reappear after sign-out and interrupted preparation keeps its retry key',async t=>{
+ let resolve;const bodies=[];const h=await downloadHarness(t,async(path,options)=>{if(options?.method!=='POST')return{items:[copyItem]};bodies.push(JSON.parse(options.body));if(bodies.length===1)throw new Error('Try again');return new Promise(r=>{resolve=r;});});
+ h.button('Prepare and download my copy').click();await drain();h.button('Prepare and download my copy').click();await drain();assert.equal(bodies[0].key,bodies[1].key);h.w.dispatchEvent(new h.w.CustomEvent('browserp:session-ended'));resolve({copy:{id:'late'}});await drain();assert.equal(h.files.length,0);assert.equal(h.text(),'');
+});
+test('staff explicitly approve scope with a stable retry and cannot download the member file',async t=>{
+ const writes=[];const h=await harness(t,async(path,options)=>{if(options?.method==='POST'){writes.push(JSON.parse(options.body));throw new Error('Retry safely');}return{items:[{...copyItem,export:null}],canFulfill:true};},{staff:true});
+ assert.equal(h.button('Prepare and download my copy'),undefined);const form=h.$('.privacy-request-copy form');form.elements.supplementNote.value='Uploaded files will be provided separately.';h.submit(form);await tick();assert.equal(writes.length,0);form.elements.confirmed.checked=true;h.submit(form);await tick();h.submit(form);await tick();assert.deepEqual(writes[0],writes[1]);assert.equal(writes[0].scopeComplete,false);assert.equal(writes[0].action,'approve_export');assert.equal(writes[0].version,item.version);
+});

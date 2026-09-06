@@ -1,0 +1,372 @@
+{
+  "at": "2026-09-06T01:26:37.314Z",
+  "origin": "https://127.0.0.1:52584",
+  "sourceSha256": "8d82e99030d82644210fae4aebb894f0cd3cb92accfd9ab94143e6c91b7e9106",
+  "cssSha256": "876a373b8602009b472550c2e7610cc8eb44da2a26ae9c0c0e4e0f6c6eb9319c",
+  "assertions": 678,
+  "total": 24,
+  "passed": 24,
+  "boundary": "Real three-engine rendered profile UI and native downloads under local HTTPS/current CSP, mocked private APIs only; not hosted OAuth/DB or physical hardware.",
+  "results": [
+    {
+      "engine": "chromium",
+      "width": 390,
+      "touch": true,
+      "scenario": "download-and-receipt",
+      "pass": true,
+      "assertions": 41,
+      "downloads": 1,
+      "receiptSent": true,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export",
+        "receive_export"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "touch": true,
+      "scenario": "bad-hash",
+      "pass": true,
+      "assertions": 22,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "touch": true,
+      "scenario": "account-changed",
+      "pass": true,
+      "assertions": 25,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "touch": true,
+      "scenario": "session-ended",
+      "pass": true,
+      "assertions": 25,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 1280,
+      "touch": false,
+      "scenario": "download-and-receipt",
+      "pass": true,
+      "assertions": 41,
+      "downloads": 1,
+      "receiptSent": true,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export",
+        "receive_export"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 1280,
+      "touch": false,
+      "scenario": "bad-hash",
+      "pass": true,
+      "assertions": 22,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 1280,
+      "touch": false,
+      "scenario": "account-changed",
+      "pass": true,
+      "assertions": 25,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export"
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 1280,
+      "touch": false,
+      "scenario": "session-ended",
+      "pass": true,
+      "assertions": 25,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export"
+      ]
+    },
+    {
+      "engine": "firefox",
+      "width": 390,
+      "touch": true,
+      "scenario": "download-and-receipt",
+      "pass": true,
+      "assertions": 41,
+      "downloads": 1,
+      "receiptSent": true,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export",
+        "receive_export"
+      ]
+    },
+    {
+      "engine": "firefox",
+      "width": 390,
+      "touch": true,
+      "scenario": "bad-hash",
+      "pass": true,
+      "assertions": 22,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export"
+      ]
+    },
+    {
+      "engine": "firefox",
+      "width": 390,
+      "touch": true,
+      "scenario": "account-changed",
+      "pass": true,
+      "assertions": 25,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export"
+      ]
+    },
+    {
+      "engine": "firefox",
+      "width": 390,
+      "touch": true,
+      "scenario": "session-ended",
+      "pass": true,
+      "assertions": 25,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export"
+      ]
+    },
+    {
+      "engine": "firefox",
+      "width": 1280,
+      "touch": false,
+      "scenario": "download-and-receipt",
+      "pass": true,
+      "assertions": 41,
+      "downloads": 1,
+      "receiptSent": true,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export",
+        "receive_export"
+      ]
+    },
+    {
+      "engine": "firefox",
+      "width": 1280,
+      "touch": false,
+      "scenario": "bad-hash",
+      "pass": true,
+      "assertions": 22,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export"
+      ]
+    },
+    {
+      "engine": "firefox",
+      "width": 1280,
+      "touch": false,
+      "scenario": "account-changed",
+      "pass": true,
+      "assertions": 25,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export"
+      ]
+    },
+    {
+      "engine": "firefox",
+      "width": 1280,
+      "touch": false,
+      "scenario": "session-ended",
+      "pass": true,
+      "assertions": 25,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "touch": true,
+      "scenario": "download-and-receipt",
+      "pass": true,
+      "assertions": 41,
+      "downloads": 1,
+      "receiptSent": true,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export",
+        "receive_export"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "touch": true,
+      "scenario": "bad-hash",
+      "pass": true,
+      "assertions": 22,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "touch": true,
+      "scenario": "account-changed",
+      "pass": true,
+      "assertions": 25,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "touch": true,
+      "scenario": "session-ended",
+      "pass": true,
+      "assertions": 25,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 1280,
+      "touch": false,
+      "scenario": "download-and-receipt",
+      "pass": true,
+      "assertions": 41,
+      "downloads": 1,
+      "receiptSent": true,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export",
+        "receive_export"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 1280,
+      "touch": false,
+      "scenario": "bad-hash",
+      "pass": true,
+      "assertions": 22,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 1280,
+      "touch": false,
+      "scenario": "account-changed",
+      "pass": true,
+      "assertions": 25,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export"
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 1280,
+      "touch": false,
+      "scenario": "session-ended",
+      "pass": true,
+      "assertions": 25,
+      "downloads": 0,
+      "receiptSent": false,
+      "actions": [
+        "generate_export",
+        "read_export",
+        "check_export"
+      ]
+    }
+  ]
+}

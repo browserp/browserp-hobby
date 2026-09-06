@@ -1,0 +1,402 @@
+{
+  "sha": "478ae90702c34febb2f8323cef7f0aec2f21764c",
+  "origin": "https://www.browserp.com",
+  "at": "2026-09-06T01:24:17.498Z",
+  "checks": [
+    {
+      "kind": "sitemap",
+      "status": 200,
+      "urls": 77,
+      "servers": 63
+    },
+    {
+      "kind": "guest-write-denial",
+      "route": "/api/submissions",
+      "status": 401
+    },
+    {
+      "kind": "guest-write-denial",
+      "route": "/api/me/data-requests",
+      "status": 403
+    },
+    {
+      "kind": "asset-hash",
+      "file": "browserp-portal-v2.js",
+      "match": true
+    },
+    {
+      "kind": "asset-hash",
+      "file": "submission-correction.js",
+      "match": true
+    },
+    {
+      "kind": "asset-hash",
+      "file": "privacy-requests.js",
+      "match": true
+    },
+    {
+      "kind": "asset-hash",
+      "file": "browserp-directory.js",
+      "match": true
+    },
+    {
+      "kind": "asset-hash",
+      "file": "discovery-model.js",
+      "match": true
+    },
+    {
+      "kind": "asset-hash",
+      "file": "browserp-games.js",
+      "match": true
+    },
+    {
+      "kind": "asset-hash",
+      "file": "blog.js",
+      "match": true
+    },
+    {
+      "kind": "no-javascript",
+      "engine": "chromium",
+      "path": "/games/fivem",
+      "status": 200
+    },
+    {
+      "kind": "no-javascript",
+      "engine": "chromium",
+      "path": "/servers?q=cali",
+      "status": 200
+    },
+    {
+      "kind": "no-javascript",
+      "engine": "chromium",
+      "path": "/server/california-roleplay-calirp-ajv9r5",
+      "status": 200
+    },
+    {
+      "kind": "no-javascript",
+      "engine": "chromium",
+      "path": "/blog",
+      "status": 200
+    },
+    {
+      "kind": "interactive",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/games/fivem",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/servers?q=cali",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/server/california-roleplay-calirp-ajv9r5",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/list-server?platform=roblox",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "chromium",
+      "width": 390,
+      "path": "/blog",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/games/fivem",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/servers?q=cali",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/server/california-roleplay-calirp-ajv9r5",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/list-server?platform=roblox",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "chromium",
+      "width": 1280,
+      "path": "/blog",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "no-javascript",
+      "engine": "firefox",
+      "path": "/games/fivem",
+      "status": 200
+    },
+    {
+      "kind": "no-javascript",
+      "engine": "firefox",
+      "path": "/servers?q=cali",
+      "status": 200
+    },
+    {
+      "kind": "no-javascript",
+      "engine": "firefox",
+      "path": "/server/california-roleplay-calirp-ajv9r5",
+      "status": 200
+    },
+    {
+      "kind": "no-javascript",
+      "engine": "firefox",
+      "path": "/blog",
+      "status": 200
+    },
+    {
+      "kind": "interactive",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/games/fivem",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/servers?q=cali",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/server/california-roleplay-calirp-ajv9r5",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/list-server?platform=roblox",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "firefox",
+      "width": 390,
+      "path": "/blog",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "firefox",
+      "width": 1280,
+      "path": "/games/fivem",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "firefox",
+      "width": 1280,
+      "path": "/servers?q=cali",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "firefox",
+      "width": 1280,
+      "path": "/server/california-roleplay-calirp-ajv9r5",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "firefox",
+      "width": 1280,
+      "path": "/list-server?platform=roblox",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "firefox",
+      "width": 1280,
+      "path": "/blog",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "no-javascript",
+      "engine": "webkit",
+      "path": "/games/fivem",
+      "status": 200
+    },
+    {
+      "kind": "no-javascript",
+      "engine": "webkit",
+      "path": "/servers?q=cali",
+      "status": 200
+    },
+    {
+      "kind": "no-javascript",
+      "engine": "webkit",
+      "path": "/server/california-roleplay-calirp-ajv9r5",
+      "status": 200
+    },
+    {
+      "kind": "no-javascript",
+      "engine": "webkit",
+      "path": "/blog",
+      "status": 200
+    },
+    {
+      "kind": "interactive",
+      "engine": "webkit",
+      "width": 390,
+      "path": "/games/fivem",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "webkit",
+      "width": 390,
+      "path": "/servers?q=cali",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "webkit",
+      "width": 390,
+      "path": "/server/california-roleplay-calirp-ajv9r5",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "webkit",
+      "width": 390,
+      "path": "/list-server?platform=roblox",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "webkit",
+      "width": 390,
+      "path": "/blog",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "webkit",
+      "width": 1280,
+      "path": "/games/fivem",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "webkit",
+      "width": 1280,
+      "path": "/servers?q=cali",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "webkit",
+      "width": 1280,
+      "path": "/server/california-roleplay-calirp-ajv9r5",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "webkit",
+      "width": 1280,
+      "path": "/list-server?platform=roblox",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    },
+    {
+      "kind": "interactive",
+      "engine": "webkit",
+      "width": 1280,
+      "path": "/blog",
+      "status": 200,
+      "overflow": false,
+      "broken": []
+    }
+  ],
+  "ok": true,
+  "resumedAt": "2026-09-06T01:30:54.051Z"
+}

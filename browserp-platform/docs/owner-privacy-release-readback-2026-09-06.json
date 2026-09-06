@@ -1,0 +1,329 @@
+{
+  "at": "2026-09-06",
+  "release": "478ae90702c34febb2f8323cef7f0aec2f21764c",
+  "metadataOnly": true,
+  "checks": [
+    {
+      "check": 0,
+      "result": [
+        {
+          "signature": "private.can_fulfill_data_requests()",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": false,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "private.check_owner_listing_update(uuid,uuid,bigint,jsonb)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": false,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "private.create_reviewed_listing_application(uuid,uuid,uuid,jsonb,text,integer,jsonb,text,text,text,text,uuid)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": false,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "private.data_request_history_page(uuid,bigint,boolean)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": false,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "private.keep_data_request_record()",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": false,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "private.record_data_request_history()",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": false,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "private.resubmit_before_owner_updates(uuid,uuid,uuid,bigint,bigint,text,jsonb,text,integer,jsonb,text,text)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": false,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "private.validate_owned_listing_features(uuid,uuid,jsonb,text,integer,jsonb)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": false,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.correct_owned_listing_update_server(uuid,uuid,uuid,bigint,bigint,bigint,text,jsonb,text,integer,jsonb,text,text)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": false,
+          "service_execute": true,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.create_server_application_server(uuid,uuid,uuid,jsonb,text,integer,jsonb,text,text,text,text)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": false,
+          "service_execute": true,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.member_data_request_history(uuid,bigint)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": true,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.member_data_requests(text,text,text,uuid,uuid,bigint)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": true,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.member_owned_listing_update(uuid)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": true,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.member_server_submission(uuid)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": true,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.propose_owned_listing_update_server(uuid,uuid,uuid,uuid,bigint,jsonb,text,integer,jsonb,text,text,text,text)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": false,
+          "service_execute": true,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.resubmit_server_submission_server(uuid,uuid,uuid,bigint,bigint,text,jsonb,text,integer,jsonb,text,text)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": false,
+          "service_execute": true,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.staff_data_request_history(uuid,bigint)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": true,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.staff_data_requests(text,text,timestamptz,uuid,integer)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": true,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.staff_fulfill_data_request(uuid,text,text,text,timestamptz,bigint,uuid,boolean)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": true,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.staff_review_data_request(uuid,text,text,bigint,uuid)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": true,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.staff_review_server_application(uuid,bigint,bigint,text,text,text,boolean,text)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": true,
+          "service_execute": false,
+          "expected_grants": true
+        },
+        {
+          "signature": "public.staff_server_submission_review(uuid)",
+          "function_exists": true,
+          "anon_execute": false,
+          "member_execute": true,
+          "service_execute": false,
+          "expected_grants": true
+        }
+      ]
+    },
+    {
+      "check": 1,
+      "result": [
+        {
+          "relation": "private.account_data_request_fulfillments",
+          "relrowsecurity": true,
+          "anon_select": false,
+          "member_select": false,
+          "anon_any_column_select": false,
+          "member_any_column_select": false,
+          "member_any_write": false,
+          "service_any_access": false
+        },
+        {
+          "relation": "private.account_data_request_history",
+          "relrowsecurity": true,
+          "anon_select": false,
+          "member_select": false,
+          "anon_any_column_select": false,
+          "member_any_column_select": false,
+          "member_any_write": false,
+          "service_any_access": false
+        },
+        {
+          "relation": "private.account_data_requests",
+          "relrowsecurity": true,
+          "anon_select": false,
+          "member_select": false,
+          "anon_any_column_select": false,
+          "member_any_column_select": false,
+          "member_any_write": false,
+          "service_any_access": false
+        },
+        {
+          "relation": "private.submission_creation_requests",
+          "relrowsecurity": true,
+          "anon_select": false,
+          "member_select": false,
+          "anon_any_column_select": false,
+          "member_any_column_select": false,
+          "member_any_write": false,
+          "service_any_access": false
+        },
+        {
+          "relation": "public.server_submissions",
+          "relrowsecurity": true,
+          "anon_select": false,
+          "member_select": false,
+          "anon_any_column_select": false,
+          "member_any_column_select": false,
+          "member_any_write": true,
+          "service_any_access": true
+        }
+      ]
+    },
+    {
+      "check": 2,
+      "result": [
+        {
+          "policyname": "submissions_owner_read",
+          "permissive": "PERMISSIVE",
+          "roles": "{public}",
+          "cmd": "SELECT",
+          "qual": "((submitted_by = ( SELECT auth.uid() AS uid)) OR has_staff_permission('servers.review'::text))",
+          "with_check": null
+        }
+      ]
+    },
+    {
+      "check": 3,
+      "result": [
+        {
+          "tgname": "immutable_data_request_fulfillment",
+          "relname": "account_data_request_fulfillments",
+          "tgenabled": "O",
+          "definition": "CREATE TRIGGER immutable_data_request_fulfillment BEFORE DELETE OR UPDATE ON private.account_data_request_fulfillments FOR EACH ROW EXECUTE FUNCTION private.keep_data_request_record()"
+        },
+        {
+          "tgname": "immutable_data_request_history",
+          "relname": "account_data_request_history",
+          "tgenabled": "O",
+          "definition": "CREATE TRIGGER immutable_data_request_history BEFORE DELETE OR UPDATE ON private.account_data_request_history FOR EACH ROW EXECUTE FUNCTION private.keep_data_request_record()"
+        },
+        {
+          "tgname": "record_data_request_history",
+          "relname": "account_data_requests",
+          "tgenabled": "O",
+          "definition": "CREATE TRIGGER record_data_request_history AFTER INSERT OR UPDATE ON private.account_data_requests FOR EACH ROW EXECUTE FUNCTION private.record_data_request_history()"
+        }
+      ]
+    },
+    {
+      "check": 4,
+      "result": [
+        {
+          "indexname": "account_data_requests_open_kind",
+          "indexdef": "CREATE UNIQUE INDEX account_data_requests_open_kind ON private.account_data_requests USING btree (user_id, kind) WHERE (status <> ALL (ARRAY['declined'::text, 'withdrawn'::text, 'fulfilled'::text]))"
+        },
+        {
+          "indexname": "one_open_owner_update_per_listing",
+          "indexdef": "CREATE UNIQUE INDEX one_open_owner_update_per_listing ON public.server_submissions USING btree (owner_update_server_id) WHERE ((owner_update_server_id IS NOT NULL) AND (status = ANY (ARRAY['pending_review'::text, 'changes_requested'::text])))"
+        }
+      ]
+    },
+    {
+      "check": 5,
+      "result": [
+        {
+          "permission_key": "privacy.requests.fulfill",
+          "roles": [
+            "owner"
+          ]
+        },
+        {
+          "permission_key": "privacy.requests.manage",
+          "roles": [
+            "owner"
+          ]
+        }
+      ]
+    },
+    {
+      "check": 6,
+      "result": [
+        {
+          "session_expiry_checked": true,
+          "owner_read_checks_member": true,
+          "completion_requires_review": true,
+          "completion_has_separate_permission": true,
+          "privacy_requires_totp": true
+        }
+      ]
+    },
+    {
+      "check": 7,
+      "result": [
+        {
+          "staff_mfa_required": true
+        }
+      ]
+    }
+  ]
+}

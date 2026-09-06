@@ -1,6 +1,7 @@
 import { assertCsrf, assertSameOrigin, readBody } from "./http.js";
 import { getSession, rpc } from "./supabase.js";
 import { rateLimit } from "./rate-limit.js";
+import { createHash } from "node:crypto";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const fail = message => Object.assign(new Error(message), { status: 400 });
@@ -33,6 +34,27 @@ export async function memberPrivacyRequests(req, res) {
     return rpc("member_data_requests", { p_action: "list" }, session.accessToken);
   }
   const body = await readBody(req, 8192);
+  if (["generate_export", "read_export", "check_export", "receive_export"].includes(body.action)) {
+    const values = { p_id: id(body.id) };
+    if (body.action === "generate_export") Object.assign(values, { p_expected_version: version(body.version), p_key: id(body.key) });
+    if (body.action === "receive_export") {
+      if (body.confirmed !== true || !/^[a-f0-9]{64}$/.test(body.sha256 || "")) throw fail("Download and check your copy before confirming receipt.");
+      Object.assign(values, { p_sha256: body.sha256, p_confirmed: true });
+    }
+    await rateLimit(req, "member-data-export", 15, 600);
+    if (body.action === "check_export") values.p_check_only = true;
+    const name = { generate_export: "member_generate_data_export", read_export: "member_read_data_export", check_export: "member_read_data_export", receive_export: "member_receive_data_export" }[body.action];
+    const result = await rpc(name, values, session.accessToken);
+    if (body.action === "read_export") {
+      if (typeof result?.content !== "string" || Buffer.byteLength(result.content) > 2097152 || Buffer.byteLength(result.content) !== result.copy?.byteSize
+        || createHash("sha256").update(result.content).digest("hex") !== result.copy?.sha256) throw Object.assign(new Error("Your copy could not be verified. Prepare a new copy or ask staff for help."), { status: 503 });
+      // Data preparation and session revocation can overlap. Do not release
+      // bytes after a revoked session, expired copy or changed request.
+      const check = await rpc("member_read_data_export", { p_id: values.p_id, p_check_only: true }, session.accessToken);
+      if (check?.allowed !== true || check.sha256 !== result.copy.sha256) throw Object.assign(new Error("Sign in again before downloading your copy."), { status: 401 });
+    }
+    return result;
+  }
   if (!["create", "update", "withdraw"].includes(body.action)) throw fail("Choose a request action.");
   const values = { p_action: body.action };
   if (body.action === "create") {
@@ -57,6 +79,13 @@ export async function staffPrivacyRequests(req, res) {
     return rpc("staff_data_requests", { p_status: status, p_kind: kind, p_before_time: time ? new Date(time).toISOString() : null, p_before_id: beforeId ? id(beforeId) : null, p_limit: 25 }, session.accessToken);
   }
   const body = await readBody(req, 8192);
+  if (body.action === "approve_export") {
+    const note = details(body.supplementNote);
+    if (typeof body.scopeComplete !== "boolean" || body.confirmed !== true || (!body.scopeComplete && note.length < 20)) throw fail("Confirm the scope and describe any remaining follow-up.");
+    const values = { p_id: id(body.id), p_expected_version: version(body.version), p_key: id(body.key), p_scope_complete: body.scopeComplete, p_supplement_note: note, p_confirmed: true };
+    await rateLimit(req, "staff-data-export-approval", 10, 600);
+    return rpc("staff_approve_data_export", values, session.accessToken);
+  }
   if (body.action === "fulfill") {
     const result = details(body.result), evidence = details(body.evidence);
     const completed = typeof body.completedAt === "string" && body.completedAt.length <= 40 ? new Date(body.completedAt) : null;

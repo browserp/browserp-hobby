@@ -62,5 +62,44 @@ test("database name ranking precedes pagination, preserves access/freshness/priv
     }
     assert.equal((await db.query("select has_function_privilege('anon','private.directory_name_relevance(text,text)','execute') as allowed")).rows[0].allowed,false);
     await db.exec("set role anon");assert.equal((await query({query:"everyday"})).total,4);
+    await db.exec("reset role");
+    await db.exec(`insert into public.servers select md5(n)::uuid,n,lower(replace(n,' ','-')),'fivem',description,'United States','English','vMenu','public',true,false,'https://example.com',q,q,null,null,now(),status,'general'
+      from (values('Summit RP','Police and civilian community',10,'published'),('Legit RP','Established police community',20,'published'),
+        ('Unrelated Mention','Our guide mentions SummitRP',100,'published'),('Summit PR','Different name',100,'published'),
+        ('Summit RPA','Different name',100,'published'),('SummitRP','Private name fixture',100,'draft')) r(n,description,q,status);
+      insert into public.server_tags(server_id,tag,relevance_score) select id,'police rp',100 from public.servers where region='United States';
+      insert into public.server_status_snapshots(server_id,online,players,capacity,checked_at,provider_status)
+        select id,true,case name when 'Unrelated Mention' then 150 else 80 end,200,now(),'online' from public.servers where region='United States';
+      insert into public.server_import_sources(server_id,keywords) select id,array['LegitRP'] from public.servers where name='Legit RP';`);
+    const before = await query({query:"SummitRP",platform:"fivem",feature:"police rp"});
+    assert.deepEqual(before.servers.map(x=>x.name),["Unrelated Mention"]);
+    assert.equal((await query({query:"LegitRP"})).servers[0].name,"Legit RP");
+    await db.exec(migration("_joined_rp_name_search.sql"));
+    const joined=await query({query:"SummitRP",platform:"fivem",feature:"police rp"}),spaced=await query({query:"Summit RP",platform:"fivem",feature:"police rp"});
+    assert.deepEqual(joined.servers.map(x=>x.name),["Summit RP","Unrelated Mention"]);
+    assert.equal(joined.total,2);assert.equal(spaced.total,4); // Existing separate-word searches remain broader.
+    assert.deepEqual(joined.facets.feature,[{value:"police rp",count:2}]);
+    assert.deepEqual(joined.facets.access,[{value:"public",count:2}]);
+    assert.equal((await query({query:"SummitRP",platform:"redm",feature:"police rp"})).total,0);
+    assert.equal((await query({query:"SummitRP",platform:"fivem",feature:"racing"})).total,0);
+    assert.equal((await query({query:"SummitRP",region:"Europe"})).total,0);
+    assert.equal((await query({query:"SummitRP",access:"whitelisted"})).total,0);
+    assert.equal((await query({query:"SummitRP nonexistent"})).total,0);
+    assert.ok((await query({query:"SummitRP police"})).servers.some(x=>x.name==="Summit RP"));
+    assert.equal((await query({query:"SummitRP",sort:"players"})).servers[0].name,"Unrelated Mention");
+    const paged1=await query({query:"SummitRP",limit:1}),paged2=await query({query:"SummitRP",limit:1,offset:1});
+    assert.equal(paged1.total,2);assert.notEqual(paged1.servers[0].id,paged2.servers[0].id);
+    assert.equal(joined.servers[0].players,80);assert.equal(joined.servers[0].name,"Summit RP");
+    assert.ok(joined.servers.every(x=>!Object.hasOwn(x,"owner_id")&&!Object.hasOwn(x,"mismatches")));
+    for(const [name,search,expected] of [["Summit RP","summitrp",true],["SummitRP","SUMMIT RP",true],["Legit-RP","LegitRP",true],
+      ["Summit RP","mitrp",false],["Summit RP","SummitRPA",false],["Summit PR","SummitRP",false],["Summit Roleplay","SummitRP",false],
+      ["Summit Valley RP","SummitValleyRP",false],["Other Name","SummitRP",false],["Ca RP","Carp",false],["Summit RP","%",false]]) {
+      assert.equal((await db.query("select private.directory_joined_rp_match($1,$2) as matches",[name,search])).rows[0].matches,expected,`${name} / ${search}`);
+    }
+    assert.equal((await db.query("select private.directory_name_relevance('Summit RP','SummitRP') score")).rows[0].score,3);
+    assert.equal((await db.query("select has_function_privilege('anon','private.directory_joined_rp_match(text,text)','execute') allowed")).rows[0].allowed,false);
+    await db.exec("set role anon");assert.equal((await query({query:"SummitRP"})).servers[0].name,"Summit RP");
+    const legacy=(await db.query("select public.search_server_directory(null,'SummitRP','fivem') servers")).rows[0].servers;
+    assert.ok(legacy.some(x=>x.name==='Summit RP'));assert.ok(legacy.every(x=>x.name!=='SummitRP'));
   } finally {await db.close();}
 });

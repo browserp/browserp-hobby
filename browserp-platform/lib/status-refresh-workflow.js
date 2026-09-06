@@ -8,7 +8,8 @@ import { cleanupAdvertMedia } from "./staff-advert-media.js";
 // and codes always come from reviewed, published database records.
 export async function scheduledStatusRefresh(req, {
   callRpc = rpc, refreshCfx = refreshCfxCode, refreshMinecraft = refreshMinecraftCode,
-  now = Date.now, budgetMs = 40_000, signal = AbortSignal.timeout(45_000), cleanupMedia = cleanupAdvertMedia
+  now = Date.now, budgetMs = 40_000, signal = AbortSignal.timeout(45_000), cleanupMedia = cleanupAdvertMedia,
+  cleanupExports = options => callRpc("service_prune_data_exports", {}, undefined, { useSecret: true, ...options })
 } = {}) {
   const start = now();
   const authorization = req.headers?.authorization;
@@ -64,6 +65,12 @@ export async function scheduledStatusRefresh(req, {
   if (now() - start < 54_000) {
     try { await cleanupMedia({ signal: AbortSignal.timeout(4_000) }); }
     catch { console.warn(JSON.stringify({ event: "advert_media_cleanup_deferred", runId })); }
+  }
+  // Expired private copies are denied even if cleanup is delayed. Only their
+  // short-lived payload is cleared; request/receipt history stays intact.
+  if (now() - start < 55_000) {
+    try { await cleanupExports({ signal: AbortSignal.timeout(2_000) }); }
+    catch { console.warn(JSON.stringify({ event: "private_export_cleanup_deferred" })); }
   }
   return { accepted: true, summary };
 }

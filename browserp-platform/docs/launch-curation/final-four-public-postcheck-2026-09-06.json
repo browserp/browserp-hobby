@@ -1,0 +1,442 @@
+{
+  "ak44p9": {
+    "detail": {
+      "url": "https://www.browserp.com/api/servers?slug=free2rp-2-0-ak44p9",
+      "status": 200,
+      "at": "2026-09-06T00:54:23.507643+00:00",
+      "server": {
+        "id": "8b19c4af-f0cc-422a-b5b3-0d6dc3661bf3",
+        "name": "FREE2RP 2.0",
+        "slug": "free2rp-2-0-ak44p9",
+        "tags": [
+          "businesses",
+          "economy",
+          "ems",
+          "gangs",
+          "police",
+          "roleplay",
+          "serious rp"
+        ],
+        "online": true,
+        "region": "United States",
+        "players": 51,
+        "capacity": 210,
+        "language": "English",
+        "verified": false,
+        "framework": "Ox Core",
+        "theme_end": "#ef9346",
+        "created_at": "2026-09-06T00:46:46.631493+00:00",
+        "boost_score": 0,
+        "description": "FREE2RP 2.0 is an English-speaking FiveM community for players aged 18 and over, with character-led stories across civilian businesses, emergency services, the justice system and criminal crews. Players must apply and be approved before joining. Its public rules set expectations for roleplay, personal boundaries and reporting, and its moderation policy describes coaching, escalating penalties and appeals. Read the current rules and joining guidance on the official website. Application review can take time, and optional paid packages offer faster review and queue priority without guaranteeing approval.",
+        "platform_id": "fivem",
+        "theme_start": "#b85d24",
+        "community_url": "https://discord.gg/free2rp",
+        "platform_name": "FiveM",
+        "quality_score": 50,
+        "platform_short": "5M",
+        "uptime_percent": 100,
+        "discovery_score": 47.3714285714286,
+        "engagement_score": 50,
+        "beginner_friendly": false,
+        "imported": true,
+        "claimable": true,
+        "keywords": [
+          "free2rp",
+          "free 2 rp",
+          "f2rp",
+          "english",
+          "whitelisted",
+          "application required",
+          "character stories",
+          "civilian careers",
+          "justice system"
+        ],
+        "website_url": "https://free2rp.com/",
+        "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ak44p9/9e2591222c019732aced372958d6a4ccca6b7707a60e8f6b0b71699848509573.png",
+        "banner_url": null,
+        "checked_at": "2026-09-06T00:52:54.367+00:00"
+      },
+      "access": "allowlisted",
+      "join": "https://cfx.re/join/ak44p9"
+    },
+    "artwork": {
+      "managed": {
+        "url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ak44p9/9e2591222c019732aced372958d6a4ccca6b7707a60e8f6b0b71699848509573.png",
+        "status": 200,
+        "at": "2026-09-06T00:54:24.077328+00:00",
+        "content_type": "image/png",
+        "bytes": 20889,
+        "format": "PNG",
+        "dimensions": [
+          96,
+          96
+        ],
+        "full_decode": true,
+        "sha256": "9e2591222c019732aced372958d6a4ccca6b7707a60e8f6b0b71699848509573",
+        "rgba_sha256": "b9f8b0ae296209487ec43803304ce1e078745d89d6bce4a996b06c4083fb6b74",
+        "visible_pixels": true
+      },
+      "source": {
+        "url": "https://frontend.cfx-services.net/api/servers/icon/ak44p9/-725141511.png",
+        "status": 200,
+        "at": "2026-09-06T00:54:24.136418+00:00",
+        "content_type": "image/png",
+        "bytes": 20889,
+        "format": "PNG",
+        "dimensions": [
+          96,
+          96
+        ],
+        "full_decode": true,
+        "sha256": "9e2591222c019732aced372958d6a4ccca6b7707a60e8f6b0b71699848509573",
+        "rgba_sha256": "b9f8b0ae296209487ec43803304ce1e078745d89d6bce4a996b06c4083fb6b74",
+        "visible_pixels": true
+      },
+      "same_pixels": true,
+      "managed_filename_matches_hash": true
+    },
+    "filter": {
+      "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=FREE2RP+2.0&platform=fivem&access=whitelisted&feature=serious+rp",
+      "status": 200,
+      "at": "2026-09-06T00:54:24.698844+00:00",
+      "total": 1,
+      "target_present": true,
+      "players": 51,
+      "checked_at": "2026-09-06T00:52:54.367+00:00"
+    }
+  },
+  "ayoz35": {
+    "detail": {
+      "url": "https://www.browserp.com/api/servers?slug=starlight-community-roleplay-ayoz35",
+      "status": 200,
+      "at": "2026-09-06T00:54:24.923388+00:00",
+      "server": {
+        "id": "0855ec23-5dd9-4081-acc1-39c46e0fd242",
+        "name": "Starlight Community Roleplay",
+        "slug": "starlight-community-roleplay-ayoz35",
+        "tags": [
+          "businesses",
+          "economy",
+          "ems",
+          "gangs",
+          "police",
+          "roleplay",
+          "serious rp",
+          "voice rp"
+        ],
+        "online": true,
+        "region": "United States",
+        "players": 37,
+        "capacity": 100,
+        "language": "English",
+        "verified": false,
+        "framework": "Qbox",
+        "theme_end": "#ef9346",
+        "created_at": "2026-09-06T00:48:17.289459+00:00",
+        "boost_score": 0,
+        "description": "Starlight Community Roleplay is an English-speaking FiveM community for players aged 18 and over. Its persistent city supports civilian careers, businesses, police and fire or medical services, alongside criminal character stories. Entry requires an application and approval through the official Discord. Read its current rules before joining: the community expects sustained character roleplay and limits repetitive combat and harassment. The website provides current rules, support links and a ban-appeal route.",
+        "platform_id": "fivem",
+        "theme_start": "#b85d24",
+        "community_url": "https://discord.gg/starlightcommunity",
+        "platform_name": "FiveM",
+        "quality_score": 50,
+        "platform_short": "5M",
+        "uptime_percent": 100,
+        "discovery_score": 49.66,
+        "engagement_score": 50,
+        "beginner_friendly": false,
+        "imported": true,
+        "claimable": true,
+        "keywords": [
+          "starlight community",
+          "slc",
+          "english",
+          "whitelisted",
+          "application required",
+          "civilian careers",
+          "character stories",
+          "fire department"
+        ],
+        "website_url": "https://www.starlightcommunityrp.com/",
+        "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ayoz35/10e2a0b2eb0d6db5bb7ce962c4f51d43a9703fca5f63542a5464a2e0771f822a.png",
+        "banner_url": null,
+        "checked_at": "2026-09-06T00:50:17.912+00:00"
+      },
+      "access": "allowlisted",
+      "join": "https://cfx.re/join/ayoz35"
+    },
+    "artwork": {
+      "managed": {
+        "url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ayoz35/10e2a0b2eb0d6db5bb7ce962c4f51d43a9703fca5f63542a5464a2e0771f822a.png",
+        "status": 200,
+        "at": "2026-09-06T00:54:25.157665+00:00",
+        "content_type": "image/png",
+        "bytes": 7788,
+        "format": "PNG",
+        "dimensions": [
+          96,
+          96
+        ],
+        "full_decode": true,
+        "sha256": "10e2a0b2eb0d6db5bb7ce962c4f51d43a9703fca5f63542a5464a2e0771f822a",
+        "rgba_sha256": "8434068c21f3bb59949621e4c55437fffd06ca2f1a14f605a654b9aad2249ee8",
+        "visible_pixels": true
+      },
+      "source": {
+        "url": "https://frontend.cfx-services.net/api/servers/icon/ayoz35/929626424.png",
+        "status": 200,
+        "at": "2026-09-06T00:54:25.215080+00:00",
+        "content_type": "image/png",
+        "bytes": 7788,
+        "format": "PNG",
+        "dimensions": [
+          96,
+          96
+        ],
+        "full_decode": true,
+        "sha256": "10e2a0b2eb0d6db5bb7ce962c4f51d43a9703fca5f63542a5464a2e0771f822a",
+        "rgba_sha256": "8434068c21f3bb59949621e4c55437fffd06ca2f1a14f605a654b9aad2249ee8",
+        "visible_pixels": true
+      },
+      "same_pixels": true,
+      "managed_filename_matches_hash": true
+    },
+    "filter": {
+      "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=Starlight+Community+Roleplay&platform=fivem&access=whitelisted&feature=serious+rp",
+      "status": 200,
+      "at": "2026-09-06T00:54:25.541752+00:00",
+      "total": 1,
+      "target_present": true,
+      "players": 37,
+      "checked_at": "2026-09-06T00:50:17.912+00:00"
+    }
+  },
+  "88q583": {
+    "detail": {
+      "url": "https://www.browserp.com/api/servers?slug=we-the-people-rp-88q583",
+      "status": 200,
+      "at": "2026-09-06T00:54:25.765209+00:00",
+      "server": {
+        "id": "af89da4e-85b2-4e22-9d07-da916f08fcdf",
+        "name": "We The People RP",
+        "slug": "we-the-people-rp-88q583",
+        "tags": [
+          "businesses",
+          "custom cars",
+          "economy",
+          "ems",
+          "gangs",
+          "police",
+          "roleplay",
+          "serious rp",
+          "voice rp"
+        ],
+        "online": true,
+        "region": "United States",
+        "players": 306,
+        "capacity": 320,
+        "language": "English",
+        "verified": false,
+        "framework": "QBCore",
+        "theme_end": "#ef9346",
+        "created_at": "2026-09-06T00:49:07.793009+00:00",
+        "boost_score": 0,
+        "description": "We The People RP is an English-speaking FiveM community built around serious character roleplay in San Andreas. Explore civilian businesses and jobs, police and medical services, or longer-running criminal and gang stories. Entry requires an application and approval through its Discord. Read the current rules carefully: the city expects sustained in-character play and uses strict consequences for rule-breaking. New applicants receive staff review and can use community support for questions.",
+        "platform_id": "fivem",
+        "theme_start": "#b85d24",
+        "community_url": "https://discord.gg/wethepeoplerp",
+        "platform_name": "FiveM",
+        "quality_score": 50,
+        "platform_short": "5M",
+        "uptime_percent": 100,
+        "discovery_score": 60.2125,
+        "engagement_score": 50,
+        "beginner_friendly": false,
+        "imported": true,
+        "claimable": true,
+        "keywords": [
+          "we the people",
+          "wtp",
+          "wtprp",
+          "english",
+          "whitelisted",
+          "application required",
+          "civilian careers",
+          "character stories"
+        ],
+        "website_url": "https://wtprp.com/",
+        "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/88q583/8538ac22760cd9e4059e4004da5380bdce03879bcb7d59c3e71ad4c3e5067620.png",
+        "banner_url": null,
+        "checked_at": "2026-09-06T00:50:45.928+00:00"
+      },
+      "access": "allowlisted",
+      "join": "https://cfx.re/join/88q583"
+    },
+    "artwork": {
+      "managed": {
+        "url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/88q583/8538ac22760cd9e4059e4004da5380bdce03879bcb7d59c3e71ad4c3e5067620.png",
+        "status": 200,
+        "at": "2026-09-06T00:54:26.161761+00:00",
+        "content_type": "image/png",
+        "bytes": 5606,
+        "format": "PNG",
+        "dimensions": [
+          96,
+          96
+        ],
+        "full_decode": true,
+        "sha256": "8538ac22760cd9e4059e4004da5380bdce03879bcb7d59c3e71ad4c3e5067620",
+        "rgba_sha256": "ae56e439d12cda12c2031f35cf78c78b91ef85fecee1f6176ddbd8da904eb120",
+        "visible_pixels": true
+      },
+      "source": {
+        "url": "https://frontend.cfx-services.net/api/servers/icon/88q583/904326473.png",
+        "status": 200,
+        "at": "2026-09-06T00:54:26.280387+00:00",
+        "content_type": "image/png",
+        "bytes": 413676,
+        "format": "PNG",
+        "dimensions": [
+          96,
+          96
+        ],
+        "full_decode": true,
+        "sha256": "149943e198477ed7301f0cc6026da1030c966482b6bb2fe99bb44e5a0a899ff0",
+        "rgba_sha256": "ae56e439d12cda12c2031f35cf78c78b91ef85fecee1f6176ddbd8da904eb120",
+        "visible_pixels": true
+      },
+      "same_pixels": true,
+      "managed_filename_matches_hash": true
+    },
+    "filter": {
+      "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=We+The+People+RP&platform=fivem&access=whitelisted&feature=serious+rp",
+      "status": 200,
+      "at": "2026-09-06T00:54:26.593876+00:00",
+      "total": 1,
+      "target_present": true,
+      "players": 306,
+      "checked_at": "2026-09-06T00:50:45.928+00:00"
+    }
+  },
+  "d9eyr3": {
+    "detail": {
+      "url": "https://www.browserp.com/api/servers?slug=the-rift-trails-d9eyr3",
+      "status": 200,
+      "at": "2026-09-06T00:54:26.823352+00:00",
+      "server": {
+        "id": "2a655578-5695-476e-b6b5-e307b0b215e0",
+        "name": "The Rift Trails",
+        "slug": "the-rift-trails-d9eyr3",
+        "tags": [
+          "casual rp",
+          "equestrian",
+          "events",
+          "horses",
+          "roleplay",
+          "sandbox",
+          "trails",
+          "western"
+        ],
+        "online": true,
+        "region": "International",
+        "players": 47,
+        "capacity": 200,
+        "language": "English",
+        "verified": false,
+        "framework": "VORP",
+        "theme_end": "#ef737b",
+        "created_at": "2026-09-06T00:51:03.082211+00:00",
+        "boost_score": 0,
+        "description": "The Rift Trails is an English-speaking RedM equestrian sandbox for adults aged 18 and over. Its international community offers trail rides, horse shows, player clubs, custom equestrian facilities and organised events. Character roleplay is optional: players can join roleplay-led activities or enjoy the horse-focused sandbox without compulsory in-character rules. Join the official Discord, read the community guidance and complete its verification steps before connecting. The precise approval requirement is not confirmed.",
+        "platform_id": "redm",
+        "theme_start": "#9d3039",
+        "community_url": "https://discord.gg/rifttrails",
+        "platform_name": "RedM",
+        "quality_score": 50,
+        "platform_short": "RM",
+        "uptime_percent": 100,
+        "discovery_score": 47.23,
+        "engagement_score": 50,
+        "beginner_friendly": false,
+        "imported": true,
+        "claimable": true,
+        "keywords": [
+          "the rift",
+          "rift trails",
+          "english",
+          "optional roleplay",
+          "horse shows",
+          "trail rides",
+          "player clubs",
+          "discord verification"
+        ],
+        "website_url": "https://www.rifttrails.com/",
+        "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/d9eyr3/3591247ab1dafe83da8a4fdec984998c1fd3d5e0364f09fa1346626149c2d103.png",
+        "banner_url": null,
+        "checked_at": "2026-09-06T00:51:41.278+00:00"
+      },
+      "access": "unknown",
+      "join": "https://cfx.re/join/d9eyr3"
+    },
+    "artwork": {
+      "managed": {
+        "url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/d9eyr3/3591247ab1dafe83da8a4fdec984998c1fd3d5e0364f09fa1346626149c2d103.png",
+        "status": 200,
+        "at": "2026-09-06T00:54:27.183017+00:00",
+        "content_type": "image/png",
+        "bytes": 17819,
+        "format": "PNG",
+        "dimensions": [
+          96,
+          96
+        ],
+        "full_decode": true,
+        "sha256": "3591247ab1dafe83da8a4fdec984998c1fd3d5e0364f09fa1346626149c2d103",
+        "rgba_sha256": "378521de582bad165aa969e1a1f2c70f726c6c76c3021159c55d91edf883a4c1",
+        "visible_pixels": true
+      },
+      "source": {
+        "url": "https://frontend.cfx-services.net/api/servers/icon/d9eyr3/397345550.png",
+        "status": 200,
+        "at": "2026-09-06T00:54:27.236069+00:00",
+        "content_type": "image/png",
+        "bytes": 17819,
+        "format": "PNG",
+        "dimensions": [
+          96,
+          96
+        ],
+        "full_decode": true,
+        "sha256": "3591247ab1dafe83da8a4fdec984998c1fd3d5e0364f09fa1346626149c2d103",
+        "rgba_sha256": "378521de582bad165aa969e1a1f2c70f726c6c76c3021159c55d91edf883a4c1",
+        "visible_pixels": true
+      },
+      "same_pixels": true,
+      "managed_filename_matches_hash": true
+    },
+    "filter": {
+      "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=The+Rift+Trails&platform=redm&access=unknown&feature=horses",
+      "status": 200,
+      "at": "2026-09-06T00:54:27.606347+00:00",
+      "total": 1,
+      "target_present": true,
+      "players": 47,
+      "checked_at": "2026-09-06T00:51:41.278+00:00"
+    }
+  },
+  "SAVRP_recovered_artwork": {
+    "url": "https://frontend.cfx-services.net/api/servers/icon/5xdqg7/-416334642.png",
+    "status": 200,
+    "at": "2026-09-06T00:54:27.659855+00:00",
+    "content_type": "image/png",
+    "bytes": 17189,
+    "format": "PNG",
+    "dimensions": [
+      96,
+      96
+    ],
+    "full_decode": true,
+    "sha256": "018801f13d35fd36fbb85e1ef043ea5abef696dc978e4ff1613a803f5bbd89a4",
+    "visible_pixels": true
+  }
+}

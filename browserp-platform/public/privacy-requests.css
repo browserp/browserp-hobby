@@ -27,3 +27,7 @@
 .privacy-request-history-entry h4 { margin: 0; font-size: 1rem; }
 .privacy-request-confirm { display: flex; align-items: flex-start; gap: .75rem; cursor: pointer; }
 .privacy-request-confirm input { flex: 0 0 auto; width: 1.25rem; height: 1.25rem; margin-top: .15rem; accent-color: #d646a6; }
+.privacy-request-copy { margin-block: 1.25rem; padding: 1rem; border: 1px solid var(--line, #35293f); border-radius: 1rem; }
+.privacy-request-copy h4 { margin: 0 0 .75rem; }
+.privacy-request-copy p { overflow-wrap: anywhere; }
+.privacy-request-copy > button { margin-block: .5rem; }

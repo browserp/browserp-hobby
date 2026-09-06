@@ -1,0 +1,395 @@
+{
+  "ex853d": {
+    "detail": {
+      "url": "https://www.browserp.com/api/servers?slug=legit-rp-ex853d",
+      "status": 200,
+      "at": "2026-09-06T00:40:06.860687+00:00",
+      "data": {
+        "servers": [
+          {
+            "id": "90ca2535-e4c0-4a63-9976-cfa9e4c94f39",
+            "name": "Legit RP",
+            "slug": "legit-rp-ex853d",
+            "tags": [
+              "businesses",
+              "economy",
+              "ems",
+              "gangs",
+              "police",
+              "roleplay",
+              "serious rp",
+              "voice rp"
+            ],
+            "online": true,
+            "region": "United States",
+            "players": 125,
+            "capacity": 150,
+            "language": "English",
+            "verified": false,
+            "framework": "Qbox",
+            "theme_end": "#ef9346",
+            "created_at": "2026-09-05T23:53:03.482116+00:00",
+            "boost_score": 0,
+            "description": "Legit RP is an English-speaking FiveM community for players aged 18 and over. Its city brings together character stories, player-run businesses, emergency services and criminal roleplay. Entry requires an application and approval. Read the community rules and current application guidance before joining, and use its Discord support tickets for help.",
+            "platform_id": "fivem",
+            "theme_start": "#b85d24",
+            "community_url": "https://discord.gg/LegitRP",
+            "platform_name": "FiveM",
+            "quality_score": 50,
+            "platform_short": "5M",
+            "uptime_percent": 100,
+            "discovery_score": 58,
+            "engagement_score": 50,
+            "beginner_friendly": false,
+            "imported": true,
+            "claimable": true,
+            "keywords": [
+              "legitrp",
+              "legit roleplay",
+              "english",
+              "application required",
+              "whitelisted",
+              "player businesses",
+              "civilian careers"
+            ],
+            "website_url": "https://legitrp.gg/",
+            "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ex853d/ed6edf04685908ca47028d0e20ec798e46764f1303583d28dc10d0b70fe1a7a2.png",
+            "banner_url": null,
+            "checked_at": "2026-09-06T00:38:59.037+00:00"
+          }
+        ],
+        "total": 1,
+        "engagement": {
+          "slug": "legit-rp-ex853d",
+          "comments": [],
+          "serverId": "90ca2535-e4c0-4a63-9976-cfa9e4c94f39",
+          "voteCount": 0,
+          "accessType": "allowlisted",
+          "cfxJoinUrl": "https://cfx.re/join/ex853d",
+          "animatedMediaEnabled": false
+        }
+      }
+    },
+    "source": {
+      "url": "https://frontend.cfx-services.net/api/servers/single/ex853d",
+      "status": 200,
+      "at": "2026-09-06T00:40:06.941100+00:00",
+      "data": {
+        "clients": 125,
+        "svMaxclients": 150,
+        "lastSeen": "2026-09-06T00:38:59.037746357Z",
+        "fallback": false,
+        "iconVersion": -2035864745,
+        "gamename": null,
+        "projectName": "Legit RP",
+        "discord": "discord.gg/LegitRP"
+      },
+      "age_seconds_at_read": 67.903,
+      "matches_detail_count": true,
+      "matches_detail_capacity": true
+    },
+    "html": {
+      "url": "https://www.browserp.com/server/legit-rp-ex853d",
+      "status": 200,
+      "at": "2026-09-06T00:40:07.610600+00:00",
+      "bytes": 6100,
+      "expected_name_present": false,
+      "server_script_present": true
+    },
+    "artwork": {
+      "managed": {
+        "url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/ex853d/ed6edf04685908ca47028d0e20ec798e46764f1303583d28dc10d0b70fe1a7a2.png",
+        "status": 200,
+        "at": "2026-09-06T00:41:04.176608+00:00",
+        "content_type": "image/png",
+        "bytes": 3096,
+        "format": "PNG",
+        "dimensions": [
+          96,
+          96
+        ],
+        "full_pixel_decode": true,
+        "sha256": "ed6edf04685908ca47028d0e20ec798e46764f1303583d28dc10d0b70fe1a7a2",
+        "rgba_sha256": "86b92e0f1d1ccce1e84bc65958676b3c1b102ab004971daac2d54406993ae14a"
+      },
+      "source": {
+        "url": "https://frontend.cfx-services.net/api/servers/icon/ex853d/-2035864745.png",
+        "status": 200,
+        "at": "2026-09-06T00:41:04.238115+00:00",
+        "content_type": "image/png",
+        "bytes": 3096,
+        "format": "PNG",
+        "dimensions": [
+          96,
+          96
+        ],
+        "full_pixel_decode": true,
+        "sha256": "ed6edf04685908ca47028d0e20ec798e46764f1303583d28dc10d0b70fe1a7a2",
+        "rgba_sha256": "86b92e0f1d1ccce1e84bc65958676b3c1b102ab004971daac2d54406993ae14a"
+      },
+      "same_pixels": true
+    },
+    "filters": [
+      {
+        "label": "correct access and meaningful framework/features",
+        "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=legit&platform=fivem&access=whitelisted&mode=qbox&feature=economy&language=English&region=United+States",
+        "at": "2026-09-06T00:41:04.621044+00:00",
+        "status": 200,
+        "total": 1,
+        "target_present": true,
+        "expected_target_present": true,
+        "pass": true,
+        "players": 125,
+        "checked_at": "2026-09-06T00:38:59.037+00:00"
+      },
+      {
+        "label": "opposite access excluded",
+        "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=legit&platform=fivem&access=public",
+        "at": "2026-09-06T00:41:04.938336+00:00",
+        "status": 200,
+        "total": 0,
+        "target_present": false,
+        "expected_target_present": false,
+        "pass": true,
+        "players": null,
+        "checked_at": null
+      },
+      {
+        "label": "serious RP membership",
+        "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=legit&platform=fivem&feature=serious+rp",
+        "at": "2026-09-06T00:41:05.250434+00:00",
+        "status": 200,
+        "total": 1,
+        "target_present": true,
+        "expected_target_present": true,
+        "pass": true,
+        "players": 125,
+        "checked_at": "2026-09-06T00:38:59.037+00:00"
+      },
+      {
+        "label": "custom cars membership",
+        "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=legit&platform=fivem&feature=custom+cars",
+        "at": "2026-09-06T00:41:05.545203+00:00",
+        "status": 200,
+        "total": 0,
+        "target_present": false,
+        "expected_target_present": false,
+        "pass": true,
+        "players": null,
+        "checked_at": null
+      },
+      {
+        "label": "police RP canonical option",
+        "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=legit&platform=fivem&feature=police+rp",
+        "at": "2026-09-06T00:41:05.835193+00:00",
+        "status": 200,
+        "total": 0,
+        "target_present": false,
+        "expected_target_present": true,
+        "pass": false,
+        "players": null,
+        "checked_at": null
+      }
+    ]
+  },
+  "javxzp": {
+    "detail": {
+      "url": "https://www.browserp.com/api/servers?slug=summit-rp-javxzp",
+      "status": 200,
+      "at": "2026-09-06T00:40:07.850541+00:00",
+      "data": {
+        "servers": [
+          {
+            "id": "3a036c8f-52a6-4e92-ad3d-a8fbee258ebc",
+            "name": "Summit RP",
+            "slug": "summit-rp-javxzp",
+            "tags": [
+              "businesses",
+              "custom cars",
+              "economy",
+              "ems",
+              "gangs",
+              "police",
+              "roleplay",
+              "serious rp",
+              "voice rp"
+            ],
+            "online": true,
+            "region": "United States",
+            "players": 177,
+            "capacity": 200,
+            "language": "English",
+            "verified": false,
+            "framework": "QBCore",
+            "theme_end": "#ef9346",
+            "created_at": "2026-09-05T23:56:09.35823+00:00",
+            "boost_score": 0,
+            "description": "Summit RP is an English-speaking FiveM community for players aged 18 and over, set in Los Santos. Explore civilian careers and businesses, emergency services, gangs and longer-running character stories. General entry is public: join its Discord, claim the Civilian role, read the rules and follow the connection guide. No application or staff approval is required for general entry.",
+            "platform_id": "fivem",
+            "theme_start": "#b85d24",
+            "community_url": "https://discord.gg/summitrp",
+            "platform_name": "FiveM",
+            "quality_score": 50,
+            "platform_short": "5M",
+            "uptime_percent": 100,
+            "discovery_score": 58.93,
+            "engagement_score": 50,
+            "beginner_friendly": false,
+            "imported": true,
+            "claimable": true,
+            "keywords": [
+              "summit",
+              "summit roleplay",
+              "english",
+              "public",
+              "civilian careers",
+              "custom systems",
+              "heists"
+            ],
+            "website_url": "https://summitrp.gg/",
+            "logo_url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/javxzp/1600e21292b17c37ee96b2b3ef373c46125d99f4b6d7b7a86693645aec8a129d.png",
+            "banner_url": null,
+            "checked_at": "2026-09-06T00:37:13.731+00:00"
+          }
+        ],
+        "total": 1,
+        "engagement": {
+          "slug": "summit-rp-javxzp",
+          "comments": [],
+          "serverId": "3a036c8f-52a6-4e92-ad3d-a8fbee258ebc",
+          "voteCount": 0,
+          "accessType": "public",
+          "cfxJoinUrl": "https://cfx.re/join/javxzp",
+          "animatedMediaEnabled": false
+        }
+      }
+    },
+    "source": {
+      "url": "https://frontend.cfx-services.net/api/servers/single/javxzp",
+      "status": 200,
+      "at": "2026-09-06T00:40:07.909652+00:00",
+      "data": {
+        "clients": 177,
+        "svMaxclients": 200,
+        "lastSeen": "2026-09-06T00:37:13.731081928Z",
+        "fallback": false,
+        "iconVersion": 1927522292,
+        "gamename": null,
+        "projectName": "^5Summit RP ^7| Custom Systems & In-House Development",
+        "discord": "https://discord.gg/summitrp"
+      },
+      "age_seconds_at_read": 174.179,
+      "matches_detail_count": true,
+      "matches_detail_capacity": true
+    },
+    "html": {
+      "url": "https://www.browserp.com/server/summit-rp-javxzp",
+      "status": 200,
+      "at": "2026-09-06T00:40:08.021278+00:00",
+      "bytes": 6100,
+      "expected_name_present": false,
+      "server_script_present": true
+    },
+    "artwork": {
+      "managed": {
+        "url": "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/javxzp/1600e21292b17c37ee96b2b3ef373c46125d99f4b6d7b7a86693645aec8a129d.png",
+        "status": 200,
+        "at": "2026-09-06T00:41:06.240527+00:00",
+        "content_type": "image/png",
+        "bytes": 8041,
+        "format": "PNG",
+        "dimensions": [
+          96,
+          96
+        ],
+        "full_pixel_decode": true,
+        "sha256": "1600e21292b17c37ee96b2b3ef373c46125d99f4b6d7b7a86693645aec8a129d",
+        "rgba_sha256": "6fa3096a40c57fe2e1bd92960d724451b08957692ad48c5b8864267951721353"
+      },
+      "source": {
+        "url": "https://frontend.cfx-services.net/api/servers/icon/javxzp/1927522292.png",
+        "status": 200,
+        "at": "2026-09-06T00:41:06.290114+00:00",
+        "content_type": "image/png",
+        "bytes": 8041,
+        "format": "PNG",
+        "dimensions": [
+          96,
+          96
+        ],
+        "full_pixel_decode": true,
+        "sha256": "1600e21292b17c37ee96b2b3ef373c46125d99f4b6d7b7a86693645aec8a129d",
+        "rgba_sha256": "6fa3096a40c57fe2e1bd92960d724451b08957692ad48c5b8864267951721353"
+      },
+      "same_pixels": true
+    },
+    "filters": [
+      {
+        "label": "correct access and meaningful framework/features",
+        "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=summit&platform=fivem&access=public&mode=qbcore&feature=economy&language=English&region=United+States",
+        "at": "2026-09-06T00:41:06.658522+00:00",
+        "status": 200,
+        "total": 1,
+        "target_present": true,
+        "expected_target_present": true,
+        "pass": true,
+        "players": 177,
+        "checked_at": "2026-09-06T00:39:36.371+00:00"
+      },
+      {
+        "label": "opposite access excluded",
+        "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=summit&platform=fivem&access=whitelisted",
+        "at": "2026-09-06T00:41:07.282725+00:00",
+        "status": 200,
+        "total": 0,
+        "target_present": false,
+        "expected_target_present": false,
+        "pass": true,
+        "players": null,
+        "checked_at": null
+      },
+      {
+        "label": "serious RP membership",
+        "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=summit&platform=fivem&feature=serious+rp",
+        "at": "2026-09-06T00:41:08.679498+00:00",
+        "status": 200,
+        "total": 1,
+        "target_present": true,
+        "expected_target_present": true,
+        "pass": true,
+        "players": 177,
+        "checked_at": "2026-09-06T00:39:36.371+00:00"
+      },
+      {
+        "label": "custom cars membership",
+        "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=summit&platform=fivem&feature=custom+cars",
+        "at": "2026-09-06T00:41:09.038363+00:00",
+        "status": 200,
+        "total": 1,
+        "target_present": true,
+        "expected_target_present": true,
+        "pass": true,
+        "players": 177,
+        "checked_at": "2026-09-06T00:39:36.371+00:00"
+      },
+      {
+        "label": "police RP canonical option",
+        "url": "https://www.browserp.com/api/servers?discover=true&limit=20&query=summit&platform=fivem&feature=police+rp",
+        "at": "2026-09-06T00:41:09.515894+00:00",
+        "status": 200,
+        "total": 0,
+        "target_present": false,
+        "expected_target_present": true,
+        "pass": false,
+        "players": null,
+        "checked_at": null
+      }
+    ]
+  },
+  "optional_control_limit": {
+    "url": "https://www.browserp.com/api/servers?discover=true&query=legit&platform=fivem&feature=police",
+    "status": 403,
+    "client": "Python urllib default user agent",
+    "note": "Later optional raw-tag control failed; no alternate browser or authenticated route used to bypass it. Earlier timestamped requests with the named verification client succeeded."
+  }
+}

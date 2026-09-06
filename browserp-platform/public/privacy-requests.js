@@ -16,6 +16,8 @@
     const host = root.matches("details") ? root.querySelector("[data-privacy-requests-content]") : root;
     if (!host) return null;
     let destroyed = false, busy = false, generation = 0, next = null, loaded = false;
+    const downloadUrls = new Map();
+    function clearDownloads() { for (const [url, timer] of downloadUrls) { clearTimeout(timer); URL.revokeObjectURL(url); } downloadUrls.clear(); }
     const feedback = make("p", "", "privacy-request-status"); feedback.setAttribute("role", "status"); feedback.tabIndex = -1;
     const controls = make("div", undefined, "privacy-request-controls");
     const list = make("div", undefined, "privacy-request-list");
@@ -41,6 +43,7 @@
       } catch (error) {
         if (!destroyed && current === generation) {
           if ([401, 403].includes(error.status)) {
+            clearDownloads();
             list.replaceChildren(); controls.replaceChildren(); next = null; more.hidden = true;
             feedback.textContent = "Sign in again before viewing private requests."; onAuthFailure?.(error);
           } else feedback.textContent = error.message || "Your requests could not be loaded. Try Refresh requests.";
@@ -96,6 +99,14 @@
             return row;
           });
           if (append) events.append(...rows); else events.replaceChildren(...rows);
+          if (!append && Array.isArray(payload.copies) && payload.copies.length) {
+            const copies = make("details"); copies.append(make("summary", "Recent structured copies (up to 25)"));
+            for (const copy of payload.copies) {
+              copies.append(make("p", `Prepared ${date(copy.createdAt)} · ${copy.receivedAt ? `Receipt confirmed ${date(copy.receivedAt)}` : "Receipt not confirmed"}. File access expires ${date(copy.expiresAt)}.`, "privacy-request-date"));
+              for (const part of copy.pending || []) copies.append(make("p", part.message, "privacy-request-text"));
+            }
+            copies.append(make("p", "A structured-copy receipt does not confirm delivery of other parts of the request.")); events.prepend(copies);
+          }
           if (staff && payload.completion && !append) {
             const evidence = make("details"); evidence.append(make("summary", "Private completion record"),
               make("p", `Completed ${date(payload.completion.completedAt)} · Recorded ${date(payload.completion.recordedAt)}`, "privacy-request-date"),
@@ -129,6 +140,66 @@
         void run(async () => { await post(body); return api(url()); }, payload => { render(payload); feedback.textContent = "Completed follow-up recorded. This form did not perform a data export, correction or erasure."; feedback.focus({ preventScroll: true }); }, "Recording completed follow-up…");
       }); section.append(form); return section;
     }
+    function copySection(item, canApprove) {
+      const section = make("section", undefined, "privacy-request-copy"); section.append(make("h4", "Your structured account copy"));
+      section.append(make("p", "A readable JSON file of your account details and recorded activity, listings, requests and other named records. Uploaded file bytes and information needing an individual review are separate."));
+      const approved = item.export?.approved === true, copy = item.export?.copy;
+      if (item.export?.supplementNote) section.append(make("p", `Still to follow up: ${item.export.supplementNote}`, "privacy-request-text"));
+      for (const part of copy?.pending || []) section.append(make("p", part.message, "privacy-request-note"));
+      if (copy?.receivedAt) section.append(make("p", `Member confirmed receipt ${date(copy.receivedAt)}. Staff still needs to verify the whole request before closing it.`, "privacy-request-note"));
+      if (staff) {
+        if (approved) section.append(make("p", "Approved for this request version. Recording another review withdraws this approval; approve again after the review if needed."));
+        if (!canApprove) return section;
+        const disclosure = make("details"); disclosure.append(make("summary", approved ? "Replace copy approval" : "Approve a structured copy"));
+        const form = make("form", undefined, "privacy-request-form"), scope = select("scopeComplete", { no: "Other parts still need follow-up", yes: "The structured records cover this request" });
+        const note = textArea("supplementNote", 20); note.value = item.export?.supplementNote || "";
+        scope.addEventListener("change", () => { note.required = scope.value === "no"; note.minLength = note.required ? 20 : 0; });
+        const confirmed = make("input"); confirmed.type = "checkbox"; confirmed.name = "confirmed"; confirmed.required = true;
+        const label = make("label", undefined, "privacy-request-confirm"); label.append(confirmed, make("span", "I reviewed this member’s request and the scope above. Approval lets only this member prepare and download their structured copy."));
+        const send = button("Approve copy", true); send.type = "submit"; let key = crypto.randomUUID();
+        form.addEventListener("input", () => { if (!busy) key = crypto.randomUUID(); });
+        form.append(field("What this copy covers", scope), field("Remaining follow-up — visible to the member", note), make("p", "This does not send an email or close the request. File bytes and individually reviewed records cannot be delivered by this download."), label, send);
+        form.addEventListener("submit", event => { event.preventDefault(); if (!form.reportValidity()) return;
+          const body = { action: "approve_export", id: item.id, version: item.version, key, scopeComplete: scope.value === "yes", supplementNote: note.value, confirmed: confirmed.checked };
+          void run(async () => { await post(body); return api(url()); }, payload => { render(payload); feedback.textContent = "Copy approved. The member can now prepare a private download."; }, "Approving the copy…");
+        }); disclosure.append(form); section.append(disclosure); return section;
+      }
+      if (!approved) { section.append(make("p", "Staff will approve the scope before you can download a private copy.")); return section; }
+      section.append(make("p", "You’ll need a sign-in from the last 10 minutes. Prepared copies expire after one hour. Save the file somewhere private; it contains your personal information."));
+      const download = button(copy?.available ? "Download my copy" : "Prepare and download my copy", true), receipt = make("div", undefined, "privacy-request-form");
+      let key = crypto.randomUUID(), currentCopy = copy?.available ? copy : null;
+      function receiptControl(value) {
+        receipt.replaceChildren();
+        const confirmed = make("input"); confirmed.type = "checkbox";
+        const label = make("label", undefined, "privacy-request-confirm"); label.append(confirmed, make("span", "I saved and opened this file, and I received the structured copy described above."));
+        const send = button("Confirm I received this copy"); send.disabled = true;
+        confirmed.addEventListener("change", () => { send.disabled = !confirmed.checked; });
+        send.addEventListener("click", () => { if (!confirmed.checked) return;
+          void run(async () => { await post({ action: "receive_export", id: value.id, sha256: value.sha256, confirmed: true }); return api(url()); }, payload => { render(payload); feedback.textContent = "Receipt recorded. Your request stays open while staff checks any remaining parts."; }, "Recording receipt…");
+        }); receipt.append(label, send);
+      }
+      download.addEventListener("click", () => { void run(async () => {
+        let result;
+        try {
+          if (!currentCopy) currentCopy = (await post({ action: "generate_export", id: item.id, version: item.version, key })).copy;
+          result = await post({ action: "read_export", id: currentCopy.id });
+        } catch (error) { if (error.status === 410) { currentCopy = null; key = crypto.randomUUID(); } throw error; }
+        if (typeof result?.content !== "string" || !result.copy || !crypto.subtle) throw new Error("This browser could not verify the download. Refresh or try an up-to-date browser.");
+        const bytes = new TextEncoder().encode(result.content), digest = await crypto.subtle.digest("SHA-256", bytes);
+        const hash = [...new Uint8Array(digest)].map(x => x.toString(16).padStart(2, "0")).join("");
+        if (bytes.length !== result.copy.byteSize || hash !== result.copy.sha256) throw new Error("The copy did not pass its integrity check. No file was downloaded. Please try again.");
+        const check = await post({ action: "check_export", id: result.copy.id });
+        if (check?.allowed !== true || check.sha256 !== hash) throw Object.assign(new Error("Sign in again before downloading your copy."), { status: 401 });
+        return { ...result, bytes };
+      }, result => {
+        clearDownloads();
+        const fileUrl = URL.createObjectURL(new Blob([result.bytes], { type: "application/json;charset=utf-8" })), link = make("a");
+        downloadUrls.set(fileUrl, setTimeout(() => { URL.revokeObjectURL(fileUrl); downloadUrls.delete(fileUrl); }, 30000));
+        link.href = fileUrl; link.download = "BrowseRP-account-data.json"; link.hidden = true; host.append(link); link.click(); link.remove();
+        currentCopy = result.copy; receiptControl(result.copy); feedback.textContent = "Your copy was checked and the download was started. Open the saved file before confirming receipt.";
+      }, "Preparing and checking your private copy…"); });
+      section.append(download, receipt); return section;
+    }
     function render(payload, append = false) {
       if (!Array.isArray(payload?.items)) throw new Error("Requests could not be confirmed. Try Refresh requests.");
       const rows = payload.items.map(item => {
@@ -136,7 +207,7 @@
         const head = make("div", undefined, "privacy-request-heading"); head.append(make("h3", kinds[item.kind] || "Data request"), make("span", statuses[item.status] || "Status unavailable", "privacy-request-badge")); row.append(head);
         row.append(make("p", `Sent ${date(item.createdAt)} · Updated ${date(item.updatedAt)}`, "privacy-request-date"));
         if (item.status === "fulfilled") row.append(make("p", "Staff recorded the completed follow-up below. You can send a new request if you need further help.", "privacy-request-note"));
-        if (item.status === "ready") row.append(make("p", "Your request has been reviewed and needs follow-up. No data has been exported, corrected or deleted through this form.", "privacy-request-note"));
+        if (item.status === "ready") row.append(make("p", item.kind === "copy" ? "Your request is ready for follow-up. Any available structured copy appears below; the request stays open until the full follow-up is verified." : "Your request has been reviewed and needs follow-up. No data has been exported, corrected or deleted through this form.", "privacy-request-note"));
         const detail = make("details"); detail.append(make("summary", staff ? `View request · ${item.displayName || "Member"}` : "View request details"));
         if (staff) detail.append(make("p", `Account: ${item.accountId}`));
         detail.append(make("p", `Request: ${item.id}`, "privacy-request-reference"));
@@ -146,6 +217,7 @@
         const closed = ["declined", "withdrawn", "fulfilled"].includes(item.status);
         if (staff && !closed) detail.append(staffForm(item));
         if (staff && item.status === "ready" && payload.canFulfill === true) detail.append(completionForm(item));
+        if (item.kind === "copy" && item.status === "ready") detail.append(copySection(item, payload.canFulfill === true));
         if (!staff && !closed) {
           const actions = make("div", undefined, "privacy-request-actions");
           if (["submitted", "information_needed"].includes(item.status)) { const update = button("Update request details"); update.addEventListener("click", () => editDetails(item, detail)); actions.append(update); }
@@ -179,7 +251,7 @@
     refresh.addEventListener("click", () => { void load(); }); more.addEventListener("click", () => { if (next) void load(true); });
     function toggle() { if (root.open && !loaded) void load(); }
     function destroy() {
-      if (destroyed) return; destroyed = true; generation++; host.querySelectorAll("textarea,input").forEach(node => { node.value = ""; }); host.replaceChildren();
+      if (destroyed) return; destroyed = true; generation++; clearDownloads(); host.querySelectorAll("textarea,input").forEach(node => { node.value = ""; }); host.replaceChildren();
       root.removeEventListener("toggle", toggle); window.removeEventListener("pagehide", leave); window.removeEventListener("browserp:session-ended", destroy);
     }
     function leave() {

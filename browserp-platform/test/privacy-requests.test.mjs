@@ -67,3 +67,28 @@ test("request history uses owned/authenticated RPCs, bounded cursor and no priva
  for(const cursor of["0","-1","NaN","1.5"]){member.url=`/api/me/data-requests?id=${id}&beforeVersion=${cursor}`;await assert.rejects(memberPrivacyRequests(member,output()),{status:400});}
  staff.headers["x-browserp-account"]="another-account";await assert.rejects(staffPrivacyRequests(staff,output()),{status:401});
 }));
+
+test("export actions require displayed-account, CSRF and exact version/key; scope cannot be silently approved",async()=>fixture(async calls=>{
+ for(const change of[{version:undefined},{key:undefined},{scopeComplete:undefined},{confirmed:false},{scopeComplete:false,supplementNote:'short'}])await assert.rejects(staffPrivacyRequests(req({action:'approve_export',id,key,version:3,scopeComplete:true,confirmed:true,...change},'aal2'),output()),{status:400});
+ await staffPrivacyRequests(req({action:'approve_export',id,key,version:3,scopeComplete:false,supplementNote:'Uploaded files still need a separate copy.',confirmed:true,userId:'attacker'},'aal2'),output());
+ assert.deepEqual(calls.find(x=>x.path.endsWith('/staff_approve_data_export')).body,{p_id:id,p_key:key,p_expected_version:3,p_scope_complete:false,p_supplement_note:'Uploaded files still need a separate copy.',p_confirmed:true});
+ await memberPrivacyRequests(req({action:'generate_export',id,version:4,key,userId:'attacker',allAccounts:true}),output());
+ assert.deepEqual(calls.find(x=>x.path.endsWith('/member_generate_data_export')).body,{p_id:id,p_expected_version:4,p_key:key});
+ for(const action of['generate_export','read_export','check_export','receive_export']){const request=req({action,id,version:4,key,sha256:'a'.repeat(64),confirmed:true});request.headers['x-browserp-account']='switched';await assert.rejects(memberPrivacyRequests(request,output()),{status:401});}
+},call=>/\/(staff_approve_data_export|member_generate_data_export)$/.test(call.path)?response({copy:{id}}):undefined));
+
+test("private file bytes are integrity checked and withheld if authority changes before release",async()=>{
+ const {createHash}=await import('node:crypto'),content='{"profile":{"displayName":"Private fixture"}}',sha256=createHash('sha256').update(content).digest('hex');
+ for(const outcome of['valid','tampered','revoked'])await fixture(async calls=>{
+  const work=memberPrivacyRequests(req({action:'read_export',id}),output());
+  if(outcome==='valid'){const result=await work;assert.equal(result.content,content);assert.equal(calls.filter(x=>x.path.endsWith('/member_read_data_export')).length,2);}
+  else await assert.rejects(work,{status:outcome==='tampered'?503:403});
+ },call=>call.path.endsWith('/member_read_data_export')?call.body.p_check_only?(outcome==='revoked'?response({message:'Session revoked'},403):response({allowed:true,sha256})):response({content:outcome==='tampered'?content+'changed':content,copy:{id,sha256,byteSize:Buffer.byteLength(content)}}):undefined);
+});
+test("receipt requires a hash and explicit confirmation; check-only request cannot include file bytes",async()=>fixture(async calls=>{
+ for(const change of[{sha256:'not-a-hash'},{confirmed:false}])await assert.rejects(memberPrivacyRequests(req({action:'receive_export',id,sha256:'a'.repeat(64),confirmed:true,...change}),output()),{status:400});
+ await memberPrivacyRequests(req({action:'receive_export',id,sha256:'a'.repeat(64),confirmed:true}),output());
+ await memberPrivacyRequests(req({action:'check_export',id}),output());
+ assert.deepEqual(calls.find(x=>x.path.endsWith('/member_receive_data_export')).body,{p_id:id,p_sha256:'a'.repeat(64),p_confirmed:true});
+ assert.deepEqual(calls.find(x=>x.path.endsWith('/member_read_data_export')).body,{p_id:id,p_check_only:true});
+},call=>/\/(member_receive_data_export|member_read_data_export)$/.test(call.path)?response({allowed:true,sha256:'a'.repeat(64)}):undefined));

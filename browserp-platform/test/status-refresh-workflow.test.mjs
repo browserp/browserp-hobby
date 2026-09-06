@@ -18,7 +18,7 @@ function rpcFixture({cfx=[],minecraft=[],claim=runId}={}){
   if(name==='service_finish_status_refresh'){assert.equal(data.p_run_id,runId);assert.notEqual(options.signal,sharedSignal);assert.equal(options.signal.aborted,false);return true;}
   assert.fail(`Unexpected privileged call: ${name}`);
  };
- return{callRpc,calls,cleanupMedia:async()=>0};
+ return{callRpc,calls,cleanupMedia:async()=>0,cleanupExports:async()=>0};
 }
 const sum=summary=>['checked','unchanged','unavailable','skipped','failed','deferred'].reduce((total,key)=>total+summary[key],0);
 
@@ -121,4 +121,12 @@ test('artwork cleanup requires a claimed scheduler run, follows persisted health
  assert.equal(cleaned,1);assert.equal(result.accepted,true);assert.equal(result.summary.failed,0);
  const busy=rpcFixture({claim:null});await scheduledStatusRefresh(request(),{...busy,cleanupMedia:async()=>{cleaned++;}});assert.equal(cleaned,1);
  await assert.rejects(scheduledStatusRefresh(request({headers:{}}),{...rpc,cleanupMedia:async()=>{cleaned++;}}),{status:401});assert.equal(cleaned,1);
+});
+
+test('private export cleanup runs only after authenticated source completion and has its own bounded budget',async()=>{
+ const fixture=rpcFixture();let invoked=0;
+ await scheduledStatusRefresh(request(),{...fixture,now:()=>100,cleanupExports:async({signal})=>{invoked++;assert.ok(signal instanceof AbortSignal);assert.equal(fixture.calls.at(-1).name,'service_finish_status_refresh');}});
+ assert.equal(invoked,1);
+ let first=true;await scheduledStatusRefresh(request(),{...rpcFixture(),now:()=>{if(first){first=false;return 0;}return 56000;},cleanupExports:async()=>{invoked++;}});assert.equal(invoked,1);
+ await assert.rejects(scheduledStatusRefresh(request({headers:{authorization:'bad'}}),{cleanupExports:async()=>{invoked++;}}),{status:401});assert.equal(invoked,1);
 });
