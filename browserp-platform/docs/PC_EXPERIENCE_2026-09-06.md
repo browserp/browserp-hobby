@@ -1,5 +1,7 @@
 # PC experience and staff access release
 
+Final follow-up status: source `306c07debf904bac1a871c8919d19fd1acd18006` is pushed, preview `dpl_HsWz92j3gKGcSkeafr9kf5A3P6dZ` is READY, and its hosted CaliRP page serves 2.19.2 styles plus real feature-tag links. Promotion remains pending because browser control stopped working before the final publish action. Production was last confirmed on `6928111`, not `306c07d`. Recheck live source before resuming promotion. These checkpoint notes are local documentation only and need no independent deployment.
+
 Based on `98d7de9` (latest launch handoff), preserving deployed application `445a852` and the existing four launch games. Asset release: 2.19.0. Main is intentionally unchanged.
 
 ## Changes
