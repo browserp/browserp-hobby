@@ -189,7 +189,7 @@ test("Stripe launch gates fail closed and local secret files are ignored", () =>
   assert.doesNotMatch(webhook, /browserp_product_key \|\| productKey/);
   assert.match(config, /expectedKeyMode = productionDeployment \? "live" : "test"/);
   assert.match(config, /fulfillmentReady: Boolean\(fulfillmentEnabled &&/);
-  const rawBodyFunction = http.match(/export async function readRawBody[\s\S]*?\n}\n/)?.[0] || "";
+  const rawBodyFunction = http.match(/export async function readRawBody[\s\S]*?\r?\n}\r?\n/)?.[0] || "";
   assert.ok(rawBodyFunction);
   assert.doesNotMatch(rawBodyFunction, /req\.body/);
   assert.match(ignore, /^\.env\.\*$/m);

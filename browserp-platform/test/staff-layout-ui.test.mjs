@@ -9,7 +9,7 @@ async function harness(t) {
   const dom = new JSDOM(read("staffpanel-scrapers.html"), { url: "https://browserp.test/staffpanel/scrapers#fivem", runScripts: "outside-only" });
   const w = dom.window; t.after(() => w.close());
   const media = new w.EventTarget(); media.matches = true; w.matchMedia = () => media;
-  w.fetch = async () => ({ ok: true, json: async () => ({ authenticated: true, provider: "discord", staffAccess: true, mfa: { required: false }, csrfToken: "fixture" }) });
+  w.fetch = async () => ({ ok: true, json: async () => ({ authenticated: true, provider: "discord", staffAccess: true, staff: true, mfa: { required: false }, csrfToken: "fixture" }) });
   w.eval(read("staffpanel-v3.js")); await tick();
   const button = w.document.querySelector("#staff-menu-v3"); const sidebar = w.document.querySelector(".staff-sidebar-v3"); const main = w.document.querySelector("main");
   return { w, media, button, sidebar, main };

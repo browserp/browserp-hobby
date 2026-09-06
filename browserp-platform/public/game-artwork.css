@@ -1,0 +1,64 @@
+/* Publisher artwork stays in its original colours and is not presented as listing media. */
+.game-hub-grid-v4 .game-official-card-v6,
+.game-future-grid-v6 .game-official-card-v6 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  gap: 18px 16px;
+  padding: 0 0 22px;
+  overflow: hidden;
+  text-decoration: none;
+  align-content: start;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+.game-official-card-v6 .game-hub-mark-v4 {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 460 / 215;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  background: #111318;
+}
+.game-official-card-v6 .game-hub-mark-v4 .game-official-artwork-v6 {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  border-radius: 0;
+  object-fit: cover;
+  filter: none;
+}
+.game-official-card-v6 .game-hub-copy-v4 { grid-column: 1; grid-row: 2; padding-left: 22px; min-width: 0; }
+.game-hub-grid-v4 .game-official-card-v6 > b,
+.game-future-grid-v6 .game-official-card-v6 > b { grid-column: 2; grid-row: 2; align-self: center; margin-right: 22px; white-space: nowrap; font-size: .78rem; }
+.game-official-card-v6 .game-hub-copy-v4 strong { font-size: 1.12rem; line-height: 1.35; }
+.game-official-card-v6 .game-hub-copy-v4 small { display: block; margin-top: 5px; line-height: 1.5; }
+.game-official-card-v6:hover { transform: translateY(-3px); }
+.game-official-card-v6:focus-visible { outline: 2px solid var(--accent, #ed54b5); outline-offset: 4px; }
+.game-page-mark-v4:has(.game-official-artwork-v6) { width: min(100%, 380px); aspect-ratio: 460 / 215; height: auto; border-radius: 14px; overflow: hidden; }
+.game-page-mark-v4 > .game-official-artwork-v6 { width: 100%; height: 100%; max-width: none; object-fit: cover; border-radius: 0; filter: none; }
+.game-page-hero-grid-v4:has(.game-official-artwork-v6) { grid-template-columns: minmax(220px, .65fr) minmax(0, 1.7fr); }
+.game-nav-chip-v4 .game-official-artwork-v6 { width: 46px; height: 30px; object-fit: cover; border-radius: 5px; filter: none; }
+.game-upcoming-grid-v5:has(.game-official-card-v6) { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+.game-coming-soon-card-v5.game-official-card-v6 { opacity: 1; }
+.game-future-feature-v6 { padding-top: 0; }
+.game-future-feature-v6 .section-head-v3 p { max-width: 740px; }
+.game-future-grid-v6 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.game-future-card-v6 .coming-soon-label-v5 { display: inline-flex; padding: 5px 9px; background: color-mix(in srgb, var(--accent, #ed54b5) 13%, transparent); border: 1px solid color-mix(in srgb, var(--accent, #ed54b5) 30%, transparent); border-radius: 6px; }
+@media (max-width: 800px) {
+  .game-page-hero-grid-v4:has(.game-official-artwork-v6) { grid-template-columns: 1fr; }
+  .game-page-mark-v4:has(.game-official-artwork-v6) { width: min(100%, 460px); }
+  .game-future-grid-v6 { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .game-hub-grid-v4 .game-official-card-v6,.game-future-grid-v6 .game-official-card-v6 { column-gap: 10px; padding-bottom: 18px; }
+  .game-official-card-v6 .game-hub-copy-v4 { padding-left: 16px; }
+  .game-hub-grid-v4 .game-official-card-v6 > b,.game-future-grid-v6 .game-official-card-v6 > b { margin-right: 16px; font-size: .72rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-official-card-v6 { transition: none; }
+  .game-official-card-v6:hover { transform: none; }
+}

@@ -55,8 +55,7 @@ test("every user-facing document publishes one consistent BrowseRP browser ident
     }));
     assert.deepEqual(icons, [
       { href: "/favicon.ico?v=2.12.1", sizes: "32x32 48x48", type: null },
-      { href: "/assets/browserp-icon-32.png", sizes: "32x32", type: "image/png" },
-      { href: "/assets/browserp-icon-48.png", sizes: "48x48", type: "image/png" },
+      { href: "/favicon.png", sizes: "192x192", type: "image/png" },
     ], `${page} favicons`);
     const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
     assert.equal(appleIcon?.getAttribute("href"), "/apple-touch-icon.png?v=2.12.1", `${page} Apple icon`);
@@ -73,7 +72,7 @@ test("launch-facing copy and submission choices name the four live games", () =>
   assert.equal(homeDocument.querySelectorAll(".game-grid-v3 .game-art-v3").length, 5, "every Browse by game option keeps its artwork");
   assert.equal(homeDocument.querySelectorAll(".game-grid-v3 .game-art-v3 .game-mark-v4").length, 0, "game symbols must not cover artwork that already identifies the game");
   assert.doesNotMatch(home, /across every game|driving simulators and more/i);
-  assert.doesNotMatch(listing, /<option value="(?:forza|gmod|arma|vrchat|dayz|project-zomboid|ets2|assetto-corsa|beamng)"/i);
+  assert.doesNotMatch(listing, /<option value="(?:forza|gmod|arma|vrchat|dayz|project-zomboid|ets2|assetto-corsa|beamng|gta6|6m)"/i);
 });
 
 test("the install and OAuth artwork use the square RP mark at provider-ready sizes", () => {
@@ -94,6 +93,9 @@ test("the install and OAuth artwork use the square RP mark at provider-ready siz
   assert.deepEqual(pngSize("public/assets/browserp-icon-32.png"), [32, 32]);
   assert.deepEqual(pngSize("public/assets/browserp-icon-48.png"), [48, 48]);
   assert.deepEqual(pngSize("public/assets/browserp-icon-192.png"), [192, 192]);
+  assert.deepEqual(pngSize("public/favicon.png"), [192, 192]);
+  assert.equal(pngColourType("public/favicon.png"), 6, "Search favicon preserves its alpha channel");
+  assert.deepEqual(readFileSync(new URL("public/favicon.png", root)), readFileSync(new URL("public/assets/browserp-icon-192.png", root)), "The favicon preserves the supplied transparent RP mark exactly");
   assert.deepEqual(pngSize("public/assets/browserp-icon-512.png"), [512, 512]);
   assert.deepEqual(pngSize("public/assets/browserp-icon-maskable-512.png"), [512, 512]);
   assert.equal(pngColourType("public/assets/browserp-icon-maskable-512.png"), 2, "maskable icon must be opaque RGB");

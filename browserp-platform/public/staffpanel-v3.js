@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const state = { session: null, csrf: "" };
+  const state = { session: null, csrf: "", authorized: false, generation: 0, pageSuspended: false };
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const make = (tag, text, className = "") => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = String(text); return el; };
@@ -9,7 +9,58 @@
   let advertisingEnquiries = null;
   let reviewGeneration = 0;
   window.addEventListener("browserp:session-ended", () => { reviewGeneration++; });
-  window.addEventListener("pagehide", () => { reviewGeneration++; });
+  window.addEventListener("pagehide", () => {
+    reviewGeneration++;
+    state.pageSuspended = true;
+    endWorkspace();
+    state.session = null; state.csrf = "";
+    $("#staff-app-v3")?.replaceChildren();
+    setWorkspaceVisible(false);
+  });
+  window.addEventListener("pageshow", event => {
+    // A history restore must never reuse a previous account's private DOM.
+    if (event.persisted || state.pageSuspended) location.reload();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (!state.authorized) return;
+    if (document.hidden) setWorkspaceVisible(false);
+    else void recheckVisibleWorkspace();
+  });
+
+  function setWorkspaceVisible(visible) {
+    const root = $("#staff-app-v3");
+    if (root) {
+      root.hidden = !visible; root.inert = !visible;
+      root.toggleAttribute("inert", !visible);
+      root.setAttribute("aria-busy", String(!visible));
+    }
+    const bar = $(".staff-mobile-bar-v3");
+    if (bar) { bar.hidden = !visible || !state.authorized; bar.inert = bar.hidden; bar.toggleAttribute("inert", bar.hidden); }
+    const pending = $("#staff-access-pending");
+    if (pending) pending.hidden = visible;
+  }
+
+  function endWorkspace() {
+    state.authorized = false;
+    state.generation++;
+    reviewGeneration++;
+    window.dispatchEvent(new CustomEvent("browserp:session-ended"));
+    staffNavigation?.disable();
+  }
+
+  async function recheckVisibleWorkspace() {
+    const accountId = state.session?.user?.id;
+    const generation = state.generation;
+    setWorkspaceVisible(false);
+    try {
+      const fresh = await api("/api/auth/session");
+      if (generation !== state.generation || document.hidden) return;
+      state.session = fresh; state.csrf = fresh.csrfToken || "";
+      if (fresh.authenticated !== true) { showLogin(); return; }
+      if (fresh.staff !== true || fresh.user?.id !== accountId) { showDenied(); return; }
+      setWorkspaceVisible(true);
+    } catch (error) { if (generation === state.generation) showSessionUnavailable(error); }
+  }
 
   function beginFormSubmission(form) {
     if (pendingForms.has(form)) return null;
@@ -189,8 +240,15 @@
 
   async function api(path, options = {}) {
     const method = String(options.method || "GET").toUpperCase();
-    const response = await fetch(path, { ...options, method, credentials: "same-origin", headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}), ...(!["GET","HEAD"].includes(method) && state.csrf ? { "X-BrowseRP-CSRF": state.csrf } : {}), ...(options.headers || {}) } });
+    const generation = state.generation;
+    const staffRequest = path.startsWith("/api/admin/");
+    if (staffRequest && !state.authorized) throw Object.assign(new Error("Your staff access must be checked again."), { status: 403 });
+    const response = await fetch(path, { ...options, method, cache: "no-store", credentials: "same-origin", headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}), ...(!["GET","HEAD"].includes(method) && state.csrf ? { "X-BrowseRP-CSRF": state.csrf } : {}), ...(options.headers || {}) } });
     const payload = await response.json().catch(() => ({}));
+    if (generation !== state.generation || state.pageSuspended) throw Object.assign(new Error("This staff view is no longer active."), { status: 401 });
+    if (staffRequest && [401, 403].includes(response.status)) {
+      if (response.status === 401) showLogin(); else showDenied();
+    }
     if (!response.ok) throw Object.assign(new Error(payload.error || "The staff request failed."), { status: response.status });
     return payload;
   }
@@ -209,9 +267,10 @@
     if (!root) return;
     const menu = $("#staff-menu-v3");
     const restoreFocus = root.contains(document.activeElement) || document.activeElement === menu;
-    staffNavigation?.disable();
+    endWorkspace();
     card.tabIndex = -1;
     root.replaceChildren(card);
+    setWorkspaceVisible(true);
     if (restoreFocus) card.focus({ preventScroll: true });
   }
 
@@ -377,7 +436,10 @@
     if (!state.session.staffAccess) { showDenied(); return false; }
     const verifiedFactor = state.session.mfa?.factors?.some((factor) => factor.status === "verified");
     if (state.session.mfa?.required !== false && (!verifiedFactor || state.session.aal !== "aal2")) { showMfa(); return false; }
+    if (state.session.staff !== true) { showDenied(); return false; }
     if (document.body.dataset.staffPage === "login") { location.replace("/staffpanel/overview"); return false; }
+    state.authorized = true;
+    setWorkspaceVisible(true);
     return true;
   }
 

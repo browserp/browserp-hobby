@@ -28,8 +28,11 @@ test("games hub offers exactly the four launch games in the requested order", ()
   const upcoming = nodes.get("#game-upcoming-grid-v5").children;
   assert.equal(upcoming.length, 9);
   const forza = upcoming.find((card) => card.dataset.platform === "forza");
-  assert.equal(forza.children[0].children[0].src, "/assets/games/forza-roleplay.webp");
-  assert.ok(upcoming.every((card) => card.tagName === "article" && !card.href && card.children.at(-1).textContent === "Coming soon"));
+  assert.equal(forza.children[0].children[0].src, "/assets/games/forza-official.jpg");
+  assert.ok(upcoming.every((card) => card.tagName === "a" && card.href.startsWith("/games/") && card.children.at(-1).textContent === "Coming soon"));
+  const future = nodes.get("#game-future-grid-v6").children;
+  assert.deepEqual(future.map(card => card.href), ["/games/gta6", "/games/6m"]);
+  assert.ok(future.every(card => card.children.at(-1).textContent === "Coming soon"));
   const html = readFileSync(new URL("../public/game.html", import.meta.url), "utf8");
   assert.match(html, /<details class="game-upcoming-v5" id="game-upcoming-v5">/);
   assert.doesNotMatch(html, /<details[^>]*\bopen\b/);
@@ -50,4 +53,16 @@ test("available game URLs keep their selected navigation and filtered server req
   assert.equal(links.find((link) => link.dataset.game === "roblox").attributes["aria-current"], "page");
   assert.match(requests[0], /platform=roblox/);
   assert.equal(nodes.get("#game-directory-link-v4").href, "/servers?platform=roblox");
+});
+
+test("GTA VI and 6M future sections never request playable servers or offer a listing submission", () => {
+  for (const id of ["gta6", "6m"]) {
+    const { document, nodes, requests } = render(`/games/${id}`);
+    assert.match(document.title, /Coming soon/);
+    assert.deepEqual(requests, []);
+    assert.ok(nodes.get("#game-page-actions-v4").children.every(link => !link.href.startsWith("/list-server")));
+    assert.equal(nodes.get("#game-page-mark-v4").children[0].src, "/assets/games/gta6-official.jpg");
+    assert.equal(nodes.get("#game-future-v6").hidden, true);
+    assert.equal(nodes.get("#game-upcoming-v5").hidden, true);
+  }
 });

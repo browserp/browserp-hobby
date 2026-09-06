@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {JSDOM} from "jsdom";
 const source=readFileSync(new URL("../public/staffpanel-v3.js",import.meta.url),"utf8");
-const instrumented=source.replace(/\n  init\(\);\n\}\)\(\);\s*$/,"\n  window.__reviewTest={openReview};\n})();");
+const instrumented=source.replace(/\r?\n  init\(\);\r?\n\}\)\(\);\s*$/,"\n  state.authorized=true; window.__reviewTest={openReview};\n})();");
 const settle=async()=>{for(let i=0;i<5;i++)await new Promise(resolve=>setImmediate(resolve));};
 const id="bbbbbbbb-0000-4000-8000-000000000001";
 function fixture(t){const dom=new JSDOM('<p id="staff-status-v3"></p>',{url:"https://browserp.test/staffpanel/moderation",runScripts:"outside-only"});const w=dom.window;t.after(()=>w.close());w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};const calls=[];let version=3;
@@ -20,7 +20,7 @@ test("changed live listing, transferred ownership and missing management permiss
 });
 
 test("legacy owner review keeps unavailable approval disabled after a failed feedback save",async t=>{
- const legacy=readFileSync(new URL("../public/browserp-portal-v2.js",import.meta.url),"utf8").replace(/\n  init\(\);\n\}\)\(\);\s*$/,"\n  state.csrfToken='fixture'; window.__reviewTest={openReview,wireReviewDialog};\n})();");
+ const legacy=readFileSync(new URL("../public/browserp-portal-v2.js",import.meta.url),"utf8").replace(/\r?\n  init\(\);\r?\n\}\)\(\);\s*$/,"\n  state.csrfToken='fixture'; window.__reviewTest={openReview,wireReviewDialog};\n})();");
  const dom=new JSDOM('<dialog id="review-dialog"><h2 id="review-dialog-title"></h2><form id="review-form"><div id="review-evidence"></div><label><textarea id="review-reason" required></textarea></label><div id="review-actions"></div><p id="review-status"></p></form></dialog>',{url:"https://browserp.test/staff",runScripts:"outside-only"});const w=dom.window;t.after(()=>w.close());w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
  w.fetch=async(path)=>path.startsWith("/api/admin/item")?{ok:true,json:async()=>({item:{id,name:"Updated name",platform:"roblox",reviewVersion:8,queueVersion:10,ownerUpdate:{canApprove:false,live:{name:"Current name"}}}})}:{ok:false,status:400,json:async()=>({error:"Fixture feedback error"})};
  w.eval(legacy);w.__reviewTest.wireReviewDialog();await w.__reviewTest.openReview("listing",id,"Review listing",[["approved","Approve",""],["changes_requested","Request changes",""]]);

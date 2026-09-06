@@ -172,9 +172,10 @@
     function draw() {
       const active = document.activeElement;
       const href = list.contains(active) ? active.closest("a[href]")?.getAttribute("href") : null;
-      render(list, shown);
+      render(list, window.BrowseRPRecommendations?.rank(shown, filters) || shown);
       if (href) [...list.querySelectorAll("a[href]")].find(item => item.getAttribute("href") === href)?.focus({ preventScroll: true });
     }
+    window.addEventListener("browserp:recommendations-changed", () => { if (shown.length) draw(); });
     function expireCounts(renderChanges = true) {
       let changed = false;
       shown = shown.map(server => {

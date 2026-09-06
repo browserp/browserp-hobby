@@ -5,8 +5,8 @@ import { JSDOM } from "jsdom";
 
 const source = readFileSync(new URL("../public/staffpanel-v3.js", import.meta.url), "utf8");
 const instrumented = source.replace(
-  /\n  init\(\);\n\}\)\(\);\s*$/,
-  "\n  window.__staffSubmissionTest = { permissionOverrides, saveStaffAccess, savePermission, saveAdvert, saveBlog };\n})();"
+  /\r?\n  init\(\);\r?\n\}\)\(\);\s*$/,
+  "\n  state.authorized=true; window.__staffSubmissionTest = { permissionOverrides, saveStaffAccess, savePermission, saveAdvert, saveBlog };\n})();"
 );
 assert.notEqual(instrumented, source, "staff submission handlers should be exposed only inside this test");
 

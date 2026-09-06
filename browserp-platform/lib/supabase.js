@@ -357,6 +357,7 @@ export async function getSession(req, res, { required = false, provider } = {}) 
     provider: identityProvider,
     csrfToken,
     aal: claims.aal || "aal1",
+    totpVerified: Array.isArray(claims.amr) && claims.amr.some(method => method?.method === "totp"),
     factors
   };
 }

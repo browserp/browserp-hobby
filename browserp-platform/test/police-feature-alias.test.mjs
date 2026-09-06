@@ -6,7 +6,7 @@ import { localDiscovery } from "../lib/discovery.js";
 
 const M = globalThis.BrowseRPDiscovery;
 const migrationFiles = new URL("../supabase/migrations/", import.meta.url);
-const migration = suffix => readFileSync(new URL(readdirSync(migrationFiles).find(name => name.endsWith(suffix)), migrationFiles), "utf8");
+const migration = suffix => readFileSync(new URL(readdirSync(migrationFiles).find(name => name.endsWith(suffix)), migrationFiles), "utf8").replace(/\r\n/g, "\n");
 const sample = (slug, tags, extra = {}) => ({ slug, name: slug, platform_id: "fivem", platform_name: "FiveM", description: "Character stories", region: "United States", language: "English", framework: "Qbox", access_type: "public", tags, ...extra });
 const fixtures = [
   sample("legacy-legit", ["police", "economy"], { access_type: "allowlisted" }),

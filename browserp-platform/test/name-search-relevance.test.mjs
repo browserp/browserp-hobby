@@ -6,7 +6,7 @@ import { localDiscovery } from "../lib/discovery.js";
 import { nameSearchRelevance } from "../lib/ranking.js";
 
 const migrations = new URL("../supabase/migrations/", import.meta.url);
-const migration = suffix => readFileSync(new URL(readdirSync(migrations).find(name => name.endsWith(suffix)), migrations), "utf8");
+const migration = suffix => readFileSync(new URL(readdirSync(migrations).find(name => name.endsWith(suffix)), migrations), "utf8").replace(/\r\n/g, "\n");
 const sample = (id, name, quality, players) => ({ id, name, slug: name.toLowerCase().replaceAll(" ", "-"),
   platform_id: "fivem", description: "Everyday roleplay with cars", region: "Europe", language: "English", framework: "vMenu",
   access_type: "public", tags: [], quality_score: quality, engagement_score: quality, uptime_percent: 100,

@@ -268,6 +268,59 @@ test("current account sessions can read profiles and AAL1 staff setup remains av
   }
 });
 
+test("staff menu eligibility requires a current role decision and the live MFA policy", async () => {
+  const cases = [
+    { label: "verified staff", membership: true, required: true, aal: "aal2", totp: true, expected: true },
+    { label: "unrelated Discord account", membership: false, required: false, aal: "aal2", totp: true, expected: false },
+    { label: "MFA outstanding", membership: true, required: true, aal: "aal1", expected: false },
+    { label: "AAL2 without TOTP", membership: true, required: true, aal: "aal2", expected: false },
+    { label: "policy unavailable", membership: true, required: true, aal: "aal2", totp: true, unavailable: true, expected: false },
+    { label: "malformed policy", membership: true, aal: "aal2", totp: true, expected: false },
+    { label: "explicit optional MFA", membership: true, required: false, aal: "aal1", expected: true }
+  ];
+  for (const fixture of cases) {
+    await isolated(async value => {
+      const path = new URL(value).pathname;
+      if (path === "/auth/v1/user") return response({ ...user, user_metadata: { role: "owner", staff: true }, factors: [{ factor_type: "totp", status: "verified", id: "fixture-factor" }] });
+      if (path.endsWith("/rpc/check_security_ban_server")) return response(null);
+      if (path.endsWith("/rpc/member_connection_status")) return response({ active: true, userId: user.id, sessionId: "fixture-live-session" });
+      if (path === "/rest/v1/profiles") return response([{ display_name: "Fixture member" }]);
+      if (path.endsWith("/rpc/staff_mfa_enrollment_allowed")) return response(fixture.membership);
+      if (path.endsWith("/rpc/staff_mfa_policy")) return fixture.unavailable ? response({ message: "Unavailable" }, 503) : response({ staffMfaRequired: fixture.required });
+      throw new Error(`Unexpected endpoint ${path}`);
+    }, async () => {
+      const token = `fixture.${Buffer.from(JSON.stringify({ sub: user.id, aal: fixture.aal, amr: [{ method: "oauth" }, ...(fixture.totp ? [{ method: "totp" }] : [])] })).toString("base64url")}.fixture`;
+      const res = output(); res.end = value => { res.body = JSON.parse(value); };
+      await router({ ...request(`brp_access=${token}; brp_csrf=${csrf}`), browserpRoute: "auth/session" }, res);
+      assert.equal(res.statusCode, 200, fixture.label);
+      assert.equal(res.body.staff, fixture.expected, fixture.label);
+      assert.equal(res.getHeader("Cache-Control"), "no-store");
+    }, { SUPABASE_SECRET_KEY: "sb_secret_fixture", PRIVACY_HASH_SECRET: "fixture-private-hash" });
+  }
+});
+
+test("private admin routes propagate authorization failures without a successful fallback", async () => {
+  for (const route of ["admin/overview", "admin/moderation", "admin/staff", "admin/roles", "admin/permissions", "admin/security", "admin/profiles", "admin/adverts", "admin/blogs", "admin/bans"]) {
+    const requests = [];
+    await isolated(async (value, options) => {
+      const path = new URL(value).pathname; requests.push({ path, options });
+      if (path === "/auth/v1/user") return response(user);
+      if (path.endsWith("/rpc/check_security_ban_server")) return response(null);
+      if (path.includes("/rpc/staff_")) return response({ message: "Staff permission required", code: "42501" }, 403);
+      throw new Error(`Unexpected endpoint ${path}`);
+    }, async () => {
+      const res = output(); res.end = value => { res.body = JSON.parse(value); };
+      await router({ ...request(`brp_access=${access}; brp_csrf=${csrf}`), url: `/api/${route}`, browserpRoute: route }, res);
+      assert.equal(res.statusCode, 403, route);
+      assert.equal(res.getHeader("Cache-Control"), "no-store", route);
+      assert.deepEqual(Object.keys(res.body).sort(), ["error", "requestId"], route);
+      const staffRequests = requests.filter(item => item.path.includes("/rpc/staff_"));
+      assert.ok(staffRequests.length, route);
+      for (const call of staffRequests) assert.equal(call.options.headers.Authorization, `Bearer ${access}`, route);
+    }, { SUPABASE_SECRET_KEY: "sb_secret_fixture", PRIVACY_HASH_SECRET: "fixture-private-hash" });
+  }
+});
+
 test("profile routes are present locally, private without sign-in, and share safe image CSP with production", async () => isolated(null, async () => {
   const server = createBrowseRPServer(); await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   const origin = `http://127.0.0.1:${server.address().port}`;

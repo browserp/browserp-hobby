@@ -99,11 +99,13 @@ function sessionHydration(h, { session = {}, response } = {}) {
   const helpersEnd = app.indexOf("  const reveal =");
   const start = app.indexOf("  async function session()");
   const end = app.indexOf("  function safeDestination(", start);
+  const avatarUrlStart = app.indexOf("  function safeWebsiteUrl(");
+  const avatarUrlEnd = app.indexOf("  const ADVERT_ARTWORK", avatarUrlStart);
   assert.ok(helpersEnd > 0 && start > helpersEnd && end > start, "the actual session controller can be isolated from unrelated page features");
   h.w.fetch = response || (async () => ({ ok: true, json: async () => session }));
   // Execute the production request/helper/session functions, excluding unrelated
   // advertising, content, and server-detail initializers.
-  h.w.eval(`${app.slice(0, helpersEnd)}${app.slice(start, end)}\nwindow.__navigationTestSession = session;\n})();`);
+  h.w.eval(`${app.slice(0, helpersEnd)}${app.slice(start, end)}${app.slice(avatarUrlStart, avatarUrlEnd)}\nwindow.__navigationTestSession = session;\n})();`);
   return h.w.__navigationTestSession();
 }
 
@@ -558,13 +560,19 @@ test("broken approved avatars fall back to readable initials in both account con
   } finally { h.dom.window.close(); }
 });
 
-test("Staff Panel links depend on the explicit authenticated staff access flag", async () => {
-  for (const staffAccess of [false, true, "true"]) {
+test("Staff Panel links require verified staff eligibility, not membership awaiting MFA", async () => {
+  for (const fixture of [
+    { staff: false, staffAccess: false, expected: 0 },
+    { staff: false, staffAccess: true, expected: 0 },
+    { staff: true, staffAccess: true, expected: 2 },
+    { staff: "true", staffAccess: true, expected: 0 },
+    { staff: undefined, staffAccess: true, expected: 0 }
+  ]) {
     const h = harness();
     try {
-      await sessionHydration(h, { session: { ...member, staffAccess } });
+      await sessionHydration(h, { session: { ...member, staff: fixture.staff, staffAccess: fixture.staffAccess } });
       const links = [...h.w.document.querySelectorAll('.account-popover-v3 a[href="/staffpanel"]')];
-      assert.equal(links.length, staffAccess === true ? 2 : 0);
+      assert.equal(links.length, fixture.expected);
       assert.ok(links.every(link => link.textContent === "Staff Panel"));
     } finally { h.dom.window.close(); }
   }

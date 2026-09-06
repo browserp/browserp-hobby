@@ -38,6 +38,29 @@ test("directory pagination is real links and uses distinct canonical pages; arbi
     assert.doesNotMatch(doc.querySelector('link[rel="canonical"]').href, /q=|access=|mode=/);
   }
 });
+
+test("GTA VI and 6M pages arrive as upcoming information without listings, counts or submission actions", async () => {
+  let directoryCalls = 0;
+  const data = { ...defaultData, directory: async () => { directoryCalls++; throw new Error("Upcoming categories must not query playable servers"); } };
+  for (const id of ["gta6", "6m"]) {
+    const response = await request(`/games/${id}`, { data }), doc = response.document();
+    assert.equal(response.statusCode, 200);
+    assert.match(doc.title, /Coming soon/);
+    assert.match(doc.querySelector("h1").textContent, /coming soon/i);
+    assert.equal(doc.querySelector('meta[name="robots"]').content, "noindex,follow");
+    assert.equal(doc.querySelector('link[rel="canonical"]').href, `https://www.browserp.com/games/${id}`);
+    assert.equal(doc.querySelector("#game-results-v4").hidden, true);
+    assert.equal(doc.querySelectorAll(".server-card").length, 0);
+    assert.equal(doc.querySelector('#game-page-actions-v4 a[href^="/list-server"]'), null);
+    assert.equal(doc.querySelector('#game-page-actions-v4 a[href="/games"]').textContent, "Explore available games");
+    assert.doesNotMatch(doc.querySelector("#game-page-lead-v4").textContent, /\d+ players|\d+ servers|November 19/);
+    assert.equal(doc.querySelector("#game-page-mark-v4 img").getAttribute("src"), "/assets/games/gta6-official.jpg");
+    assert.equal(publicServer({ ...server, platform_id: id }), null, "Future categories cannot become public listings");
+  }
+  assert.equal(directoryCalls, 0);
+  const hub = (await request("/games", { data })).document();
+  assert.deepEqual([...hub.querySelectorAll("#game-hub-grid-v4 a")].map(link => link.getAttribute("href")), ["/games/fivem", "/games/redm", "/games/roblox", "/games/minecraft"]);
+});
 test("server detail keeps the existing controls, exact metadata order and real images without private fields", async () => {
   const response = await request("/server/cali-rp"), doc = response.document();
   assert.equal(response.statusCode, 200);
@@ -102,7 +125,7 @@ test("sitemap includes every published listing and article beyond one page and e
   assert.equal(response.statusCode, 200); assert.deepEqual(seen, [0, 100]); assert.match(response.headers["content-type"], /xml/);
   assert.equal((response.body.match(/<loc>[^<]*\/server\//g) || []).length, 125);
   assert.match(response.body, /\/blog\/choosing-a-community/);
-  assert.doesNotMatch(response.body, /\/list-server|\/staffpanel|\/profile|\/games\/forza|PRIVATE_|<loc>[^<]*\?/);
+  assert.doesNotMatch(response.body, /\/list-server|\/staffpanel|\/profile|\/games\/(?:forza|gta6|6m)|PRIVATE_|<loc>[^<]*\?/);
   for (const directory of [async () => ({ total: 2, servers: [server] }), async () => ({ total: 1, servers: [{ ...server, slug: "../escape" }] })]) assert.equal((await request("/sitemap.xml", { data: { ...defaultData, directory } })).statusCode, 503);
 });
 test("deployment uses the existing router and exposes templates only through controlled public routes", () => {

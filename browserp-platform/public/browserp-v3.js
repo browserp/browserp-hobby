@@ -24,6 +24,25 @@
     return String(value || "BrowseRP member").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
   }
 
+  function accountAvatar(profile, name) {
+    const url = [profile.custom_avatar_url, profile.customAvatarUrl, profile.avatar_url, profile.avatarUrl, profile.approved_avatar_url, profile.approvedAvatarUrl].find(value => safeWebsiteUrl(value));
+    if (!url) return node("span", "account-initials-v3", initials(name));
+    const image = new Image(); image.className = "account-avatar-v3"; image.alt = ""; image.referrerPolicy = "no-referrer";
+    image.addEventListener("error", () => image.replaceWith(node("span", "account-initials-v3", initials(name))), { once: true }); image.src = url;
+    return image;
+  }
+
+  window.addEventListener("browserp:profile-updated", event => {
+    if (!state.session?.authenticated || !event.detail?.profile) return;
+    const profile = event.detail.profile;
+    const name = profile.display_name || profile.displayName || state.session.user?.profile?.display_name || "BrowseRP member";
+    $$(".account-trigger-v3").forEach(button => {
+      button.querySelector(".account-avatar-v3, .account-initials-v3")?.replaceWith(accountAvatar(profile, name));
+      const label = button.querySelector(".account-name-v3"); if (label) label.textContent = name;
+      button.setAttribute("aria-label", `Open account menu for ${name}`);
+    });
+  });
+
   async function api(path, options = {}) {
     const method = String(options.method || "GET").toUpperCase();
     const changing = !["GET", "HEAD"].includes(method);
@@ -132,24 +151,16 @@
       if (!state.session.authenticated) { link.textContent = "Sign in"; link.href = "/dashboard"; return; }
       const profile = state.session.user?.profile || {};
       const name = profile.display_name || profile.username || "BrowseRP member";
-      const avatarApproved = profile.avatar_review_status === "approved" && /^https:\/\//i.test(profile.avatar_url || "");
       const wrap = node("div", "account-menu-v3");
       const button = node("button", "account-trigger-v3"); button.type = "button"; button.setAttribute("aria-expanded", "false"); button.setAttribute("aria-label", `Open account menu for ${name}`);
-      const avatar = avatarApproved ? new Image() : node("span", "account-initials-v3", initials(name));
-      if (avatarApproved) {
-        avatar.className = "account-avatar-v3";
-        avatar.alt = "";
-        avatar.referrerPolicy = "no-referrer";
-        avatar.addEventListener("error", () => avatar.replaceWith(node("span", "account-initials-v3", initials(name))), { once: true });
-        avatar.src = profile.avatar_url;
-      }
+      const avatar = accountAvatar(profile, name);
       button.append(avatar, node("span", "account-name-v3", name), node("span", "account-chevron-v3", "⌄"));
       const menu = node("nav", "account-popover-v3"); menu.hidden = true; menu.inert = true; menu.id = `account-navigation-${index}`; menu.setAttribute("aria-label", "Your account"); button.setAttribute("aria-controls", menu.id);
       const menuItems = [
         ["Profile", "/profile"], ["My servers", "/dashboard#listings"], ["Favourite servers", "/dashboard#saved"],
         ["Recently viewed", "/dashboard#recent"], ["Reviews", "/dashboard#submissions"], ["Settings", "/dashboard#account"]
       ].map(([label, href]) => { const item=node("a","",label);item.href=href;return item; });
-      if (state.session.staffAccess === true) {
+      if (state.session.staff === true) {
         const staff = node("a", "account-staff-v3", "Staff Panel"); staff.href = "/staffpanel"; menuItems.push(staff);
       }
       const logout = node("button", "account-danger-v3", "Sign out"); logout.type = "button";
@@ -246,6 +257,15 @@
   }
 
   async function adverts() {
+    if (["home", "games"].includes(document.body.dataset.page) || document.body.hasAttribute("data-blog-page")) {
+      const main = $("main");
+      if (main && !$(".banner-ad-v7", main)) {
+        const wrapper = node("div", "shell-v3");
+        const banner = node("aside", "side-ad-v3 banner-ad-v7"); banner.dataset.adPlacement = "side"; banner.dataset.adStart = "1"; banner.hidden = true; wrapper.append(banner);
+        const featured = $("#featured-server-list")?.closest("section");
+        if (featured) featured.after(wrapper); else main.append(wrapper);
+      }
+    }
     const placements = [...new Set($$("[data-ad-placement]").map((element) => element.dataset.adPlacement))];
     $$('[data-ad-placement="side"]').forEach((root) => {
       state.ads.set("side", [...HOUSE_ADVERTS]);
@@ -266,8 +286,8 @@
     const list = state.ads.get(root.dataset.adPlacement) || [];
     if (!list.length) { root.hidden = true; return; }
     root.hidden = false;
-    let index = 0;
-    const visual = root.classList.contains("side-ad-v3");
+    let index = Math.max(0, Number.parseInt(root.dataset.adStart || "0", 10) || 0) % list.length;
+    const visual = root.classList.contains("side-ad-v3") || root.classList.contains("banner-ad-v7");
     let copy = $("[data-ad-copy]", root);
     let image;
     let dots;
@@ -359,18 +379,27 @@
       });
     }
     let timer;
+    let paused = false;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     function stop() { window.clearInterval(timer); }
     root._browserpAdvertCleanup = () => {
       stop();
+      document.removeEventListener("visibilitychange", visibilityChanged);
       listeners.forEach((remove) => remove());
       if (image) { image.onload = null; image.onerror = null; }
     };
     function restart() {
       stop();
-      if (visual && list.length > 1 && !reducedMotion.matches) {
+      if (visual && list.length > 1 && !paused && !reducedMotion.matches && document.visibilityState !== "hidden" && !root.matches(":hover") && !root.contains(document.activeElement)) {
         timer = window.setInterval(() => { index = (index + 1) % list.length; draw(); }, 7000);
       }
+    }
+    function visibilityChanged() { restart(); }
+    document.addEventListener("visibilitychange", visibilityChanged);
+    if (visual && list.length > 1) {
+      const pause = node("button", "ad-pause-v7", "Pause rotation"); pause.type = "button"; pause.setAttribute("aria-pressed", "false");
+      pause.addEventListener("click", () => { paused = !paused; pause.textContent = paused ? "Resume rotation" : "Pause rotation"; pause.setAttribute("aria-pressed", String(paused)); restart(); });
+      root.append(pause);
     }
     $$('[data-ad-direction]', root).forEach((button) => button.addEventListener("click", () => {
       index = (index + (button.dataset.adDirection === "next" ? 1 : -1) + list.length) % list.length;
@@ -571,6 +600,7 @@
       const payload = await api(`/api/servers?slug=${encodeURIComponent(slug)}`);
       const server = payload.servers?.[0];
       if (!server) throw Object.assign(new Error("Server not found"), { status: 404 });
+      window.BrowseRPRecommendations?.record(server);
       try {
         const recent = JSON.parse(localStorage.getItem("browserp-recent-servers") || "[]");
         const next = [{ slug: server.slug, name: server.name, platform: server.platform_name || server.platform_short || "Roleplay" }, ...recent.filter((item) => item?.slug !== server.slug)].slice(0, 8);

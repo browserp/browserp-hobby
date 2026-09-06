@@ -172,3 +172,53 @@ body.staff-v3 { background: var(--bg); color: var(--text); }
 .staff-dialog-card-v3 { background: var(--panel); }
 .staff-dialog-copy-v3 { color: var(--copy); }
 .staff-dialog-actions-v3 .staff-danger-v3 { border-color: var(--danger); background: #4f242f; }
+
+/* Workspace spacing is independent of the authentication gate. */
+body.staff-v3 { font-size: 15px; }
+.staff-shell-v3 { grid-template-columns: 244px minmax(0, 1fr); }
+.staff-sidebar-v3 { padding: 24px 16px; }
+.staff-nav-v3 { gap: 5px; }
+.staff-nav-v3 a { min-height: 44px; border-left: 0; border-radius: 8px; padding: 11px 13px; transition: background .16s ease, color .16s ease; }
+.staff-nav-v3 a[aria-current="page"] { background: color-mix(in srgb, var(--pink) 11%, var(--panel)); color: var(--text); box-shadow: inset 3px 0 var(--pink); }
+.staff-nav-group-v3 { letter-spacing: .08em; font-size: 10px; margin-top: 26px; }
+.staff-main-v3 { max-width: 1700px; width: 100%; margin-inline: auto; padding: 36px clamp(24px, 3.5vw, 56px) 80px; }
+.staff-top-v3 { align-items: center; padding-bottom: 26px; }
+.staff-top-v3 h1 { font-size: clamp(28px, 3vw, 40px); line-height: 1.2; }
+.staff-top-v3 p { max-width: 75ch; font-size: 14px; line-height: 1.7; }
+.staff-grid-v3 { gap: 16px; }
+.staff-stat-v3 { padding: 22px; border-radius: 12px; }
+.staff-stat-v3 strong { font-size: 32px; line-height: 1.2; letter-spacing: -.025em; margin-bottom: 8px; }
+.staff-stat-v3 span { font-size: 13px; font-weight: 550; }
+.staff-section-v3 { border-radius: 14px; }
+.staff-section-head-v3 { align-items: center; padding: 22px 24px; }
+.staff-section-head-v3 h2 { font-size: 19px; letter-spacing: -.02em; }
+.staff-section-head-v3 p { font-size: 13px; line-height: 1.65; }
+.staff-table-wrap-v3 { border-radius: 0 0 14px 14px; scrollbar-width: thin; }
+.staff-table-v3 th { padding-block: 14px; font-size: 10px; letter-spacing: .07em; background: var(--bg-soft); }
+.staff-table-v3 td { padding-block: 16px; line-height: 1.6; }
+.staff-table-v3 tbody tr:hover { background: color-mix(in srgb, var(--panel-2) 55%, transparent); }
+.staff-table-v3 tbody tr:last-child td { border-bottom: 0; }
+.staff-state-v3 { border-radius: 6px; min-height: 28px; font-weight: 600; }
+.permission-item-v3 { border-radius: 9px; padding: 14px; align-items: center; }
+.permission-item-v3 input[type="checkbox"] { width: 18px; height: 18px; flex: none; accent-color: var(--pink); }
+.security-banner-v3 { border-radius: 10px; font-size: 14px; line-height: 1.7; }
+.staff-dialog-v3 { border-radius: 16px; }
+.staff-dialog-card-v3 { padding: 30px; }
+.staff-login-card-v3 { border-radius: 18px; padding: clamp(28px, 5vw, 44px); }
+.staff-login-card-v3 h1 { font-size: clamp(28px, 4vw, 36px); line-height: 1.2; }
+.profile-evidence-v3 img { border-radius: 50%; }
+body.staff-v3 .field-v3 :is(input, select, textarea) { border-radius: 9px; min-height: 46px; font-size: 14px; }
+body.staff-v3 select:not([multiple]):not([size]) { appearance: none; padding-right: 42px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m5 7.5 5 5 5-5' stroke='%23a297a8' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; }
+@media (max-width: 760px) {
+  .staff-main-v3 { padding: 26px 16px 60px; }
+  .staff-sidebar-v3 { width: min(340px, calc(100vw - 24px)); border-right: 1px solid var(--line); box-shadow: 20px 0 60px #0005; }
+  .staff-top-v3 { display: grid; gap: 18px; }
+  .staff-top-v3 .button-v3 { margin: 0; }
+  .staff-grid-v3 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .staff-stat-v3 { padding: 18px 14px; }
+  .staff-stat-v3 strong { font-size: 28px; }
+  .staff-section-head-v3 { padding: 18px; flex-wrap: wrap; }
+  .staff-form-v3 { padding: 18px; }
+  .staff-dialog-card-v3 { padding: 22px 18px; }
+}
+@media (forced-colors: active) { body.staff-v3 select:not([multiple]):not([size]) { appearance: auto; background-image: none; } }

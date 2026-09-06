@@ -5,7 +5,7 @@ import { JSDOM } from "jsdom";
 
 const read = file => readFileSync(new URL(`../public/${file}`, import.meta.url), "utf8");
 const tick = () => new Promise(resolve => setImmediate(resolve));
-const session = { authenticated: true, provider: "discord", staffAccess: true, csrfToken: "fixture-csrf", aal: "aal1", mfa: { required: true, factors: [] } };
+const session = { authenticated: true, provider: "discord", staffAccess: true, staff: true, user: { id: "staff-fixture" }, csrfToken: "fixture-csrf", aal: "aal1", mfa: { required: true, factors: [] } };
 const json = (value, status = 200) => ({ ok: status < 400, status, json: async () => value });
 async function harness(t, fetch, page = "scrapers") {
   const dom = new JSDOM(read(`staffpanel-${page}.html`), { url: `https://browserp.test/staffpanel/${page}`, runScripts: "outside-only" });
@@ -23,8 +23,69 @@ async function harness(t, fetch, page = "scrapers") {
 test("staff session outages show a retry state rather than pretending the user signed out", async t => {
   const h = await harness(t, async () => { throw new Error("Connection unavailable"); });
   assert.match(h.text(), /Staff access could not be checked/); assert.ok(h.button("Try again"));
-  assert.equal(h.$('a[href^="/api/auth/discord"]'), null); assert.match(h.$('[role="status"]').textContent, /Connection unavailable/);
+  assert.equal(h.$('a[href^="/api/auth/discord"]'), null); assert.match(h.$('.staff-login-card-v3 [role="status"]').textContent, /Connection unavailable/);
   h.$(".skip-link").click(); assert.equal(h.w.document.activeElement, h.$(".staff-login-card-v3"));
+});
+
+test("staff navigation and controls remain hidden and inert for a delayed unauthorized session", async t => {
+  let finish; const calls = [];
+  const h = await harness(t, (path, options) => { calls.push({ path, options }); return new Promise(resolve => { finish = resolve; }); });
+  assert.equal(h.$("#staff-app-v3").hidden, true);
+  assert.equal(h.$("#staff-app-v3").hasAttribute("inert"), true);
+  assert.equal(h.$(".staff-mobile-bar-v3").hidden, true);
+  assert.equal(h.$("#staff-access-pending").hidden, false);
+  assert.deepEqual(calls.map(call => call.path), ["/api/auth/session"]);
+  assert.equal(calls[0].options.cache, "no-store");
+  finish(json({ ...session, staffAccess: false, staff: false })); await tick();
+  assert.equal(h.$("#staff-app-v3").hidden, false);
+  assert.equal(h.$(".staff-sidebar-v3"), null);
+  assert.equal(h.$(".staff-mobile-bar-v3").hidden, true);
+  assert.match(h.text(), /Staff access required/);
+  assert.equal(calls.length, 1);
+});
+
+test("a membership flag without the verified backend staff flag cannot unlock a workspace", async t => {
+  const h = await harness(t, async () => json({ ...session, staff: false, mfa: { required: false } }));
+  assert.match(h.text(), /Staff access required/);
+  assert.equal(h.$(".staff-sidebar-v3"), null);
+});
+
+test("access revocation clears private views and rejects responses that arrive after denial", async t => {
+  let finish;
+  const h = await harness(t, (path) => path === "/api/auth/session"
+    ? Promise.resolve(json({ ...session, mfa: { required: false } }))
+    : path.endsWith("/denied") ? Promise.resolve(json({ error: "Staff permission required" }, 403))
+    : new Promise(resolve => { finish = resolve; }), "moderation");
+  h.$(".staff-main-v3").append(h.w.document.createTextNode("Private account evidence"));
+  const late = h.moderation().api("/api/admin/private").catch(error => error);
+  await assert.rejects(h.moderation().api("/api/admin/denied"), error => error.status === 403);
+  assert.doesNotMatch(h.text(), /Private account evidence/);
+  finish(json({ records: ["Private late evidence"] }));
+  assert.equal((await late).status, 401);
+  assert.doesNotMatch(h.text(), /Private late evidence/);
+});
+
+test("pagehide removes private staff DOM before a browser history snapshot", async t => {
+  const h = await harness(t, async () => json({ ...session, mfa: { required: false } }), "moderation");
+  h.$(".staff-main-v3").append(h.w.document.createTextNode("Private account evidence"));
+  h.w.dispatchEvent(new h.w.PageTransitionEvent("pagehide", { persisted: true }));
+  assert.equal(h.$("#staff-app-v3").hidden, true);
+  assert.equal(h.$("#staff-app-v3").childElementCount, 0);
+  assert.doesNotMatch(h.text(), /Private account evidence/);
+  await assert.rejects(h.moderation().api("/api/admin/private"), error => error.status === 403);
+});
+
+test("returning to a staff tab masks the old view until the current account is verified", async t => {
+  let resolveCheck; let checks = 0;
+  const h = await harness(t, async () => ++checks === 1 ? json({ ...session, mfa: { required: false } }) : new Promise(resolve => { resolveCheck = resolve; }), "moderation");
+  let hidden = true; Object.defineProperty(h.w.document, "hidden", { get: () => hidden });
+  h.w.document.dispatchEvent(new h.w.Event("visibilitychange"));
+  assert.equal(h.$("#staff-app-v3").hidden, true);
+  hidden = false; h.w.document.dispatchEvent(new h.w.Event("visibilitychange"));
+  assert.equal(h.$("#staff-app-v3").hidden, true);
+  resolveCheck(json({ ...session, user: { id: "unrelated-account" }, staff: false, staffAccess: false })); await tick();
+  assert.equal(h.$(".staff-sidebar-v3"), null);
+  assert.match(h.text(), /Staff access required/);
 });
 
 test("staff access gates never leave a menu for a removed navigation panel", async t => {

@@ -550,6 +550,7 @@
     syncCreate();
   }
 
+  window.BrowseRPDirectory = { render: renderServers };
   if (page === "home") home();
   if (page === "servers") directory();
   if (page === "list-server") listing();

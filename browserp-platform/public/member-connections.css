@@ -1,11 +1,10 @@
-.member-connections { margin-top: 28px; padding-top: 26px; border-top: 1px solid var(--line, #34253e); }
-.member-connections h3 { margin: 0 0 10px; font-size: 22px; letter-spacing: -.025em; }
+.member-connections { display: grid; align-content: start; gap: 18px; min-width: 0; margin-top: 28px; padding-top: 26px; border-top: 1px solid var(--line, #34253e); }
+.member-connections h3 { margin: 0; font-size: 22px; letter-spacing: -.025em; }
 .member-connections-status, .member-connections-help, .member-connections-result { color: var(--copy, #c6bfce); line-height: 1.65; font-size: 14px; overflow-wrap: anywhere; }
-.member-connections-status { margin: 0 0 20px; }
-.member-connections-help { margin: 18px 0 0; }
-.member-connections-result { padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); }
+.member-connections-status, .member-connections-help { margin: 0; }
+.member-connections-result { margin: 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); }
 .member-connections-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.member-connection { min-width: 0; display: flex; align-items: flex-start; flex-direction: column; gap: 20px; padding: 20px; border: 1px solid var(--line, #34253e); border-radius: 14px; background: var(--bg-soft, #100b14); }
+.member-connection { min-width: 0; display: flex; align-items: flex-start; flex-direction: column; gap: 16px; padding: 20px; border: 1px solid var(--line, #34253e); border-radius: 12px; background: var(--bg-soft, #100b14); }
 .member-connection-title { display: flex; align-items: center; gap: 12px; }
 .member-connection-title svg { width: 25px; height: 25px; flex: none; }
 .member-connection-title strong { font-size: 17px; }
@@ -14,5 +13,9 @@
 .member-connection .button { min-height: 44px; width: 100%; }
 .member-connection .button[hidden] { display: none; }
 .member-connection-confirmation, .member-connection-actions { display: grid; gap: 12px; width: 100%; }
+.member-connection-actions > .button { position: relative; inset: auto; width: 100%; min-height: 46px; margin: 0; white-space: normal; }
+.member-connection-reauth { display: grid; gap: 12px; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); }
+.member-connection-reauth > strong { font-size: 15px; }
+.member-connection-reauth > p { margin: 0; color: var(--copy); font-size: 14px; line-height: 1.65; }
 .member-connection-confirmation p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--copy); }
 @media (max-width: 520px) { .member-connections-grid { grid-template-columns: minmax(0, 1fr); } }

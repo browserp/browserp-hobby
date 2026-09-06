@@ -112,6 +112,30 @@
     return String(value || "RP").trim().split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toUpperCase() || "RP";
   }
 
+  function profileAvatarUrl(profile) {
+    const candidates = [profile?.custom_avatar_url, profile?.customAvatarUrl, profile?.avatar_url, profile?.avatarUrl, profile?.approved_avatar_url, profile?.approvedAvatarUrl];
+    return candidates.map(safeHttpsUrl).find(Boolean) || "";
+  }
+
+  function profileAvatar(profile, className, name) {
+    const avatar = make("div", className, initials(name || profile?.display_name || profile?.displayName));
+    const avatarUrl = profileAvatarUrl(profile);
+    if (!avatarUrl) return avatar;
+    const image = new Image();
+    image.alt = "";
+    image.referrerPolicy = "no-referrer";
+    image.decoding = "async";
+    image.addEventListener("error", () => { avatar.replaceChildren(make("span", "", initials(name || profile?.display_name || profile?.displayName))); }, { once: true });
+    image.src = avatarUrl;
+    avatar.replaceChildren(image);
+    return avatar;
+  }
+
+  function publishProfile(profile) {
+    if (!profile || state.sessionEnded || !state.session?.authenticated) return;
+    window.dispatchEvent(new CustomEvent("browserp:profile-updated", { detail: { profile } }));
+  }
+
   function safeHttpsUrl(value) {
     try {
       const parsed = new URL(String(value || ""));
@@ -255,12 +279,12 @@
     void signInGate({ title: "Sign in to continue", description: messages[event.detail.reason], remainingProviders, returnTo: page === "profile" ? "/profile" : "/dashboard" });
   });
 
-  function portalHead(kicker, title, description, displayName) {
+  function portalHead(kicker, title, description, displayName, profile) {
     const head = make("header", "portal-head");
     const copy = make("div", "portal-head-copy");
     if (displayName) {
       const identity = make("div", "queue-label");
-      append(identity, make("div", "portal-avatar", initials(displayName)));
+      append(identity, profileAvatar(profile, "portal-avatar", displayName));
       const words = make("div");
       append(words, make("span", "portal-kicker", kicker), make("h1", "", title), make("p", "", description));
       append(identity, words);
@@ -311,7 +335,7 @@
   }
 
   function displayName(session, overview) {
-    return overview?.profile?.display_name || overview?.profile?.username || session?.user?.profile?.display_name || session?.user?.profile?.username || session?.user?.email || "Member";
+    return overview?.profile?.display_name || overview?.profile?.displayName || overview?.profile?.username || session?.user?.profile?.display_name || session?.user?.profile?.displayName || session?.user?.profile?.username || session?.user?.displayName || session?.user?.email || "Member";
   }
 
   async function signOut() {
@@ -399,11 +423,7 @@
 
   function profilePictureUploader(profile, refresh) {
     const shell = make("div", "profile-picture-editor-v3");
-    const preview = make("div", "profile-picture-preview-v3");
-    const currentUrl = profile?.avatar_url || profile?.avatarUrl || "";
-    if (/^https:\/\//i.test(currentUrl)) {
-      const current = new Image(); current.src = currentUrl; current.alt = "Current profile picture"; current.referrerPolicy = "no-referrer"; preview.append(current);
-    } else preview.append(make("span", "", initials(profile?.display_name || profile?.displayName || "RP")));
+    const preview = profileAvatar(profile, "profile-picture-preview-v3");
     const choose = button("button button-secondary", "Upload profile picture");
     const input = make("input"); input.type = "file"; input.accept = "image/png,image/jpeg,image/webp"; input.hidden = true;
     const help = make("small", "portal-help", "PNG, JPEG or WebP, up to 5 MB. Images are cropped to 512 × 512, validated and published immediately.");
@@ -449,7 +469,7 @@
       const reset = button("button button-secondary", "Reset"); const save = button("button button-primary", "Save cropped picture");
       actions.append(reset, save); form.append(head, viewport, zoomField, actions); dialog.append(form); document.body.append(dialog);
       let offsetX = 0; let offsetY = 0; let dragging = false; let startX = 0; let startY = 0;
-      const viewportSize = 320;
+      let viewportSize = 320;
       const scaleState = () => {
         const base = Math.max(viewportSize / image.naturalWidth, viewportSize / image.naturalHeight);
         const scale = base * Number(zoom.value);
@@ -468,11 +488,17 @@
         const canvas=document.createElement("canvas");canvas.width=512;canvas.height=512;const context=canvas.getContext("2d",{alpha:false});
         context.fillStyle="#0b0910";context.fillRect(0,0,512,512);
         const size=scaleState();const factor=512/viewportSize;context.drawImage(image,((viewportSize-size.width)/2+offsetX)*factor,((viewportSize-size.height)/2+offsetY)*factor,size.width*factor,size.height*factor);
-        try { await api("/api/me/avatar",{method:"POST",body:JSON.stringify({imageData:canvas.toDataURL("image/png")})});dialog.close();toast("Profile picture updated and is now live.");await refresh(); }
+        try { const result = await api("/api/me/avatar",{method:"POST",body:JSON.stringify({imageData:canvas.toDataURL("image/png")})});publishProfile(result.profile || { ...profile, avatar_url: result.avatarUrl, avatar_review_status: "approved" });dialog.close();toast("Profile picture updated and is now live.");await refresh(); }
         catch(error){toast(error.message,"error");save.disabled=false;save.textContent="Save cropped picture";}
       });
-      dialog.addEventListener("close",()=>dialog.remove(),{once:true});
-      dialog.showModal(); render();
+      const resize = new ResizeObserver(() => {
+        const nextSize = viewport.clientWidth;
+        if (!nextSize || nextSize === viewportSize) return;
+        const ratio = nextSize / viewportSize;
+        offsetX *= ratio; offsetY *= ratio; viewportSize = nextSize; render();
+      });
+      dialog.addEventListener("close",()=>{resize.disconnect();dialog.remove();},{once:true});
+      dialog.showModal(); viewportSize = viewport.clientWidth || 320; resize.observe(viewport); render();
     });
     return shell;
   }
@@ -495,7 +521,7 @@
       const option = make("option", "", text); option.value = value; option.selected = value === (profile?.profile_visibility || profile?.visibility || "public"); visibility.append(option);
     });
     visibilityField.append(visibility);
-    const avatarState = (profile?.avatar_url || profile?.avatarUrl) ? "live" : "not set";
+    const avatarState = profileAvatarUrl(profile) ? "live" : "not set";
     const review = make("p", "portal-status", `Profile picture: ${avatarState} · Bio: ${profile?.bio_review_status || profile?.bioStatus || "not set"}`);
     const submit = button("button button-primary", "Save profile"); submit.type = "submit";
     form.append(avatarField, nameField, bioField, visibilityField, review, submit);
@@ -507,9 +533,11 @@
         toast("Profile saved. Bio changes may still require review."); await refresh();
       } catch (error) { toast(error.message, "error"); submit.disabled = false; }
     });
-    section.append(form);
-    const connections = make("section"); connections.setAttribute("aria-label", "Connected accounts"); section.append(connections);
+    const settings = make("div", "profile-settings-layout-v7");
+    const connections = make("section"); connections.setAttribute("aria-label", "Connected accounts"); settings.append(form, connections); section.append(settings);
     void window.BrowseRPMemberConnections?.init({ api, root: connections });
+    const recommendations = make("div"); recommendations.dataset.recommendationSettings = ""; section.append(recommendations);
+    window.BrowseRPRecommendations?.mountSettings(section);
     return section;
   }
 
@@ -602,6 +630,7 @@
       const [payload, profilePayload] = await Promise.all([api("/api/me/overview"), api("/api/me/profile")]);
       const overview = payload.overview || {};
       const profile = profilePayload.profile || overview.profile || {};
+      publishProfile(profile);
       const servers = Array.isArray(overview.servers) ? overview.servers : [];
       const submissions = Array.isArray(overview.submissions) ? overview.submissions : [];
       const favorites = Array.isArray(overview.favoriteServers) ? overview.favoriteServers : [];
@@ -609,7 +638,7 @@
       const unread = Number(overview.unreadNotifications || 0);
       const content = make("div", "dashboard-view");
       const name = displayName(session, overview);
-      const heading = portalHead("My account", `Welcome back, ${name}`, "Manage your listings, review status, saved servers and security alerts.", name);
+      const heading = portalHead("My account", `Welcome back, ${name}`, "Manage your listings, review status, saved servers and security alerts.", name, profile);
       heading.actions.append(link("/list-server", "button button-primary", "List a server"));
       const logout = button("button button-secondary", "Sign out");
       logout.addEventListener("click", signOut);
@@ -659,9 +688,10 @@
       const [profilePayload, overviewPayload] = await Promise.all([api("/api/me/profile"), api("/api/me/overview")]);
       if (state.sessionEnded || session !== state.session || request !== profileRequest) return;
       const profile = profilePayload.profile || overviewPayload.overview?.profile || {};
+      publishProfile(profile);
       const content = make("div", "dashboard-view profile-page-v3");
       const name = profile.display_name || profile.displayName || "BrowseRP member";
-      const heading = portalHead("Community profile", name, "Your gaming identity across BrowseRP comments, reviews and owned communities.", name);
+      const heading = portalHead("Community profile", name, "Your gaming identity across BrowseRP comments, reviews and owned communities.", name, profile);
       heading.actions.append(link("/dashboard", "button button-secondary", "My dashboard"), link("/servers", "button button-primary", "Browse servers"));
       content.append(heading.head);
       const stack = make("div", "portal-stack");

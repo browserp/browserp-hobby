@@ -19,7 +19,10 @@
     const signInLinks = (providers) => {
       const actions = make("div", undefined, "member-connection-actions");
       for (const provider of providers.filter(value => Object.hasOwn(names, value))) {
-        const link = make("a", `Sign in with ${names[provider]}`, "button button-secondary");
+        const link = make("a", undefined, "button button-secondary provider-button-v4");
+        const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg"); icon.classList.add("provider-icon-v4"); icon.setAttribute("aria-hidden", "true"); icon.setAttribute("focusable", "false");
+        const use = document.createElementNS("http://www.w3.org/2000/svg", "use"); use.setAttribute("href", `/assets/provider-icons-v4.svg#provider-${provider}`); icon.append(use);
+        link.append(icon, make("span", `Sign in with ${names[provider]}`));
         link.href = `/api/auth/${provider}?returnTo=${encodeURIComponent(returnTo)}`; actions.append(link);
       }
       return actions;
@@ -50,7 +53,12 @@
           if (error.status === 401 && disconnectedSession) endSession("connection-unconfirmed", signIns);
         }
       };
-      if (connections.canManage && connections.reauthenticationRequired) root.append(signInLinks(usableProviders));
+      if (connections.canManage && connections.reauthenticationRequired) {
+        const reauthentication = make("section", undefined, "member-connection-reauth");
+        reauthentication.setAttribute("aria-label", "Confirm your sign-in");
+        reauthentication.append(make("strong", "Confirm your sign-in"), make("p", "Sign in again with a connected account before changing your connections."), signInLinks(usableProviders));
+        root.append(reauthentication);
+      }
       for (const provider of ["discord", "google"]) {
         const item = connections.providers.find(value => value.provider === provider);
         if (!item) continue;

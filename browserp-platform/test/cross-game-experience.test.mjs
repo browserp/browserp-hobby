@@ -60,7 +60,7 @@ test("signed-in navigation uses a permission-backed avatar menu and dark-only th
   const css = read("public/browserp-v3.css");
   assert.match(shell, /account-trigger-v3/);
   assert.match(shell, /\["Profile", "\/profile"\]/);
-  assert.match(shell, /session\.staffAccess === true/);
+  assert.match(shell, /session\.staff === true/);
   assert.doesNotMatch(shell, /browserp-theme/);
   assert.doesNotMatch(css, /:root\[data-theme="light"\]/);
   assert.match(css, /account-popover-v3/);
@@ -78,12 +78,12 @@ test("public search uses shared contextual choices and clear wording", () => {
   for (const page of ["index", "servers", "game"]) assert.match(read(`public/${page}.html`), /smart-search.js/);
 });
 
-test("homepage game cards use local original artwork instead of letter tiles", () => {
+test("homepage game cards use local publisher artwork instead of letter tiles", () => {
   const home = read("public/index.html");
   const css = read("public/browserp-v3.css");
   for (const game of ["fivem", "redm", "roblox", "minecraft"]) {
     assert.match(home, new RegExp(`game-art-${game}-v3`));
-    assert.match(css, new RegExp(`/assets/games/${game}-roleplay\\.webp`));
+    assert.match(css, new RegExp(`/assets/games/${game}-official\\.${game === "roblox" ? "webp" : "jpg"}`));
   }
   assert.doesNotMatch(home, /<b>(5M|RM|RB|MC|FZ)<\/b>/);
   assert.doesNotMatch(home, /href="\/games\/forza"/);

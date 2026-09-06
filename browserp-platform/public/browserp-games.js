@@ -14,30 +14,35 @@
     { id: "project-zomboid", name: "Project Zomboid", line: "Co-operative survival stories", description: "Browse groups combining long-form characters, settlements and difficult survival choices." },
     { id: "ets2", name: "Euro Truck Simulator 2", line: "Trucking and logistics roleplay", description: "Join virtual companies, convoys and logistics communities built around relaxed simulation." },
     { id: "assetto-corsa", name: "Assetto Corsa", line: "Track and street communities", description: "Discover automotive groups for organised drives, meets, race events and realistic car culture." },
-    { id: "beamng", name: "BeamNG.drive", line: "Driving simulation roleplay", description: "Explore vehicle communities built around realistic driving, transport, emergency and open-world scenarios." }
+    { id: "beamng", name: "BeamNG.drive", line: "Driving simulation roleplay", description: "Explore vehicle communities built around realistic driving, transport, emergency and open-world scenarios." },
+    { id: "gta6", name: "GTA 6 Roleplay", line: "The next chapter, when it is ready", description: "A future home for GTA VI roleplay communities. Listings will open when supported roleplay tools are available; there are no playable GTA VI servers on BrowseRP yet.", future: true },
+    { id: "6m", name: "6M", line: "A space for future roleplay tools", description: "We’re reserving a place for the next generation of GTA roleplay. 6M is a community term, not a confirmed platform launch. This section will open only when reliable information and supported tools are available.", future: true }
   ]);
   const AVAILABLE_GAME_IDS = new Set(["fivem", "redm", "roblox", "minecraft"]);
-  const ARTWORK_GAME_IDS = new Set([...AVAILABLE_GAME_IDS, "forza"]);
   const AVAILABLE_GAMES = GAMES.filter((game) => AVAILABLE_GAME_IDS.has(game.id));
-  const UPCOMING_GAMES = GAMES.filter((game) => !AVAILABLE_GAME_IDS.has(game.id));
+  const UPCOMING_GAMES = GAMES.filter((game) => !AVAILABLE_GAME_IDS.has(game.id) && !game.future);
+  const FUTURE_GAMES = GAMES.filter((game) => game.future);
 
   const $ = (selector) => document.querySelector(selector);
   const node = (tag, className, text) => { const item = document.createElement(tag); if (className) item.className = className; if (text !== undefined) item.textContent = text; return item; };
   const icon = (id, className = "game-mark-v4") => { const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.classList.add(className); svg.setAttribute("aria-hidden", "true"); const use = document.createElementNS("http://www.w3.org/2000/svg", "use"); use.setAttribute("href", `/assets/game-marks-v4.svg#mark-${id}`); svg.append(use); return svg; };
 
   function gameMark(id, className) {
-    if (!ARTWORK_GAME_IDS.has(id)) return icon(id, className);
-    const image = node("img", `game-artwork-v5 ${className}`);
-    image.src = `/assets/games/${id}-roleplay.webp`;
+    if (!GAMES.some((game) => game.id === id)) return icon(id, className);
+    const image = node("img", `game-artwork-v5 game-official-artwork-v6 ${className}`);
+    const artworkId = id === "6m" ? "gta6" : id;
+    image.src = `/assets/games/${artworkId}-official.${id === "roblox" ? "webp" : "jpg"}`;
     image.alt = "";
-    image.width = 160;
-    image.height = 160;
+    image.width = 460;
+    image.height = 215;
+    image.decoding = "async";
+    if (className !== "game-page-symbol-v4") image.loading = "lazy";
     return image;
   }
 
   function gameCard(game, comingSoon = false) {
-    const link = node(comingSoon ? "article" : "a", `game-hub-card-v4${comingSoon ? " game-coming-soon-card-v5" : ""}`);
-    if (!comingSoon) link.href = `/games/${game.id}`;
+    const link = node("a", `game-hub-card-v4 game-official-card-v6${comingSoon ? " game-coming-soon-card-v5" : ""}${game.future ? " game-future-card-v6" : ""}`);
+    link.href = `/games/${game.id}`;
     window.BrowseRPPlatforms.theme(link, game.id);
     const mark = node("span", "game-hub-mark-v4"); mark.append(gameMark(game.id, "game-card-artwork-v5"));
     const copy = node("span", "game-hub-copy-v4"); copy.append(node("strong", "", game.name), node("small", "", game.line));
@@ -77,6 +82,7 @@
     const nav = $("#game-page-nav-v4");
     nav.replaceChildren(...AVAILABLE_GAMES.map((item) => { const link = node("a", "game-nav-chip-v4", item.name); link.href = `/games/${item.id}`; link.dataset.game = item.id; window.BrowseRPPlatforms.theme(link, item.id); link.prepend(gameMark(item.id, "game-nav-mark-v4")); if (game?.id === item.id) { link.classList.add("is-selected"); link.setAttribute("aria-current", "page"); } return link; }));
     $("#game-upcoming-grid-v5").replaceChildren(...UPCOMING_GAMES.map((item) => gameCard(item, true)));
+    $("#game-future-grid-v6").replaceChildren(...FUTURE_GAMES.map((item) => gameCard(item, true)));
     if (!game) {
       nav.hidden = true;
       const allGamesLogo = node("img", "game-page-all-logo-v5");
@@ -96,6 +102,7 @@
     $("#game-page-title-v4").textContent = `Find your ${game.name} roleplay community.`;
     $("#game-page-lead-v4").textContent = game.description;
     $("#game-hub-grid-v4").hidden = true;
+    $("#game-future-v6").hidden = true;
     if (game.id === "roblox") {
       const browse = node("a", "button-v3 button-primary-v3", "Browse Roblox communities"); browse.href = "/servers?platform=roblox";
       const apply = node("a", "button-v3 button-secondary-v3", "Apply to list your community"); apply.href = "/list-server?platform=roblox";
@@ -111,9 +118,17 @@
       document.querySelector('meta[name="description"]').content = `${game.name} discovery is coming soon to BrowseRP.`;
       $("#game-page-eyebrow-v4").textContent = "Coming soon";
       $("#game-page-title-v4").textContent = `${game.name} is coming soon.`;
-      $("#game-page-lead-v4").textContent = "We’re starting with FiveM, RedM, Roblox and Minecraft. More games will join the directory in future.";
+      $("#game-page-lead-v4").textContent = game.future ? game.description : "We’re starting with FiveM, RedM, Roblox and Minecraft. More games will join the directory in future.";
       const browse = node("a", "button-v3 button-primary-v3", "Explore available games"); browse.href = "/games";
       $("#game-page-actions-v4").replaceChildren(browse);
+      if (game.future) {
+        const news = node("a", "button-v3 button-secondary-v3", "Official GTA VI news");
+        news.href = "https://www.rockstargames.com/VI";
+        news.target = "_blank";
+        news.rel = "noopener noreferrer";
+        $("#game-page-actions-v4").append(news);
+        $("#game-upcoming-v5").hidden = true;
+      }
       return;
     }
     const results = $("#game-results-v4"); results.hidden = false;
@@ -123,5 +138,6 @@
     window.BrowseRPSearch.mount({ root: $("#game-discovery-controls"), list: $("#game-server-list-v4"), empty: $("#game-server-empty-v4"), count: $("#game-result-count"), fixedGame: game.id, render: (list, servers) => list.replaceChildren(...servers.map(serverCard)) });
   }
 
+  window.BrowseRPDirectory = { render: (list, servers) => list.replaceChildren(...servers.map(serverCard)) };
   render();
 })();

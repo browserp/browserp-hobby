@@ -16,7 +16,8 @@ const games = {
   roblox: ["Roblox", "Community-led roleplay worlds", "Discover reviewed Roblox roleplay communities, from everyday life to emergency services and fantasy. Owners apply to list their community; each listing explains how players join."],
   minecraft: ["Minecraft", "Storytelling and survival worlds", "Browse communities where building, survival, factions and long-running characters create shared stories."]
 };
-const upcoming = { forza: "Forza", gmod: "Garry's Mod", arma: "ARMA", vrchat: "VRChat", dayz: "DayZ", "project-zomboid": "Project Zomboid", ets2: "Euro Truck Simulator 2", "assetto-corsa": "Assetto Corsa", beamng: "BeamNG.drive" };
+const upcoming = { forza: "Forza", gmod: "Garry's Mod", arma: "ARMA", vrchat: "VRChat", dayz: "DayZ", "project-zomboid": "Project Zomboid", ets2: "Euro Truck Simulator 2", "assetto-corsa": "Assetto Corsa", beamng: "BeamNG.drive", gta6: "GTA VI Roleplay", "6m": "6M" };
+const gameArtwork = id => `/assets/games/${id === "6m" ? "gta6" : id}-official.${id === "roblox" ? "webp" : "jpg"}`;
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const validSlug = value => typeof value === "string" && value.length <= 160 && slugPattern.test(value);
 const text = (value, limit = 20000) => typeof value === "string" ? value.slice(0, limit) : "";
@@ -99,8 +100,8 @@ function card(server) {
   const image = server.logo_url || server.banner_url;
   return `<a class="server-card" href="/server/${server.slug}" data-platform="${server.platform_id}"><div class="server-card-top"><div class="server-card-media">${image ? `<img class="server-card-media-image" src="${escapeHTML(image)}" alt="" loading="lazy" width="96" height="96">` : `<span class="server-initials">${initials(server)}</span>`}</div><span class="status">${server.applicationOnly ? "Community listing" : "Reviewed listing"}</span></div><h3>${escapeHTML(server.name)}</h3>${metadata(server)}<p class="server-description">${escapeHTML(server.description)}</p><div class="server-tags">${server.tags.slice(0, 3).map(tag => `<span>${escapeHTML(tag)}</span>`).join("")}</div><div class="server-card-bottom"><strong>${server.applicationOnly ? "Live player count not provided" : "Check live status"}</strong><span class="server-card-action">View listing</span></div></a>`;
 }
-function gameCard(id) { const [name, line] = games[id]; return `<a class="game-hub-card-v4" data-platform="${id}" href="/games/${id}"><span class="game-hub-mark-v4"><img src="/assets/games/${id}-roleplay.webp" alt="" width="160" height="160" class="game-artwork-v5 game-card-artwork-v5"></span><span class="game-hub-copy-v4"><strong>${name}</strong><small>${line}</small></span><b>Explore servers</b></a>`; }
-function navGames(current) { return Object.entries(games).map(([id, [name]]) => `<a class="game-nav-chip-v4${id === current ? " is-selected" : ""}" data-platform="${id}" data-game="${id}" href="/games/${id}"${id === current ? ' aria-current="page"' : ""}><img class="game-artwork-v5 game-nav-mark-v4" src="/assets/games/${id}-roleplay.webp" alt="" width="160" height="160">${name}</a>`).join(""); }
+function gameCard(id) { const [name, line] = games[id]; return `<a class="game-hub-card-v4 game-official-card-v6" data-platform="${id}" href="/games/${id}"><span class="game-hub-mark-v4"><img src="${gameArtwork(id)}" alt="" width="460" height="215" class="game-artwork-v5 game-card-artwork-v5 game-official-artwork-v6"></span><span class="game-hub-copy-v4"><strong>${name}</strong><small>${line}</small></span><b>Explore servers</b></a>`; }
+function navGames(current) { return Object.entries(games).map(([id, [name]]) => `<a class="game-nav-chip-v4${id === current ? " is-selected" : ""}" data-platform="${id}" data-game="${id}" href="/games/${id}"${id === current ? ' aria-current="page"' : ""}><img class="game-artwork-v5 game-nav-mark-v4 game-official-artwork-v6" src="${gameArtwork(id)}" alt="" width="160" height="80">${name}</a>`).join(""); }
 function pagination(path, filters, total) {
   const link = (offset, label) => { const query = model.params({ ...filters, offset }); return `<a class="button-v3 button-secondary-v3" href="${escapeHTML(path + (query.size ? `?${query}` : ""))}">${label}</a>`; };
   return `<nav data-public-pagination aria-label="Directory pages">${filters.offset ? link(Math.max(0, filters.offset - filters.limit), "Previous servers") : ""}${filters.offset + filters.limit < total ? link(filters.offset + filters.limit, "Next servers") : ""}</nav>`;
@@ -180,16 +181,22 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         if (!isDirectory) {
           html = slot(html, "game-page-nav-v4", navGames(id), { hidden: !id ? "" : false });
           html = slot(html, "game-hub-grid-v4", Object.keys(games).map(gameCard).join(""), { hidden: id ? "" : false });
-          html = slot(html, "game-page-mark-v4", id ? `<img class="game-artwork-v5 game-page-symbol-v4" src="/assets/games/${game || id === "forza" ? id : "all-games-logo"}.${game || id === "forza" ? "webp" : "png"}" alt="" width="140" height="140">`.replace(`${id}.webp`, `${id}-roleplay.webp`) : '<img class="game-page-all-logo-v5" src="/assets/games/all-games-logo.png" alt="" width="140" height="140">');
+          html = slot(html, "game-page-mark-v4", id ? `<img class="game-artwork-v5 game-page-symbol-v4 game-official-artwork-v6" src="${gameArtwork(id)}" alt="" width="460" height="215">` : '<img class="game-page-all-logo-v5" src="/assets/games/all-games-logo.png" alt="" width="140" height="140">');
           if (id) {
             title = game ? `${game[0]} roleplay servers — BrowseRP` : `${coming} — Coming soon — BrowseRP`;
             description = game ? game[2] : `${coming} discovery is coming soon to BrowseRP.`;
+            if (id === "gta6" || id === "6m") description = "A future home for GTA VI roleplay discovery. Listings are not open. No PC roleplay platform or 6M launch date is confirmed; BrowseRP is not affiliated with Rockstar Games.";
             html = slot(html, "game-page-eyebrow-v4", game ? `${game[0]} roleplay` : "Coming soon");
             html = slot(html, "game-page-title-v4", game ? `Find your ${game[0]} roleplay community.` : `${escapeHTML(coming)} is coming soon.`);
             html = slot(html, "game-page-lead-v4", escapeHTML(description));
             html = html.replace('class="game-page-hero-v4"', `class="game-page-hero-v4" data-platform="${id}"`);
           }
           if (id === "roblox") html = slot(html, "game-page-actions-v4", '<a class="button-v3 button-primary-v3" href="/servers?platform=roblox">Browse Roblox communities</a><a class="button-v3 button-secondary-v3" href="/list-server?platform=roblox">Apply to list your community</a>');
+          if (coming) {
+            html = slot(html, "game-page-actions-v4", '<a class="button-v3 button-primary-v3" href="/games">Explore available games</a>' + (id === "gta6" || id === "6m" ? '<a class="button-v3 button-secondary-v3" href="https://www.rockstargames.com/VI" target="_blank" rel="noopener noreferrer">Official GTA VI news</a>' : ''));
+            html = attribute(html, "game-upcoming-v5", { hidden: "" });
+            html = attribute(html, "game-future-v6", { hidden: "" });
+          }
         }
         if (isDirectory || game) {
           const filters = model.normalize({ ...Object.fromEntries(url.searchParams), ...(game ? { platform: id } : {}), limit: 24 });
@@ -221,7 +228,7 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         if (result.connect) html = slot(html, "server-connect-v3", "Connect via Cfx");
         const joining = server.roblox ? `<section class="server-community-joining" id="server-roblox-joining"><h2>How to join</h2><p>${escapeHTML(server.roblox.joiningInstructions)}</p><a class="button-v3 button-secondary-v3" href="${escapeHTML(server.roblox.experienceUrl)}" target="_blank" rel="noopener noreferrer">View Roblox experience</a></section>` : server.minecraft_address ? `<div class="server-minecraft-address" id="server-minecraft-address"><strong>Minecraft ${server.minecraft_edition === "bedrock" ? "Bedrock" : "Java"} address</strong><code>${escapeHTML(server.minecraft_address)}</code></div>` : "";
         if (server.banner_url) html = html.replace('class="detail-banner-v3">', `class="detail-banner-v3 has-server-artwork-v3"><img class="server-import-banner-v3" src="${escapeHTML(server.banner_url)}" alt="">`);
-        if (joining) html = html.replace('</div></div></div></div></section>', `</div>${joining}</div></div></div></section>`);
+        if (joining) html = slot(html, "server-joining-v7", joining);
         return send(200, head(html, { title: `${server.name} — ${server.platform_name} roleplay — BrowseRP`, description: `${server.name}: ${server.description}`.slice(0, 180), path, structured: { "@context": "https://schema.org", "@type": "WebPage", name: server.name, url: ORIGIN + path, description: server.description.slice(0, 500), isPartOf: { "@type": "WebSite", name: "BrowseRP", url: ORIGIN } } }));
       }
       if (path === "/blog" || path.startsWith("/blog/")) {

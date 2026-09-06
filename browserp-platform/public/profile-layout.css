@@ -1,0 +1,64 @@
+/* Member settings share a quiet, spacious layout at every viewport size. */
+body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage { padding: 42px 0 88px; }
+body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage > .shell { width: min(calc(100% - 64px), 1360px); }
+.dashboard-view .portal-head { align-items: center; gap: 24px; margin-bottom: 32px; }
+.dashboard-view .portal-head-copy { min-width: 0; }
+.dashboard-view .portal-head .queue-label { align-items: center; gap: 22px; }
+.dashboard-view .portal-head .queue-label > div:last-child { min-width: 0; }
+.dashboard-view .portal-head h1 { margin: 0 0 8px; font-size: clamp(28px, 3.5vw, 44px); line-height: 1.2; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.dashboard-view .portal-head p { font-size: 15px; line-height: 1.65; }
+.dashboard-view .portal-kicker { font-size: 12px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
+.dashboard-view .portal-head .portal-avatar { width: 76px; height: 76px; border-radius: 50%; box-shadow: 0 0 0 5px var(--bg-soft); }
+.dashboard-view .portal-head-actions { flex: none; }
+.dashboard-view .portal-panel-v2 { border-radius: 16px; padding: clamp(22px, 3vw, 36px); }
+.dashboard-view .portal-panel-head { margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
+.dashboard-view .portal-panel-head h2 { font-size: clamp(23px, 2.3vw, 30px); letter-spacing: -.025em; }
+.dashboard-view .portal-panel-head p { max-width: 65ch; font-size: 15px; line-height: 1.65; }
+.profile-settings-layout-v7 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, .8fr); gap: clamp(32px, 5vw, 72px); align-items: start; }
+.profile-settings-layout-v7 > .profile-form-v2 { max-width: none; gap: 22px; }
+.profile-settings-layout-v7 > .member-connections { margin: 0; padding: 0 0 0 28px; border-top: 0; border-left: 1px solid var(--line-soft); }
+.profile-settings-layout-v7 .member-connections-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.profile-settings-layout-v7 .member-connection { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 18px; }
+.profile-settings-layout-v7 .member-connection > :is(.button, .member-connection-confirmation) { grid-column: 1 / -1; }
+.profile-settings-layout-v7 .member-connection-unavailable { max-width: 12ch; text-align: right; line-height: 1.5; }
+.profile-settings-layout-v7 .member-connection-title { gap: 10px; }
+.profile-settings-layout-v7 .member-connection-title strong { font-size: 15px; }
+.profile-settings-layout-v7 .member-connected-badge { font-size: 12px; padding: 3px 9px; white-space: nowrap; }
+.profile-settings-layout-v7 .member-connections h3 { font-size: 20px; }
+.profile-picture-editor-v3 { grid-template-columns: 84px minmax(0, 1fr); }
+.profile-picture-editor-v3 .button { justify-self: start; max-width: 100%; }
+.profile-picture-editor-v3 .portal-help { grid-column: 2; line-height: 1.65; }
+.profile-form-v2 .portal-field input[readonly] { color: var(--copy); background: var(--bg-soft); cursor: default; }
+.profile-form-v2 .portal-field :is(input, textarea, select) { min-width: 0; border-color: var(--line); background-color: var(--bg); border-radius: 10px; transition: border-color .18s ease, box-shadow .18s ease; }
+.profile-form-v2 .portal-field :is(input, textarea, select):focus-visible { border-color: var(--pink); outline: 2px solid color-mix(in srgb, var(--pink) 25%, transparent); outline-offset: 2px; }
+.profile-form-v2 .portal-status { margin: 0; font-size: 13px; }
+.dashboard-view .portal-nav { top: 88px; background: color-mix(in srgb, var(--panel) 96%, transparent); border-radius: 12px; }
+.dashboard-view .metric-v2 { min-height: 128px; border-radius: 12px; }
+.dashboard-view .portal-empty-v2 { border-style: solid; border-color: var(--line-soft); background: var(--bg-soft); border-radius: 12px; }
+.dashboard-view .portal-empty-v2 h3 { font-size: 20px; }
+@media (max-width: 1040px) {
+  .dashboard-view .portal-head { align-items: flex-start; }
+  .dashboard-view .portal-head-actions { max-width: 210px; }
+  .profile-settings-layout-v7 { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .profile-settings-layout-v7 > .member-connections { padding: 28px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+  .profile-settings-layout-v7 .member-connections-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage { padding-block: 28px 56px; }
+  body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage > .shell { width: calc(100% - 32px); }
+  .dashboard-view .portal-head { gap: 20px; }
+  .dashboard-view .portal-head-actions { width: 100%; max-width: none; }
+  .dashboard-view .portal-head .queue-label { gap: 16px; align-items: flex-start; }
+  .dashboard-view .portal-head .portal-avatar { width: 58px; height: 58px; font-size: 17px; }
+  .dashboard-view .portal-head h1 { font-size: 28px; }
+  .dashboard-view .portal-head p { font-size: 14px; }
+  .dashboard-view .portal-panel-v2 { padding: 22px 18px; }
+  .dashboard-view .portal-nav { top: 78px; }
+  .profile-settings-layout-v7 .member-connections-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 400px) {
+  .profile-picture-editor-v3 { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; }
+  .profile-picture-preview-v3 { width: 64px; height: 64px; grid-row: auto; }
+  .profile-picture-editor-v3 .portal-help { grid-column: 1 / -1; }
+  .profile-picture-editor-v3 .button { padding-inline: 12px; font-size: 13px; }
+}

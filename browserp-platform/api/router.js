@@ -264,8 +264,8 @@ const routes = {
   "auth/session": endpoint("GET", async (req, res) => {
     const csrfToken = csrfTokenForRequest(req, res);
     const session = await getSession(req, res);
-    if (!session) return ok(res, { authenticated: false, user: null, csrfToken });
-    if (!await currentAccountSession(session)) return ok(res, { authenticated: false, user: null, csrfToken });
+    if (!session) return ok(res, { authenticated: false, staff: false, staffAccess: false, user: null, csrfToken });
+    if (!await currentAccountSession(session)) return ok(res, { authenticated: false, staff: false, staffAccess: false, user: null, csrfToken });
     let profile = null;
     try {
       profile = (await rest(`profiles?select=id,username,display_name,avatar_url,avatar_review_status,bio,bio_review_status,joined_at,profile_visibility&id=eq.${encodeURIComponent(session.user.id)}&limit=1`, { useSecret: true }))?.[0] || null;
@@ -273,14 +273,21 @@ const routes = {
     let staffAccess = false;
     try { staffAccess = await rpc("staff_mfa_enrollment_allowed", {}, session.accessToken) === true; } catch { /* Staff entry remains hidden if the permission check is unavailable. */ }
     let staffMfaRequired = true;
+    let staff = false;
     if (staffAccess) {
       try {
         const securityStatus = await rpc("staff_mfa_policy", {}, session.accessToken);
         staffMfaRequired = securityStatus?.staffMfaRequired !== false;
+        // The policy RPC checks active membership, the Discord allowlist and
+        // the current auth.sessions row. Never infer entry from a cached role.
+        staff = session.provider === "discord"
+          && typeof securityStatus?.staffMfaRequired === "boolean"
+          && (!staffMfaRequired || (session.aal === "aal2" && session.totpVerified === true && session.factors.some(factor => factor.status === "verified")));
       } catch { /* Fail closed if the staff MFA policy cannot be read. */ }
     }
     return ok(res, {
       authenticated: true,
+      staff,
       staffAccess,
       provider: session.provider,
       aal: session.aal,
