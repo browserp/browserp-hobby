@@ -43,6 +43,37 @@ Remaining search evidence after publication:
 
 Search rankings, crawl timing and sufficient field-performance data remain external outcomes. Successful sitemap processing and branding approval do not guarantee ranking. The old plan's ongoing analytics, editorial programme and future landing-page ideas are post-launch options driven by real evidence; they are not a new open-ended launch implementation requirement.
 
+## Preview build correction and exact release evidence
+
+The first release preview at GitHub commit `04f635a01cad1007096b8b628b47b19358a82798` exposed a test-environment leak: production metadata assertions inherited `VERCEL_ENV=preview`. Local commit `f32cbf15df1ed11d7920b13c8fdbb0259d4cfbac` isolates the production test baseline, restores the inherited environment after each test and expands the explicit preview case. Product indexing rules were not weakened.
+
+Both full Node 24 verification runs passed: **888 main tests + 35 database tests = 923 passed, 0 failed, 0 skipped**, once with `VERCEL_ENV=preview` and once with `VERCEL_ENV=production`. Both deployment gates retained **12 functions**. Logs: `/tmp/browserp-verify-preview-isolation-20260906.log` and `/tmp/browserp-verify-production-isolation-20260906.log`.
+
+The release branch was updated without force to GitHub commit `543b04ddbeb006d5f9ec3d6a771e0daeb44ae040`. A fresh fetch confirmed its tree exactly matched the committed local tree `9a5277a6bda118cb4747262a7b3756214b5a045c`. Vercel deployment `dpl_FnaT3tSSDuytTrrhVFaK6rrorVub` reached **READY** for that exact SHA at [the preview URL](https://browserp-hobby-pbcsskoy0-browserp.vercel.app). No production promotion was performed by this verification.
+
+Read-only requests for the exact preview homepage, FiveM hub, filtered directory, sitemap and invalid continuation were intercepted by Vercel Authentication. The connected Vercel fetch also returned an SSO redirect with the platform's noindex header. These responses establish access protection, not the application's rendered metadata or status. The root task's existing authenticated preview browser remains the route for that smoke check; no provider login rehearsal was performed.
+
+## Google search-logo transparency investigation
+
+The reported nontransparent Google Search logo was checked against the actual local pixels and current public files on 6 September. The following live responses returned **200**, their correct image content types, no `X-Robots-Tag` restriction, and bytes identical to the repository assets. The live `robots.txt` also matches the repository and does not block these image paths.
+
+| Current public asset | Verified image evidence |
+| --- | --- |
+| `/favicon.png` | 192×192 RGBA; all four corner pixels have alpha 0; 68.19% of pixels fully transparent. Identical to the existing `assets/browserp-icon-192.png`. SHA-256 `66008d3afd686d9b2d46f94f5a6f3e7c130878a2e0faf92b748db497470d67f9`. |
+| `/favicon.ico?v=2.12.1` | Both 32×32 and 48×48 frames have real alpha transparency and four fully transparent corners. |
+| `/browserp-mark-v3.png` | 1254×1254 RGBA RP mark; all four corners have alpha 0; 67.49% of pixels fully transparent. This is the declared Organization logo in the release and the existing social image. |
+| `/apple-touch-icon.png?v=2.12.1` | 180×180 opaque RGB home-screen icon with background `#06070b`, as deliberately required by the existing branding tests. It is a separate asset from the transparent favicon. |
+
+The live homepage declares both favicon alternatives and the Apple icon. At this check, its WebSite structured data still lacked the new publisher identity; that identity is present in the READY release. No defect was found in the transparency of the favicon or RP mark, so no branding asset was replaced, generated or edited.
+
+[Google's favicon guidance](https://developers.google.com/search/docs/appearance/favicon-in-search) identifies the small organic-result icon separately from an Organization logo, supports `icon` and `apple-touch-icon` declarations, recommends a stable crawlable square asset, and says processing can take days to weeks.
+
+The user's subsequent screenshot shows BrowseRP's favicon beside its site name on a white circular badge with a grey edge. The BritishRP result immediately below has the same badge treatment. Together with the verified transparent favicon files, this strongly indicates Google's presentation rather than an opaque source-image defect. The screenshot does not expose the exact cached image or page DOM, so that attribution remains an evidence-based inference. The separate Apple icon is dark and does not contain this white disk. [Google's visual-elements guide](https://developers.google.com/search/docs/appearance/visual-elements-gallery) confirms that this is the favicon attribution element and that result presentation can vary.
+
+Google's documented favicon controls do not offer a setting for removing that surrounding badge. A dark-filled replacement might change the image interior but would lose the requested transparency elsewhere and could retain Google's outer rim or padding. Retain the original transparent RP artwork; no asset change was justified or made after reviewing the screenshot.
+
+[Google's Organization guidance](https://developers.google.com/search/docs/appearance/structured-data/organization) describes a separate logo signal and requires a crawlable image at least 112×112 that looks appropriate on white. The existing transparent RP mark satisfies those image-size and access checks. Keep the verified assets and stable favicon URL. After release, the already-planned canonical-homepage URL Inspection can request a recrawl if needed; neither a code change nor a recrawl guarantees Google's chosen display or its timing.
+
 ## Current primary guidance consulted
 
 - [Google sitemap guidance](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap): canonical public URLs and reliable modification dates.

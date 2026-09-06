@@ -312,12 +312,19 @@
       image.className = "side-ad-image-v3";
       image.alt = "";
       image.loading = "eager";
-      const imageNotice = node("p", "side-ad-image-notice-v3", "Artwork unavailable.");
+      const imageNotice = node("div", "side-ad-image-notice-v3");
       imageNotice.hidden = true;
+      const fallbackBrand = new Image();
+      fallbackBrand.alt = "BrowseRP";
+      fallbackBrand.onerror = () => { fallbackBrand.hidden = true; };
+      imageNotice.append(fallbackBrand, node("span", "visually-hidden", "Advertisement shown without artwork."));
       const finishImage = (unavailable) => {
         image.classList.remove("is-changing");
         root.classList.toggle("artwork-unavailable", unavailable);
         imageNotice.hidden = !unavailable;
+        // Reuse the site's wordmark; never substitute another campaign image
+        // or address when a browser blocks the creative.
+        if (unavailable && !fallbackBrand.getAttribute("src")) fallbackBrand.src = "/assets/browserp-logo-v5.png";
       };
       // Keep the advert readable when a browser blocks its artwork. Do not
       // retry blocked addresses or override a content blocker's image styles.
@@ -333,7 +340,7 @@
       const shade = node("div", "side-ad-shade-v3");
       copy = node("div", "side-ad-copy-v3");
       copy.dataset.adCopy = "";
-      stage.append(image, shade, copy, imageNotice);
+      stage.append(image, shade, imageNotice, copy);
       if (list.length > 1) {
         const previous = node("button", "ad-arrow-v3 ad-arrow-previous-v3", "‹");
         previous.type = "button"; previous.dataset.adDirection = "previous"; previous.setAttribute("aria-label", "Previous advert");

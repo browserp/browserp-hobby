@@ -65,6 +65,10 @@ test("blocked artwork renders a compact labelled advert, does not retry failures
   assert.equal(h.w.getComputedStyle(h.$(".side-ad-copy-v3")).position, "static");
   assert.equal(h.$(".ad-label-v3").textContent, "Advertisement");
   assert.equal(h.$(".side-ad-image-notice-v3").hidden, false);
+  assert.equal(h.$(".side-ad-image-notice-v3 img").getAttribute("src"), "/assets/browserp-logo-v5.png");
+  assert.equal(h.$(".side-ad-image-notice-v3 img").alt, "BrowseRP");
+  assert.equal(h.$(".side-ad-image-notice-v3 .visually-hidden").textContent, "Advertisement shown without artwork.");
+  assert.equal(h.root.textContent.includes("Artwork unavailable"), false);
   assert.equal(h.$("[data-ad-copy] strong").textContent, "Reviewed advert 1");
   assert.equal(h.$("[data-ad-copy] a").getAttribute("href"), "/servers?campaign=1");
   assert.equal(image.classList.contains("is-changing"), false);
@@ -78,6 +82,24 @@ test("blocked artwork renders a compact labelled advert, does not retry failures
   assert.equal(h.root.classList.contains("artwork-unavailable"), true);
   assert.equal(h.requests.filter(request => request.image === image && request.src === artwork[0]).length, firstRequests);
   assert.ok(h.requests.every(request => artwork.includes(request.src)), "No alternate paths or hosts bypass artwork blocking");
+});
+
+test("the fallback uses the existing wordmark only when needed and remains usable if branding is blocked too", async t => {
+  const h = await harness(t, { outcomes: { [artwork[1]]: "error" } }); await h.hydrate();
+  const brand = h.$(".side-ad-image-notice-v3 img");
+  assert.equal(brand.hasAttribute("src"), false, "Healthy artwork does not request an extra fallback image");
+  h.$('[data-ad-direction="next"]').click();
+  const source = brand.getAttribute("src");
+  assert.equal(source, "/assets/browserp-logo-v5.png");
+  brand.dispatchEvent(new h.w.Event("error"));
+  assert.equal(brand.hidden, true, "A blocked wordmark cannot leave a second broken image");
+  h.$('[data-ad-direction="previous"]').click();
+  h.$('[data-ad-direction="next"]').click();
+  assert.equal(brand.hidden, true);
+  assert.equal(brand.getAttribute("src"), source);
+  assert.equal(h.$(".ad-label-v3").textContent, "Advertisement");
+  assert.equal(h.$("[data-ad-copy] strong").textContent, "Reviewed advert 2");
+  assert.equal(h.$("[data-ad-copy] a").getAttribute("href"), "/servers?campaign=2");
 });
 
 test("reviewed advert links are sponsored while house links retain their ordinary relationship", async t => {

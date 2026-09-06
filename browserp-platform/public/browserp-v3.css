@@ -255,7 +255,8 @@ img { display: block; max-width: 100%; }
 .side-ad-v3.artwork-unavailable .side-ad-image-v3,.side-ad-v3.artwork-unavailable .side-ad-shade-v3 { visibility: hidden; }
 .side-ad-v3.artwork-unavailable .side-ad-copy-v3 { position: static; grid-column: 1 / -1; padding: 0; }
 .side-ad-v3.artwork-unavailable .side-ad-copy-v3 strong { max-width: none; }
-.side-ad-image-notice-v3 { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 13px; }
+.side-ad-image-notice-v3 { grid-column: 1 / -1; }
+.side-ad-image-notice-v3 img { display: block; width: 180px; max-width: 100%; height: auto; }
 .side-ad-v3.artwork-unavailable .ad-arrow-v3 { position: relative; top: auto; left: auto; right: auto; margin: 0; }
 .side-ad-v3.artwork-unavailable .ad-arrow-next-v3 { justify-self: end; }
 .ad-dots-v3 { display: flex; justify-content: center; gap: 2px; padding: 4px 13px; background: var(--panel); }

@@ -85,8 +85,8 @@
     $("#game-future-grid-v6").replaceChildren(...FUTURE_GAMES.map((item) => gameCard(item, true)));
     if (!game) {
       nav.hidden = true;
-      const allGamesLogo = node("img", "game-page-all-logo-v5");
-      allGamesLogo.src = "/assets/games/all-games-logo.png";
+      const allGamesLogo = node("img", "game-page-all-logo-v5 game-artwork-v5");
+      allGamesLogo.src = "/assets/games/all-games-collage.webp";
       allGamesLogo.alt = "";
       allGamesLogo.width = 140;
       allGamesLogo.height = 140;

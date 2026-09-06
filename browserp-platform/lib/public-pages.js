@@ -211,7 +211,7 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         if (!isDirectory) {
           html = slot(html, "game-page-nav-v4", navGames(id), { hidden: !id ? "" : false });
           html = slot(html, "game-hub-grid-v4", Object.keys(games).map(gameCard).join(""), { hidden: id ? "" : false });
-          html = slot(html, "game-page-mark-v4", id ? `<img class="game-artwork-v5 game-page-symbol-v4 game-official-artwork-v6" src="${gameArtwork(id)}" alt="" width="460" height="215">` : '<img class="game-page-all-logo-v5" src="/assets/games/all-games-logo.png" alt="" width="140" height="140">');
+          html = slot(html, "game-page-mark-v4", id ? `<img class="game-artwork-v5 game-page-symbol-v4 game-official-artwork-v6" src="${gameArtwork(id)}" alt="" width="460" height="215">` : '<img class="game-page-all-logo-v5 game-artwork-v5" src="/assets/games/all-games-collage.webp" alt="" width="140" height="140">');
           if (id) {
             title = game ? `${game[0]} roleplay servers — BrowseRP` : `${coming} — Coming soon — BrowseRP`;
             description = game ? game[2] : `${coming} discovery is coming soon to BrowseRP.`;

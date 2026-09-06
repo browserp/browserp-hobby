@@ -87,7 +87,7 @@ test("homepage game cards use local publisher artwork instead of letter tiles", 
   }
   assert.doesNotMatch(home, /<b>(5M|RM|RB|MC|FZ)<\/b>/);
   assert.doesNotMatch(home, /href="\/games\/forza"/);
-  assert.match(home, /src="\/assets\/games\/all-games-logo\.png"/);
+  assert.match(home, /src="\/assets\/games\/all-games-collage\.webp"/);
 });
 
 test("profile picture previews remain compatible with the strict image CSP", () => {
