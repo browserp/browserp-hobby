@@ -186,6 +186,10 @@
       "destination": "/api/router?_route=admin/refresh-health"
     },
     {
+      "source": "/api/admin/presence",
+      "destination": "/api/router?_route=admin/presence"
+    },
+    {
       "source": "/api/admin/staff",
       "destination": "/api/router?_route=admin/staff"
     },

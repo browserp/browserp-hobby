@@ -564,6 +564,15 @@ const routes = {
     return ok(res, { health: await rpc("staff_refresh_health", {}, session.accessToken) });
   }),
 
+  "admin/presence": endpoint("POST", async (req, res) => {
+    assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    await rateLimit(req, "staff-presence", 120, 300);
+    const online = await rpc("staff_presence_touch", {}, session.accessToken);
+    if (online !== true) throw Object.assign(new Error("Staff presence could not be confirmed."), { status: 403 });
+    return ok(res, { online: true });
+  }),
+
   "admin/moderation": endpoint(["GET", "POST"], async (req, res, id) => {
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true, provider: "discord" });

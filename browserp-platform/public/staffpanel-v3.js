@@ -7,6 +7,8 @@
   const pendingForms = new WeakSet();
   let staffNavigation = null;
   let advertisingEnquiries = null;
+  let presenceTimer = null;
+  let presencePending = false;
   let reviewGeneration = 0;
   window.addEventListener("browserp:session-ended", () => { reviewGeneration++; });
   window.addEventListener("pagehide", () => {
@@ -41,6 +43,7 @@
   }
 
   function endWorkspace() {
+    stopPresence();
     state.authorized = false;
     state.generation++;
     reviewGeneration++;
@@ -59,6 +62,7 @@
       if (fresh.authenticated !== true) { showLogin(); return; }
       if (fresh.staff !== true || fresh.user?.id !== accountId) { showDenied(); return; }
       setWorkspaceVisible(true);
+      void touchPresence();
     } catch (error) { if (generation === state.generation) showSessionUnavailable(error); }
   }
 
@@ -251,6 +255,23 @@
     }
     if (!response.ok) throw Object.assign(new Error(payload.error || "The staff request failed."), { status: response.status });
     return payload;
+  }
+  function stopPresence() {
+    if (presenceTimer !== null) window.clearInterval(presenceTimer);
+    presenceTimer = null;
+    presencePending = false;
+  }
+  async function touchPresence() {
+    if (!state.authorized || document.hidden || state.pageSuspended || presencePending) return;
+    presencePending = true;
+    try { await api("/api/admin/presence", { method: "POST", body: "{}" }); }
+    catch (error) { if (error?.status === 401 || error?.status === 403) stopPresence(); }
+    finally { presencePending = false; }
+  }
+  function startPresence() {
+    stopPresence();
+    void touchPresence();
+    presenceTimer = window.setInterval(() => { void touchPresence(); }, 30_000);
   }
   function status(message, error = false) { const el = $("#staff-status-v3"); if (!el) return; el.textContent = message; el.style.color = error ? "#ff8192" : "#57d7a2"; }
   function date(value) { const d = new Date(value); return Number.isNaN(d.getTime()) ? "—" : new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(d); }
@@ -663,7 +684,7 @@
     if (legacy[pageKey]) { location.replace(`/staffpanel/moderation#${legacy[pageKey]}`); return; }
     if (pageKey === "content") { location.replace("/staffpanel/overview#overview-adverts"); return; }
     if (pageKey === "overview" && location.hash === "#overview-roles") { location.replace("/staffpanel/moderation#staff"); return; }
-    mobile();applyTheme(document.documentElement.dataset.theme||preferredTheme());if(!await ensureStaff())return;void window.BrowseRPStaffRefreshHealth?.init({api});window.BrowseRPStaffScrapers?.init({api});try{const page=document.body.dataset.staffPage;if(page==="overview") {
+    mobile();applyTheme(document.documentElement.dataset.theme||preferredTheme());if(!await ensureStaff())return;startPresence();void window.BrowseRPStaffRefreshHealth?.init({api});window.BrowseRPStaffScrapers?.init({api});try{const page=document.body.dataset.staffPage;if(page==="overview") {
       advertisingEnquiries = window.BrowseRPAdvertisingEnquiries?.initStaff({ api, accountId: state.session?.user?.id, root: $("#advertising-enquiries"), onAuthFailure: showLogin });
       let toolsMounted = false;
       await window.BrowseRPStaffOverview.init({ api, onAuthFailure: showLogin, onLoad: async (website) => {

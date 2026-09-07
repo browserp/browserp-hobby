@@ -18,7 +18,7 @@ export default endpoint("GET", async (req, res) => {
   const view = requestedView(req);
   if (view === "staff") {
     try {
-      return publicJson(res, { staff: await publicStaffRoster() }, 60);
+      return publicJson(res, { staff: await publicStaffRoster() }, 15);
     } catch (error) {
       if (!developmentCatalogAllowed()) throw error;
       return publicJson(res, { staff: fallback }, 30);

@@ -9,6 +9,8 @@
   if (!grid || !count || !empty || !error || !retry) return;
 
   let requestSerial = 0;
+  let hasRoster = false;
+  let stopped = false;
 
   function initials(value) {
     return String(value || "BrowseRP staff").trim().split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("").toUpperCase() || "BR";
@@ -65,7 +67,13 @@
     }
 
     const copy = element("div", "staff-public-card-copy");
-    copy.append(element("h3", "", member.displayName), element("span", "staff-public-role", member.roleName));
+    const meta = element("div", "staff-public-card-meta");
+    const presence = element("span", `staff-public-presence ${member.online === true ? "is-online" : "is-offline"}`);
+    const dot = element("span", "staff-public-presence-dot");
+    dot.setAttribute("aria-hidden", "true");
+    presence.append(dot, document.createTextNode(member.online === true ? "Online" : "Offline"));
+    meta.append(element("span", "staff-public-role", member.roleName), presence);
+    copy.append(element("h3", "", member.displayName), meta);
     head.append(avatar, copy);
 
     const joined = element("div", "staff-public-joined");
@@ -87,7 +95,8 @@
       && typeof value.displayName === "string" && value.displayName.trim().length >= 2 && value.displayName.length <= 48
       && typeof value.roleName === "string" && value.roleName.trim().length >= 2 && value.roleName.length <= 80
       && (value.joinedAt === null || typeof value.joinedAt === "string")
-      && (value.avatarUrl === null || typeof value.avatarUrl === "string");
+      && (value.avatarUrl === null || typeof value.avatarUrl === "string")
+      && (value.online === undefined || typeof value.online === "boolean");
   }
 
   function setState(state, staff = []) {
@@ -107,16 +116,18 @@
       count.textContent = "No active staff listed";
       return;
     }
-    count.textContent = `${staff.length} active staff ${staff.length === 1 ? "member" : "members"}`;
+    count.textContent = `${staff.length} staff ${staff.length === 1 ? "member" : "members"}`;
   }
 
-  async function load() {
+  async function load({ background = false } = {}) {
     const serial = ++requestSerial;
+    const keepRosterVisible = background && hasRoster;
     retry.disabled = true;
-    setState("loading");
+    if (!keepRosterVisible) setState("loading");
     try {
       const response = await fetch("/api/resources?view=staff", {
         method: "GET",
+        cache: "no-store",
         credentials: "same-origin",
         headers: { Accept: "application/json" }
       });
@@ -125,16 +136,30 @@
       if (serial !== requestSerial) return;
       const staff = Array.isArray(payload.staff) ? payload.staff.filter(validMember) : [];
       grid.replaceChildren(...staff.map(card));
+      hasRoster = true;
       setState(staff.length ? "ready" : "empty", staff);
     } catch {
       if (serial !== requestSerial) return;
-      grid.replaceChildren();
-      setState("error");
+      if (!keepRosterVisible) {
+        grid.replaceChildren();
+        hasRoster = false;
+        setState("error");
+      }
     } finally {
       if (serial === requestSerial) retry.disabled = false;
     }
   }
 
-  retry.addEventListener("click", load);
-  load();
+  retry.addEventListener("click", () => load());
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && hasRoster && !stopped) void load({ background: true });
+  });
+  const timer = window.setInterval(() => {
+    if (!document.hidden && !stopped) void load({ background: true });
+  }, 30_000);
+  window.addEventListener("pagehide", () => {
+    stopped = true;
+    window.clearInterval(timer);
+  }, { once: true });
+  void load();
 })();

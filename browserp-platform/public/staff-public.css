@@ -175,6 +175,49 @@
   background: var(--pink-strong);
   box-shadow: 0 0 12px rgb(236 79 166 / .6);
 }
+.staff-public-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.staff-public-presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px solid rgb(255 255 255 / .09);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .035em;
+}
+.staff-public-presence-dot {
+  position: relative;
+  flex: 0 0 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #757783;
+}
+.staff-public-presence.is-online {
+  border-color: rgb(64 221 139 / .25);
+  background: rgb(64 221 139 / .08);
+  color: #91f1bd;
+}
+.staff-public-presence.is-online .staff-public-presence-dot {
+  background: #40dd8b;
+  box-shadow: 0 0 13px rgb(64 221 139 / .7);
+}
+.staff-public-presence.is-online .staff-public-presence-dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border: 1px solid rgb(64 221 139 / .65);
+  border-radius: 50%;
+  animation: staff-public-presence-ping 1.7s ease-out infinite;
+}
 .staff-public-joined {
   display: flex;
   align-items: center;
@@ -252,6 +295,10 @@
   line-height: 1.78;
 }
 @keyframes staff-public-shimmer { to { background-position: -220% 0; } }
+@keyframes staff-public-presence-ping {
+  0% { opacity: .9; transform: scale(.55); }
+  75%, 100% { opacity: 0; transform: scale(1.45); }
+}
 @media (max-width: 980px) {
   .staff-public-hero-grid { grid-template-columns: 1fr; gap: 22px; }
   .staff-public-mark { display: none; }
@@ -272,4 +319,5 @@
   .staff-public-card:hover { transform: none; }
   .staff-public-skeleton .staff-public-avatar,
   .staff-public-skeleton-line { animation: none; }
+  .staff-public-presence.is-online .staff-public-presence-dot::after { animation: none; }
 }
