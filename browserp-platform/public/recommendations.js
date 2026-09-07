@@ -49,6 +49,18 @@
   let storage;
   try { storage = localStorage; } catch { storage = { getItem: () => null, setItem: () => { throw Error("Storage unavailable"); }, removeItem: () => {} }; }
   const model = create(storage); model.prune();
+  const CHOICE_KEY = "browserp-cookie-choice-v1";
+  let choiceSaveFailed = false;
+  function hasCookieChoice() {
+    try { if (["accepted", "rejected"].includes(storage.getItem(CHOICE_KEY))) return true; } catch {}
+    // Earlier explicit recommendation opt-ins already establish a choice.
+    return model.read().enabled;
+  }
+  function chooseRecommendations(enabled) {
+    if (!model.enable(enabled)) return false;
+    try { storage.setItem(CHOICE_KEY, enabled ? "accepted" : "rejected"); choiceSaveFailed = false; return true; }
+    catch { choiceSaveFailed = true; return false; }
+  }
   window.BrowseRPRecommendations = model;
   const el = (tag, className, text) => { const item = document.createElement(tag); item.className = className; if (text) item.textContent = text; return item; };
   let section, results, message, request = 0, controller;
@@ -64,7 +76,7 @@
     label.append(input, el("span", "", "Personalise with my BrowseRP history"));
     const clear = el("button", "button-v3 button-secondary-v3", "Clear recommendation history"); clear.type = "button";
     const status = el("p", "recommendation-status"); status.setAttribute("role", "status");
-    input.addEventListener("change", () => { const okay = model.enable(input.checked); input.checked = model.read().enabled; status.textContent = okay ? input.checked ? "Personalisation is on for this browser." : "Personalisation is off and its history has been cleared." : "Your browser could not save this preference."; changed(); });
+    input.addEventListener("change", () => { const okay = chooseRecommendations(input.checked); input.checked = model.read().enabled; status.textContent = okay ? input.checked ? "Personalisation is on for this browser." : "Personalisation is off and its history has been cleared." : "Your browser could not save this preference."; changed(); });
     clear.addEventListener("click", () => { status.textContent = model.clear() ? "Recommendation history cleared." : "Your browser could not clear this history."; changed(); });
     root.classList.add("recommendation-settings"); root.replaceChildren(heading, copy, label, clear, status);
     window.addEventListener("browserp:recommendations-changed", () => { input.checked = model.read().enabled; clear.disabled = !model.read().views.length; });
@@ -91,8 +103,8 @@
       for (const [label, enabled] of [["Accept recommendations", true], ["Reject recommendations", false]]) {
         const button = el("button", "button-v3 button-secondary-v3", label); button.type = "button";
         button.addEventListener("click", () => {
-          if (model.enable(enabled)) {
-            changed();
+          const okay = chooseRecommendations(enabled); changed();
+          if (okay) {
             preferenceStatus.textContent = enabled ? "Recommendations are on for this browser." : "Recommendations are off and their history has been cleared.";
           } else preferenceStatus.textContent = "Your browser could not save this choice. Please check your browser’s site-data settings.";
         });
@@ -116,7 +128,10 @@
         const box = preferenceDialog.getBoundingClientRect();
         if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) preferenceDialog.close();
       });
-      preferenceDialog.addEventListener("close", () => { if (preferenceTrigger?.isConnected) preferenceTrigger.focus(); });
+      preferenceDialog.addEventListener("close", () => {
+        if (preferenceTrigger?.isConnected && !preferenceTrigger.closest("[hidden]")) preferenceTrigger.focus();
+        else document.querySelector("[data-cookie-preferences]")?.focus({ preventScroll: true });
+      });
       preferenceDialog.append(heading, intro, detail, scope, preferenceStatus, choices, links, close);
       document.body.append(preferenceDialog);
     }
@@ -133,6 +148,52 @@
     policy.after(button);
   };
   window.addEventListener("browserp:recommendations-changed", preferenceState);
+  function cookiePrompt() {
+    if (hasCookieChoice() || document.querySelector("[data-cookie-prompt]")) return;
+    const prompt = el("section", "cookie-prompt-v3"); prompt.dataset.cookiePrompt = "";
+    prompt.setAttribute("role", "region"); prompt.setAttribute("aria-labelledby", "cookie-prompt-title");
+    const copy = el("div", "cookie-prompt-copy-v3");
+    const title = el("h2", "", "Cookie preferences"); title.id = "cookie-prompt-title";
+    const description = el("p", "", "Essential cookies keep sign-in and security working. Optional recommendations remember BrowseRP server views on this browser for up to 30 days and stay off unless you accept. No advertising or optional analytics cookies.");
+    const links = el("p", "cookie-preferences-links-v3");
+    for (const [label, href] of [["Cookie policy", "/legal#cookies"], ["Privacy policy", "/privacy"]]) {
+      const link = el("a", "", label); link.href = href; links.append(link);
+    }
+    const status = el("p", "cookie-prompt-status-v3"); status.setAttribute("role", "status"); status.hidden = true;
+    copy.append(title, description, links, status);
+    const actions = el("div", "cookie-prompt-actions-v3");
+    for (const [label, enabled] of [["Accept recommendations", true], ["Reject recommendations", false]]) {
+      const button = el("button", "button-v3 button-secondary-v3", label); button.type = "button";
+      button.addEventListener("click", () => {
+        const okay = chooseRecommendations(enabled); changed();
+        if (!okay) {
+          status.hidden = false;
+          status.textContent = `Your browser could not remember this choice. Recommendations are currently ${model.read().enabled ? "on" : "off"}. You can keep browsing; this notice may return.`;
+          reserveSpace();
+        }
+      });
+      actions.append(button);
+    }
+    const manage = el("button", "button-v3 button-quiet-v3", "Manage preferences"); manage.type = "button";
+    manage.setAttribute("aria-haspopup", "dialog"); manage.addEventListener("click", () => openCookiePreferences(manage));
+    actions.append(manage); prompt.append(copy, actions);
+    const spacer = el("div", "cookie-prompt-spacer-v3"); spacer.setAttribute("aria-hidden", "true");
+    document.body.append(spacer, prompt);
+    function reserveSpace() {
+      const height = prompt.hidden ? 0 : Math.ceil(prompt.getBoundingClientRect().height) + 32;
+      spacer.style.height = `${height}px`;
+      document.documentElement.style.setProperty("--cookie-prompt-space", `${height}px`);
+    }
+    function update() {
+      const dismiss = !choiceSaveFailed && hasCookieChoice();
+      if (dismiss && prompt.contains(document.activeElement)) document.querySelector("[data-cookie-preferences]")?.focus({ preventScroll: true });
+      prompt.hidden = dismiss; spacer.hidden = dismiss; reserveSpace();
+    }
+    window.addEventListener("browserp:recommendations-changed", update);
+    if (typeof ResizeObserver === "function") new ResizeObserver(reserveSpace).observe(prompt);
+    else window.addEventListener("resize", reserveSpace);
+    reserveSpace();
+  }
   async function refresh() {
     if (!section) return;
     const id = ++request; controller?.abort(); results.replaceChildren(); results.hidden = true;
@@ -160,6 +221,7 @@
   }
   function init() {
     model.mountCookiePreferences(document.querySelector(".footer-v3"));
+    cookiePrompt();
     document.querySelectorAll("[data-recommendation-settings]").forEach(controls);
     const page = document.body.dataset.page;
     const anchor = page === "home" ? document.querySelector("#featured-server-list")?.closest("section") : document.querySelector("#discovery-controls, #game-discovery-controls");
@@ -171,14 +233,14 @@
     message = el("p", "recommendation-message"); copy.append(message);
     const actions = el("div", "recommendation-actions");
     const enable = el("button", "button-v3 button-secondary-v3", "Enable recommendations"); enable.type = "button"; enable.dataset.enableRecommendations = "";
-    enable.addEventListener("click", () => { if (model.enable(true)) changed(); else message.textContent = "Your browser could not save this preference. Recommendations remain off."; });
+    enable.addEventListener("click", () => { const okay = chooseRecommendations(true); changed(); if (!okay) message.textContent = "Your browser could not save this preference. Check your discovery preferences before continuing."; });
     const reset = el("button", "button-v3 button-quiet-v3", "Turn off & clear"); reset.type = "button"; reset.dataset.resetRecommendations = "";
-    reset.addEventListener("click", () => { if (model.enable(false)) changed(); else message.textContent = "Your browser could not clear this preference. Please clear BrowseRP site data in browser settings."; });
+    reset.addEventListener("click", () => { const okay = chooseRecommendations(false); changed(); if (!okay) message.textContent = "Your browser could not clear this preference. Please clear BrowseRP site data in browser settings."; });
     actions.append(enable, reset); head.append(copy, actions);
     results = el("div", "recommendation-results"); results.hidden = true; inner.append(head, results); section.append(inner); anchor.before(section);
     refresh();
   }
   window.addEventListener("browserp:recommendations-changed", refresh);
-  window.addEventListener("storage", event => { if (event.key === KEY || event.key === null) changed(); });
+  window.addEventListener("storage", event => { if (event.key === KEY || event.key === CHOICE_KEY || event.key === null) changed(); });
   document.addEventListener("DOMContentLoaded", init, { once: true });
 })();
