@@ -47,7 +47,7 @@ async function harness(t, { reduced = false, observerAvailable = true } = {}) {
 
 test("a full asynchronous FiveM page keeps its tall results and dynamic cards free from scroll gates", async t => {
   const h = await harness(t);
-  const results = h.$("#game-results-v4"), observer = h.observers[0];
+  const results = h.$("#game-results-v4"), observer = h.observers.find(item => item.options?.rootMargin === "0px 0px 35% 0px");
   assert.ok(observer, "The actual reveal module must be available for result cards");
   assert.equal(observer.targets.has(results), false, "A results container taller than the viewport must never wait on a reveal observer");
   assert.equal(h.w.getComputedStyle(results).opacity, "1");
@@ -73,7 +73,7 @@ test("a full asynchronous FiveM page keeps its tall results and dynamic cards fr
 test("reduced-motion game pages display asynchronous results without relying on an observer", async t => {
   const h = await harness(t, { reduced: true });
   await h.loaded();
-  assert.equal(h.observers.length, 0);
+  assert.ok(h.observers.every(observer => [...observer.targets].every(target => target.matches(".home-hero-pattern"))), "Only the decorative pattern may retain its offscreen pause observer");
   for (const selector of ["#game-results-v4", "#game-results-v4 .section-head-v3"]) assert.equal(h.w.getComputedStyle(h.$(selector)).opacity, "1", selector);
   assert.equal(h.$("#game-server-list-v4").children.length, 24);
 });

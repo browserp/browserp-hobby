@@ -1,79 +1,19 @@
-/* Homepage only: repeat the original transparent wordmark without altering it. */
+/* Homepage layout; the shared logo treatment lives in wordmark-pattern.css. */
 .home-hero-v3 { padding: 0 0 64px; background: none; }
 .home-hero-v3::after { display: none; }
 .home-hero-intro { position: relative; padding: 90px 0 30px; isolation: isolate; }
-.home-hero-pattern {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  overflow: hidden;
-  pointer-events: none;
-  mask-image: linear-gradient(#000 0%, #000 80%, transparent 100%);
-  -webkit-mask-image: linear-gradient(#000 0%, #000 80%, transparent 100%);
-  --wordmark-width: 120px;
-  --wordmark-height: calc(var(--wordmark-width) * 358 / 1400);
-  --wordmark-gap: 16px;
-}
-.home-hero-wordmarks {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  display: grid;
-  grid-auto-rows: var(--wordmark-height);
-  gap: var(--wordmark-gap);
-  transform: translate(-50%, -50%) rotate(-45deg);
-  opacity: .92;
-}
-.home-hero-wordmark-row {
-  position: relative;
-}
-.home-hero-wordmark-row::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: url("/assets/browserp-logo-v5.png") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
-  opacity: .22;
-}
-.home-hero-wordmark-row::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: url("/assets/browserp-logo-v5.png") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
-  filter: brightness(1.16) drop-shadow(0 0 2px rgb(236 79 166 / .45));
-  opacity: 0;
-  transform-origin: center;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .home-hero-wordmarks { animation: home-wordmark-drift 36s linear infinite; animation-play-state: paused; }
-  .home-hero-wordmark-row::after {
-    animation: home-wordmark-wave var(--wave-duration, 14s) linear infinite;
-    animation-delay: calc((var(--wave-index, 0) - var(--wave-start, 0)) * .18s - .6s);
-    animation-play-state: paused;
-  }
-  .home-hero-pattern[data-motion="running"] .home-hero-wordmarks,
-  .home-hero-pattern[data-motion="running"] .home-hero-wordmark-row::after { animation-play-state: running; }
-}
-/* Row order becomes a top-left to bottom-right wave after the plane's rotation. */
-@keyframes home-wordmark-wave {
-  0%, 14%, 100% { opacity: 0; transform: scaleY(1); }
-  6% { opacity: .7; transform: scaleY(1.1); }
-}
-@keyframes home-wordmark-drift {
-  from { transform: translate(-50%, -50%) rotate(-45deg) translateX(0); }
-  to { transform: translate(-50%, -50%) rotate(-45deg) translateX(-120px); }
-}
-.home-hero-intro::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: linear-gradient(90deg, rgb(5 5 7 / .65), rgb(5 5 7 / .45) 60%, rgb(5 5 7 / .08));
-}
 .home-hero-intro .hero-copy-v3 { max-width: 1000px; }
 .home-hero-intro h1 { max-width: 1000px; }
 .home-hero-intro p { max-width: 780px; }
 .home-hero-intro .search-v3 { margin-bottom: 0; }
+/* Slow only the homepage, scaling the entire wave timing to preserve its path. */
+@media (prefers-reduced-motion: no-preference) {
+  .home-hero-v3 .home-hero-wordmarks { animation-duration: 115.2s; }
+  .home-hero-v3 .home-hero-wordmark-row::after {
+    animation-duration: calc(var(--wave-duration, 18s) * 1.6);
+    animation-delay: calc((var(--wave-index, 0) - var(--wave-start, 0)) * .512s - 1.44s);
+  }
+}
 .home-game-discovery .game-showcase-v3 { box-shadow: none; }
 .home-game-discovery .game-grid-v3 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .home-game-discovery .game-grid-v3 a:not(.game-all-v3) { padding: 12px; }
@@ -141,6 +81,5 @@ body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .ad-arrow-previou
   .home-game-filter-actions > .button-v3 { width: 100%; }
 }
 @media (forced-colors: active) {
-  .home-hero-pattern, .home-hero-intro::after { display: none; }
   .home-game-discovery .game-grid-v3 [aria-pressed="true"] { outline: 2px solid Highlight; outline-offset: -3px; }
 }

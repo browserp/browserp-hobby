@@ -214,6 +214,7 @@
     root.className = "";
     root.setAttribute("aria-busy", "false");
     root.replaceChildren(content);
+    if (page === "dashboard") window.BrowseRPWordmarks?.mount();
   }
 
   function emptyState(title, description, action) {
@@ -639,6 +640,10 @@
       const content = make("div", "dashboard-view");
       const name = displayName(session, overview);
       const heading = portalHead("My account", `Welcome back, ${name}`, "Manage your listings, review status, saved servers and security alerts.", name, profile);
+      heading.head.setAttribute("data-wordmark-surface", "");
+      const pattern = make("div", "home-hero-pattern");
+      pattern.setAttribute("aria-hidden", "true");
+      heading.head.prepend(pattern);
       heading.actions.append(link("/list-server", "button button-primary", "List a server"));
       const logout = button("button button-secondary", "Sign out");
       logout.addEventListener("click", signOut);

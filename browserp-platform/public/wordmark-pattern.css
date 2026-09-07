@@ -1,0 +1,73 @@
+/* One original-wordmark treatment for selected public page introductions. */
+[data-wordmark-surface] { position: relative; isolation: isolate; }
+.home-hero-pattern {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(#000 0%, #000 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(#000 0%, #000 80%, transparent 100%);
+  --wordmark-width: 120px;
+  --wordmark-height: calc(var(--wordmark-width) * 358 / 1400);
+  --wordmark-gap: 16px;
+}
+.home-hero-wordmarks {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  grid-auto-rows: var(--wordmark-height);
+  gap: var(--wordmark-gap);
+  transform: translate(-50%, -50%) rotate(-45deg);
+  opacity: .92;
+}
+.home-hero-wordmark-row {
+  position: relative;
+}
+.home-hero-wordmark-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/assets/browserp-logo-v5.png") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
+  opacity: .22;
+}
+.home-hero-wordmark-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/assets/browserp-logo-v5.png") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
+  filter: brightness(1.06) drop-shadow(0 0 1px rgb(236 79 166 / .25));
+  opacity: 0;
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .home-hero-wordmarks { animation: home-wordmark-drift 72s linear infinite; animation-play-state: paused; }
+  .home-hero-wordmark-row::after {
+    animation: home-wordmark-wave var(--wave-duration, 18s) ease-in-out infinite;
+    animation-delay: calc((var(--wave-index, 0) - var(--wave-start, 0)) * .32s - .9s);
+    animation-play-state: paused;
+  }
+  .home-hero-pattern[data-motion="running"] .home-hero-wordmarks,
+  .home-hero-pattern[data-motion="running"] .home-hero-wordmark-row::after { animation-play-state: running; }
+}
+/* Row order becomes a top-left to bottom-right wave after the plane's rotation. */
+@keyframes home-wordmark-wave {
+  0%, 14%, 100% { opacity: 0; transform: scaleY(1); }
+  7% { opacity: .42; transform: scaleY(1.045); }
+}
+@keyframes home-wordmark-drift {
+  from { transform: translate(-50%, -50%) rotate(-45deg) translateX(0); }
+  to { transform: translate(-50%, -50%) rotate(-45deg) translateX(-120px); }
+}
+[data-wordmark-surface]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgb(5 5 7 / .65), rgb(5 5 7 / .45) 60%, rgb(5 5 7 / .08));
+}
+@media (forced-colors: active) {
+  .home-hero-pattern, [data-wordmark-surface]::after { display: none; }
+}
