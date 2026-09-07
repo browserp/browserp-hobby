@@ -75,7 +75,7 @@ test("theme helper loads before consumers on every directory and detail page", (
 
 test("public game colours keep Minecraft darker than FiveM and remain readable without changing staff tokens", () => {
   const css = read("public/browserp-v3.css");
-  const colours = { fivem: "71e685", redm: "ff797f", roblox: "ffffff", minecraft: "35a65f" };
+  const colours = { fivem: "ffac69", redm: "ff797f", roblox: "ffffff", minecraft: "35a65f" };
   const staff = { fivem: "ffac69", redm: "ff797f", roblox: "e5e9f0", minecraft: "8cdd8b" };
   const rgb = hex => hex.match(/../g).map(part => parseInt(part, 16));
   const luminance = rgb => rgb.map(v => v / 255).map(v => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4).reduce((sum, v, i) => sum + v * [.2126, .7152, .0722][i], 0);

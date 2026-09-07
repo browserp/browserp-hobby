@@ -54,13 +54,14 @@ test("authenticator QR markup is normalised and setup secrets are not displayed 
   assert.doesNotMatch(staff, /append\(make\("span",factor\.secret/);
 });
 
-test("signed-in navigation uses a permission-backed avatar menu and dark-only theme", () => {
+test("signed-in navigation keeps the avatar menu, public links and dark-only theme", () => {
   const shell = read("public/browserp-v3.js");
   const navigation = read("public/navigation.js");
   const css = read("public/browserp-v3.css");
   assert.match(shell, /account-trigger-v3/);
   assert.match(shell, /\["Profile", "\/profile"\]/);
-  assert.match(shell, /session\.staff === true/);
+  // Staff entry and pre-MFA eligibility are exercised with real session
+  // hydration in public-navigation.test.mjs, separately from workspace access.
   assert.doesNotMatch(shell, /browserp-theme/);
   assert.doesNotMatch(css, /:root\[data-theme="light"\]/);
   assert.match(css, /account-popover-v3/);

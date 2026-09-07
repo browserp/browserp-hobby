@@ -93,7 +93,7 @@
       // Start at the visible top-left edge, rather than waiting through overscan.
       const visibleRows = Math.ceil((rect.width + rect.height) / Math.SQRT2 / rowPitch) + 2;
       plane.style.setProperty("--wave-start", Math.max(0, (rows - visibleRows) / 2));
-      plane.style.setProperty("--wave-duration", (visibleRows * .18 + 1.4).toFixed(2) + "s");
+      plane.style.setProperty("--wave-duration", (visibleRows * .32 + 2.4).toFixed(2) + "s");
       while (plane.children.length < rows) {
         const row = node("div", "home-hero-wordmark-row");
         row.style.setProperty("--wave-index", plane.children.length);
@@ -190,6 +190,20 @@
     catch { current = { authenticated: false, csrfToken: "" }; }
     if (generation !== state.sessionGeneration) return state.session;
     state.session = current;
+    // The server confirms membership before MFA. This opens only the generic
+    // sign-in shell; workspace documents and APIs enforce the staff/MFA policy.
+    const staffEntryAllowed = current?.authenticated === true && current.provider === "discord" && current.staffAccess === true;
+    $$("[data-staff-entry-v3]").forEach(link => link.remove());
+    if (staffEntryAllowed) {
+      const footer = $(".navigation-footer-v6");
+      if (footer) {
+        const staff = node("a", "button-v3 button-primary-v3", "Staff panel access");
+        staff.href = "/staffpanel"; staff.setAttribute("data-staff-entry-v3", "");
+        const arrow = footer.querySelector('a[href="/list-server"] svg')?.cloneNode(true);
+        if (arrow) staff.append(arrow);
+        footer.prepend(staff);
+      }
+    }
     $$('[data-account-v3], [data-account-link]').forEach((link, index) => {
       if (!state.session.authenticated) { link.textContent = "Sign in"; link.href = "/dashboard"; return; }
       const profile = state.session.user?.profile || {};
@@ -203,7 +217,7 @@
         ["Profile", "/profile"], ["My servers", "/dashboard#listings"], ["Favourite servers", "/dashboard#saved"],
         ["Recently viewed", "/dashboard#recent"], ["Reviews", "/dashboard#submissions"], ["Settings", "/dashboard#account"]
       ].map(([label, href]) => { const item=node("a","",label);item.href=href;return item; });
-      if (state.session.staff === true) {
+      if (staffEntryAllowed) {
         const staff = node("a", "account-staff-v3 button-v3 button-primary-v3", "Staff panel"); staff.href = "/staffpanel"; menuItems.push(staff);
       }
       const logout = node("button", "account-danger-v3", "Sign out"); logout.type = "button";
@@ -248,6 +262,7 @@
     state.claimsController?.endSession(); state.claimsController = null;
     state.session = { authenticated: false, csrfToken: "" };
     document.dispatchEvent(new Event("navigation:close"));
+    $$("[data-staff-entry-v3]").forEach(link => link.remove());
     $$(".account-menu-v3").forEach(menu => {
       const focused = menu.contains(document.activeElement);
       const link = node("a", "button-v3 button-secondary-v3", "Sign in");

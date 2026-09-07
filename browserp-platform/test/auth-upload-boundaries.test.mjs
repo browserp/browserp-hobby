@@ -268,7 +268,7 @@ test("current account sessions can read profiles and AAL1 staff setup remains av
   }
 });
 
-test("staff menu eligibility requires a current role decision and the live MFA policy", async () => {
+test("staff entry eligibility and MFA-verified workspace access remain separate server decisions", async () => {
   const cases = [
     { label: "verified staff", membership: true, required: true, aal: "aal2", totp: true, expected: true },
     { label: "unrelated Discord account", membership: false, required: false, aal: "aal2", totp: true, expected: false },
@@ -293,6 +293,8 @@ test("staff menu eligibility requires a current role decision and the live MFA p
       const res = output(); res.end = value => { res.body = JSON.parse(value); };
       await router({ ...request(`brp_access=${token}; brp_csrf=${csrf}`), browserpRoute: "auth/session" }, res);
       assert.equal(res.statusCode, 200, fixture.label);
+      assert.equal(res.body.staffAccess, fixture.membership === true, fixture.label);
+      assert.equal(res.body.provider, "discord", fixture.label);
       assert.equal(res.body.staff, fixture.expected, fixture.label);
       assert.equal(res.getHeader("Cache-Control"), "no-store");
     }, { SUPABASE_SECRET_KEY: "sb_secret_fixture", PRIVACY_HASH_SECRET: "fixture-private-hash" });

@@ -152,8 +152,9 @@ test("a delayed earlier session response cannot restore header identity after di
     let resolve;
     const pending = sessionHydration(h, { response: () => new Promise(done => { resolve = done; }) });
     h.w.dispatchEvent(new h.w.CustomEvent("browserp:session-ended"));
-    resolve({ ok: true, json: async () => member }); await pending;
+    resolve({ ok: true, json: async () => ({ ...member, provider: "discord", staffAccess: true, staff: true }) }); await pending;
     assert.equal(h.$(".account-menu-v3"), null);
+    assert.equal(h.$('[href="/staffpanel"]'), null);
     assert.equal(h.w.document.body.textContent.includes("Alex Rivers"), false);
     assert.equal(h.$("[data-account-v3]").textContent, "Sign in");
   } finally { h.dom.window.close(); }
@@ -578,22 +579,74 @@ test("broken approved avatars fall back to readable initials in both account con
   } finally { h.dom.window.close(); }
 });
 
-test("Staff Panel links require verified staff eligibility, not membership awaiting MFA", async () => {
+test("staff entry requires strict server eligibility and Discord sign-in, including before MFA", async () => {
   for (const fixture of [
-    { staff: false, staffAccess: false, expected: 0 },
-    { staff: false, staffAccess: true, expected: 0 },
-    { staff: true, staffAccess: true, expected: 2 },
-    { staff: "true", staffAccess: true, expected: 0 },
-    { staff: undefined, staffAccess: true, expected: 0 }
+    { label: "ordinary member", staff: false, staffAccess: false, expected: 0 },
+    { label: "eligible staff awaiting MFA", staff: false, staffAccess: true, expected: 2 },
+    { label: "verified staff", staff: true, staffAccess: true, expected: 2 },
+    { label: "staff flag alone", staff: true, staffAccess: false, expected: 0 },
+    { label: "string eligibility", staff: true, staffAccess: "true", expected: 0 },
+    { label: "missing eligibility", staff: true, staffAccess: undefined, expected: 0 },
+    { label: "Google identity", provider: "google", staff: true, staffAccess: true, expected: 0 },
+    { label: "missing provider", provider: undefined, staff: true, staffAccess: true, expected: 0 },
+    { label: "signed out", authenticated: false, staff: true, staffAccess: true, expected: 0 },
+    { label: "string authentication", authenticated: "true", staff: true, staffAccess: true, expected: 0 }
   ]) {
-    const h = harness();
+    const h = harness({ page: "dashboard" });
     try {
-      await sessionHydration(h, { session: { ...member, staff: fixture.staff, staffAccess: fixture.staffAccess } });
+      await sessionHydration(h, { session: { ...member, provider: "discord", ...fixture } });
       const links = [...h.w.document.querySelectorAll('.account-popover-v3 a[href="/staffpanel"]')];
-      assert.equal(links.length, fixture.expected);
+      assert.equal(links.length, fixture.expected, fixture.label);
       assert.ok(links.every(link => link.textContent === "Staff panel" && link.classList.contains("button-primary-v3") && link.classList.contains("button-v3")));
+      assert.equal(h.w.document.querySelectorAll("[data-staff-entry-v3]").length, fixture.expected ? 1 : 0, fixture.label);
     } finally { h.dom.window.close(); }
   }
+});
+
+test("every public menu places Staff panel access above List a server, independently of the account dropdown", async () => {
+  for (const page of publicPages) {
+    const h = harness({ page });
+    try {
+      await sessionHydration(h, { session: { ...member, provider: "discord", staffAccess: true, staff: false } });
+      const dialog = open(h);
+      const entry = h.$("[data-staff-entry-v3]");
+      const listing = h.$('.navigation-footer-v6 a[href="/list-server"]');
+      assert.equal(entry.textContent, "Staff panel access", page);
+      assert.equal(entry.getAttribute("href"), "/staffpanel", page);
+      assert.equal(entry.className, listing.className, "same gradient button style");
+      assert.equal(entry.nextElementSibling, listing, page);
+      assert.equal(entry.parentElement.previousElementSibling, h.$(".navigation-account-v6"), page);
+      assert.equal(entry.closest("[hidden],[inert]"), null, "entry is available without opening the account dropdown");
+      assert.equal(h.$(".navigation-account-v6 .account-popover-v3").hidden, true);
+      assert.equal(dialog.open, true);
+      assert.equal(h.$(".navigation-toggle-v6").getAttribute("aria-expanded"), "true");
+    } finally { h.dom.window.close(); }
+  }
+});
+
+test("staff entry waits for the server response and disappears when that session ends", async () => {
+  const h = harness({ page: "dashboard" });
+  try {
+    let resolve;
+    const pending = sessionHydration(h, { response: () => new Promise(done => { resolve = done; }) });
+    open(h);
+    assert.equal(h.$("[data-staff-entry-v3]"), null);
+    resolve({ ok: true, json: async () => ({ ...member, provider: "discord", staffAccess: true, staff: false }) });
+    await pending;
+    assert.ok(h.$("[data-staff-entry-v3]"));
+    h.w.dispatchEvent(new h.w.CustomEvent("browserp:session-ended"));
+    assert.equal(h.$('[href="/staffpanel"]'), null);
+    assert.equal(h.$(".account-menu-v3"), null);
+  } finally { h.dom.window.close(); }
+});
+
+test("failed session requests cannot show a staff action", async () => {
+  const h = harness({ page: "dashboard" });
+  try {
+    await sessionHydration(h, { response: async () => { throw new Error("Unavailable"); } });
+    assert.equal(h.$('[href="/staffpanel"]'), null);
+    assert.equal(h.$("[data-account-v3]").textContent, "Sign in");
+  } finally { h.dom.window.close(); }
 });
 
 test("Escape closes the inner account disclosure without cancelling the outer navigation dialog", async () => {
