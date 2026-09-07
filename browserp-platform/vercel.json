@@ -90,6 +90,10 @@
       "destination": "/api/router?_route=public/overview"
     },
     {
+      "source": "/api/public/staff",
+      "destination": "/api/router?_route=public/staff"
+    },
+    {
       "source": "/api/public/content",
       "destination": "/api/router?_route=public/content"
     },

@@ -125,7 +125,7 @@
     retry.disabled = true;
     if (!keepRosterVisible) setState("loading");
     try {
-      const response = await fetch("/api/resources?view=staff", {
+      const response = await fetch("/api/public/staff", {
         method: "GET",
         cache: "no-store",
         credentials: "same-origin",

@@ -86,7 +86,7 @@ test("staff page is a clean public page with current roster states and no privat
 });
 
 test("public roster client renders its dynamic join label with DOM APIs, safe avatar fallback and a truthful retry state", async t => {
-  assert.match(script, /fetch\("\/api\/resources\?view=staff"/);
+  assert.match(script, /fetch\("\/api\/public\/staff"/);
   assert.match(script, /grid\.replaceChildren/);
   assert.match(script, /image\.addEventListener\("error"/);
   assert.match(script, /Date unavailable/);
@@ -130,15 +130,19 @@ test("public roster client renders its dynamic join label with DOM APIs, safe av
   assert.equal(dom.window.document.querySelector("#staff-public-count")?.textContent, "2 staff members");
 });
 
-test("existing resources function multiplexes staff without creating a thirteenth Vercel function", () => {
+test("existing API functions expose the safe roster without creating a thirteenth Vercel function", () => {
   assert.match(resources, /publicStaffRoster/);
   assert.match(resources, /view === "staff"/);
   assert.match(resources, /publicJson\(res, \{ staff:/);
   assert.match(resources, /view !== "resources"/);
   assert.match(publicStaff, /service_public_staff_presence/);
+  assert.match(router, /publicStaffRoster/);
+  assert.match(router, /"public\/staff": endpoint\("GET"/);
+  assert.match(router, /publicJson\(res, \{ staff: await publicStaffRoster\(\) \}, 15\)/);
   assert.match(router, /"admin\/presence": endpoint\("POST"/);
   assert.match(router, /rpc\("staff_presence_touch"/);
   assert.match(staffPanel, /api\("\/api\/admin\/presence"/);
   assert.match(staffPanel, /30_000/);
   assert.ok(vercel.rewrites.some((rewrite) => rewrite.source === "/api/admin/presence" && rewrite.destination.includes("admin/presence")));
+  assert.ok(vercel.rewrites.some((rewrite) => rewrite.source === "/api/public/staff" && rewrite.destination.includes("public/staff")));
 });

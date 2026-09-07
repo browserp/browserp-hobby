@@ -22,6 +22,7 @@ import { memberPrivacyRequests, staffPrivacyRequests } from "../lib/privacy-requ
 import { memberAdvertisingEnquiries, staffAdvertisingEnquiries } from "../lib/advertising-enquiries.js";
 import { staffAdvertMedia } from "../lib/staff-advert-media.js";
 import { preparedPngRaster } from "../lib/prepared-png.js";
+import { publicStaffRoster } from "../lib/public-staff.js";
 import {
   authCapabilities,
   beginOAuth,
@@ -1023,6 +1024,15 @@ const routes = {
           players: fallbackServers.reduce((sum, server) => sum + server.players, 0)
         })
       }, 30);
+    }
+  }),
+
+  "public/staff": endpoint("GET", async (_req, res) => {
+    try {
+      return publicJson(res, { staff: await publicStaffRoster() }, 15);
+    } catch (error) {
+      if (!developmentCatalogAllowed()) throw error;
+      return publicJson(res, { staff: [] }, 30);
     }
   }),
 
