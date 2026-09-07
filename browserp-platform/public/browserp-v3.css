@@ -373,6 +373,18 @@ img { display: block; max-width: 100%; }
 .footer-column-v3 strong { display: block; margin-bottom: 12px; font-size: 14px; }
 .footer-column-v3 a { display: block; padding: 4px 0; color: var(--muted); font-size: 14px; }
 .footer-column-v3 a:hover { color: var(--text); }
+.cookie-preferences-trigger-v3 { display: block; padding: 4px 0; border: 0; background: none; color: var(--muted); font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
+.cookie-preferences-trigger-v3:hover { color: var(--text); }
+.cookie-preferences-trigger-v3:focus-visible, .cookie-preferences-v3 :focus-visible { outline: 2px solid var(--cyan, #69d5ec); outline-offset: 4px; }
+.cookie-preferences-v3 { width: min(580px, calc(100% - 32px)); max-height: calc(100dvh - 32px); margin: auto; padding: clamp(20px, 4vw, 32px); border: 1px solid var(--line, #393347); border-radius: 20px; background: var(--panel, #181421); color: var(--text); box-shadow: 0 24px 80px #0006; overflow-y: auto; }
+.cookie-preferences-v3::backdrop { background: #090611b8; }
+.cookie-preferences-v3 h2 { margin: 0 0 16px; font-size: clamp(24px, 5vw, 30px); }
+.cookie-preferences-v3 p { margin: 0 0 16px; color: var(--muted); line-height: 1.6; }
+.cookie-preferences-v3 .cookie-preferences-status-v3 { color: var(--text); font-weight: 600; }
+.cookie-preferences-choices-v3 { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
+.cookie-preferences-choices-v3 > button { flex: 1 1 210px; white-space: normal; }
+.cookie-preferences-links-v3 { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.cookie-preferences-links-v3 a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 .footer-bottom-v3 { display: flex; justify-content: space-between; gap: 20px; padding: 18px 0; border-top: 1px solid var(--line-soft); color: var(--muted); font-size: 13px; }
 .toast { position: fixed; right: 18px; bottom: 18px; z-index: 100; max-width: 360px; padding: 13px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--text); transform: translate3d(0,24px,0) scale(.98); opacity: 0; pointer-events: none; box-shadow: 0 20px 54px rgb(0 0 0 / .28); transition: opacity .22s var(--motion-ease), transform .22s var(--motion-ease); }
 .toast.show { transform: none; opacity: 1; pointer-events: auto; }

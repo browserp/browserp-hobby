@@ -522,7 +522,11 @@
 
   function footer() {
     const root = $(".footer-v3");
-    if (!root || $(".footer-grid-v3", root)) return;
+    if (!root) return;
+    if ($(".footer-grid-v3", root)) {
+      window.BrowseRPRecommendations?.mountCookiePreferences?.(root);
+      return;
+    }
     const grid = node("div", "shell-v3 footer-grid-v3");
     const brand = node("div", "footer-brand-v3");
     const lockup = node("span", "logo-lockup-v3"); const mark = new Image(); mark.src = "/assets/browserp-logo-v5.png"; mark.alt = "BrowseRP"; mark.className = "logo-full-v5";
@@ -537,6 +541,7 @@
     for (const [heading, links] of groups) { const column=node("div","footer-column-v3");column.append(node("strong","",heading));for(const [label,href] of links){const link=node("a","",label);link.href=href;column.append(link);}grid.append(column); }
     const bottom=node("div","shell-v3 footer-bottom-v3");bottom.append(node("span","",`© ${new Date().getFullYear()} BrowseRP · Operated in the United Kingdom`));
     root.replaceChildren(grid,bottom);
+    window.BrowseRPRecommendations?.mountCookiePreferences?.(root);
   }
 
   async function blogIndex() {

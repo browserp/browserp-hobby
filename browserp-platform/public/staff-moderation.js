@@ -286,8 +286,11 @@
       root.replaceChildren(heading("staff")); const roles = make("section", undefined, "moderation-staff-box"); roles.id = "overview-roles"; root.append(roles);
       const permissions = make("section", undefined, "moderation-staff-box");
       if (key("staff.permissions.manage")) {
-        permissions.append(make("h3", "Individual permission overrides"), make("p", "Use the role default unless this person needs a specific exception. Every change requires a reason."));
+        const guidance = make("p", "Role default follows their assigned role. Allow grants this permission to this person; Deny blocks it even if their role allows it. Sign-in and two-factor rules still apply. Select the person first and give a reason before saving.");
+        guidance.id = "permission-guidance-v3";
+        permissions.append(make("h3", "Individual permission overrides"), guidance);
         const form = make("form", undefined, "staff-form-v3"); form.id = "permission-form-v3";
+        form.setAttribute("aria-describedby", guidance.id);
         const user = field("Staff member", "staffMember", { type: "select", required: true }); user.control.id = "permission-user";
         const grid = make("div", undefined, "permission-grid-v3"); grid.id = "permission-grid-v3";
         const reason = field("Reason for this change", "reason", { type: "textarea", required: true, minLength: 5, maxLength: 500 }); const save = button("Save permission overrides", true); save.type = "submit"; form.append(user.wrapper, grid, reason.wrapper, save); permissions.append(form); root.append(permissions);
