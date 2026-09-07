@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { JSDOM } from "jsdom";
 import { publicStaffView, safePublicStaffAvatar } from "../lib/public-staff.js";
 
 const root = resolve(import.meta.dirname, "..");
@@ -63,12 +64,16 @@ test("staff page is a clean public page with current roster states and no privat
   assert.match(page, /id="staff-public-grid"/);
   assert.match(page, /id="staff-public-empty"[^>]*hidden/);
   assert.match(page, /id="staff-public-error"[^>]*hidden/);
-  assert.match(page, /Joined staff/);
-  assert.doesNotMatch(page, /Discord ID|permission overrides|security token/i);
+  const staticPage = new JSDOM(page);
+  try {
+    assert.equal(staticPage.window.document.querySelectorAll("[data-permission], [data-security-token], [data-discord-id], form, input, select, textarea").length, 0);
+  } finally {
+    staticPage.window.close();
+  }
   assert.match(about, /href="\/staff">Meet the staff<\/a>/);
 });
 
-test("public roster client renders with DOM APIs, safe avatar fallback and a truthful retry state", () => {
+test("public roster client renders its dynamic join label with DOM APIs, safe avatar fallback and a truthful retry state", async t => {
   assert.match(script, /fetch\("\/api\/resources\?view=staff"/);
   assert.match(script, /grid\.replaceChildren/);
   assert.match(script, /image\.addEventListener\("error"/);
@@ -78,6 +83,24 @@ test("public roster client renders with DOM APIs, safe avatar fallback and a tru
   assert.match(styles, /\.staff-public-grid/);
   assert.match(styles, /@media \(max-width: 680px\)[\s\S]*grid-template-columns: 1fr/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
+
+  const dom = new JSDOM(page, { url: "https://browserp.test/staff", runScripts: "outside-only" });
+  t.after(() => dom.window.close());
+  dom.window.fetch = async () => ({
+    ok: true,
+    json: async () => ({ staff: [{
+      displayName: "BrowseRP Owner",
+      roleName: "Owner",
+      joinedAt: "2026-08-19T17:49:30.567Z",
+      avatarUrl: null
+    }] })
+  });
+  dom.window.eval(script);
+  for (let i = 0; i < 3; i++) await new Promise(resolve => setImmediate(resolve));
+  const joined = dom.window.document.querySelector(".staff-public-joined");
+  assert.ok(joined);
+  assert.equal(joined.querySelector("strong")?.textContent, "Joined staff");
+  assert.equal(joined.querySelector("time")?.textContent, "19 August 2026");
 });
 
 test("existing resources function multiplexes staff without creating a thirteenth Vercel function", () => {

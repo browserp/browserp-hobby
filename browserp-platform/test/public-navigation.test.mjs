@@ -500,8 +500,8 @@ test("initializing twice does not duplicate markup or menu listeners", () => {
   } finally { h.dom.window.close(); }
 });
 
-test("staff pages and staff routes never receive the public navigation controller", () => {
-  const staffPages = readdirSync(new URL("../public", import.meta.url)).filter(name => name.startsWith("staff") && name.endsWith(".html"));
+test("private staffpanel pages and routes never receive the public navigation controller", () => {
+  const staffPages = readdirSync(new URL("../public", import.meta.url)).filter(name => name.startsWith("staffpanel") && name.endsWith(".html"));
   for (const filename of staffPages) {
     const html = read(`public/${filename}`);
     const h = harness({ html, pathname: `/${filename.replace(/\.html$/, "")}` });
@@ -520,6 +520,13 @@ test("staff pages and staff routes never receive the public navigation controlle
       assert.equal(h.$("header nav").textContent, "Staff navigation");
     } finally { h.dom.window.close(); }
   }
+});
+
+test("the public staff page remains outside the private staffpanel boundary", () => {
+  const html = read("public/staff.html");
+  assert.match(html, /<script[^>]+src="\/navigation\.js/);
+  assert.doesNotMatch(html, /staff-layout\.css/);
+  assert.doesNotMatch(html, /staffpanel-v3\.(?:css|js)/);
 });
 
 test("signed-out and failed sessions preserve both functional sign-in links", async () => {
