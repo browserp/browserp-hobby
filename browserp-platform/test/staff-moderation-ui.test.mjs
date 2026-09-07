@@ -62,6 +62,28 @@ test("staff controls receive the backend owner decision separately from role-man
   }
 });
 
+test("individual permission guidance is attached to the authorised form and absent without delegation access", async () => {
+  for (const canDelegate of [false, true]) {
+    const overview = summary({ manageStaff: true });
+    if (canDelegate) overview.permissions.keys.push("staff.permissions.manage");
+    let editorLoads = 0;
+    const app = harness(async () => ({ summary: overview }), "#staff");
+    assert.equal(app.document.querySelector("#permission-guidance-v3"), null);
+    await app.init({ actions: { permissionOverrides: async () => { editorLoads++; } } });
+    const form = app.document.querySelector("#permission-form-v3");
+    assert.equal(Boolean(form), canDelegate);
+    assert.equal(editorLoads, canDelegate ? 1 : 0);
+    if (canDelegate) {
+      const guidance = app.document.querySelector(`#${form.attributes["aria-describedby"]}`);
+      assert.ok(guidance, "The form must reference its visible explanation for assistive technology");
+      assert.match(guidance.textContent, /Role default follows their assigned role/);
+      assert.match(guidance.textContent, /Deny blocks it even if their role allows it/);
+      assert.match(guidance.textContent, /Sign-in and two-factor rules still apply/);
+      assert.equal(form.querySelector('[name="reason"]').required, true);
+    }
+  }
+});
+
 test("moderation filters round-trip privately, map both queues, and reset platform and region descendants", () => {
   const f = filters();
   assert.equal(f.parse("#content?status=open").view, "content");
