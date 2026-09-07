@@ -72,9 +72,12 @@
     toast.timer = setTimeout(() => target.classList.remove("show"), 3600);
   }
 
+  let clearWordmarks = () => {};
   function homeWordmarks() {
     const pattern = $(".home-hero-pattern");
-    if (!pattern || pattern.querySelector(".home-hero-wordmarks")) return;
+    if (pattern?.querySelector(".home-hero-wordmarks")) return;
+    clearWordmarks();
+    if (!pattern) return;
     const plane = node("div", "home-hero-wordmarks");
     pattern.append(plane);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -104,16 +107,30 @@
       sync();
     };
     size();
-    if (typeof ResizeObserver === "function") new ResizeObserver(size).observe(pattern);
+    let resizeObserver, intersectionObserver;
+    if (typeof ResizeObserver === "function") { resizeObserver = new ResizeObserver(size); resizeObserver.observe(pattern); }
     else window.addEventListener("resize", size, { passive: true });
     if (typeof IntersectionObserver === "function") {
-      new IntersectionObserver(entries => { inView = entries[0].isIntersecting; sync(); }).observe(pattern);
+      intersectionObserver = new IntersectionObserver(entries => { inView = entries[0].isIntersecting; sync(); });
+      intersectionObserver.observe(pattern);
     }
     document.addEventListener("visibilitychange", sync);
     reduced.addEventListener?.("change", sync);
-    window.addEventListener("pagehide", () => { parked = true; sync(); });
-    window.addEventListener("pageshow", () => { parked = false; size(); });
+    const hide = () => { parked = true; sync(); };
+    const show = () => { parked = false; size(); };
+    window.addEventListener("pagehide", hide);
+    window.addEventListener("pageshow", show);
+    clearWordmarks = () => {
+      pattern.dataset.motion = "paused";
+      resizeObserver?.disconnect(); intersectionObserver?.disconnect();
+      window.removeEventListener("resize", size);
+      document.removeEventListener("visibilitychange", sync);
+      reduced.removeEventListener?.("change", sync);
+      window.removeEventListener("pagehide", hide); window.removeEventListener("pageshow", show);
+      clearWordmarks = () => {};
+    };
   }
+  window.BrowseRPWordmarks = Object.freeze({ mount: homeWordmarks });
 
   const reveal = (() => {
     let observer = null;
