@@ -5,7 +5,7 @@ The owner requested a useful, bounded final pass based on staff-chat suggestions
 ## Selected for the final release
 
 - **Individual permission guidance:** per-person Role default / Allow / Deny controls and permission descriptions already exist and are enforced by the database. The clarification explains inheritance and that staff sign-in and MFA requirements still apply. No staff powers were expanded.
-- **Cookie preferences:** a footer control opens an accessible dialog on request. It reuses the existing optional recommendations setting, which is off by default. Rejecting turns recommendations off and clears their history. Essential authentication/security cookies remain unchanged. There is no automatic recommendation prompt, new analytics, or advertising tracking.
+- **Cookie preferences:** a compact first-visit prompt offers clear accept and reject choices, with optional recommendations off until chosen. A footer control opens the full preferences dialog later. An explicit choice is remembered across navigation; rejecting turns recommendations off and clears their history. Essential authentication/security cookies remain unchanged. No analytics or advertising tracking was added. The first-visit prompt follows the owner's latest request for a visible popup.
 - **Protected network evidence:** review found that two simultaneous calls could reuse one approved reveal. The additive migration locks the exact request and checks current expiry before consuming it. Only an active owner with approval permission can reveal directly; other staff require their own approved request. Evidence retrieval and its audit entry remain one transaction. Activation and production verification must be recorded in the final release receipt.
 
 ## Already present; preserve
