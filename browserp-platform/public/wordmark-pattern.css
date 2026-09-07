@@ -11,6 +11,7 @@
   --wordmark-width: 120px;
   --wordmark-height: calc(var(--wordmark-width) * 358 / 1400);
   --wordmark-gap: 16px;
+  --wordmark-tempo: 1.3333333333;
 }
 .home-hero-wordmarks {
   position: absolute;
@@ -30,22 +31,22 @@
   position: absolute;
   inset: 0;
   background: url("/assets/browserp-logo-v5.png") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
-  opacity: .22;
+  opacity: .25;
 }
 .home-hero-wordmark-row::after {
   content: "";
   position: absolute;
   inset: 0;
   background: url("/assets/browserp-logo-v5.png") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
-  filter: brightness(1.06) drop-shadow(0 0 1px rgb(236 79 166 / .25));
+  filter: brightness(1.12) drop-shadow(0 0 1px rgb(236 79 166 / .32));
   opacity: 0;
   transform-origin: center;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .home-hero-wordmarks { animation: home-wordmark-drift 72s linear infinite; animation-play-state: paused; }
+  .home-hero-wordmarks { animation: home-wordmark-drift calc(72s * var(--wordmark-tempo)) linear infinite; animation-play-state: paused; }
   .home-hero-wordmark-row::after {
-    animation: home-wordmark-wave var(--wave-duration, 18s) ease-in-out infinite;
-    animation-delay: calc((var(--wave-index, 0) - var(--wave-start, 0)) * .32s - .9s);
+    animation: home-wordmark-wave calc(var(--wave-duration, 18s) * var(--wordmark-tempo)) ease-in-out infinite;
+    animation-delay: calc(((var(--wave-index, 0) - var(--wave-start, 0)) * .32s - .9s) * var(--wordmark-tempo));
     animation-play-state: paused;
   }
   .home-hero-pattern[data-motion="running"] .home-hero-wordmarks,
@@ -54,7 +55,7 @@
 /* Row order becomes a top-left to bottom-right wave after the plane's rotation. */
 @keyframes home-wordmark-wave {
   0%, 14%, 100% { opacity: 0; transform: scaleY(1); }
-  7% { opacity: .42; transform: scaleY(1.045); }
+  7% { opacity: .48; transform: scaleY(1.045); }
 }
 @keyframes home-wordmark-drift {
   from { transform: translate(-50%, -50%) rotate(-45deg) translateX(0); }

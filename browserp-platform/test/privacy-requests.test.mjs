@@ -79,6 +79,19 @@ test("export actions require displayed-account, CSRF and exact version/key; scop
  for(const action of['generate_export','read_export','check_export','receive_export']){const request=req({action,id,version:4,key,sha256:'a'.repeat(64),confirmed:true});request.headers['x-browserp-account']='switched';await assert.rejects(memberPrivacyRequests(request,output()),{status:401});}
 },call=>/\/(staff_approve_data_export|member_generate_data_export)$/.test(call.path)?response({copy:{id}}):undefined));
 
+test('uploaded-file actions retain current-account/CSRF binding and never forward client paths',async()=>fixture(async calls=>{
+ for(const action of ['list_export_files','read_export_file','check_export_file','receive_export_file']){
+  const request=req({action,id,fileId:key,offset:0,sha256:'a'.repeat(64),confirmed:true});request.headers['x-browserp-account']='another-account';
+  await assert.rejects(memberPrivacyRequests(request,output()),{status:401});
+ }
+ const crossOrigin=req({action:'list_export_files',id});crossOrigin.headers.origin='https://other.example';await assert.rejects(memberPrivacyRequests(crossOrigin,output()),{status:403});
+ const noCsrf=req({action:'list_export_files',id});delete noCsrf.headers['x-browserp-csrf'];await assert.rejects(memberPrivacyRequests(noCsrf,output()),{status:403});
+ await memberPrivacyRequests(req({action:'list_export_files',id,userId:'attacker',objectPath:'other/private'}),output());
+ assert.deepEqual(calls.find(x=>x.path.endsWith('/member_list_data_export_files')).body,{p_id:id});
+ const check=await memberPrivacyRequests(req({action:'check_export_file',id,fileId:key,bucket:'private'}),output());assert.deepEqual(check,{allowed:true,sha256:'a'.repeat(64),byteSize:100});assert.doesNotMatch(JSON.stringify(check),/objectPath|secret/);
+ await assert.rejects(memberPrivacyRequests(req({action:'receive_export_file',id,fileId:key,sha256:'a'.repeat(64),confirmed:false}),output()),{status:400});
+},call=>call.path.endsWith('/member_list_data_export_files')?response({files:[]}):call.path.endsWith('/member_read_data_export_file')?response({sha256:'a'.repeat(64),byteSize:100,objectPath:'secret/path'}):undefined));
+
 test("private file bytes are integrity checked and withheld if authority changes before release",async()=>{
  const {createHash}=await import('node:crypto'),content='{"profile":{"displayName":"Private fixture"}}',sha256=createHash('sha256').update(content).digest('hex');
  for(const outcome of['valid','tampered','revoked'])await fixture(async calls=>{

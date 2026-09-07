@@ -50,6 +50,18 @@ function harness(api, hash = "#servers") {
 const flush = async () => { for (let i = 0; i < 15; i += 1) await Promise.resolve(); };
 const text = (element) => [element.textContent, ...element.children.map(text)].join(" ");
 
+test("staff controls receive the backend owner decision separately from role-management capability", async () => {
+  for (const isOwner of [false, true]) {
+    let received;
+    const data = summary({ manageRoles: true }); data.permissions.isOwner = isOwner;
+    const app = harness(async () => ({ summary: data }), "#staff");
+    app.window.BrowseRPStaffRoles = { init: async ({ permissions }) => { received = permissions; } };
+    const controller = await app.init();
+    assert.equal(received.manageRoles, true); assert.equal(received.isOwner, isOwner);
+    controller.destroy();
+  }
+});
+
 test("moderation filters round-trip privately, map both queues, and reset platform and region descendants", () => {
   const f = filters();
   assert.equal(f.parse("#content?status=open").view, "content");

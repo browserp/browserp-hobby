@@ -18,6 +18,72 @@ export function validateDiscordSyncConfiguration(body) {
       typeof body.enabled !== "boolean" || typeof body.revokeOnly !== "boolean" || !Number.isSafeInteger(body.expectedVersion) || body.expectedVersion < 0) {
     throw Object.assign(new Error("Supply the reviewed Discord configuration with exact text IDs."), { status: 400 });
   }
+  const mapped = Object.values(body.mappings);
+  if (new Set(mapped).size !== mapped.length || mapped.some(roleId => roleId === body.guildId || body.protectedRoleIds.includes(roleId))) {
+    throw Object.assign(new Error("Use a distinct, unprotected Discord role for each site rank."), { status: 400 });
+  }
+}
+
+export function discordSyncRuntime(env = process.env) {
+  return {
+    environmentAllowed: !env.VERCEL_ENV || env.VERCEL_ENV === "production",
+    applicationEnabled: env.DISCORD_ROLE_SYNC_ENABLED === "true",
+    botTokenConfigured: Boolean(env.DISCORD_ROLE_SYNC_BOT_TOKEN)
+  };
+}
+
+// Only call after the owner/MFA/current-session database guard has succeeded.
+// This check reads Discord metadata; it cannot assign or remove member roles.
+export async function inspectDiscordSyncReadiness(config, { env = process.env, fetchImpl = fetch } = {}) {
+  const runtime = discordSyncRuntime(env);
+  if (!runtime.environmentAllowed) return { ready: false, code: "preview_disabled", message: "Role synchronization is available only on the intended production deployment." };
+  if (!runtime.botTokenConfigured) return { ready: false, code: "token_missing", message: "The server-side bot credential has not been configured." };
+  if (!Object.keys(config.mappings).length && !config.revokeOnly) return { ready: false, code: "mapping_missing", message: "Map at least one approved site rank, or choose removal only." };
+  try {
+    const boundary = await validateDiscordRoleBoundary(discordRoleClient(env.DISCORD_ROLE_SYNC_BOT_TOKEN, { fetchImpl }), config);
+    const roles = [];
+    for (const [siteRole, roleId] of Object.entries(config.mappings)) {
+      boundary.assertRole(roleId, { adding: !config.revokeOnly });
+      roles.push({ siteRole, roleId, name: boundary.roleName(roleId) });
+    }
+    for (const roleId of config.managedRoleIds || []) boundary.assertRole(roleId);
+    return { ready: true, code: "ready", message: "Bot identity, permissions and role hierarchy passed. Review channel access separately before enabling.", roles };
+  } catch (error) {
+    const messages = {
+      rate_limited: "Discord asked us to wait. Try the check again later.",
+      forbidden: "The bot could not read this server. Check its credential, membership and permissions.",
+      configuration_error: "Check the bot identity, protected roles and hierarchy. Mapped roles must be unmanaged labels with no server-wide permissions."
+    };
+    return { ready: false, code: messages[error.code] ? error.code : "provider_unavailable", message: messages[error.code] || "Discord could not be checked. No settings were enabled." };
+  }
+}
+
+export async function ownerDiscordRoleSync(method, body, accessToken, { callRpc = rpc, env = process.env, fetchImpl = fetch } = {}) {
+  // This RPC enforces an active owner, current session and MFA before any
+  // credential presence, configuration or provider metadata is disclosed.
+  const control = await callRpc("staff_discord_role_sync_control", {}, accessToken);
+  const runtime = discordSyncRuntime(env);
+  if (method === "GET") return { control, runtime };
+  const action = body.action || "save";
+  if (!["save", "check"].includes(action) || Object.keys(body).some(key => !["action", "guildId", "botUserId", "protectedRoleIds", "mappings", "enabled", "revokeOnly", "expectedVersion", "reason"].includes(key))) {
+    throw Object.assign(new Error("Choose a valid role-sync action. Credentials are configured only on the server."), { status: 400 });
+  }
+  validateDiscordSyncConfiguration(body);
+  if (body.expectedVersion !== control.version) throw Object.assign(new Error("Configuration changed. Reload before checking or saving."), { status: 409 });
+  if (control.guildId && control.guildId !== body.guildId) throw Object.assign(new Error("The configured server cannot be changed without a reviewed cleanup."), { status: 400 });
+  const candidate = { ...body, managedRoleIds: control.managedRoleIds || [] };
+  if (action === "check") return { readiness: await inspectDiscordSyncReadiness(candidate, { env, fetchImpl }), runtime };
+  if (body.enabled) {
+    const readiness = await inspectDiscordSyncReadiness(candidate, { env, fetchImpl });
+    if (!readiness.ready) throw Object.assign(new Error(readiness.message), { status: 409 });
+  }
+  if (typeof body.reason !== "string" || body.reason.trim().length < 10 || body.reason.trim().length > 500) throw Object.assign(new Error("Give a review reason between 10 and 500 characters."), { status: 400 });
+  const result = await callRpc("staff_configure_discord_role_sync", {
+    p_guild_id: body.guildId, p_bot_user_id: body.botUserId, p_protected_role_ids: body.protectedRoleIds,
+    p_mappings: body.mappings, p_enabled: body.enabled, p_revoke_only: body.revokeOnly,
+    p_expected_version: body.expectedVersion, p_reason: body.reason.trim()
+  }, accessToken);
+  return { result };
 }
 
 export function discordRoleClient(token, { fetchImpl = fetch, signal } = {}) {
@@ -61,6 +127,7 @@ export async function validateDiscordRoleBoundary(client, config) {
   if ([...protectedIds].some(roleId => !byId.has(roleId) || byId.get(roleId).position <= highest)) throw failure("configuration_error");
   return {
     ownerId: id(guild.owner_id),
+    roleName: roleId => byId.get(roleId)?.name || "Deleted role",
     assertRole(roleId, { adding = false } = {}) {
       id(roleId);
       const role = byId.get(roleId);
@@ -135,7 +202,7 @@ export async function scheduledDiscordRoleSync(req, {
   const authorization = req.headers?.authorization;
   if (typeof authorization !== "string" || !/^Bearer [a-f0-9]{64}$/.test(authorization)) throw Object.assign(new Error("Scheduler authorization required."), { status: 401 });
   if (Object.keys(await readBody(req, 128)).length) throw Object.assign(new Error("This endpoint does not accept member or role inputs."), { status: 400 });
-  if (env.DISCORD_ROLE_SYNC_ENABLED !== "true") return { accepted: false, reason: "disabled" };
+  if (!discordSyncRuntime(env).environmentAllowed || env.DISCORD_ROLE_SYNC_ENABLED !== "true") return { accepted: false, reason: "disabled" };
   if (!env.DISCORD_ROLE_SYNC_BOT_TOKEN) throw failure("configuration_error");
   const signal = AbortSignal.timeout(Math.min(Math.max(budgetMs, 1), 30000));
   const invoke = (name, args) => callRpc(name, args, undefined, { useSecret: true, signal });

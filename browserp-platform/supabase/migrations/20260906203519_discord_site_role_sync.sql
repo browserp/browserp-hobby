@@ -71,6 +71,9 @@ begin
  return (select jsonb_build_object('enabled',enabled,'revokeOnly',revoke_only,'guildId',guild_id,'botUserId',bot_user_id,'protectedRoleIds',protected_role_ids,'version',version,
  'mappings',(select coalesce(jsonb_object_agg(site_role_key,discord_role_id),'{}') from private.discord_role_sync_roles where active),
  'managedRoleIds',(select coalesce(jsonb_agg(discord_role_id),'[]') from private.discord_role_sync_roles),
+ 'schedulerEnabled',exists(select 1 from cron.job where jobname='browserp-discord-role-sync' and active),
+ 'trackedMembers',(select count(*) from private.discord_role_sync_members),
+ 'lastCheckedAt',(select max(last_checked_at) from private.discord_role_sync_members),
  'dueMembers',(select count(*) from private.discord_role_sync_members where next_check_at<=clock_timestamp()),'notBefore',not_before,
  'recentEvents',(select coalesce(jsonb_agg(e),'[]') from (select created_at,discord_user_id,event,details from private.discord_role_sync_audit order by id desc limit 30) e))
  from private.discord_role_sync_control where singleton);
@@ -113,6 +116,11 @@ begin
   join public.staff_memberships m on m.user_id=i.user_id and m.status='active' and m.role_key=a.role_key
   join private.discord_role_sync_roles r on r.site_role_key=m.role_key and r.active
   where a.discord_user_id=p_discord_user_id and a.enabled and m.role_key<>'owner'
+  -- Match website account restrictions for the subject, not the service
+  -- caller's auth.uid()/session. Device/network bans are not account bans.
+  and not exists(select 1 from public.security_bans b where b.user_id=u.id
+    and b.target_type='account' and b.revoked_at is null and b.starts_at<=now()
+    and (b.ends_at is null or b.ends_at>now()))
   and (select count(*) from auth.identities own where own.user_id=i.user_id)=1;
  end if;
  return jsonb_build_object('desiredRoleId',desired,'managedRoleIds',(select coalesce(jsonb_agg(discord_role_id),'[]') from private.discord_role_sync_roles),'version',c.version);

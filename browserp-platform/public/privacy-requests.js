@@ -15,7 +15,7 @@
     root.classList.add("privacy-requests");
     const host = root.matches("details") ? root.querySelector("[data-privacy-requests-content]") : root;
     if (!host) return null;
-    let destroyed = false, busy = false, generation = 0, next = null, loaded = false;
+    let destroyed = false, busy = false, generation = 0, next = null, loaded = false, fileDownloadAbort = null;
     const downloadUrls = new Map();
     function clearDownloads() { for (const [url, timer] of downloadUrls) { clearTimeout(timer); URL.revokeObjectURL(url); } downloadUrls.clear(); }
     const feedback = make("p", "", "privacy-request-status"); feedback.setAttribute("role", "status"); feedback.tabIndex = -1;
@@ -142,11 +142,12 @@
     }
     function copySection(item, canApprove) {
       const section = make("section", undefined, "privacy-request-copy"); section.append(make("h4", "Your structured account copy"));
-      section.append(make("p", "A readable JSON file of your account details and recorded activity, listings, requests and other named records. Uploaded file bytes and information needing an individual review are separate."));
+      section.append(make("p", "A readable JSON file of your account details and recorded activity, listings, requests and other named records. Your uploaded files are available separately below. Information needing an individual review still needs staff follow-up."));
       const approved = item.export?.approved === true, copy = item.export?.copy;
       if (item.export?.supplementNote) section.append(make("p", `Still to follow up: ${item.export.supplementNote}`, "privacy-request-text"));
       for (const part of copy?.pending || []) section.append(make("p", part.message, "privacy-request-note"));
       if (copy?.receivedAt) section.append(make("p", `Member confirmed receipt ${date(copy.receivedAt)}. Staff still needs to verify the whole request before closing it.`, "privacy-request-note"));
+      if (copy?.files) section.append(make("p", `Uploaded files: ${copy.files.received} of ${copy.files.count} receipts confirmed.`, "privacy-request-note"));
       if (staff) {
         if (approved) section.append(make("p", "Approved for this request version. Recording another review withdraws this approval; approve again after the review if needed."));
         if (!canApprove) return section;
@@ -155,10 +156,10 @@
         const note = textArea("supplementNote", 20); note.value = item.export?.supplementNote || "";
         scope.addEventListener("change", () => { note.required = scope.value === "no"; note.minLength = note.required ? 20 : 0; });
         const confirmed = make("input"); confirmed.type = "checkbox"; confirmed.name = "confirmed"; confirmed.required = true;
-        const label = make("label", undefined, "privacy-request-confirm"); label.append(confirmed, make("span", "I reviewed this member’s request and the scope above. Approval lets only this member prepare and download their structured copy."));
+        const label = make("label", undefined, "privacy-request-confirm"); label.append(confirmed, make("span", "I reviewed this member’s request and the scope above. Approval lets only this member prepare and download their structured copy and the uploaded files it names."));
         const send = button("Approve copy", true); send.type = "submit"; let key = crypto.randomUUID();
         form.addEventListener("input", () => { if (!busy) key = crypto.randomUUID(); });
-        form.append(field("What this copy covers", scope), field("Remaining follow-up — visible to the member", note), make("p", "This does not send an email or close the request. File bytes and individually reviewed records cannot be delivered by this download."), label, send);
+        form.append(field("What this copy covers", scope), field("Remaining follow-up — visible to the member", note), make("p", "This does not send an email or close the request. Uploaded files have separate checked downloads and receipts. Individually reviewed records still need follow-up."), label, send);
         form.addEventListener("submit", event => { event.preventDefault(); if (!form.reportValidity()) return;
           const body = { action: "approve_export", id: item.id, version: item.version, key, scopeComplete: scope.value === "yes", supplementNote: note.value, confirmed: confirmed.checked };
           void run(async () => { await post(body); return api(url()); }, payload => { render(payload); feedback.textContent = "Copy approved. The member can now prepare a private download."; }, "Approving the copy…");
@@ -183,7 +184,7 @@
         try {
           if (!currentCopy) currentCopy = (await post({ action: "generate_export", id: item.id, version: item.version, key })).copy;
           result = await post({ action: "read_export", id: currentCopy.id });
-        } catch (error) { if (error.status === 410) { currentCopy = null; key = crypto.randomUUID(); } throw error; }
+        } catch (error) { if (error.status === 410) { currentCopy = null; key = crypto.randomUUID(); fileList.replaceChildren(); receipt.replaceChildren(); } throw error; }
         if (typeof result?.content !== "string" || !result.copy || !crypto.subtle) throw new Error("This browser could not verify the download. Refresh or try an up-to-date browser.");
         const bytes = new TextEncoder().encode(result.content), digest = await crypto.subtle.digest("SHA-256", bytes);
         const hash = [...new Uint8Array(digest)].map(x => x.toString(16).padStart(2, "0")).join("");
@@ -198,7 +199,81 @@
         link.href = fileUrl; link.download = "BrowseRP-account-data.json"; link.hidden = true; host.append(link); link.click(); link.remove();
         currentCopy = result.copy; receiptControl(result.copy); feedback.textContent = "Your copy was checked and the download was started. Open the saved file before confirming receipt.";
       }, "Preparing and checking your private copy…"); });
-      section.append(download, receipt); return section;
+      const filesPanel = make("section", undefined, "privacy-request-files"), fileList = make("div");
+      const showFiles = button("Show uploaded files");
+      filesPanel.append(make("h4", "Your uploaded files"), make("p", "Each file is checked before download. Save and open it before confirming receipt. Files share this copy’s approval and expiry; a missing or changed file keeps your request open."), showFiles, fileList);
+      const hashBytes = async bytes => [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))].map(x => x.toString(16).padStart(2, "0")).join("");
+      function showFileRows(files) {
+        fileList.replaceChildren(); let visible = 0;
+        const moreFiles = button("Show more files");
+        function addRows() {
+          const end = Math.min(visible + 50, files.length);
+          for (; visible < end; visible++) {
+            const file = files[visible], row = make("div", undefined, "privacy-request-form");
+            const getFile = button("Download file"), received = make("p", file.receivedAt ? `Receipt confirmed ${date(file.receivedAt)}.` : "Receipt not confirmed.", "privacy-request-note");
+            getFile.setAttribute("aria-label", `Download ${file.filename}`);
+            let saved = make("input"); saved.type = "checkbox"; saved.disabled = true;
+            const confirmLabel = make("label", undefined, "privacy-request-confirm"); confirmLabel.append(saved, make("span", "I saved and opened this file."));
+            const confirmFile = button("Confirm file receipt"); confirmFile.disabled = true;
+            saved.addEventListener("change", () => { confirmFile.disabled = !saved.checked; });
+            row.append(make("p", `${file.filename} · ${(file.byteSize / 1024).toFixed(1)} KB`, "privacy-request-text"), getFile, received, confirmLabel, confirmFile);
+            getFile.addEventListener("click", () => { void run(async () => {
+              const current = generation, abort = new AbortController(); fileDownloadAbort = abort;
+              const stillCurrent = () => { if (destroyed || current !== generation) throw new Error("The account view changed."); abort.signal.throwIfAborted(); };
+              try {
+                if (!crypto.subtle || !Number.isSafeInteger(file.byteSize) || file.byteSize < 1 || file.byteSize > 10485760
+                  || !/^[a-zA-Z0-9_-]+\.(?:png|jpg|webp|bin)$/.test(file.filename) || !/^[a-f0-9]{64}$/.test(file.sha256)) throw new Error("This file needs a new copy review.");
+                const bytes = new Uint8Array(file.byteSize); let offset = 0;
+                while (offset < bytes.length) {
+                  stillCurrent();
+                  const part = await api(base, { method: "POST", signal: abort.signal, body: JSON.stringify({ action: "read_export_file", id: currentCopy.id, fileId: file.id, offset }) });
+                  stillCurrent();
+                  if (part.fileId !== file.id || part.offset !== offset || part.byteSize !== file.byteSize || part.sha256 !== file.sha256
+                    || typeof part.content !== "string" || part.content.length > 700000 || !/^[A-Za-z0-9+/]+={0,2}$/.test(part.content)) throw new Error("This file did not pass its integrity check.");
+                  const chunk = Uint8Array.from(atob(part.content), char => char.charCodeAt(0)), expected = Math.min(524288, bytes.length - offset);
+                  if (chunk.length !== expected || await hashBytes(chunk) !== part.chunkSha256
+                    || part.nextOffset !== (offset + chunk.length < bytes.length ? offset + chunk.length : null)) throw new Error("This file did not pass its integrity check.");
+                  bytes.set(chunk, offset); offset += chunk.length;
+                  if (!destroyed && current === generation) feedback.textContent = `Checking file… ${Math.round(offset / bytes.length * 100)}%`;
+                }
+                if (await hashBytes(bytes) !== file.sha256) throw new Error("The complete file did not pass its integrity check. No file was downloaded.");
+                stillCurrent();
+                const check = await post({ action: "check_export_file", id: currentCopy.id, fileId: file.id });
+                stillCurrent();
+                if (check?.allowed !== true || check.sha256 !== file.sha256 || check.byteSize !== file.byteSize) throw Object.assign(new Error("Sign in again before downloading this file."), { status: 401 });
+                return bytes;
+              } finally { if (fileDownloadAbort === abort) fileDownloadAbort = null; }
+            }, bytes => {
+              clearDownloads();
+              const fileUrl = URL.createObjectURL(new Blob([bytes], { type: "application/octet-stream" })), link = make("a");
+              downloadUrls.set(fileUrl, setTimeout(() => { URL.revokeObjectURL(fileUrl); downloadUrls.delete(fileUrl); }, 30000));
+              link.href = fileUrl; link.download = file.filename; link.hidden = true; host.append(link); link.click(); link.remove();
+              const ready = saved.cloneNode(); ready.disabled = false; ready.checked = false; saved.replaceWith(ready); saved = ready;
+              saved.addEventListener("change", () => { confirmFile.disabled = !saved.checked; });
+              feedback.textContent = "File checked and download started. Open the saved file before confirming receipt.";
+            }, "Preparing your private file…"); });
+            confirmFile.addEventListener("click", () => { if (!saved.checked) return;
+              void run(() => post({ action: "receive_export_file", id: currentCopy.id, fileId: file.id, sha256: file.sha256, confirmed: true }), result => {
+                received.textContent = `Receipt confirmed ${date(result.receivedAt)}.`; feedback.textContent = "File receipt recorded. Staff still checks the full request before closing it.";
+              }, "Recording file receipt…");
+            });
+            fileList.append(row);
+          }
+          moreFiles.hidden = visible >= files.length; fileList.append(moreFiles);
+        }
+        moreFiles.addEventListener("click", addRows); addRows();
+        if (!files.length) fileList.prepend(make("p", "This account copy has no uploaded files."));
+      }
+      showFiles.addEventListener("click", () => { void run(async () => {
+        try {
+          if (!currentCopy) currentCopy = (await post({ action: "generate_export", id: item.id, version: item.version, key })).copy;
+          return await post({ action: "list_export_files", id: currentCopy.id });
+        } catch (error) { if (error.status === 410) { currentCopy = null; key = crypto.randomUUID(); fileList.replaceChildren(); receipt.replaceChildren(); } throw error; }
+      }, payload => {
+        if (!Array.isArray(payload?.files) || payload.files.length > 2000) throw new Error("The file list could not be confirmed.");
+        currentCopy = payload.copy; showFileRows(payload.files);
+      }, "Checking uploaded files…"); });
+      section.append(download, receipt, filesPanel); return section;
     }
     function render(payload, append = false) {
       if (!Array.isArray(payload?.items)) throw new Error("Requests could not be confirmed. Try Refresh requests.");
@@ -251,7 +326,7 @@
     refresh.addEventListener("click", () => { void load(); }); more.addEventListener("click", () => { if (next) void load(true); });
     function toggle() { if (root.open && !loaded) void load(); }
     function destroy() {
-      if (destroyed) return; destroyed = true; generation++; clearDownloads(); host.querySelectorAll("textarea,input").forEach(node => { node.value = ""; }); host.replaceChildren();
+      if (destroyed) return; destroyed = true; generation++; fileDownloadAbort?.abort(); clearDownloads(); host.querySelectorAll("textarea,input").forEach(node => { node.value = ""; }); host.replaceChildren();
       root.removeEventListener("toggle", toggle); window.removeEventListener("pagehide", leave); window.removeEventListener("browserp:session-ended", destroy);
     }
     function leave() {

@@ -2,6 +2,7 @@ import { assertCsrf, assertSameOrigin, readBody } from "./http.js";
 import { getSession, rpc } from "./supabase.js";
 import { rateLimit } from "./rate-limit.js";
 import { createHash } from "node:crypto";
+import { readMemberFileChunk } from "./member-file-export.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const fail = message => Object.assign(new Error(message), { status: 400 });
@@ -34,6 +35,21 @@ export async function memberPrivacyRequests(req, res) {
     return rpc("member_data_requests", { p_action: "list" }, session.accessToken);
   }
   const body = await readBody(req, 8192);
+  if (["list_export_files", "read_export_file", "check_export_file", "receive_export_file"].includes(body.action)) {
+    const values = { p_id: id(body.id) };
+    if (body.action !== "list_export_files") values.p_file_id = id(body.fileId);
+    await rateLimit(req, "member-data-export-files", 240, 600);
+    if (body.action === "read_export_file") return readMemberFileChunk({ exportId: values.p_id, fileId: values.p_file_id, offset: body.offset }, session.accessToken);
+    if (body.action === "check_export_file") {
+      const file = await rpc("member_read_data_export_file", values, session.accessToken);
+      return { allowed: true, sha256: file.sha256, byteSize: file.byteSize };
+    }
+    if (body.action === "receive_export_file") {
+      if (body.confirmed !== true || !/^[a-f0-9]{64}$/.test(body.sha256 || "")) throw fail("Save and check the file before confirming receipt.");
+      Object.assign(values, { p_sha256: body.sha256, p_confirmed: true });
+    }
+    return rpc(body.action === "list_export_files" ? "member_list_data_export_files" : "member_receive_data_export_file", values, session.accessToken);
+  }
   if (["generate_export", "read_export", "check_export", "receive_export"].includes(body.action)) {
     const values = { p_id: id(body.id) };
     if (body.action === "generate_export") Object.assign(values, { p_expected_version: version(body.version), p_key: id(body.key) });

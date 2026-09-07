@@ -19,6 +19,7 @@ test('private role reconciliation preserves revocations, exact authority, histor
  create table auth.identities(user_id uuid references auth.users on delete cascade,provider text,provider_id text,identity_data jsonb default '{}');
  create table public.staff_roles(key text primary key);insert into public.staff_roles values('owner'),('administrator'),('senior_moderator'),('moderator'),('support');
  create table public.staff_memberships(user_id uuid references auth.users on delete cascade,role_key text,status text);
+ create table public.security_bans(user_id uuid,target_type text,starts_at timestamptz default now(),ends_at timestamptz,revoked_at timestamptz);
  create table private.discord_owner_allowlist(discord_user_id text primary key,role_key text,enabled boolean);
  create table private.secrets(key text primary key,secret_hash text);
  insert into private.secrets values('server_status_refresh',encode(extensions.digest('${token}','sha256'),'hex'));
@@ -54,6 +55,15 @@ test('private role reconciliation preserves revocations, exact authority, histor
   await db.exec(`update private.discord_owner_allowlist set role_key='moderator';insert into auth.identities(user_id,provider,provider_id) values('${member}','google','other')`);assert.equal((await read()).desiredRoleId,null);
   await db.exec("delete from auth.identities where provider='google'");assert.equal((await read()).desiredRoleId,a);
  });
+ await t.test('active account bans remove desired authority without requiring a staff-membership edit',async()=>{
+  await setRole();await db.query("insert into public.security_bans(user_id,target_type) values($1,'account')",[member]);
+  await setRole('service_role');assert.equal((await read()).desiredRoleId,null);
+  await setRole();assert.equal(await value("status from public.staff_memberships where role_key='moderator'"),'active');assert.equal(await value('enabled from private.discord_owner_allowlist'),true);
+  for(const update of ["ends_at=now()-interval '1 second'","ends_at=null,revoked_at=now()","revoked_at=null,starts_at=now()+interval '1 day'","starts_at=now(),target_type='device'","target_type='network_prefix'"]){
+   await setRole();await db.exec('update public.security_bans set '+update);await setRole('service_role');assert.equal((await read()).desiredRoleId,a);
+  }
+  await setRole();await db.exec('delete from public.security_bans');
+ });
  await t.test('mapping changes fence active jobs and retain previous roles for cleanup',async()=>{
   await setRole('authenticated');await configure({moderator:b},1);await setRole('service_role');await assert.rejects(read(),/Expired or disabled/);
   await assert.rejects(value('public.service_record_discord_role_sync($1,$2,$3,null,300)',[run.runId,target,'unchanged']),/Expired/);
@@ -67,6 +77,8 @@ test('private role reconciliation preserves revocations, exact authority, histor
   await assert.rejects(value('public.service_record_discord_role_sync($1,$2,$3,$4,300)',[run.runId,target,'added',protect]),/outside approved/);
   await value('public.service_record_discord_role_sync($1,$2,$3,null,42)',[run.runId,target,'rate_limited']);await setRole();assert.ok(await value('not_before>clock_timestamp() from private.discord_role_sync_control'));
   await setRole('authenticated');const status=await value('public.staff_discord_role_sync_control()');assert.ok(!JSON.stringify(status).includes(token));assert.ok(status.recentEvents.some(e=>e.event==='rate_limited'));
+  assert.equal(status.schedulerEnabled,false);assert.equal(status.trackedMembers,1);assert.ok(status.lastCheckedAt);
+  await setRole();await db.exec("update cron.job set active=true");await setRole('authenticated');assert.equal((await value('public.staff_discord_role_sync_control()')).schedulerEnabled,true);
  });
  }finally{await db.close();}
 });

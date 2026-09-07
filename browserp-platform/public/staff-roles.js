@@ -32,6 +32,10 @@
     }
     const status = node("p", "Loading roles…", "staff-form-status-v3"); status.setAttribute("role", "status");
     const content = node("div", undefined, "overview-role-content"); root.append(content, status);
+    if (permissions.isOwner === true && window.BrowseRPStaffDiscordSync) {
+      const sync = node("section", undefined, "overview-role-panel"); root.append(sync);
+      void window.BrowseRPStaffDiscordSync.init({ api, root: sync, isOwner: true });
+    }
     let control, staff, editingRole = null;
     const message = (text, error = false) => { status.textContent = text; status.classList.toggle("is-error", error); };
     async function refresh() {

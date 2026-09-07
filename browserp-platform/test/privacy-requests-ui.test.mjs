@@ -102,3 +102,58 @@ test('staff explicitly approve scope with a stable retry and cannot download the
  const writes=[];const h=await harness(t,async(path,options)=>{if(options?.method==='POST'){writes.push(JSON.parse(options.body));throw new Error('Retry safely');}return{items:[{...copyItem,export:null}],canFulfill:true};},{staff:true});
  assert.equal(h.button('Prepare and download my copy'),undefined);const form=h.$('.privacy-request-copy form');form.elements.supplementNote.value='Uploaded files will be provided separately.';h.submit(form);await tick();assert.equal(writes.length,0);form.elements.confirmed.checked=true;h.submit(form);await tick();h.submit(form);await tick();assert.deepEqual(writes[0],writes[1]);assert.equal(writes[0].scopeComplete,false);assert.equal(writes[0].action,'approve_export');assert.equal(writes[0].version,item.version);
 });
+
+test('uploaded files verify every chunk and whole file, then enable a separate usable receipt',async t=>{
+ const {createHash}=await import('node:crypto'),hash=x=>createHash('sha256').update(x).digest('hex'),bytes=Buffer.alloc(524305,71);
+ const file={id:'owned-file',filename:'avatar-owned.png',byteSize:bytes.length,sha256:hash(bytes)},copy={id:'private-copy',available:true};const writes=[];
+ const h=await downloadHarness(t,async(path,options)=>{
+  if(options?.method!=='POST')return{items:[{...copyItem,export:{...copyItem.export,copy}}]};
+  const body=JSON.parse(options.body);writes.push(body);
+  if(body.action==='list_export_files')return{copy,files:[file]};
+  if(body.action==='read_export_file'){const part=bytes.subarray(body.offset,body.offset+524288);return{fileId:file.id,offset:body.offset,nextOffset:body.offset+part.length<bytes.length?body.offset+part.length:null,byteSize:bytes.length,sha256:file.sha256,chunkSha256:hash(part),content:part.toString('base64')};}
+  if(body.action==='check_export_file')return{allowed:true,sha256:file.sha256,byteSize:file.byteSize};
+  if(body.action==='receive_export_file')return{id:file.id,receivedAt:item.createdAt};throw new Error('Unexpected action');
+ });
+ h.button('Show uploaded files').click();await drain();assert.equal(h.$('.privacy-request-files input').disabled,true);
+ assert.equal(h.button('Download file').getAttribute('aria-label'),'Download avatar-owned.png');
+ h.button('Download file').click();await drain();assert.equal(h.files.length,1);assert.deepEqual(Buffer.from(await h.files[0].arrayBuffer()),bytes);
+ assert.deepEqual(writes.filter(x=>x.action==='read_export_file').map(x=>x.offset),[0,524288]);
+ const checkbox=h.$('.privacy-request-files input');assert.equal(checkbox.disabled,false,'run() state restoration cannot disable the new receipt control');
+ checkbox.checked=true;checkbox.dispatchEvent(new h.w.Event('change'));assert.equal(h.button('Confirm file receipt').disabled,false);h.button('Confirm file receipt').click();await drain();
+ assert.equal(writes.at(-1).action,'receive_export_file');assert.equal(writes.at(-1).sha256,file.sha256);assert.match(h.text(),/File receipt recorded/);assert.equal(writes.some(x=>x.action==='fulfill'),false);
+});
+test('corrupted file bytes and a revoked final permission check produce no download',async t=>{
+ const {createHash}=await import('node:crypto'),hash=x=>createHash('sha256').update(x).digest('hex'),good=Buffer.from('my uploaded image');
+ const file={id:'owned-file',filename:'avatar-owned.png',byteSize:good.length,sha256:hash(good)},copy={id:'private-copy',available:true};
+ for(const failure of ['whole-hash','revoked']){
+  const h=await downloadHarness(t,async(path,options)=>{
+   if(options?.method!=='POST')return{items:[{...copyItem,export:{...copyItem.export,copy}}]};const body=JSON.parse(options.body);
+   if(body.action==='list_export_files')return{copy,files:[file]};
+   if(body.action==='read_export_file'){const part=failure==='whole-hash'?Buffer.alloc(good.length,9):good;return{fileId:file.id,offset:0,nextOffset:null,byteSize:good.length,sha256:file.sha256,chunkSha256:hash(part),content:part.toString('base64')};}
+   throw Object.assign(new Error('Session revoked'),{status:401});
+  });
+  h.button('Show uploaded files').click();await drain();h.button('Download file').click();await drain();assert.equal(h.files.length,0);assert.match(h.text(),failure==='revoked'?/Sign in again/:/integrity check/);
+ }
+});
+test('leaving the private view aborts a pending file and prevents remaining chunks or receipts',async t=>{
+ let release,signal;const writes=[],file={id:'owned-file',filename:'avatar-owned.png',byteSize:10,sha256:'a'.repeat(64)},copy={id:'private-copy',available:true};
+ const h=await downloadHarness(t,async(path,options)=>{
+  if(options?.method!=='POST')return{items:[{...copyItem,export:{...copyItem.export,copy}}]};const body=JSON.parse(options.body);writes.push(body);
+  if(body.action==='list_export_files')return{copy,files:[file]};signal=options.signal;return new Promise(r=>{release=r;});
+ });
+ h.button('Show uploaded files').click();await drain();h.button('Download file').click();await drain();h.w.dispatchEvent(new h.w.Event('browserp:session-ended'));
+ assert.equal(signal.aborted,true);release({content:'late'});await drain();assert.equal(h.files.length,0);assert.equal(h.text(),'');assert.equal(writes.filter(x=>x.action==='read_export_file').length,1);
+});
+test('an expired file inventory clears old controls and can prepare a fresh approved copy on retry',async t=>{
+ const old={id:'old-copy',available:true},fresh={id:'fresh-copy',available:true},writes=[];
+ const h=await downloadHarness(t,async(path,options)=>{
+  if(options?.method!=='POST')return{items:[{...copyItem,export:{...copyItem.export,copy:old}}]};
+  const body=JSON.parse(options.body);writes.push(body);
+  if(body.action==='list_export_files'&&body.id==='old-copy')throw Object.assign(new Error('Copy expired. Try again to prepare a new copy.'),{status:410});
+  if(body.action==='generate_export')return{copy:fresh};
+  if(body.action==='list_export_files')return{copy:fresh,files:[]};throw new Error('Unexpected action');
+ });
+ h.button('Show uploaded files').click();await drain();assert.match(h.text(),/Copy expired/);
+ h.button('Show uploaded files').click();await drain();assert.deepEqual(writes.map(x=>x.action),['list_export_files','generate_export','list_export_files']);
+ assert.equal(writes.at(-1).id,'fresh-copy');assert.match(h.text(),/has no uploaded files/);
+});

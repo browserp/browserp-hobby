@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateDiscordSyncConfiguration, discordRoleClient, validateDiscordRoleBoundary, reconcileDiscordMember, scheduledDiscordRoleSync } from '../lib/discord-role-sync.js';
+import { validateDiscordSyncConfiguration, discordRoleClient, validateDiscordRoleBoundary, reconcileDiscordMember, scheduledDiscordRoleSync, ownerDiscordRoleSync } from '../lib/discord-role-sync.js';
 const guild='111111111111111111',bot='222222222222222222',owner='333333333333333333',user='444444444444444444',oldRole='555555555555555555',newRole='666666666666666666',protectedRole='777777777777777777',botRole='888888888888888888',cosmetic='999999999999999999';
 const config={guildId:guild,botUserId:bot,protectedRoleIds:[protectedRole],runId:'00000000-0000-4000-8000-000000000001'};
 function fixture({roles=[oldRole,cosmetic],desired=newRole,change,putError,deleteError}={}) {
@@ -37,3 +37,34 @@ test('deployed and local routes reach the guarded worker without authentication 
 });
 
 test('owner configuration rejects rounded numeric IDs and accepts only exact strings',()=>{const valid={guildId:guild,botUserId:bot,protectedRoleIds:[protectedRole],mappings:{moderator:newRole},enabled:false,revokeOnly:false,expectedVersion:0};assert.doesNotThrow(()=>validateDiscordSyncConfiguration(valid));for(const change of [{guildId:Number(guild)},{botUserId:Number(bot)},{protectedRoleIds:[Number(protectedRole)]},{mappings:{moderator:Number(newRole)}},{protectedRoleIds:null},{mappings:{owner:newRole}}])assert.throws(()=>validateDiscordSyncConfiguration({...valid,...change}),e=>e.status===400);});
+
+const ownerBody = () => ({...config, runId: undefined, mappings:{moderator:newRole}, enabled:false, revokeOnly:false, expectedVersion:0, reason:'Reviewed explicit rank mappings'});
+function ownerFixture({ denied = false, env = {}, tweak } = {}) {
+ const provider=fixture(); tweak?.(provider);
+ const calls=[], network=[], control={...config, version:0, mappings:{},managedRoleIds:[]};
+ const deps={env:{VERCEL_ENV:'production',DISCORD_ROLE_SYNC_BOT_TOKEN:'private-test-token',...env},callRpc:async(name,args,token)=>{calls.push({name,args,token});if(denied)throw Object.assign(new Error('Owner permission required'),{status:403});return name==='staff_discord_role_sync_control'?control:{version:1};},fetchImpl:async(url,options)=>{network.push({url,method:options.method});return new Response(JSON.stringify(await provider.client(options.method,new URL(url).pathname.replace('/api/v10',''))),{status:200});}};
+ const body=ownerBody();delete body.runId;
+ return{calls,network,control,deps,body};
+}
+test('owner authorization precedes token presence, configuration and every provider check',async()=>{
+ for(const method of ['GET','POST']){const f=ownerFixture({denied:true});await assert.rejects(ownerDiscordRoleSync(method,{...f.body,action:'check'},'owner-session',f.deps),e=>e.status===403);assert.equal(f.network.length,0);assert.equal(f.calls.length,1);assert.equal(f.calls[0].name,'staff_discord_role_sync_control');}
+ const f=ownerFixture();const result=await ownerDiscordRoleSync('GET',{},'owner-session',f.deps);assert.equal(result.runtime.botTokenConfigured,true);assert.ok(!JSON.stringify(result).includes('private-test-token'));assert.equal(f.network.length,0);
+});
+test('owner preflight reads exact role names without writes and enabled saves repeat the check',async()=>{
+ const f=ownerFixture();const result=await ownerDiscordRoleSync('POST',{...f.body,action:'check'},'owner-session',f.deps);assert.equal(result.readiness.ready,true);assert.deepEqual(result.readiness.roles,[{siteRole:'moderator',roleId:newRole,name:'Staff label'}]);assert.equal(f.calls.length,1);assert.ok(f.network.every(r=>r.method==='GET'));
+ const reads=f.network.length;await ownerDiscordRoleSync('POST',{...f.body,enabled:true},'owner-session',f.deps);assert.ok(f.network.length>reads);assert.equal(f.calls.at(-1).name,'staff_configure_discord_role_sync');assert.equal(f.calls.at(-1).args.p_enabled,true);
+});
+test('disabled drafts need no provider or credential; unsafe activation cannot save',async()=>{
+ const draft=ownerFixture({env:{DISCORD_ROLE_SYNC_BOT_TOKEN:''}});await ownerDiscordRoleSync('POST',draft.body,'owner-session',draft.deps);assert.equal(draft.network.length,0);assert.equal(draft.calls.at(-1).name,'staff_configure_discord_role_sync');
+ for(const options of [{env:{DISCORD_ROLE_SYNC_BOT_TOKEN:''}},{env:{VERCEL_ENV:'preview'}},{tweak:f=>f.guildRoles.find(r=>r.id===newRole).permissions='8'},{tweak:f=>f.guildRoles.find(r=>r.id===protectedRole).position=1}]){const f=ownerFixture(options);await assert.rejects(ownerDiscordRoleSync('POST',{...f.body,enabled:true},'owner-session',f.deps),e=>e.status===409);assert.ok(f.calls.every(r=>r.name!=='staff_configure_discord_role_sync'));assert.ok(f.network.every(r=>r.method==='GET'));}
+});
+test('stale checks, unexpected credentials, duplicate or protected mappings stop before provider IO',async()=>{
+ for(const change of [{expectedVersion:9},{token:'do-not-accept'},{mappings:{moderator:newRole,support:newRole}},{mappings:{moderator:protectedRole}},{guildId:'123456789012345678'}]){const f=ownerFixture();await assert.rejects(ownerDiscordRoleSync('POST',{...f.body,...change,action:'check'},'owner-session',f.deps));assert.equal(f.network.length,0);assert.equal(f.calls.length,1);}
+});
+test('provider failures return safe readiness messages and removal-only accepts dangerous retired roles for cleanup',async()=>{
+ const f=ownerFixture();f.deps.fetchImpl=async()=>new Response(JSON.stringify({message:'private-provider-details'}),{status:403});const result=await ownerDiscordRoleSync('POST',{...f.body,action:'check'},'owner-session',f.deps);assert.equal(result.readiness.ready,false);assert.ok(!JSON.stringify(result).includes('private-provider-details'));
+ const cleanup=ownerFixture({tweak:f=>f.guildRoles.find(r=>r.id===newRole).permissions='8'});cleanup.control.managedRoleIds=[newRole];const checked=await ownerDiscordRoleSync('POST',{...cleanup.body,mappings:{},revokeOnly:true,action:'check'},'owner-session',cleanup.deps);assert.equal(checked.readiness.ready,true);
+});
+test('preview worker cannot perform IO even with both environment credentials configured',async()=>{
+ let calls=0;const result=await scheduledDiscordRoleSync(request(),{env:{VERCEL_ENV:'preview',DISCORD_ROLE_SYNC_ENABLED:'true',DISCORD_ROLE_SYNC_BOT_TOKEN:'configured'},callRpc:async()=>calls++,fetchImpl:async()=>calls++});assert.equal(result.accepted,false);assert.equal(calls,0);
+});

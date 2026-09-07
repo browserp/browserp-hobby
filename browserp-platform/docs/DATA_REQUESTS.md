@@ -1,5 +1,15 @@
 # Account data requests
 
+## Current implementation checkpoint — 7 September 2026
+
+The original inbox description below is historical. Subsequent reviewed changes added immutable request history, separately attested completion, and actual approved JSON account copies; see `ACCOUNT_PRIVACY_RELEASE_2026-09-06.md` and `OWNER_PRIVACY_RELEASE_REVIEW_2026-09-06.md` for their release evidence.
+
+The local file-delivery extension now provides checked downloads and separate member receipts for uploaded files named by an approved copy. It is **implemented and locally tested, but its migration is unapplied and the extension is not deployed**. `MEMBER_FILE_DELIVERY_2026-09-07.md` records the exact scope, checks, migration order and activation requirements. Missing or changed files fail visibly instead of silently disappearing from the inventory. Receipts do not automatically close requests.
+
+Actual account erasure and individually reviewed supplements remain unfinished. Existing deletion requests and completion attestations do not execute erasure. The new checkpoint identifies the concrete retention and foreign-key decisions still needed; no immutable evidence safeguard was removed to make deletion appear complete.
+
+## Original inbox scope — 5 September 2026
+
 This batch adds a private request inbox. A signed-in member can request a copy of their data, a correction or account deletion; read their most recent 50 requests; update details when asked; and withdraw an open request. They cannot choose another account as the request owner.
 
 Staff can filter and page through the queue, ask for more information, record a review, decline a request or mark it **Ready for follow-up**. That final label means a separate verified action is still needed. There is deliberately no Completed, Exported or Deleted action. This module does not produce data exports, modify profile data, purge an account, remove server ownership, delete media, or dispose of moderation/security evidence.

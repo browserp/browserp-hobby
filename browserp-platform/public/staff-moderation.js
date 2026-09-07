@@ -293,7 +293,7 @@
         const reason = field("Reason for this change", "reason", { type: "textarea", required: true, minLength: 5, maxLength: 500 }); const save = button("Save permission overrides", true); save.type = "submit"; form.append(user.wrapper, grid, reason.wrapper, save); permissions.append(form); root.append(permissions);
       }
       const tasks = [];
-      if (window.BrowseRPStaffRoles) tasks.push(window.BrowseRPStaffRoles.init({ api, permissions: { manageRoles: state.permissions.manageRoles } }));
+      if (window.BrowseRPStaffRoles) tasks.push(window.BrowseRPStaffRoles.init({ api, permissions: { manageRoles: state.permissions.manageRoles, isOwner: state.summary?.permissions?.isOwner === true } }));
       if (actions.permissionOverrides && key("staff.permissions.manage")) tasks.push(actions.permissionOverrides());
       const results = await Promise.allSettled(tasks);
       for (const result of results) if (result.status === "rejected") root.append(make("p", `Some staff controls could not load: ${result.reason?.message || "Please refresh."}`, "moderation-inline-note"));
