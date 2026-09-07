@@ -17,7 +17,17 @@
 .directory-filter-panel .smart-refinements { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
 .directory-filter-panel .smart-checks { margin-top: 4px; }
 .directory-game-hint { margin: 16px 0 0; color: var(--muted); font-size: 13px; }
+/* Failed artwork is a compact text advert, not a portrait-sized creative.
+   Scope this to Discover so healthy artwork and other placements keep their layout. */
+.directory-layout-v3 > .side-ad-v3.artwork-unavailable .side-ad-stage-v3 { min-height: 0; padding: 16px; gap: 12px; }
+.directory-layout-v3 > .side-ad-v3.artwork-unavailable .side-ad-image-notice-v3 img { width: 128px; }
+.directory-layout-v3 > .side-ad-v3.artwork-unavailable .side-ad-copy-v3 { gap: 8px; }
+.directory-layout-v3 > .side-ad-v3.artwork-unavailable .side-ad-copy-v3 strong { font-size: 18px; line-height: 1.25; }
+.directory-layout-v3 > .side-ad-v3.artwork-unavailable .side-ad-copy-v3 span { font-size: 13px; line-height: 1.5; }
+.directory-layout-v3 > .side-ad-v3.artwork-unavailable .side-ad-copy-v3 a { margin-top: 0; line-height: 1.4; }
 @media(max-width:760px) {
+  /* Let longer advert copy size the stage instead of clipping above 210px. */
+  .directory-layout-v3 > .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { position: relative; padding-inline: 64px; }
   .directory-control-row { gap: 6px; }
   .directory-control-row button { padding: 8px 3px; min-height: 70px; font-size: 12px; }
   .directory-control-row .smart-filter-toggle { gap: 7px; }
