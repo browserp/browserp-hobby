@@ -1,6 +1,72 @@
 # BrowseRP community setup checkpoint
 
-## Latest verified Music and channel checkpoint — 6 September 2026
+## Current Help outage and restoration blocker — 7 September 2026
+
+**Help is currently unavailable: Security kicked Ticket Tool, and its restoration is waiting for the owner to complete hCaptcha.** Ticket Tool's absence was verified in the member list. The Help panel remains published as message **`1546302725216542865`**, with its concise body and **Get help** button label verified, but it cannot open tickets while the bot is absent. Reports and Appeals remain unpublished drafts. This supersedes the earlier all-panels-draft and bot-online checkpoints below.
+
+**Controlled test before the outage:** the root task created Help ticket **`1546306881419612254`** and verified its intended private greeting/content. The observed private access list included Ownership, Management, Admin, Junior Admin, Moderator, Support Team, Ticket Tool and Security; Music and ServerStats were absent. Opening, closing, manual transcript export and reopening succeeded. A private **5 KB**, **four-message** HTML archive, **`transcript-closed-0001.html`**, remains in **ticket-transcripts** `1546280076612730991`, message **`1546307779948585062`**. The second close received the bot's closed confirmation; the name change was skipped because Discord's rename limit showed **7m52s**. The subsequent Delete button successfully removed the test ticket, **then Security kicked Ticket Tool**. Security's **00:57 local, 7 September** DM explicitly confirmed **Anti Nuke → Deleting Channels → Kick → Ticket Tool**. These owner-controlled lifecycle checks do not prove isolation between ordinary requesters or an operational service after the kick.
+
+**Exact restoration blocker:** in the existing signed-in Discord **tab 13**, the official application **`557628352828014614`** restoration consent showed account **browserp.**, server **BrowseRP**, and the reviewed **nine permission checkboxes** encoded by **`2416045072`**, with **no Administrator**. Authorize reached **hCaptcha**; an asynchronous request has been sent to the owner to complete it. **The bot has not yet been confirmed restored.** Ticket Tool dashboard **tab 15** currently says **“You don't have access to this server”** while the bot is absent. After successful consent, verify the bot's return and restore its **new managed-role** overrides in Help tickets, Report tickets, Appeal tickets, help-desk and ticket-transcripts; the old managed role was removed when the bot was kicked. Do not assume the old category/channel permissions survive as effective grants.
+
+**Agreed recovery policy, not yet configured:** keep Anti-Nuke enabled with no blanket whitelist. Disable Ticket Tool's automatic **Delete button and Delete command**; the actual owner will purge closed tickets through native Discord, while authorised staff retain **Close and Transcript**. Dashboard access is currently blocked, so these restrictions have **not** been applied or verified. Security's channel-creation limits still need a capacity check **without bypassing Anti-Nuke**, so legitimate ticket intake does not cause another bot kick. Before describing Help as restored, verify the bot and new role permissions, apply/read back the deletion restrictions, and verify **ticket creation, closing and manual transcript archival**. Do not repeat bot-driven deletion as an operational test: the chosen design reserves purging for the owner through native Discord. Reports/Appeals publication, ordinary-member access and requester/transcript isolation remain pending.
+
+The bounded official-doc review found action-specific bot-user whitelists and specific-channel whitelists, but no documented exception combining a bot identity with a parent ticket category or guaranteeing propagation to new child tickets. Category-only channel creation with global Manage Channels off is likewise unproven from those sources. No such workaround was claimed configured. References: [Security channel whitelist](https://docs.securitybot.gg/whitelist/whitelist/channel-whitelist), [whitelist actions](https://docs.securitybot.gg/whitelist/whitelist), [Discord channel creation](https://docs.discord.com/developers/resources/guild#create-guild-channel).
+
+## Latest template cleanup and ticket drafts — 7 September 2026
+
+The root task confirmed these **16 imported text channels were empty before deleting them** during the user-requested cleanup:
+
+| Deleted channel | Former channel ID |
+| --- | --- |
+| mafia-gang | `1546229472993345631` |
+| hitman-info | `1546229459743547412` |
+| police-application | `1546229480513605652` |
+| police-replies | `1546229481625231360` |
+| ambulance-application | `1546229482657157271` |
+| ambulance-replies | `1546229484087283824` |
+| punishments | `1546229469524660234` |
+| compliments | `1546229464541823116` |
+| civilian-guide | `1546229461958262865` |
+| dark-chat | `1546229447357894788` |
+| instagram | `1546229449291472979` |
+| packs | `1546229410015871007` |
+| cars | `1546229418718920735` |
+| duplicate imported rules | `1546229426340241540` |
+| request-role | `1546229462834876459` |
+| giveaways | `1546229438042341599` |
+
+The root task also confirmed these **nine voice channels were empty and had no connected members before deletion**:
+
+| Deleted voice channel | Former channel ID |
+| --- | --- |
+| whitelist | `1546229404869591120` |
+| Support Office 2 | `1546229416965841026` |
+| Support Office 3 | `1546229419763306539` |
+| Support Office 4 | `1546229421206278287` |
+| Support Office 5 | `1546229423387312299` |
+| Support Office 6 | `1546229424989409580` |
+| Support Office 7 | `1546229431365017630` |
+| Support Office 8 | `1546229433315229698` |
+| Support Office 9 | `1546229434879705188` |
+
+The empty **Police, Ambulance, Donation and Roleplay** categories were deleted. Cleanup totals are **16 text + 9 voice = 25 channels, plus four categories**. An earlier mismatched Support Office 7 confirmation was cancelled; its later correctly targeted deletion is recorded above. Retained: original posted **rules** `1545983932338667561`, **Support Office 1** `1546229411660042330`, **requesting-support**, **Staff voice** and **Owner office**. Useful staff, member and game roles remain in place.
+
+Ticket Tool now has three **draft panels: Help, Reports and Appeals**. The native private **Help tickets**, **Report tickets** and **Appeal tickets** categories were created, along with **ticket-transcripts**, `1546280076612730991`. The read-only **help-desk** entry channel, `1546229406169825310`, is prepared. Ticket Tool's global **Delete, Add and Remove** command settings show **Ownership and Management allowed**, **@everyone denied**, and **Support Team Only off**. Add/Remove selections were verified after reloading; Delete had its earlier saved readback. The **Transcript** command has **Support Team Only checked**. These are configuration observations, not successful role-based command tests. The panels remain **DRAFT: not published or tested**; no working ticket flow, requester isolation or transcript-access proof is claimed. Final category/channel permissions, routing and ordinary-member checks remain pending. This checkpoint records only those observed changes and does not mark Discord complete.
+
+## Native safety and Ticket Tool checkpoint — 6 September 2026
+
+The root task verified the following in the actual Discord UI. This later checkpoint supersedes earlier bot/role counts and pending AutoMod-setting readbacks below; it does not establish tested member safety or a working private ticket service. Music's saved configuration remains unchanged.
+
+- **Safety Setup readback:** Raid/CAPTCHA **3/3**, DM/Spam **5/5**, AutoMod **3/5**, Permissions **2/3**. These are the displayed setup counts, not a security certification. Sensitive-image filtering covers **all members**; administrator-only member pruning is on, and the `@everyone` risk indicator showed **zero risky permissions**.
+- **Mention spam:** enabled; the threshold changed from **20 to 5 unique mentions per message**, with message blocking and an alert to **staff-updates**. The change was saved and the Save Changes control disappeared. **Suspected spam** is also enabled with blocking and staff-updates alerts.
+- **Welcoming-content preset:** **Keep BrowseRP welcoming** is enabled. **Insults/Slurs** and **Sexual Content** are checked; **Severe Profanity** remains unchecked, preserving its existing setting. No attack or ordinary-member filter test is claimed.
+- **Moderator 2FA:** still **OFF**, explicitly verified after the user's latest sign-in. The owner passkey action remains outstanding; account sign-in alone did not enable this server requirement.
+- **Ticket Tool installation:** **Ticket Tool#4843** is online alongside Music, Security and ServerStats, plus the owner. The role list now contains **21 roles**. Its managed role is below all human staff roles. The actual nine enabled permissions are **View Channels, Manage Channels, Manage Roles, Send Messages, Manage Messages, Embed Links, Attach Files, Read Message History and Use Application Commands**. Administrator, Manage Server, member moderation, mass mentions and Manage Webhooks are off.
+- **Ticket setup boundary:** the official dashboard is signed in. Help-panel and private-category configuration is underway; no completed panel, live ticket flow or requester-isolation proof is recorded. Actual ticket channel permissions and ordinary-member access still require verification before the service is advertised as working.
+
+Remaining work includes the owner action for moderator 2FA, effective member/bot privacy checks, verification-to-Member testing, ticket isolation, moderated suggestions, channel adaptation and branded information posts. The saved safety settings and installed bot do not close those items. This update contains no deployment or live role-sync change.
+
+## Verified Music and channel checkpoint — 6 September 2026
 
 This later root-task UI evidence supersedes the earlier bot-installation, role-count and channel-name statements retained below. It records saved setup, not a completed Discord community or proven playback.
 
