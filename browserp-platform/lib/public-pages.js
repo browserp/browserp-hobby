@@ -240,6 +240,9 @@ export function createPublicPageHandler({ data = source, readTemplate = template
           if (filters.offset && filters.offset >= result.total) throw notFound();
           const servers = result.servers.map(publicServer).filter(Boolean);
           const count = `${result.total} ${result.total === 1 ? "server" : "servers"}`;
+          if (id === "roblox" && result.total === 0 && (filters.query || Object.keys(model.fields).some(key => key !== "platform" && filters[key] !== model.defaults[key]))) {
+            html = slot(html, "game-server-empty-v4", '<h3>No servers match your search.</h3><p>Remove a selected filter or try another game or region.</p><a class="button-v3 button-primary-v3" href="/list-server?platform=roblox">Apply to list your community</a>');
+          }
           html = slot(html, isDirectory ? "server-list" : "game-server-list-v4", servers.map(card).join(""), { "aria-busy": "false", "data-public-rendered": "true" });
           html = slot(html, isDirectory ? "result-count" : "game-result-count", count);
           html = attribute(html, isDirectory ? "directory-empty" : "game-server-empty-v4", { hidden: servers.length ? "" : false });

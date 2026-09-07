@@ -73,6 +73,45 @@ test("Roblox empty-state guidance and application destination match before and a
     } finally { dom.window.close(); }
   }
 });
+test("Roblox guidance survives the real search refresh while active no-match filters keep their reset action", async () => {
+  const response = await request("/games/roblox", { data: { ...defaultData, directory: async () => ({ servers: [], total: 0 }) } });
+  const dom = new JSDOM(response.body, { url: "https://www.browserp.com/games/roblox", runScripts: "outside-only" });
+  try {
+    const w = dom.window, doc = w.document, empty = doc.querySelector("#game-server-empty-v4");
+    const initial = { heading: empty.querySelector("h3").textContent, copy: empty.querySelector("p").textContent, href: empty.querySelector("a").getAttribute("href") };
+    const requests = [];
+    w.BrowseRPPlatforms = { theme(element, id) { element.dataset.platform = id; } };
+    w.fetch = async url => { requests.push(String(url)); return { ok: true, json: async () => ({ servers: [], total: 0, facets: {}, nextOffset: null }) }; };
+    for (const file of ["discovery-model.js", "smart-search.js", "browserp-games.js"]) w.eval(read(`public/${file}`));
+    const settled = async () => {
+      for (let tries = 0; tries < 100; tries++) {
+        await new Promise(resolve => setTimeout(resolve, 5));
+        if (doc.querySelector("#game-server-list-v4").getAttribute("aria-busy") === "false" && doc.querySelector("#game-result-count").textContent === "0 servers") return;
+      }
+      assert.fail("The fixture search did not settle");
+    };
+    const guidance = () => ({ heading: empty.querySelector("h3").textContent, copy: empty.querySelector("p").textContent, href: empty.querySelector("a").getAttribute("href") });
+    await settled();
+    assert.ok(requests.length > 0, "The actual search controller must complete its initial API refresh");
+    assert.deepEqual(guidance(), initial);
+    const reset = [...empty.querySelectorAll("button")].find(button => button.textContent === "Clear filters");
+    assert.equal(reset.hidden, true);
+    for (const query of ["q=missing", "region=Europe", "mode=city+rp", "feature=housing", "access=public", "language=English", "online=true", "verified=true", "beginner=true"]) {
+      const filtered = await request(`/games/roblox?${query}`, { data: { ...defaultData, directory: async () => ({ servers: [], total: 0 }) } });
+      assert.match(filtered.body, /<h3>No servers match your search\.<\/h3>/, query);
+      w.history.replaceState(null, "", `/games/roblox?${query}`);
+      w.dispatchEvent(new w.PopStateEvent("popstate"));
+      await settled();
+      assert.equal(empty.querySelector("h3").textContent, "No servers match your search.", query);
+      assert.equal(reset.hidden, false, query);
+      assert.equal(empty.querySelector("a").getAttribute("href"), initial.href, query);
+      reset.click();
+      await settled();
+      assert.deepEqual(guidance(), initial, query);
+      assert.equal(reset.hidden, true, query);
+    }
+  } finally { dom.window.close(); }
+});
 test("published game/directory pages arrive with unique content and crawlable server links", async () => {
   for (const path of ["/servers", "/games/fivem", "/api/router?_route=public/document&_path=/games/fivem"]) {
     const response = await request(path), doc = response.document();
