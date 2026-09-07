@@ -1,5 +1,17 @@
 # Launch SEO completion — 6 September 2026
 
+## Brand-discovery follow-up — 7 September 2026
+
+A read-only production audit identified live source `dcc800d6be1c3b137d56ec816c2a4dc62fe2cdee` through `/api/health`. The canonical homepage and Games page returned 200 with consistent BrowseRP identity. Apex and `/index.html` returned 308 to the canonical homepage. The favicon and original organization mark returned public PNG responses at 192×192 and 1254×1254. Robots permits the homepage; the sitemap returned 77 canonical URLs including home, with no private routes in the checked inventory. Raw HTML contains the game links. This supersedes older production handles in historical records; it does not establish Google's selected canonical or current ranking.
+
+The small source patch adds **`alternateName: ["Browse RP", "browserp.com"]`** to the existing homepage WebSite and Organization nodes and the matching shared identities in generated directory, game, community and article HTML. **BrowseRP remains the primary name.** Titles, descriptions, content, layout, image URLs, canonical URLs, crawl policy and navigation remain unchanged. RPBrowse is not declared a brand, and no keyword-variant pages or repeated title phrases are introduced. No unverified external profile is added as `sameAs`.
+
+Google permits genuine alternative site names and a lowercase domain fallback. These properties express naming preferences, not a promise of first place for any query. Google also recommends using the same name/alternate names for the Organization identity. References: [site-name guidance](https://developers.google.com/search/docs/appearance/site-names), [Organization identity](https://developers.google.com/search/docs/appearance/structured-data/organization), [title guidance](https://developers.google.com/search/docs/appearance/title-link).
+
+The root task's current Search Console Overview showed **2 indexed / 3 not indexed / 0 clicks**. Its reporting dates and homepage URL Inspection are still being investigated; these overview counts are not treated as a current complete sitemap inventory or a diagnosis of a code failure. The already accepted sitemap should not be repeatedly resubmitted.
+
+Validation for this patch parses the single homepage identity and compares it with generated Games, directory, game, community, blog index and article identities. All **25 focused metadata/public-page tests passed** with one Node 24 worker, covering the existing canonical, preview, content and privacy boundaries. The homepage was also verified byte-identical outside its JSON-LD block; the diff check passed. After publication, inspect the exact homepage HTML and use Search Console URL Inspection for Google's access and canonical evidence. **Rich Results Test does not support site-name markup**; use a schema parser/validator for that markup. Allow recrawl and processing time. This paragraph records local source work; publication of the alternate names still needs the exact release readback.
+
 ## Live Google markup checks — 6 September, 21:46–21:49 BST
 
 Google's public Rich Results Test fetched the real production pages successfully using its smartphone inspection agent:

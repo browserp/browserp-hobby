@@ -71,6 +71,7 @@
   }
   function mount({ root, list, empty, count, render, fixedGame }) {
     let initialDocument = list.dataset.publicRendered === "true";
+    const gameEmpty = fixedGame === "roblox" ? { heading: empty.querySelector("h3").textContent, copy: empty.querySelector("p").textContent } : null;
     let filters = read(fixedGame), facets = {}, nextOffset = null, requestId = 0, controller, timer = null, shown = [], retryAppend = false;
     let firstOffset = filters.offset;
     let loading = false, refreshAt = 0, lastLoadedAt = 0, directoryControls;
@@ -223,15 +224,17 @@
         expireCounts(false);
         draw(); list.hidden = !shown.length; empty.hidden = Boolean(shown.length);
         count.textContent = `${payload.total} ${payload.total === 1 ? "server" : "servers"}${shown.length < payload.total ? ` · Showing ${shown.length}` : ""}`;
-        empty.querySelector("h3").textContent = "No servers match your search.";
-        empty.querySelector("p").textContent = "Remove a selected filter or try another game or region.";
+        const showGameGuidance = gameEmpty && payload.total === 0 && !snapshot.query && snapshot.offset === 0
+          && Object.keys(M.fields).every(key => key === "platform" || snapshot[key] === M.defaults[key]);
+        empty.querySelector("h3").textContent = showGameGuidance ? gameEmpty.heading : "No servers match your search.";
+        empty.querySelector("p").textContent = showGameGuidance ? gameEmpty.copy : "Remove a selected filter or try another game or region.";
         more.hidden = nextOffset === null;
         if (nextOffset !== null) {
           const nextParams = M.params({ ...filters, offset: nextOffset });
           if (fixedGame) nextParams.delete("platform");
           more.href = `${location.pathname}?${nextParams}`;
         } else more.removeAttribute("href");
-        more.setAttribute("aria-disabled", "false"); clearEmpty.hidden = false; sync();
+        more.setAttribute("aria-disabled", "false"); clearEmpty.hidden = Boolean(showGameGuidance); sync();
       } catch (error) {
         if (id !== requestId || (error.name === "AbortError" && !timedOut)) return;
         if (background && shown.length) {
