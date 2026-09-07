@@ -20,8 +20,9 @@ const upcoming = { forza: "Forza", gmod: "Garry's Mod", arma: "ARMA", vrchat: "V
 const gameArtwork = id => Object.hasOwn(games, id) ? `/assets/games/${id}-selected-v2.webp` : `/assets/games/${id === "6m" ? "gta6" : id}-official.jpg`;
 const gameImageSizes = { fivem: [825, 413], redm: [740, 423], minecraft: [640, 339], roblox: [1920, 1076] };
 const brandImage = { url: `${ORIGIN}/browserp-mark-v3.png`, alt: "BrowseRP RP logo", type: "image/png", width: 1254, height: 1254, card: "summary" };
-const publisher = { "@type": "Organization", "@id": `${ORIGIN}/#organization`, name: "BrowseRP", url: `${ORIGIN}/`, logo: { "@type": "ImageObject", url: brandImage.url, width: 1254, height: 1254 } };
-const website = { "@type": "WebSite", "@id": `${ORIGIN}/#website`, name: "BrowseRP", url: `${ORIGIN}/`, publisher };
+const alternateNames = ["Browse RP", "browserp.com"];
+const publisher = { "@type": "Organization", "@id": `${ORIGIN}/#organization`, name: "BrowseRP", alternateName: alternateNames, url: `${ORIGIN}/`, logo: { "@type": "ImageObject", url: brandImage.url, width: 1254, height: 1254 } };
+const website = { "@type": "WebSite", "@id": `${ORIGIN}/#website`, name: "BrowseRP", alternateName: alternateNames, url: `${ORIGIN}/`, publisher };
 function breadcrumbs(items) { return { "@type": "BreadcrumbList", itemListElement: [["BrowseRP", "/"], ...items].map(([name, path], index) => ({ "@type": "ListItem", position: index + 1, name, item: ORIGIN + path })) }; }
 function gameImage(id) { const [width, height] = gameImageSizes[id]; return { url: ORIGIN + gameArtwork(id), alt: `${games[id][0]} artwork`, type: "image/webp", width, height, card: "summary_large_image" }; }
 function serverImage(server) {
@@ -221,7 +222,11 @@ export function createPublicPageHandler({ data = source, readTemplate = template
             html = slot(html, "game-page-lead-v4", escapeHTML(description));
             html = html.replace('class="game-page-hero-v4"', `class="game-page-hero-v4" data-platform="${id}"`);
           }
-          if (id === "roblox") html = slot(html, "game-page-actions-v4", '<a class="button-v3 button-primary-v3" href="/servers?platform=roblox">Browse Roblox communities</a><a class="button-v3 button-secondary-v3" href="/list-server?platform=roblox">Apply to list your community</a>');
+          html = attribute(html, "game-joining-guide-v4", { hidden: id === "fivem" ? false : "" });
+          if (id === "roblox") {
+            html = slot(html, "game-page-actions-v4", '<a class="button-v3 button-primary-v3" href="/servers?platform=roblox">Browse Roblox communities</a><a class="button-v3 button-secondary-v3" href="/list-server?platform=roblox">Apply to list your community</a>');
+            html = slot(html, "game-server-empty-v4", '<h3>Help shape Roblox roleplay on BrowseRP.</h3><p>Run a community? Apply for a reviewed listing. Applying to BrowseRP is separate from any application players need to join you.</p><a class="button-v3 button-primary-v3" href="/list-server?platform=roblox">Apply to list your community</a>');
+          }
           if (coming) {
             html = slot(html, "game-page-actions-v4", '<a class="button-v3 button-primary-v3" href="/games">Explore available games</a>' + (id === "gta6" || id === "6m" ? '<a class="button-v3 button-secondary-v3" href="https://www.rockstargames.com/VI" target="_blank" rel="noopener noreferrer">Official GTA VI news</a>' : ''));
             html = attribute(html, "game-upcoming-v5", { hidden: "" });

@@ -22,6 +22,57 @@ async function request(path, { data = defaultData, method = "GET", headers = {} 
   await createPublicPageHandler({ data })({ url: path, method, headers }, output);
   return { ...output, document: () => new JSDOM(output.body).window.document };
 }
+function hydrateGame(dom) {
+  let search;
+  dom.window.BrowseRPPlatforms = { theme(element, id) { element.dataset.platform = id; } };
+  dom.window.BrowseRPSearch = { mount(options) { search = options; } };
+  dom.window.eval(read("public/browserp-games.js"));
+  return search;
+}
+test("FiveM's choosing guide is visible before and after hydration without changing listings or metadata", async () => {
+  const data = { ...defaultData, directory: async () => ({ servers: [server], total: 40 }) };
+  for (const path of ["/games/fivem", "/games/redm", "/games/minecraft", "/games/roblox", "/games", "/games/gta6"]) {
+    const response = await request(path, { data });
+    const dom = new JSDOM(response.body, { url: `https://www.browserp.com${path}`, runScripts: "outside-only" });
+    try {
+      const doc = dom.window.document;
+      const guide = doc.querySelector("#game-joining-guide-v4");
+      assert.equal(guide.hidden, path !== "/games/fivem", path);
+      const before = [doc.title, doc.querySelector('meta[name="description"]').content, doc.querySelector("h1").textContent, doc.querySelector("#game-result-count").textContent, doc.querySelector("#game-server-list-v4").innerHTML];
+      if (path === "/games/fivem") {
+        assert.equal(guide.querySelector("a").getAttribute("href"), "/blog/how-to-choose-a-fivem-roleplay-server");
+        assert.equal(guide.textContent, "How to choose a FiveM roleplay server");
+        assert.equal(guide.closest("[hidden]"), null);
+        assert.ok(doc.querySelector('a[href="/server/cali-rp"]'));
+        assert.ok(doc.querySelector('a[href="/games/fivem?offset=24"]'));
+      }
+      hydrateGame(dom);
+      assert.equal(guide.hidden, path !== "/games/fivem", path);
+      if (path !== "/games/gta6") assert.deepEqual([doc.title, doc.querySelector('meta[name="description"]').content, doc.querySelector("h1").textContent, doc.querySelector("#game-result-count").textContent, doc.querySelector("#game-server-list-v4").innerHTML], before, path);
+    } finally { dom.window.close(); }
+  }
+});
+test("Roblox empty-state guidance and application destination match before and after hydration", async () => {
+  for (const total of [0, 1]) {
+    const data = { ...defaultData, directory: async () => ({ servers: total ? [{ ...server, platform_id: "roblox" }] : [], total }) };
+    const response = await request("/games/roblox", { data });
+    const dom = new JSDOM(response.body, { url: "https://www.browserp.com/games/roblox", runScripts: "outside-only" });
+    try {
+      const doc = dom.window.document, empty = doc.querySelector("#game-server-empty-v4");
+      assert.equal(empty.hidden, total > 0);
+      assert.equal(doc.querySelector("#game-result-count").textContent, `${total} ${total === 1 ? "server" : "servers"}`);
+      assert.equal(empty.querySelector("h3").textContent, "Help shape Roblox roleplay on BrowseRP.");
+      assert.match(empty.querySelector("p").textContent, /Applying to BrowseRP is separate from any application players need to join you\./);
+      assert.equal(empty.querySelector("a").getAttribute("href"), "/list-server?platform=roblox");
+      const before = empty.innerHTML;
+      const search = hydrateGame(dom);
+      assert.equal(empty.innerHTML, before);
+      assert.equal(empty.hidden, total > 0);
+      assert.equal(search.fixedGame, "roblox");
+      assert.equal(search.empty, empty);
+    } finally { dom.window.close(); }
+  }
+});
 test("published game/directory pages arrive with unique content and crawlable server links", async () => {
   for (const path of ["/servers", "/games/fivem", "/api/router?_route=public/document&_path=/games/fivem"]) {
     const response = await request(path), doc = response.document();
@@ -38,6 +89,24 @@ test("published game/directory pages arrive with unique content and crawlable se
     assert.match(response.headers["cache-control"], /private, no-store/);
     assert.equal(response.headers["cdn-cache-control"], "no-store");
   }
+});
+test("public page identities match the homepage brand and its genuine alternate names", async () => {
+  const home = new JSDOM(read("public/index.html"));
+  try {
+    const identity = JSON.parse(home.window.document.querySelector('script[type="application/ld+json"]').textContent);
+    delete identity["@context"];
+    for (const path of ["/games", "/servers", "/games/fivem", "/server/cali-rp", "/blog", "/blog/choosing-a-community"]) {
+      const response = await request(path), dom = new JSDOM(response.body);
+      try {
+        assert.equal(response.statusCode, 200, path);
+        const structured = JSON.parse(dom.window.document.querySelector('script[type="application/ld+json"]').textContent);
+        assert.deepEqual(structured.isPartOf, identity, path);
+        if (structured.publisher) assert.deepEqual(structured.publisher, identity.publisher, path);
+        assert.deepEqual(structured.isPartOf.alternateName, ["Browse RP", "browserp.com"]);
+        assert.equal(structured.isPartOf.name, "BrowseRP");
+      } finally { dom.window.close(); }
+    }
+  } finally { home.window.close(); }
 });
 test("directory pagination is real links and uses distinct canonical pages; arbitrary filters stay noindex", async () => {
   const data = { ...defaultData, directory: async filters => ({ total: 60, servers: [{ ...server, slug: `community-${filters.offset}` }] }) };

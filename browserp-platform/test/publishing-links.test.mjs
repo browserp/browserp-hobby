@@ -97,10 +97,12 @@ test("homepage declares BrowseRP once with its canonical publisher identity and 
     assert.equal(identity["@type"], "WebSite");
     assert.equal(identity["@id"], `${canonical}#website`);
     assert.equal(identity.name, "BrowseRP");
+    assert.deepEqual(identity.alternateName, ["Browse RP", "browserp.com"]);
     assert.equal(identity.url, canonical);
     assert.equal(identity.publisher["@type"], "Organization");
     assert.equal(identity.publisher["@id"], `${canonical}#organization`);
     assert.equal(identity.publisher.name, identity.name);
+    assert.deepEqual(identity.publisher.alternateName, identity.alternateName);
     assert.equal(identity.publisher.url, canonical);
     assert.equal(identity.publisher.logo["@type"], "ImageObject");
     assert.equal(identity.publisher.logo.url, doc.querySelector('meta[property="og:image"]').content);

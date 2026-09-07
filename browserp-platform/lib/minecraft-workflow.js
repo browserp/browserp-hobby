@@ -71,8 +71,13 @@ export async function refreshMinecraftCode(code,{serverId,strict=false,fetchServ
   const sources=await rpc("service_minecraft_sources",{p_server_id:serverId,p_due_only:false,p_limit:1},undefined,{useSecret:true,signal});const item=(sources||[]).find(s=>s.serverId===serverId&&s.joinCode===code);
   if(!item)throw Object.assign(new Error("This published Minecraft source is unavailable."),{status:404});
   if(!await rpc("service_claim_minecraft_refresh",{p_join_code:code},undefined,{useSecret:true,signal}))return{serverId,skipped:true,reason:"recent_or_in_progress",checkedAt:item.lastCheckedAt||null};
-  try{return await saveObservation(code,await fetchServer(item.address,{edition:item.edition,signal}),signal);}
+  let source;
+  try{source=await fetchServer(item.address,{edition:item.edition,signal});}
   catch(e){signal?.throwIfAborted();await rpc("service_mark_minecraft_unavailable",{p_join_code:code},undefined,{useSecret:true,signal});if(strict)throw e;return{players:null,capacity:null,online:false,unavailable:true};}
+  // Keep rejected saves in the worker-failure counter, without marking a
+  // successfully read source unavailable or changing its stored freshness.
+  signal?.throwIfAborted();
+  return saveObservation(code,source,signal);
 }
 export async function refreshDueMinecraftServers(){
   if(!supabaseConfig().privileged)return[];

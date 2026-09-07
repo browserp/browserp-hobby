@@ -103,16 +103,20 @@ export async function refreshCfxCode(joinCode, { platform = "fivem", strict = fa
   const code = parseFiveMJoinCode(joinCode);
   const lease = await rpc("service_claim_cfx_refresh", { p_platform: platform, p_join_code: code }, undefined, { useSecret: true, signal });
   if (!lease) return null;
+  let source;
   try {
-    const source = await fetchCfxServer(code, { platform, signal });
+    source = await fetchCfxServer(code, { platform, signal });
     if (source.players.status !== "online" || source.players.online === null || source.players.max === null || !source.players.observedAt) throw new Error("Cfx has no current player observation for this server.");
-    return await rpc("service_refresh_cfx_snapshot", { p_platform: platform, p_join_code: code, p_online: true, p_players: source.players.online, p_capacity: source.players.max, p_observed_at: source.players.observedAt }, undefined, { useSecret: true, signal });
   } catch (error) {
     signal?.throwIfAborted();
     await rpc("service_mark_cfx_unavailable", { p_platform: platform, p_join_code: code }, undefined, { useSecret: true, signal });
     if (strict) throw error;
     return { online: false, players: null, capacity: null, unavailable: true };
   }
+  // A rejected save is a processing failure, not an unavailable source.
+  // Let the scheduler record it without overwriting the source's last error.
+  signal?.throwIfAborted();
+  return rpc("service_refresh_cfx_snapshot", { p_platform: platform, p_join_code: code, p_online: true, p_players: source.players.online, p_capacity: source.players.max, p_observed_at: source.players.observedAt }, undefined, { useSecret: true, signal });
 }
 export async function refreshDueFiveMServers() {
   if (!supabaseConfig().privileged) return [];

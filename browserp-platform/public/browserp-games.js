@@ -79,6 +79,7 @@
   function render() {
     const requested = location.pathname.split("/").filter(Boolean)[1] || new URLSearchParams(location.search).get("game") || "";
     const game = GAMES.find((item) => item.id === requested);
+    $("#game-joining-guide-v4").hidden = game?.id !== "fivem";
     const nav = $("#game-page-nav-v4");
     nav.replaceChildren(...AVAILABLE_GAMES.map((item) => { const link = node("a", "game-nav-chip-v4", item.name); link.href = `/games/${item.id}`; link.dataset.game = item.id; window.BrowseRPPlatforms.theme(link, item.id); link.prepend(gameMark(item.id, "game-nav-mark-v4")); if (game?.id === item.id) { link.classList.add("is-selected"); link.setAttribute("aria-current", "page"); } return link; }));
     $("#game-upcoming-grid-v5").replaceChildren(...UPCOMING_GAMES.map((item) => gameCard(item, true)));
