@@ -4,6 +4,12 @@
 
 Updated 7 September 2026. This is the working scope and evidence ledger, not a claim that launch work is complete. Later requests add to this scope unless the owner explicitly changes it. Historical verification must be refreshed against the release being published.
 
+## Final Discord update — 7 September 2026, after 08:55 local
+
+The user approved free confirmed delete-on-close on all seven Ticket Tool panels. Saved settings read **Two Step Ticket OFF / Two Step Close ON**, with **Support Team Only** Close and Confirm Close controls labelled **Close & delete / Confirm deletion**. Staff must save and verify a manual transcript **before** confirming deletion; automatic transcripts/Premium were not purchased. The controlled Help test saved a 4 KB, three-message transcript (`1546428337138831381`), deleted ticket `1546427997232566292` after confirmation, and left Ticket Tool and Security online. Security exceptions now name **Ticket Tool only for Channel Create and Channel Delete**, with no All/Global exception; they are not confined to ticket categories. This supersedes earlier retain-on-close and creation-only instructions. No historical bulk purge was performed.
+
+Welcome/FAQ, read-only reporting/appeal/application redirects and named categories are published. Unverified users have View/Read History access to public start-here only, with writing denies retained. The latest Discord setup document records exact message IDs and permission readbacks. Ordinary-member verification/privacy/voting, effective staff delegation and server moderator 2FA remain unproven or unfinished; website MFA does not establish server 2FA. Website-to-Discord role assignment/revocation remains disabled and unapplied. Production stays `4d3b4c7` / `dpl_E8Wh56s1GAmHkNtnLUu87Q3JPGJi`; this documentation update does not change or redeploy the website.
+
 ## Website release checkpoint — 7 September 2026
 
 This checkpoint supersedes the earlier website release handles below. Production at **https://www.browserp.com** is **`4d3b4c78d26d8407e922112fb5fb015d1dfe55e6`**, tree **`1b7718e41f4ee748ef37bec6998adf6393f997a0`**, through READY deployment **`dpl_E8Wh56s1GAmHkNtnLUu87Q3JPGJi`** (`https://browserp-hobby-3lh20khvn-browserp.vercel.app`). The reviewed preview is `dpl_9Rbr3VbsnSJqYG97mADuTGpm1gqq` (`https://browserp-hobby-igzefcv5s-browserp.vercel.app`). Root reviewed actual desktop/mobile advert evidence and promoted that exact commit.
