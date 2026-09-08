@@ -1,4 +1,4 @@
-/* One original-wordmark treatment for selected public page introductions. */
+/* A quiet wordmark texture for selected public page introductions. */
 [data-wordmark-surface] { position: relative; isolation: isolate; }
 .home-hero-pattern {
   position: absolute;
@@ -8,10 +8,15 @@
   pointer-events: none;
   mask-image: linear-gradient(#000 0%, #000 80%, transparent 100%);
   -webkit-mask-image: linear-gradient(#000 0%, #000 80%, transparent 100%);
-  --wordmark-width: 120px;
-  --wordmark-height: calc(var(--wordmark-width) * 358 / 1400);
+  --wordmark-width: 92px;
+  --wordmark-aspect: .2007142857; /* The transparent artwork is 1400 by 281. */
+  --wordmark-height: calc(var(--wordmark-width) * var(--wordmark-aspect));
   --wordmark-gap: 16px;
   --wordmark-tempo: 1.3333333333;
+  --wordmark-period: 36.8s; /* One 92px repeat at a steady 2.5px per second. */
+  --wordmark-base-opacity: .07;
+  --wordmark-wave-opacity: .24;
+  --wordmark-wave-scale: 1.03;
 }
 .home-hero-wordmarks {
   position: absolute;
@@ -23,34 +28,37 @@
   transform: translate(-50%, -50%) rotate(-45deg);
   opacity: .92;
 }
+.home-hero-wordmark-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .92; }
+/* Keep the original grid for geometry and a no-canvas fallback, without any
+   repeated-image paint or animation work after the cached renderer is ready. */
+.home-hero-pattern[data-renderer="canvas"] .home-hero-wordmarks { visibility: hidden; }
+.home-hero-pattern[data-renderer="canvas"] .home-hero-wordmarks,
+.home-hero-pattern[data-renderer="canvas"] .home-hero-wordmark-row,
+.home-hero-pattern[data-renderer="canvas"] .home-hero-wordmark-row::before,
+.home-hero-pattern[data-renderer="canvas"] .home-hero-wordmark-row::after { animation: none !important; }
 .home-hero-wordmark-row {
   position: relative;
-  --row-shift: -120px;
-  --row-drift-delay: calc(var(--wave-index, 0) * -1.8s);
 }
-.home-hero-wordmark-row:nth-child(even) { --row-shift: 120px; }
 .home-hero-wordmark-row::before {
   content: "";
   position: absolute;
-  /* One full repeat on either side covers the row's opposing translations. */
-  inset: 0 -120px;
-  background: url("/assets/browserp-logo-v5.png?v=20260908") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
-  opacity: .25;
+  /* A full repeat on each side keeps the shared diagonal travel seamless. */
+  inset: 0 calc(-1 * var(--wordmark-width));
+  background: url("/assets/browserp-pattern-wordmark-v1.png?v=20260908") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
+  opacity: var(--wordmark-base-opacity);
 }
 .home-hero-wordmark-row::after {
   content: "";
   position: absolute;
-  inset: 0 -120px;
-  background: url("/assets/browserp-logo-v5.png?v=20260908") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
+  inset: 0 calc(-1 * var(--wordmark-width));
+  background: url("/assets/browserp-pattern-wordmark-v1.png?v=20260908") repeat-x 0 0 / var(--wordmark-width) var(--wordmark-height);
   filter: brightness(1.12) drop-shadow(0 0 1px rgb(236 79 166 / .32));
   opacity: 0;
   transform-origin: center;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .home-hero-wordmarks { animation: home-wordmark-drift calc(72s * var(--wordmark-tempo)) linear infinite; animation-play-state: paused; }
   .home-hero-wordmark-row {
-    animation: home-wordmark-row-drift calc(48s * var(--wordmark-tempo)) linear infinite;
-    animation-delay: var(--row-drift-delay);
+    animation: home-wordmark-row-drift var(--wordmark-period) linear infinite;
     animation-play-state: paused;
   }
   .home-hero-wordmark-row::after {
@@ -65,15 +73,11 @@
 /* Row order becomes a top-left to bottom-right wave after the plane's rotation. */
 @keyframes home-wordmark-wave {
   0%, 14%, 100% { opacity: 0; transform: scaleY(1); }
-  7% { opacity: .48; transform: scaleY(1.045); }
-}
-@keyframes home-wordmark-drift {
-  from { transform: translate(-50%, -50%) rotate(-45deg) translateX(0); }
-  to { transform: translate(-50%, -50%) rotate(-45deg) translateX(-120px); }
+  7% { opacity: var(--wordmark-wave-opacity); transform: scaleY(var(--wordmark-wave-scale)); }
 }
 @keyframes home-wordmark-row-drift {
   from { transform: translateX(0); }
-  to { transform: translateX(var(--row-shift)); }
+  to { transform: translateX(var(--wordmark-width)); }
 }
 [data-wordmark-surface]::after {
   content: "";

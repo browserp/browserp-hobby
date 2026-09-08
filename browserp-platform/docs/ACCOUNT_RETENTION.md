@@ -9,7 +9,9 @@ The daily `browserp-account-retention` job identifies inactive accounts for staf
 
 `private.run_account_retention()` remains private to the scheduled database operation. It returns `mode: review-only`, the number of new reminders and due reviews, and `deleted: 0`. Repeated runs do not duplicate reminders. The existing daily schedule remains in place.
 
-For a review, inspect account activity and relevant ownership, moderation and appeal records. Inactivity alone is not grounds for removing a community or its owner. A future account deletion request needs a real contact/request route, verified identity, an explicit decision about retained records and server ownership, safe media cleanup, and a proven backup/recovery process. The dashboard currently has no dedicated export or deletion request form; do not tell a member that it does.
+For a review, inspect account activity and relevant ownership, moderation and appeal records. Inactivity alone is not grounds for removing a community or its owner.
+
+The signed-in dashboard includes a data-request form for a copy, correction or account deletion, with request updates and staff review (`public/privacy-requests.js`, mounted by `public/browserp-portal-v2.js`). Approved copies have separate preparation, download and receipt steps. Submitting a deletion request, running its read-only erasure preflight, or recording a staff follow-up does not itself delete the account. An erasure executor still needs verified identity, explicit decisions about retained records and server ownership, safe media cleanup, and defined backup/restore handling. See `ACCOUNT_ERASURE_PREFLIGHT.md` for that boundary.
 
 ## Release checks
 

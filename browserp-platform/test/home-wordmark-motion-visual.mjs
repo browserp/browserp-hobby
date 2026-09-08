@@ -1,103 +1,165 @@
-import assert from "node:assert/strict";
-import { pathToFileURL } from "node:url";
-import { resolve } from "node:path";
+import assert from 'node:assert/strict';
+import { pathToFileURL } from 'node:url';
+import { resolve } from 'node:path';
 
-const engines = await import(pathToFileURL(resolve(process.argv[2], "index.mjs")).href);
-const base = process.env.BROWSERP_VISUAL_URL || "http://127.0.0.1:4189";
+const engines = await import(pathToFileURL(resolve(process.argv[2], 'index.mjs')).href);
+const base = process.env.BROWSERP_VISUAL_URL || 'http://127.0.0.1:4189';
+const near = (actual, expected, label) => assert.ok(Math.abs(actual - expected) < .002, `${label}: ${actual} differs from ${expected}`);
 
-async function motionState(page) {
+async function state(page) {
   return page.evaluate(() => {
-    const matrix = transform => transform === "none" ? new DOMMatrixReadOnly() : new DOMMatrixReadOnly(transform);
-    const rows = [...document.querySelectorAll(".home-hero-wordmark-row")].map(row => {
-      const style = getComputedStyle(row), before = getComputedStyle(row, "::before"), after = getComputedStyle(row, "::after");
-      const movement = matrix(style.transform), wave = matrix(after.transform);
-      return {
-        x: movement.m41, rowScale: movement.m22, rowName: style.animationName,
-        rowDuration: style.animationDuration, rowState: style.animationPlayState,
-        beforePosition: before.backgroundPosition, afterPosition: after.backgroundPosition,
-        beforeLeft: parseFloat(before.left), beforeRight: parseFloat(before.right),
-        afterLeft: parseFloat(after.left), afterRight: parseFloat(after.right),
-        beforeName: before.animationName, afterName: after.animationName,
-        afterState: after.animationPlayState, afterDelay: parseFloat(after.animationDelay),
-        waveOpacity: parseFloat(after.opacity), waveScale: wave.m22, waveX: wave.m41
-      };
-    });
-    const plane = getComputedStyle(document.querySelector(".home-hero-wordmarks"));
-    const brand = document.querySelector(".public-nav-v6 > .navigation-brand-v6");
-    const image = getComputedStyle(brand.querySelector("img")), halo = getComputedStyle(brand, "::before");
-    return { rows, planeTransform: plane.transform, planeName: plane.animationName, planeDuration: plane.animationDuration,
-      brandName: image.animationName, brandState: image.animationPlayState, brandScale: matrix(image.transform).m11,
-      haloName: halo.animationName, haloOpacity: parseFloat(halo.opacity) };
+    const canvas = document.querySelector('.home-hero-wordmark-canvas');
+    const brand = document.querySelector('.public-nav-v6 > .navigation-brand-v6');
+    const image = getComputedStyle(brand.querySelector('img')), halo = getComputedStyle(brand, '::before'), cyan = getComputedStyle(brand, '::after');
+    return { ...canvas.wordmarkFrame, pixels: [canvas.width, canvas.height],
+      dpr: devicePixelRatio, brandName: image.animationName, brandState: image.animationPlayState,
+      brandTransform: image.transform, haloName: halo.animationName, haloOpacity: halo.opacity, haloState: halo.animationPlayState, cyanName: cyan.animationName, cyanOpacity: cyan.opacity, cyanState: cyan.animationPlayState };
   });
 }
 
-const browser = await engines.chromium.launch({ headless: true });
+const engine = process.env.BROWSERP_BROWSER_ENGINE || 'chromium';
+console.log(JSON.stringify({ engine, status: 'started' }));
+const browser = await engines[engine].launch({ headless: true });
 try {
-  const context = await browser.newContext({ viewport: { width: 1366, height: 900 }, reducedMotion: "no-preference" });
+  const context = await browser.newContext({ viewport: { width: 1366, height: 900 }, reducedMotion: 'no-preference' });
+  await context.addInitScript(() => {
+    localStorage.setItem('browserp-theme', 'dark');
+    const schedule = window.requestAnimationFrame.bind(window);
+    window.wordmarkRequests = 0;
+    window.requestAnimationFrame = callback => {
+      if (callback.name === 'tick') window.wordmarkRequests += 1;
+      return schedule(callback);
+    };
+  });
   const page = await context.newPage();
   await page.goto(`${base}/`);
-  await page.locator('.home-hero-pattern[data-motion="running"] .home-hero-wordmark-row').first().waitFor();
-  const brand = await page.locator(".public-nav-v6 > .navigation-brand-v6 img").evaluate(image => ({
-    complete: image.complete,
-    naturalWidth: image.naturalWidth,
-    naturalHeight: image.naturalHeight,
-    width: image.getBoundingClientRect().width,
-    height: image.getBoundingClientRect().height
-  }));
-  assert.deepEqual({ complete: brand.complete, naturalWidth: brand.naturalWidth, naturalHeight: brand.naturalHeight }, { complete: true, naturalWidth: 1400, naturalHeight: 358 });
-  assert.ok(brand.width <= 190 * 1.041 && brand.height <= 54 * 1.041 && brand.width > 160 && brand.height > 40, "the new asset stays inside the existing header geometry and its retained 4% breathe animation");
-  const first = await motionState(page);
-  await page.waitForTimeout(600);
-  const middle = await motionState(page);
-  await page.waitForTimeout(600);
-  const second = await motionState(page);
-  assert.equal(first.rows[0].rowName, "home-wordmark-row-drift");
-  assert.equal(first.rows[0].rowDuration, "64s");
-  assert.equal(first.rows[0].rowState, "running");
-  assert.equal(first.rows[0].beforeName, "none");
-  assert.equal(first.rows[0].afterName, "home-wordmark-wave");
-  assert.equal(first.rows[0].afterState, "running");
-  const oddTravel = second.rows[0].x - first.rows[0].x;
-  const evenTravel = second.rows[1].x - first.rows[1].x;
-  assert.ok(Math.abs(oddTravel) > .5, `odd row moved only ${oddTravel}px`);
-  assert.ok(Math.abs(evenTravel) > .5, `even row moved only ${evenTravel}px`);
-  assert.ok(oddTravel * evenTravel < 0, "adjacent rows drift in opposite directions");
-  for (const [index, row] of second.rows.entries()) {
-    assert.equal(row.beforePosition, first.rows[index].beforePosition, "base images are static painted content");
-    assert.equal(row.afterPosition, first.rows[index].afterPosition, "glow images inherit row travel without repainting their backgrounds");
-    assert.equal(row.rowScale, 1); assert.equal(row.waveX, 0, "the wave's transform remains independent of row translation");
-    assert.ok([row.beforeLeft, row.beforeRight, row.afterLeft, row.afterRight].every(inset => inset === -120), "both layers cover a complete repeat in either direction");
-    assert.ok(Math.abs((row.waveScale - 1) / .045 - row.waveOpacity / .48) < .002, "wave brightness and growth remain synchronized");
+  await page.locator('.home-hero-pattern[data-renderer="canvas"] canvas').waitFor();
+  await page.locator('.public-nav-v6 > .navigation-brand-v6 img').waitFor();
+  const first = await state(page); await page.waitForTimeout(600);
+  const middle = await state(page); await page.waitForTimeout(600);
+  const second = await state(page);
+  const travel = second.rows[0].x - first.rows[0].x;
+  assert.ok(travel > 0, 'the rows move left to right along the rotated plane');
+  for (let i = 0; i < second.rows.length; i += 1) near(second.rows[i].x - first.rows[i].x, travel, `row ${i} has the shared speed`);
+  near(travel / ((second.time - first.time) / 1000), 2.5, 'steady visible travel in pixels per second');
+  assert.equal(second.planeX, 0, 'no plane movement cancels the shared row movement');
+  assert.equal(second.geometry.width, 92);
+  near(second.geometry.baseOpacity, .07, 'the small resting wordmarks remain lightly visible');
+  near(second.geometry.waveOpacity, .24, 'the travelling pulse defines the wordmarks');
+  assert.ok(second.rows.some((row, i) => Math.abs(row.opacity - first.rows[i].opacity) > .01), 'the wave travels while the rows move');
+  assert.equal(second.pixels[0], Math.ceil(second.geometry.viewportWidth * second.dpr));
+  assert.equal(second.pixels[1], Math.ceil(second.geometry.viewportHeight * second.dpr));
+  assert.equal(first.brandName, 'navigation-brand-breathe'); assert.equal(first.brandState, 'running');
+  assert.equal(first.haloName, 'navigation-brand-glow');
+  assert.equal(first.cyanName, 'navigation-brand-glow-cyan');
+  assert.ok(new Set([first.brandTransform, middle.brandTransform, second.brandTransform]).size > 1, 'header breathing continues concurrently');
+  assert.ok(new Set([first.haloOpacity, middle.haloOpacity, second.haloOpacity]).size > 1, 'header glow continues concurrently');
+
+  const colors = await page.evaluate(() => {
+    const brand = document.querySelector('.public-nav-v6 > .navigation-brand-v6');
+    const animations = brand.getAnimations({ subtree: true });
+    const saved = animations.map(animation => animation.currentTime);
+    const phase = time => {
+      animations.forEach(animation => { animation.pause(); animation.currentTime = time; });
+      return { pink: Number(getComputedStyle(brand, '::before').opacity), cyan: Number(getComputedStyle(brand, '::after').opacity),
+        filter: getComputedStyle(brand.querySelector('img')).filter, width: brand.offsetWidth, height: brand.offsetHeight };
+    };
+    const pink = phase(3000), cyan = phase(9000);
+    animations.forEach((animation, index) => { animation.currentTime = saved[index]; animation.play(); });
+    return { pink, cyan };
+  });
+  assert.ok(colors.pink.pink > colors.pink.cyan && colors.cyan.cyan > colors.cyan.pink, 'soft pink and cyan halos take turns');
+  assert.equal(colors.pink.filter, 'none'); assert.equal(colors.cyan.filter, 'none');
+  assert.equal(colors.pink.width, colors.cyan.width); assert.equal(colors.pink.height, colors.cyan.height);
+
+  // Sample the CSS fallback, hidden and paused at the exact
+  // drawn canvas time. Browser CSS interpolation is an independent timing oracle.
+  const oracle = await page.evaluate(time => {
+    const original = document.querySelector('.home-hero-pattern');
+    const copy = original.cloneNode(true);
+    delete copy.dataset.renderer; copy.dataset.motion = 'paused';
+    copy.style.visibility = 'hidden'; copy.querySelector('canvas').remove();
+    original.parentElement.append(copy);
+    getComputedStyle(copy.querySelector('.home-hero-wordmarks')).transform;
+    for (const animation of copy.getAnimations({ subtree: true })) { animation.pause(); animation.currentTime = time; }
+    const matrix = value => value === 'none' ? new DOMMatrixReadOnly() : new DOMMatrixReadOnly(value);
+    const rows = [...copy.querySelectorAll('.home-hero-wordmark-row')].map(row => {
+      const body = getComputedStyle(row), wave = getComputedStyle(row, '::after');
+      return { x: matrix(body.transform).m41, opacity: Number(wave.opacity), scale: matrix(wave.transform).m22 };
+    });
+    const plane = matrix(getComputedStyle(copy.querySelector('.home-hero-wordmarks')).transform);
+    copy.remove(); return { rows, planeX: plane.m41, planeY: plane.m42 };
+  }, second.time);
+  assert.equal(oracle.rows.length, second.rows.length);
+  for (let i = 0; i < oracle.rows.length; i += 1) {
+    near(second.rows[i].x, oracle.rows[i].x, `row ${i} travel`);
+    near(second.rows[i].opacity, oracle.rows[i].opacity, `row ${i} brightness`);
+    near(second.rows[i].scale, oracle.rows[i].scale, `row ${i} growth`);
   }
-  assert.ok([first, middle, second].some(frame => frame.rows.some(row => row.waveOpacity > .01 && row.waveScale > 1)), "the glow/growth wave runs while rows travel");
-  assert.ok(second.rows.some((row, index) => Math.abs(row.waveOpacity - first.rows[index].waveOpacity) > .01), "the wave progresses between rows");
-  assert.ok(Math.abs(first.rows[1].afterDelay - first.rows[0].afterDelay - .32 * 1.3333333333) < .001, "row ordering retains the diagonal wave delay");
-  assert.equal(first.planeName, "home-wordmark-drift"); assert.equal(first.planeDuration, "96s");
-  assert.notEqual(first.planeTransform, second.planeTransform, "the whole rotated plane continues drifting");
-  assert.equal(first.brandName, "navigation-brand-breathe"); assert.equal(first.brandState, "running");
-  assert.equal(first.haloName, "navigation-brand-glow");
-  assert.ok(Math.max(first.brandScale, middle.brandScale, second.brandScale) - Math.min(first.brandScale, middle.brandScale, second.brandScale) > .0001, "the header keeps breathing concurrently");
-  assert.ok(Math.max(first.haloOpacity, middle.haloOpacity, second.haloOpacity) - Math.min(first.haloOpacity, middle.haloOpacity, second.haloOpacity) > .001, "the header halo keeps glowing concurrently");
-  await page.locator(".home-hero-pattern").evaluate(pattern => { pattern.dataset.motion = "paused"; });
-  const paused = await motionState(page);
+  near(oracle.planeX, -second.geometry.extent / 2 + second.planeX * Math.SQRT1_2, 'plane horizontal transform');
+  near(oracle.planeY, -second.geometry.planeHeight / 2 - second.planeX * Math.SQRT1_2, 'plane vertical transform');
+
+  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+  const paused = await state(page), pausedRequests = await page.evaluate(() => window.wordmarkRequests);
   await page.waitForTimeout(200);
-  const still = await motionState(page);
-  assert.equal(still.rows[0].rowState, "paused"); assert.equal(still.rows[0].afterState, "paused");
-  assert.equal(still.planeTransform, paused.planeTransform);
-  assert.deepEqual(still.rows.map(row => [row.x, row.waveOpacity, row.waveScale]), paused.rows.map(row => [row.x, row.waveOpacity, row.waveScale]), "pausing freezes row movement and its separate wave together");
+  assert.deepEqual((await state(page)).rows, paused.rows, 'page lifecycle pause stops row and wave updates');
+  assert.equal(paused.brandState, 'paused'); assert.equal(paused.haloState, 'paused'); assert.equal(paused.cyanState, 'paused');
+  assert.equal(await page.evaluate(() => window.wordmarkRequests), pausedRequests, 'a paused renderer schedules no animation frames');
+  await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
+  await page.waitForTimeout(200); assert.ok((await state(page)).time > paused.time, 'resuming continues the saved phase');
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.locator('.home-hero-pattern[data-motion="paused"]').waitFor({ state: 'attached' });
+  const offscreenRequests = await page.evaluate(() => window.wordmarkRequests);
+  await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => window.wordmarkRequests), offscreenRequests, 'offscreen artwork schedules no animation frames');
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.locator('.home-hero-pattern[data-motion="running"]').waitFor({ state: 'attached' });
+
+  // Fail resize preparation after successful activation, then recover it.
+  await page.evaluate(() => {
+    const descriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+    window.failWordmarkBake = true;
+    Object.defineProperty(HTMLImageElement.prototype, 'src', { ...descriptor, set(value) {
+      if (window.failWordmarkBake && value.startsWith('data:image/svg+xml')) {
+        queueMicrotask(() => this.dispatchEvent(new Event('error'))); return;
+      }
+      descriptor.set.call(this, value);
+    } });
+  });
+  await page.setViewportSize({ width: 1250, height: 900 });
+  await page.locator('.home-hero-pattern:not([data-renderer]) .home-hero-wordmark-row').first().waitFor();
+  assert.equal(await page.locator('.home-hero-wordmark-canvas').count(), 0, 'a failed resize removes the stale canvas');
+  await page.evaluate(() => { window.failWordmarkBake = false; });
+  await page.setViewportSize({ width: 1251, height: 900 });
+  await page.locator('.home-hero-pattern[data-renderer="canvas"] canvas').waitFor();
+  assert.equal((await state(page)).geometry.viewportWidth, 1251, 'a later successful resize restores correctly sized artwork');
   await context.close();
 
-  const reduced = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
-  const reducedPage = await reduced.newPage();
-  await reducedPage.goto(`${base}/`);
-  await reducedPage.locator(".home-hero-wordmark-row").first().waitFor();
-  await reducedPage.locator(".public-nav-v6 > .navigation-brand-v6 img").waitFor();
-  const reducedState = await motionState(reducedPage);
-  assert.equal(reducedState.rows[0].rowName, "none");
-  assert.equal(reducedState.rows[0].beforeName, "none");
-  assert.equal(reducedState.rows[0].afterName, "none");
-  assert.equal(reducedState.planeName, "none");
+  const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, hasTouch: true, reducedMotion: 'no-preference' });
+  await mobile.addInitScript(() => localStorage.setItem('browserp-theme', 'dark'));
+  const mobilePage = await mobile.newPage(); await mobilePage.goto(`${base}/`);
+  await mobilePage.locator('.home-hero-pattern[data-renderer="canvas"] canvas').waitFor();
+  await mobilePage.locator('.public-nav-v6 > .navigation-brand-v6 img').waitFor();
+  const mobileFirst = await state(mobilePage); await mobilePage.waitForTimeout(800);
+  const mobileSecond = await state(mobilePage);
+  near((mobileSecond.rows[0].x - mobileFirst.rows[0].x) / ((mobileSecond.time - mobileFirst.time) / 1000), 2.5, 'phone viewport retains the same diagonal speed');
+  assert.ok(mobileSecond.rows.every(row => row.x === mobileSecond.rows[0].x));
+  assert.equal(mobileSecond.pixels[0], Math.ceil(mobileSecond.geometry.viewportWidth * 3));
+  assert.equal(mobileSecond.brandState, 'running');
+  assert.ok(await mobilePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'the decorative pattern creates no phone overflow');
+  await mobile.close();
+
+  const reduced = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  await reduced.addInitScript(() => localStorage.setItem('browserp-theme', 'dark'));
+  const reducedPage = await reduced.newPage(); await reducedPage.goto(`${base}/`);
+  await reducedPage.locator('.home-hero-pattern[data-renderer="canvas"] canvas').waitFor();
+  await reducedPage.locator('.public-nav-v6 > .navigation-brand-v6 img').waitFor();
+  const staticFrame = await state(reducedPage); await reducedPage.waitForTimeout(200);
+  assert.equal(staticFrame.planeX, 0);
+  assert.equal(staticFrame.brandName, 'none'); assert.equal(staticFrame.haloName, 'none'); assert.equal(staticFrame.cyanName, 'none');
+  assert.ok(staticFrame.rows.every(row => row.x === 0 && row.scale === 1 && row.opacity === 0));
+  assert.equal((await state(reducedPage)).time, staticFrame.time, 'reduced motion schedules no continuing renderer frames');
   await reduced.close();
-} finally {
-  await browser.close();
-}
+} finally { await browser.close(); }
+
+console.log(JSON.stringify({ engine, status: 'passed', profiles: ['desktop motion', 'mobile DPR 3 motion', 'mobile reduced motion'] }));

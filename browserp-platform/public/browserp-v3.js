@@ -114,9 +114,10 @@
     const plane = node("div", "home-hero-wordmarks");
     pattern.append(plane);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let inView = false, parked = false;
+    let inView = false, parked = false, canvasRenderer = null, disposed = false;
     const sync = () => {
       pattern.dataset.motion = inView && !parked && !document.hidden && !reduced.matches ? "running" : "paused";
+      canvasRenderer?.setMotion(pattern.dataset.motion === "running", reduced.matches);
     };
     const size = () => {
       const rect = pattern.getBoundingClientRect();
@@ -124,7 +125,7 @@
       const extent = Math.ceil(Math.hypot(rect.width, rect.height) + 480);
       plane.style.width = `${extent}px`;
       const style = getComputedStyle(pattern);
-      const rowPitch = (parseFloat(style.getPropertyValue("--wordmark-width")) || 120) * 358 / 1400 + (parseFloat(style.getPropertyValue("--wordmark-gap")) || 16);
+      const rowPitch = (parseFloat(style.getPropertyValue("--wordmark-width")) || 92) * (parseFloat(style.getPropertyValue("--wordmark-aspect")) || 281 / 1400) + (parseFloat(style.getPropertyValue("--wordmark-gap")) || 16);
       const rows = Math.ceil(extent / rowPitch) + 1;
       // Start at the visible top-left edge, rather than waiting through overscan.
       const visibleRows = Math.ceil((rect.width + rect.height) / Math.SQRT2 / rowPitch) + 2;
@@ -136,13 +137,19 @@
         plane.append(row);
       }
       while (plane.children.length > rows) plane.lastElementChild.remove();
+      canvasRenderer?.resize();
       inView = rect.bottom > 0 && rect.top < window.innerHeight;
       sync();
     };
     size();
+    import("./wordmark-canvas.js?v=20260908").then(({ createWordmarkCanvas }) => {
+      if (disposed) return;
+      canvasRenderer = createWordmarkCanvas(pattern, plane);
+      sync();
+    }).catch(() => {});
     let resizeObserver, intersectionObserver;
     if (typeof ResizeObserver === "function") { resizeObserver = new ResizeObserver(size); resizeObserver.observe(pattern); }
-    else window.addEventListener("resize", size, { passive: true });
+    window.addEventListener("resize", size, { passive: true });
     if (typeof IntersectionObserver === "function") {
       intersectionObserver = new IntersectionObserver(entries => { inView = entries[0].isIntersecting; sync(); });
       intersectionObserver.observe(pattern);
@@ -154,6 +161,8 @@
     window.addEventListener("pagehide", hide);
     window.addEventListener("pageshow", show);
     clearWordmarks = () => {
+      disposed = true;
+      canvasRenderer?.destroy();
       pattern.dataset.motion = "paused";
       resizeObserver?.disconnect(); intersectionObserver?.disconnect();
       window.removeEventListener("resize", size);

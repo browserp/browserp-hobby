@@ -8,13 +8,18 @@
 .navigation-brand-v6 { display: inline-flex; align-items: center; flex: none; }
 .navigation-brand-v6 img { width: 190px; height: 54px; object-fit: contain; }
 .public-nav-v6 > .navigation-brand-v6 { position: relative; isolation: isolate; }
-/* Keep the original colour and bevel; only the separate, static halo fades. */
-.public-nav-v6 > .navigation-brand-v6::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url("/assets/browserp-logo-v5.png?v=20260908") center / contain no-repeat; filter: drop-shadow(0 0 4px rgb(236 79 166 / .9)) drop-shadow(0 0 12px rgb(236 79 166 / .65)); opacity: .04; transform-origin: left center; animation: navigation-brand-glow 7s ease-in-out infinite; }
-.public-nav-v6 > .navigation-brand-v6 img { transform-origin: left center; animation: navigation-brand-breathe 7s ease-in-out infinite; }
+/* Two prepainted halos crossfade around the crisp original artwork. */
+.public-nav-v6 > .navigation-brand-v6::before,
+.public-nav-v6 > .navigation-brand-v6::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url("/assets/browserp-logo-v5.png?v=20260908") center / contain no-repeat; transform-origin: left center; opacity: .03; }
+.public-nav-v6 > .navigation-brand-v6::before { filter: drop-shadow(0 0 3px rgb(236 79 166 / .6)) drop-shadow(0 0 9px rgb(236 79 166 / .36)); animation: navigation-brand-glow 12s ease-in-out infinite; }
+.public-nav-v6 > .navigation-brand-v6::after { filter: drop-shadow(0 0 3px rgb(89 205 224 / .55)) drop-shadow(0 0 9px rgb(89 205 224 / .32)); animation: navigation-brand-glow-cyan 12s ease-in-out infinite; }
+.public-nav-v6 > .navigation-brand-v6 img { transform-origin: left center; animation: navigation-brand-breathe 12s ease-in-out infinite; }
 .public-nav-v6[data-brand-motion="paused"] > .navigation-brand-v6 img,
-.public-nav-v6[data-brand-motion="paused"] > .navigation-brand-v6::before { animation-play-state: paused; }
-@keyframes navigation-brand-breathe { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.04); opacity: 1; } }
-@keyframes navigation-brand-glow { 0%, 100% { transform: scale(1); opacity: .04; } 50% { transform: scale(1.04); opacity: 1; } }
+.public-nav-v6[data-brand-motion="paused"] > .navigation-brand-v6::before,
+.public-nav-v6[data-brand-motion="paused"] > .navigation-brand-v6::after { animation-play-state: paused; }
+@keyframes navigation-brand-breathe { 0%, 50%, 100% { transform: scale(1); opacity: .96; } 25%, 75% { transform: scale(1.018); opacity: 1; } }
+@keyframes navigation-brand-glow { 0%, 50%, 100% { transform: scale(1); opacity: .03; } 25% { transform: scale(1.018); opacity: .6; } 75% { transform: scale(1.018); opacity: .03; } }
+@keyframes navigation-brand-glow-cyan { 0%, 50%, 100% { transform: scale(1); opacity: .03; } 25% { transform: scale(1.018); opacity: .03; } 75% { transform: scale(1.018); opacity: .5; } }
 .public-nav-links-v6 { display: flex; align-items: center; gap: 3px; margin-right: auto; }
 .public-nav-links-v6 > a { position: relative; padding: 12px; color: var(--copy); font-size: 14px; font-weight: 650; transition: color .2s ease; }
 .public-nav-links-v6 > a::after { content: ""; position: absolute; height: 2px; bottom: 5px; inset-inline: 12px; background: var(--pink); border-radius: 2px; transform: scaleX(0); transition: transform .2s ease; }
@@ -101,7 +106,7 @@
 .navigation-enter-v6:nth-child(5),.navigation-enter-v6:nth-child(6),.navigation-enter-v6:nth-child(7) { animation-delay: 100ms !important; }
 @keyframes navigation-arrive-v6 { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 /* The page is inert while the modal is open; pause ambient repainting behind it. */
-.navigation-open-v6 .hero-v3::after,.navigation-open-v6 .navigation-brand-v6,.navigation-open-v6 .public-nav-v6 > .navigation-brand-v6 img,.navigation-open-v6 .public-nav-v6 > .navigation-brand-v6::before,.navigation-open-v6 .logo-lockup-v3 { animation-play-state: paused; }
+.navigation-open-v6 .hero-v3::after,.navigation-open-v6 .navigation-brand-v6,.navigation-open-v6 .public-nav-v6 > .navigation-brand-v6 img,.navigation-open-v6 .public-nav-v6 > .navigation-brand-v6::before,.navigation-open-v6 .public-nav-v6 > .navigation-brand-v6::after,.navigation-open-v6 .logo-lockup-v3 { animation-play-state: paused; }
 @media (max-width: 1200px) { .public-nav-v6 { gap: 16px; } .public-nav-actions-v6 .account-name-v3 { display: none; } }
 @media (max-width: 1080px) { .public-nav-v6 { justify-content: space-between; } .public-nav-links-v6,.public-nav-actions-v6 { display: none; } }
 @media (max-width: 520px) {
@@ -118,7 +123,7 @@
   .navigation-intro-v6 h2 { font-size: 26px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .navigation-dialog-v6,.navigation-dialog-v6::backdrop,.navigation-dialog-v6 *, .public-nav-v6 *, .public-nav-v6 > .navigation-brand-v6::before { animation: none !important; transition: none !important; }
+  .navigation-dialog-v6,.navigation-dialog-v6::backdrop,.navigation-dialog-v6 *, .public-nav-v6 *, .public-nav-v6 > .navigation-brand-v6::before, .public-nav-v6 > .navigation-brand-v6::after { animation: none !important; transition: none !important; }
 }
 @media (hover: none), (pointer: coarse) {
   .navigation-toggle-v6:active,.navigation-close-v6:active { background: var(--panel-2); filter: brightness(1.12) saturate(1.06); box-shadow: 0 5px 20px rgb(236 79 166 / .3), 0 0 14px rgb(155 108 255 / .2); }

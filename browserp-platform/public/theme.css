@@ -89,6 +89,11 @@
 :root[data-theme="light"] .button-quiet-v3 { color: var(--copy); border-color: var(--line); }
 :root[data-theme="light"] .empty-v3 { border-color: var(--line-strong); }
 
+/* Labels change immediately with the theme. Switch their surfaces at the same
+   time so neither direction briefly puts dark-on-dark or light-on-light text. */
+:root[data-theme] .button-secondary-v3 { transition-property: border-color, transform, box-shadow; }
+:root[data-theme] :is(.navigation-toggle-v6,.navigation-close-v6) { transition-property: border-color; }
+
 :root[data-theme="light"] .hero-v3 { background: linear-gradient(180deg,rgb(185 31 114 / .055),transparent 48%); }
 :root[data-theme="light"] :is(.section-v3,.footer-v3,.page-body,.platform-band,.discover-section,.category-section,.credits-section,.tools-section,.staff-section,.foundation-section) { background-color: var(--bg); border-color: var(--line-soft); }
 :root[data-theme="light"] :is(.discover-section,.tools-section,.foundation-section) { background-color: #fbf8fb; }

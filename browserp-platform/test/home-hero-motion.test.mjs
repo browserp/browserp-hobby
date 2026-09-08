@@ -21,7 +21,7 @@ test("hero movement pauses offscreen, in hidden pages and for reduced motion, th
   assert.ok(rows > 0);
   const plane = pattern.querySelector(".home-hero-wordmarks");
   const waveDuration = parseFloat(plane.style.getPropertyValue("--wave-duration"));
-  assert.ok(waveDuration > 10 && waveDuration < 15, "the visible wave returns at the calmer pace without waiting through overscan");
+  assert.ok(waveDuration > 10 && waveDuration < 17, "the visible wave returns at the calmer pace without waiting through overscan");
   assert.ok(Number(plane.style.getPropertyValue("--wave-start")) > 0, "the wave starts at visible rows, inside the overscan");
   assert.deepEqual([...plane.children].map(row => Number(row.style.getPropertyValue("--wave-index"))), Array.from({ length: rows }, (_, index) => index));
   assert.equal(pattern.getAttribute("aria-hidden"), "true");

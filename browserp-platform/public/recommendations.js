@@ -284,6 +284,50 @@
     policy.after(button);
   };
   window.addEventListener("browserp:recommendations-changed", preferenceState);
+  function appearanceChoice() {
+    if (!document.querySelector("link[data-first-visit-appearance]")) {
+      const styles = el("link", ""); styles.rel = "stylesheet";
+      styles.href = "/first-visit-appearance.css?v=20260908"; styles.dataset.firstVisitAppearance = "";
+      document.head.append(styles);
+    }
+    const group = el("div", "first-visit-appearance");
+    group.setAttribute("role", "group"); group.setAttribute("aria-labelledby", "first-visit-appearance-title");
+    group.setAttribute("aria-describedby", "first-visit-appearance-hint");
+    const title = el("h3", "first-visit-appearance-title", "Appearance"); title.id = "first-visit-appearance-title";
+    const hint = el("p", "first-visit-appearance-hint", "Your theme is separate from recommendation preferences."); hint.id = "first-visit-appearance-hint";
+    const choices = el("div", "first-visit-appearance-choices");
+    function update(theme) {
+      for (const button of choices.children) button.setAttribute("aria-pressed", String(button.dataset.appearanceChoice === theme));
+    }
+    for (const theme of ["dark", "light"]) {
+      const button = el("button", "first-visit-appearance-choice", theme === "dark" ? "Dark" : "Light");
+      button.type = "button"; button.dataset.appearanceChoice = theme;
+      button.addEventListener("click", () => {
+        if (window.BrowseRPTheme?.set) {
+          update(window.BrowseRPTheme.set(theme));
+          return;
+        }
+        // Keep appearance usable if the public page controller has not loaded.
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+        const colour = document.querySelector('meta[name="theme-color"]');
+        if (colour) colour.content = theme === "light" ? "#f8f5f8" : "#050507";
+        try { storage.setItem("browserp-theme", theme); } catch { /* The visible choice still applies for this page. */ }
+        window.dispatchEvent(new CustomEvent("browserp:theme-changed", { detail: { theme } }));
+      });
+      choices.append(button);
+    }
+    let theme = document.documentElement.dataset.theme;
+    if (theme !== "light" && theme !== "dark") {
+      try { theme = storage.getItem("browserp-theme"); } catch { /* Dark is the default. */ }
+    }
+    update(theme === "light" ? "light" : "dark");
+    window.addEventListener("browserp:theme-changed", event => {
+      if (event.detail?.theme === "light" || event.detail?.theme === "dark") update(event.detail.theme);
+    });
+    group.append(title, choices, hint);
+    return group;
+  }
   function cookiePrompt() {
     if (hasCookieChoice() || document.querySelector("[data-cookie-prompt]")) return;
     const prompt = el("section", "cookie-prompt-v3"); prompt.dataset.cookiePrompt = "";
@@ -296,7 +340,7 @@
       const link = el("a", "", label); link.href = href; links.append(link);
     }
     const status = el("p", "cookie-prompt-status-v3"); status.setAttribute("role", "status"); status.hidden = true;
-    copy.append(title, description, links, status);
+    copy.append(title, description, links, status, appearanceChoice());
     const actions = el("div", "cookie-prompt-actions-v3");
     for (const [label, enabled] of [["Accept recommendations", true], ["Reject recommendations", false]]) {
       const button = el("button", "button-v3 button-secondary-v3", label); button.type = "button";
