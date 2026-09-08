@@ -1,6 +1,16 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import test, { before, after } from "node:test";
 import { staffDuty } from "../lib/staff-duty.js";
+
+// Keep fixture requests independent of the deployment's configured public URL.
+const fixtureEnv = { APP_URL: "http://localhost:8080", NODE_ENV: "test", VERCEL: "0", VERCEL_ENV: "" };
+const previousEnv = new Map(Object.keys(fixtureEnv).map(key => [key, process.env[key]]));
+before(() => Object.assign(process.env, fixtureEnv));
+after(() => {
+  for (const [key, value] of previousEnv) {
+    if (value === undefined) delete process.env[key]; else process.env[key] = value;
+  }
+});
 
 const actor="00000000-0000-4000-8000-000000000001";
 const sessionId="11111111-0000-4000-8000-000000000001";
