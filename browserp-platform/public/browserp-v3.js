@@ -434,7 +434,7 @@
         imageNotice.hidden = !unavailable;
         // Reuse the site's wordmark; never substitute another campaign image
         // or address when a browser blocks the creative.
-        if (unavailable && !fallbackBrand.getAttribute("src")) fallbackBrand.src = "/assets/browserp-logo-v5.png";
+        if (unavailable && !fallbackBrand.getAttribute("src")) fallbackBrand.src = "/assets/browserp-logo-v5.png?v=20260908";
       };
       // Keep the advert readable when a browser blocks its artwork. Do not
       // retry blocked addresses or override a content blocker's image styles.
@@ -568,7 +568,7 @@
     }
     const grid = node("div", "shell-v3 footer-grid-v3");
     const brand = node("div", "footer-brand-v3");
-    const lockup = node("span", "logo-lockup-v3"); const mark = new Image(); mark.src = "/assets/browserp-logo-v5.png"; mark.alt = "BrowseRP"; mark.className = "logo-full-v5";
+    const lockup = node("span", "logo-lockup-v3"); const mark = new Image(); mark.src = "/assets/browserp-logo-v5.png?v=20260908"; mark.alt = "BrowseRP"; mark.className = "logo-full-v5";
     lockup.append(mark); brand.append(lockup, node("p", "", "A clearer way to discover roleplay communities across games."));
     grid.append(brand);
     const groups = [

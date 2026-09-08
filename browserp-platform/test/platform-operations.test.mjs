@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, readdirSync } from "node:fs";
+import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { securityContext, securityFingerprintContext, unsealAddress } from "../lib/security.js";
 
@@ -11,6 +11,14 @@ const interactionAcl = readFileSync(join(root, "supabase", "migrations", "202608
 const router = readFileSync(join(root, "api", "router.js"), "utf8");
 const staff = readFileSync(join(root, "public", "staffpanel-v3.js"), "utf8");
 const health = readFileSync(join(root, "lib", "health.js"), "utf8");
+
+function publicSourceFiles(directory = join(root, "public")) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) return publicSourceFiles(path);
+    return [".css", ".html", ".js"].includes(extname(path)) ? [path] : [];
+  });
+}
 
 function response() {
   const headers = new Map();
@@ -117,7 +125,7 @@ test("the public product is multi-page and hides the operations route", () => {
   for (const file of files) assert.match(readFileSync(join(root, "public", file), "utf8"), /<!doctype html>/i, file);
   assert.doesNotMatch(index, /href=["']\/staffpanel/i);
   assert.match(index, /logo-lockup-v3/);
-  assert.match(index, /\/assets\/browserp-logo-v5\.png/);
+  assert.match(index, /\/assets\/browserp-logo-v5\.png\?v=20260908/);
   assert.match(index, /browserp-mark-v3\.png/);
   assert.doesNotMatch(index, /data-ad-placement="top"/);
   assert.match(index, /data-ad-placement="side"/);
@@ -131,11 +139,24 @@ test("the supplied BrowseRP lockup is a genuine transparent PNG used across the 
   assert.equal(logo[25], 6, "PNG colour type must be RGBA");
   for (const file of ["index.html", "servers.html", "dashboard.html", "staffpanel-overview.html"]) {
     const html = readFileSync(join(root, "public", file), "utf8");
-    assert.match(html, /<img class="logo-full-v5" src="\/assets\/browserp-logo-v5\.png" alt="BrowseRP">/, file);
+    assert.match(html, /<img class="logo-full-v5" src="\/assets\/browserp-logo-v5\.png\?v=20260908" alt="BrowseRP">/, file);
     assert.doesNotMatch(html, /logo-word-v3/, file);
   }
-  assert.match(readFileSync(join(root, "public", "browserp-v3.js"), "utf8"), /\/assets\/browserp-logo-v5\.png/);
-  assert.match(readFileSync(join(root, "public", "staffpanel-v3.js"), "utf8"), /\/assets\/browserp-logo-v5\.png/);
+  assert.match(readFileSync(join(root, "public", "browserp-v3.js"), "utf8"), /\/assets\/browserp-logo-v5\.png\?v=20260908/);
+  assert.match(readFileSync(join(root, "public", "staffpanel-v3.js"), "utf8"), /\/assets\/browserp-logo-v5\.png\?v=20260908/);
+});
+
+test("every full-wordmark reference uses the shared cache-busting URL", () => {
+  const references = publicSourceFiles().flatMap((file) => {
+    const source = readFileSync(file, "utf8");
+    return [...source.matchAll(/\/assets\/browserp-logo-v5\.png(?:\?[^"'\s)]+)?/g)].map((match) => ({ file, url: match[0] }));
+  });
+  assert.ok(references.length >= 40, "expected the shared wordmark across public and staff surfaces");
+  assert.deepEqual(
+    references.filter(({ url }) => url !== "/assets/browserp-logo-v5.png?v=20260908"),
+    [],
+    "all full-wordmark references must invalidate the previous cached asset"
+  );
 });
 
 test("listing tags are canonical, unique and limited in the browser", () => {

@@ -65,7 +65,7 @@ test("blocked artwork renders a compact labelled advert, does not retry failures
   assert.equal(h.w.getComputedStyle(h.$(".side-ad-copy-v3")).position, "static");
   assert.equal(h.$(".ad-label-v3").textContent, "Advertisement");
   assert.equal(h.$(".side-ad-image-notice-v3").hidden, false);
-  assert.equal(h.$(".side-ad-image-notice-v3 img").getAttribute("src"), "/assets/browserp-logo-v5.png");
+  assert.equal(h.$(".side-ad-image-notice-v3 img").getAttribute("src"), "/assets/browserp-logo-v5.png?v=20260908");
   assert.equal(h.$(".side-ad-image-notice-v3 img").alt, "BrowseRP");
   assert.equal(h.$(".side-ad-image-notice-v3 .visually-hidden").textContent, "Advertisement shown without artwork.");
   assert.equal(h.root.textContent.includes("Artwork unavailable"), false);
@@ -104,7 +104,7 @@ test("the fallback uses the existing wordmark only when needed and remains usabl
   assert.equal(brand.hasAttribute("src"), false, "Healthy artwork does not request an extra fallback image");
   h.$('[data-ad-direction="next"]').click();
   const source = brand.getAttribute("src");
-  assert.equal(source, "/assets/browserp-logo-v5.png");
+  assert.equal(source, "/assets/browserp-logo-v5.png?v=20260908");
   brand.dispatchEvent(new h.w.Event("error"));
   assert.equal(brand.hidden, true, "A blocked wordmark cannot leave a second broken image");
   h.$('[data-ad-direction="previous"]').click();

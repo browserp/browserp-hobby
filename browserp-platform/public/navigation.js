@@ -58,7 +58,7 @@
     const anchor = link("", "/", "navigation-brand-v6");
     anchor.setAttribute("aria-label", "BrowseRP home");
     const image = make("img");
-    image.src = "/assets/browserp-logo-v5.png";
+    image.src = "/assets/browserp-logo-v5.png?v=20260908";
     image.alt = "BrowseRP";
     image.width = 190;
     image.height = 54;

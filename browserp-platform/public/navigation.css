@@ -9,7 +9,7 @@
 .navigation-brand-v6 img { width: 190px; height: 54px; object-fit: contain; }
 .public-nav-v6 > .navigation-brand-v6 { position: relative; isolation: isolate; }
 /* Keep the original colour and bevel; only the separate, static halo fades. */
-.public-nav-v6 > .navigation-brand-v6::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url("/assets/browserp-logo-v5.png") center / contain no-repeat; filter: drop-shadow(0 0 4px rgb(236 79 166 / .9)) drop-shadow(0 0 12px rgb(236 79 166 / .65)); opacity: .04; transform-origin: left center; animation: navigation-brand-glow 7s ease-in-out infinite; }
+.public-nav-v6 > .navigation-brand-v6::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url("/assets/browserp-logo-v5.png?v=20260908") center / contain no-repeat; filter: drop-shadow(0 0 4px rgb(236 79 166 / .9)) drop-shadow(0 0 12px rgb(236 79 166 / .65)); opacity: .04; transform-origin: left center; animation: navigation-brand-glow 7s ease-in-out infinite; }
 .public-nav-v6 > .navigation-brand-v6 img { transform-origin: left center; animation: navigation-brand-breathe 7s ease-in-out infinite; }
 .public-nav-v6[data-brand-motion="paused"] > .navigation-brand-v6 img,
 .public-nav-v6[data-brand-motion="paused"] > .navigation-brand-v6::before { animation-play-state: paused; }
