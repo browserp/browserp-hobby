@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { qrCodeDataUri } from "./authenticator-qr.js";
 import { assertCsrf, assertSameOrigin, readBody } from "./http.js";
 import { rateLimit } from "./rate-limit.js";
 import { recordAccountActivity } from "./security.js";
@@ -20,13 +21,6 @@ function safeFactors(user) {
   }));
 }
 function summary(factors) { return { factors, maxFactors: MAX_FACTORS, canAdd: factors.length < MAX_FACTORS }; }
-function qrImage(value) {
-  const source = String(value || "").trim();
-  if (source.length > 200000) return null;
-  if (/^<svg[\s>]/i.test(source)) return `data:image/svg+xml;base64,${Buffer.from(source).toString("base64")}`;
-  if (/^data:image\/svg\+xml(?:;base64)?,/i.test(source)) return source;
-  return null;
-}
 
 // Mounted by the API router. Every operation uses the caller's Auth session;
 // the service credential is used only for the existing private audit writer.
@@ -88,7 +82,7 @@ export async function staffAuthenticators(req, res, requestId, preloadedSession)
       const enrolled = await providerWrite("auth/v1/factors", "POST", { factor_type: "totp", friendly_name: name, issuer: "BrowseRP" });
       if (!UUID.test(enrolled?.id || "") || !/^[A-Z2-7]{16,128}$/i.test(enrolled?.totp?.secret || "")) { uncertain = true; throw fail("The setup response was incomplete. Refresh to check for an unfinished authenticator.", 502); }
       await audit("auth.mfa_enrolled", { id: enrolled.id, label: name });
-      return { authenticators: summary(await userForFactors()), setup: { id: enrolled.id, label: name, qrCode: qrImage(enrolled.totp.qr_code), secret: enrolled.totp.secret } };
+      return { authenticators: summary(await userForFactors()), setup: { id: enrolled.id, label: name, qrCode: qrCodeDataUri(enrolled.totp.qr_code), secret: enrolled.totp.secret } };
     }
     const chosen = factors.find(item => item.id === target);
     if (!chosen) throw fail("This authenticator is no longer on your account. Refresh and try again.", 404);

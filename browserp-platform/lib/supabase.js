@@ -537,14 +537,21 @@ export async function verifyTotp(res, accessToken, factorId, code, csrfToken) {
   return verified.data;
 }
 
-export async function signOut(req, res) {
+export async function signOut(req, res, accessToken) {
   const cookies = parseCookies(req);
-  const accessToken = cookieValue(cookies, "brp_access");
-  if (accessToken || cookieValue(cookies, "brp_refresh")) assertCsrf(req);
-  if (accessToken) {
-    try { await supabaseRequest("auth/v1/logout", { method: "POST", accessToken }); } catch { /* Local session still clears. */ }
+  if (accessToken || cookieValue(cookies, "brp_access") || cookieValue(cookies, "brp_refresh")) assertCsrf(req);
+  try {
+    // getSession may have refreshed the response cookies. Revoke with that
+    // validated token, never an expired token from the original request.
+    if (accessToken) await supabaseRequest("auth/v1/logout", { method: "POST", accessToken });
+  } catch {
+    throw Object.assign(new Error("You’re signed out here, but we couldn’t confirm that your server sessions ended. Sign in again and retry signing out."), {
+      status: 502,
+      code: "SESSION_REVOCATION_FAILED"
+    });
+  } finally {
+    clearSession(res);
   }
-  clearSession(res);
 }
 
 export async function rpc(name, body, accessToken, options = {}) {

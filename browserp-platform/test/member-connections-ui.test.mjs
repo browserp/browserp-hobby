@@ -103,3 +103,11 @@ test("an ambiguous disconnect offers the remaining provider, not the possibly re
   assert.match(h.root.querySelector("a").textContent, /Discord/);
   assert.match(h.root.textContent, /couldn’t confirm/);
 });
+
+
+test("failed callback wording does not contradict freshly verified connected providers", async t => {
+  const h = harness(t, "?connections=failed");
+  await h.init(async () => ({ connections: { accountId, canManage: true, providers: providers.map(p => ({ ...p, connected: true, canConnect: false })) } }));
+  assert.equal(h.root.querySelector(".member-connections-result").textContent, "We couldn’t confirm the connection attempt. Your current connections are shown below.");
+  assert.doesNotMatch(h.root.textContent, /connection was not completed/);
+});

@@ -42,6 +42,7 @@ export async function privacyFileFixture(t) {
  await db.exec(read("20260906002145_private_request_history_and_completion.sql"));
  await db.exec(read("20260906004454_structured_member_data_export.sql"));
  await db.exec(read("20260907105813_member_uploaded_file_delivery.sql"));
+ await db.exec(read("20260908095702_member_file_trusted_chunk_digests.sql"));
  const admin=async sql=>{await db.exec("reset role");if(sql)await db.exec(sql);};
  const login=async(id=a,extra={})=>{await admin();await db.query("select set_config('request.jwt.claim.sub',$1,false),set_config('request.jwt.claims',$2,false)",[id,JSON.stringify({sub:id,session_id:sid(id),aal:id===owner?"aal2":"aal1",app_metadata:{provider:id===owner?"discord":"google"},amr:[{method:"oauth",timestamp:Math.floor(Date.now()/1000)},{method:"totp"}],...extra})]);await db.exec("set role authenticated");};
  const call=async(name,args=[],types="")=>(await db.query(`select public.${name}(${args.map((_,i)=>`$${i+1}${types.split(',')[i]?`::${types.split(',')[i]}`:''}`).join(',')}) value`,args)).rows[0].value;

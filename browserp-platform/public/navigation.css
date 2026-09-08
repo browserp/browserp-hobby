@@ -73,6 +73,14 @@
 .navigation-game-v6[data-platform="roblox"] { --game-colour: #e5e9f0; }
 .navigation-game-v6 svg { width: 23px; height: 23px; color: var(--game-colour); }
 .navigation-game-v6:hover,.navigation-game-v6[aria-current="page"] { border-color: var(--game-colour); background: color-mix(in srgb,var(--game-colour) 8%,var(--panel)); }
+.navigation-appearance-v6 { display: grid; gap: 10px; padding-top: 2px; }
+.navigation-appearance-heading-v6 { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+.navigation-appearance-heading-v6 h3 { margin: 0; font-size: 12px; font-weight: 750; }
+.navigation-appearance-heading-v6 span { color: var(--muted); font-size: 10px; }
+.navigation-theme-choices-v6 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.navigation-theme-choice-v6 { min-height: 44px; padding: 8px 12px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 700; cursor: pointer; }
+.navigation-theme-choice-v6:hover { color: var(--text); background: var(--panel-2); }
+.navigation-theme-choice-v6[aria-pressed="true"] { color: var(--text); border-color: color-mix(in srgb,var(--pink) 58%,var(--line)); background: color-mix(in srgb,var(--pink) 10%,var(--panel-2)); box-shadow: inset 0 1px rgb(255 255 255 / .08); }
 .navigation-account-v6 { border-top: 1px solid var(--line-soft); padding-top: 18px; }
 .navigation-account-v6 > .button-v3 { width: 100%; border-radius: 12px; }
 .navigation-account-v6 .account-trigger-v3 { width: 100%; padding: 9px 12px; border-radius: 12px; text-align: left; }
@@ -90,7 +98,7 @@
 .navigation-enter-v6:nth-child(2) { animation-delay: 30ms !important; }
 .navigation-enter-v6:nth-child(3) { animation-delay: 55ms !important; }
 .navigation-enter-v6:nth-child(4) { animation-delay: 80ms !important; }
-.navigation-enter-v6:nth-child(5),.navigation-enter-v6:nth-child(6) { animation-delay: 100ms !important; }
+.navigation-enter-v6:nth-child(5),.navigation-enter-v6:nth-child(6),.navigation-enter-v6:nth-child(7) { animation-delay: 100ms !important; }
 @keyframes navigation-arrive-v6 { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 /* The page is inert while the modal is open; pause ambient repainting behind it. */
 .navigation-open-v6 .hero-v3::after,.navigation-open-v6 .navigation-brand-v6,.navigation-open-v6 .public-nav-v6 > .navigation-brand-v6 img,.navigation-open-v6 .public-nav-v6 > .navigation-brand-v6::before,.navigation-open-v6 .logo-lockup-v3 { animation-play-state: paused; }

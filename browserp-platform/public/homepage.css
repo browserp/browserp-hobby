@@ -33,6 +33,14 @@
 .home-game-discovery .home-game-filter-status { font-size: 14px; line-height: 1.5; margin: 12px 0 0; color: var(--muted); }
 .home-game-filter-status:empty { display: none; }
 /* Show the full portrait creative and keep copy outside its artwork. */
+body[data-page="home"] .content-with-rail-v3 > .side-ad-v3 {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+}
+body[data-page="home"] .content-with-rail-v3 > .side-ad-v3 .ad-label-v3 { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); }
+body[data-page="home"] .content-with-rail-v3 > .side-ad-v3 .side-ad-stage-v3 { border: 0; border-radius: 0; }
 body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 { min-height: 0; }
 body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-image-v3 {
   position: static;

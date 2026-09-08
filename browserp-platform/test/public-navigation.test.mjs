@@ -9,7 +9,7 @@ const publicPages = ["index", "404", "servers", "game", "server", "list-server",
 const routes = { index: "/", 404: "/missing-page", game: "/games", server: "/server/community", "blog-post": "/blog/community-guide" };
 const primaryRoutes = ["/servers", "/games", "/blog", "/about"];
 
-function harness({ page = "index", pathname = routes[page] || `/${page}`, html = read(`public/${page}.html`), compact = false, reduced = false, overflow = "" } = {}) {
+function harness({ page = "index", pathname = routes[page] || `/${page}`, html = read(`public/${page}.html`), compact = false, reduced = false, overflow = "", theme = null } = {}) {
   const dom = new JSDOM(html, { url: `https://browserp.test${pathname}`, runScripts: "outside-only" });
   const w = dom.window;
   const timers = new Map();
@@ -19,6 +19,7 @@ function harness({ page = "index", pathname = routes[page] || `/${page}`, html =
   let now = 0;
   let showCalls = 0;
   let closeCalls = 0;
+  if (theme) w.localStorage.setItem("browserp-theme", theme);
   w.document.body.style.overflow = overflow;
   w.setTimeout = (callback, delay = 0) => { const id = ++serial; timers.set(id, { callback, at: now + delay }); return id; };
   w.clearTimeout = id => timers.delete(id);
@@ -105,6 +106,21 @@ test("header branding pauses in hidden or parked pages and resumes on return", (
   } finally { h.dom.window.close(); }
 });
 
+test("public appearance is local, explicit and keeps both choices in sync", () => {
+  const h = harness({ theme: "light" });
+  try {
+    assert.equal(h.w.document.documentElement.dataset.theme, "light");
+    assert.equal(h.$('[data-theme-choice-v6="light"]').getAttribute("aria-pressed"), "true");
+    assert.equal(h.$('[data-theme-choice-v6="dark"]').getAttribute("aria-pressed"), "false");
+    h.$('[data-theme-choice-v6="dark"]').click();
+    assert.equal(h.w.document.documentElement.dataset.theme, "dark");
+    assert.equal(h.w.localStorage.getItem("browserp-theme"), "dark");
+    assert.equal(h.$('[data-theme-choice-v6="dark"]').getAttribute("aria-pressed"), "true");
+    assert.equal(h.$('[data-theme-choice-v6="light"]').getAttribute("aria-pressed"), "false");
+    assert.equal(h.$(".navigation-theme-choices-v6").getAttribute("role"), "group");
+  } finally { h.dom.window.close(); }
+});
+
 function assertClosed(h, overflow = "") {
   assert.equal(h.$("#public-navigation").open, false);
   assert.equal(h.$(".navigation-toggle-v6").getAttribute("aria-expanded"), "false");
@@ -169,6 +185,7 @@ test("all public pages expose the same complete header and dialog navigation", a
       assert.deepEqual([...h.$(".public-nav-links-v6").children].map(item => item.getAttribute("href")), primaryRoutes);
       assert.deepEqual([...h.$(".navigation-links-v6").children].map(item => item.getAttribute("href")), primaryRoutes);
       assert.deepEqual([...h.$(".navigation-game-grid-v6").children].map(item => item.getAttribute("href")).sort(), ["/games/fivem", "/games/minecraft", "/games/redm", "/games/roblox"]);
+      assert.deepEqual([...h.w.document.querySelectorAll("[data-theme-choice-v6]")].map(item => item.textContent), ["Dark", "Light"]);
       assert.equal(h.w.document.querySelectorAll("[data-account-v3]").length, 2, "both account slots are available to session hydration");
       assert.equal(h.$(".public-nav-actions-v6 a[href='/list-server']").textContent, "List a server");
       assert.ok(h.$(".navigation-footer-v6 a[href='/list-server']"));

@@ -126,6 +126,8 @@ test("the public product is multi-page and hides the operations route", () => {
 test("the supplied BrowseRP lockup is a genuine transparent PNG used across the site", () => {
   const logo = readFileSync(join(root, "public", "assets", "browserp-logo-v5.png"));
   assert.equal(logo.subarray(1, 4).toString("ascii"), "PNG");
+  assert.equal(logo.readUInt32BE(16), 1400, "wordmark canvas width must preserve every existing layout");
+  assert.equal(logo.readUInt32BE(20), 358, "wordmark canvas height must preserve the pattern ratio");
   assert.equal(logo[25], 6, "PNG colour type must be RGBA");
   for (const file of ["index.html", "servers.html", "dashboard.html", "staffpanel-overview.html"]) {
     const html = readFileSync(join(root, "public", file), "utf8");

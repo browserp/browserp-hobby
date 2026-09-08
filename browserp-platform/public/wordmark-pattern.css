@@ -25,7 +25,10 @@
 }
 .home-hero-wordmark-row {
   position: relative;
+  --row-shift: -120px;
+  --row-drift-delay: calc(var(--wave-index, 0) * -1.8s);
 }
+.home-hero-wordmark-row:nth-child(even) { --row-shift: 120px; }
 .home-hero-wordmark-row::before {
   content: "";
   position: absolute;
@@ -44,12 +47,19 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   .home-hero-wordmarks { animation: home-wordmark-drift calc(72s * var(--wordmark-tempo)) linear infinite; animation-play-state: paused; }
+  .home-hero-wordmark-row::before {
+    animation: home-wordmark-row-drift calc(48s * var(--wordmark-tempo)) linear infinite;
+    animation-delay: var(--row-drift-delay);
+    animation-play-state: paused;
+  }
   .home-hero-wordmark-row::after {
-    animation: home-wordmark-wave calc(var(--wave-duration, 18s) * var(--wordmark-tempo)) ease-in-out infinite;
-    animation-delay: calc(((var(--wave-index, 0) - var(--wave-start, 0)) * .32s - .9s) * var(--wordmark-tempo));
+    animation: home-wordmark-row-drift calc(48s * var(--wordmark-tempo)) linear infinite,
+      home-wordmark-wave calc(var(--wave-duration, 18s) * var(--wordmark-tempo)) ease-in-out infinite;
+    animation-delay: var(--row-drift-delay), calc(((var(--wave-index, 0) - var(--wave-start, 0)) * .32s - .9s) * var(--wordmark-tempo));
     animation-play-state: paused;
   }
   .home-hero-pattern[data-motion="running"] .home-hero-wordmarks,
+  .home-hero-pattern[data-motion="running"] .home-hero-wordmark-row::before,
   .home-hero-pattern[data-motion="running"] .home-hero-wordmark-row::after { animation-play-state: running; }
 }
 /* Row order becomes a top-left to bottom-right wave after the plane's rotation. */
@@ -60,6 +70,10 @@
 @keyframes home-wordmark-drift {
   from { transform: translate(-50%, -50%) rotate(-45deg) translateX(0); }
   to { transform: translate(-50%, -50%) rotate(-45deg) translateX(-120px); }
+}
+@keyframes home-wordmark-row-drift {
+  from { background-position: 0 0; }
+  to { background-position: var(--row-shift) 0; }
 }
 [data-wordmark-surface]::after {
   content: "";

@@ -27,11 +27,13 @@
   <link rel="stylesheet" href="/browserp-v3.css?v=2.19.6">
   <link rel="stylesheet" href="/staffpanel-v3.css?v=2.19.0">
   <link rel="stylesheet" href="/staff-overview.css?v=2.12.0">
+  <link rel="stylesheet" href="/staff-duty.css?v=1">
   <link rel="stylesheet" href="/staff-authenticators.css?v=1">
   <script src="/staff-authenticators.js?v=1" defer></script>
   <link rel="stylesheet" href="/staff-adverts.css?v=2.13.0">
   <link rel="stylesheet" href="/staff-publishing.css?v=1">
   <script src="/publishing-content.js?v=2.18.0" defer></script>
+  <script src="/staff-duty.js?v=1" defer></script>
   <script src="/staff-overview.js?v=2.13.0" defer></script>
   <script src="/staff-adverts.js?v=2.17.0" defer></script>
   <link rel="stylesheet" href="/advertising-enquiries.css?v=2.17.0">
@@ -69,6 +71,7 @@
         <a class="overview-action" href="#overview-adverts"><span class="overview-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m3 10 12-5v14L3 14v-4Zm12-2 5-2v12l-5-2M6 15l1 6h4l-2-5"/></svg></span><strong>Adverts</strong><span>Create and manage website placements</span></a>
         <a class="overview-action" href="#overview-publishing"><span class="overview-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-5-5L4 14l-1 7 7-1M13 20h8"/></svg></span><strong>Blog posts</strong><span>Write and publish community news</span></a>
         <a class="overview-action" href="#overview-announcements"><span class="overview-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M9 21h6"/></svg></span><strong>Announcements</strong><span>Share an update across the website</span></a>
+        <a class="overview-action" href="#overview-duty"><span class="overview-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2M7 3l2 2M17 3l-2 2"/></svg></span><strong>Duty &amp; availability</strong><span>Record shifts and see who is available</span></a>
       </nav>
       <div class="overview-livebar"><p class="overview-live-state" id="overview-live-status" role="status">Loading website data…</p><button class="button-v3 button-quiet-v3" id="overview-refresh" type="button">Refresh now</button></div>
       <section class="overview-metrics" id="staff-metrics-v3" aria-label="Website totals" aria-busy="true">
@@ -76,6 +79,10 @@
         <article class="overview-metric"><span>Published servers</span><strong data-overview-metric="publishedServers">—</strong><small>Live in the directory</small></article>
         <article class="overview-metric"><span>Published blog posts</span><strong data-overview-metric="publishedBlogs">—</strong><small>Live on the blog</small></article>
         <article class="overview-metric"><span>Active staff</span><strong data-overview-metric="activeStaff">—</strong><small>Your staff team</small></article>
+      </section>
+      <section id="overview-duty" class="overview-module staff-duty" aria-labelledby="staff-duty-title" aria-busy="true">
+        <div class="overview-section-heading staff-duty-heading"><div><span class="eyebrow-v3">Staff operations</span><h2 id="staff-duty-title">Duty &amp; availability</h2><p>Record confirmed work sessions and tell the team when you are available.</p></div><p class="staff-duty-live" data-duty-live role="status">Loading duty information…</p></div>
+        <div class="staff-duty-content" data-duty-content><p class="staff-duty-empty">Checking your current duty state…</p></div>
       </section>
       <section id="overview-refresh-health" data-refresh-health aria-label="Live listing checks"></section>
       <section class="overview-users" aria-labelledby="overview-users-title">

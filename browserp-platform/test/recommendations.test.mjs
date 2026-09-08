@@ -107,10 +107,10 @@ test("clearing without consent never creates optional preference storage", () =>
 });
 
 async function browser(t, fetcher, pathname = "/") {
-  const dom = new JSDOM('<body data-page="home"><section><div id="featured-server-list"></div></section></body>', { url: `https://browserp.test${pathname}`, runScripts: "outside-only" });
+  const dom = new JSDOM('<body data-page="home"><section><div id="featured-server-list"></div></section></body>', { url: `https://browserp.test${pathname}`, runScripts: "outside-only", pretendToBeVisual: true });
   t.after(() => dom.window.close()); const w = dom.window;
   w.localStorage.setItem(key, seed([view("uk-one", "UK", "fivem", Date.now()), view("uk-two", "UK", "fivem", Date.now()), view("uk-three", "UK", "fivem", Date.now())]));
-  w.fetch = fetcher;
+  w.fetch = (url, options) => url === "/api/auth/session" ? Promise.resolve({ ok: true, json: async () => ({ authenticated: false }) }) : fetcher(url, options);
   w.BrowseRPDirectory = { render(root, servers) { root.replaceChildren(...servers.map(item => { const p = w.document.createElement("p"); p.textContent = item.slug; return p; })); } };
   w.eval(source); w.document.dispatchEvent(new w.Event("DOMContentLoaded")); await tick();
   return { w, $: selector => w.document.querySelector(selector) };
@@ -176,5 +176,5 @@ test("a storage failure during opt-out is explained rather than claiming history
   h.w.Storage.prototype.removeItem = () => { throw Error("Storage is unavailable"); };
   h.$("[data-reset-recommendations]").click();
   assert.match(h.$(".recommendation-message").textContent, /could not clear/);
-  assert.equal(h.w.BrowseRPRecommendations.read().enabled, true);
+  assert.equal(h.w.BrowseRPRecommendations.read().enabled, false);
 });

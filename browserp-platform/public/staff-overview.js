@@ -30,7 +30,7 @@
     if (!$("#website-overview")) return null;
     active?.destroy();
     const authenticators = window.BrowseRPStaffAuthenticators?.init({ api });
-    const state = { range: "30d", website: null, busy: false, destroyed: false, request: 0, selectedDate: null, interval: null, observer: null, lastWidth: 0 };
+    const state = { range: "30d", website: null, busy: false, destroyed: false, request: 0, selectedDate: null, interval: null, observer: null, lastWidth: 0, duty: null };
     const cleanup = [];
     const listen = (element, event, callback) => { if (!element) return; element.addEventListener(event, callback); cleanup.push(() => element.removeEventListener(event, callback)); };
     const status = (text, mode = "loading") => { const element = $("#overview-live-status"); if (element) { element.textContent = text; element.dataset.state = mode; } };
@@ -186,18 +186,23 @@
       } finally { if (!state.destroyed && request === state.request) busy(false); }
     }
 
-    const controller = { refresh, get website() { return state.website; }, destroy() { state.destroyed = true; state.request += 1; clearInterval(state.interval); state.observer?.disconnect(); authenticators?.destroy(); cleanup.forEach((remove) => remove()); if (active === controller) active = null; } };
+    const controller = { refresh, get website() { return state.website; }, destroy() { state.destroyed = true; state.request += 1; clearInterval(state.interval); state.observer?.disconnect(); authenticators?.destroy(); state.duty?.destroy(); cleanup.forEach((remove) => remove()); if (active === controller) active = null; } };
     active = controller;
     $$("[data-overview-range]").forEach((button) => listen(button, "click", () => selectRange(button.dataset.overviewRange)));
     listen($("#overview-refresh"), "click", () => { void refresh(); });
     listen($("#overview-range"), "keydown", (event) => { if (event.key === "Escape") { $("#overview-range").open = false; $("#overview-range summary").focus(); } });
     listen(document, "visibilitychange", () => { if (!document.hidden && !state.busy) void refresh(); });
+    listen(window, "browserp:session-ended", () => controller.destroy());
     listen(window, "pagehide", () => controller.destroy());
     if (typeof ResizeObserver !== "undefined") {
       state.observer = new ResizeObserver(() => { const width = $("#overview-chart").getBoundingClientRect().width; if (state.website?.users.range === state.range && Math.abs(width - state.lastWidth) > 8) drawChart(state.website.users); });
       state.observer.observe($("#overview-chart"));
     }
     await refresh();
+    if (!state.destroyed && window.BrowseRPStaffDuty?.init) {
+      const duty = await window.BrowseRPStaffDuty.init({ api, root: $("#overview-duty"), onAuthFailure });
+      if (state.destroyed) duty?.destroy(); else state.duty = duty;
+    }
     if (!state.destroyed) state.interval = setInterval(() => { if (!document.hidden && !state.busy) void refresh(); }, 30000);
     return controller;
   }

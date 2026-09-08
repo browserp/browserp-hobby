@@ -9,7 +9,7 @@
   const date = value => { const parsed = new Date(value); return Number.isFinite(parsed.getTime()) ? parsed.toLocaleString() : "Date unavailable"; };
   function textArea(name, minimum = 0) { const node = make("textarea"); node.name = name; node.maxLength = 1000; node.minLength = minimum; node.required = minimum > 0; node.rows = 4; return node; }
 
-  function init({ api: request, accountId, root, staff = false, allowed = false, onAuthFailure } = {}) {
+  function init({ api: request, accountId, root, staff = false, allowed = false, isOwner = false, onAuthFailure } = {}) {
     if (!root || typeof request !== "function" || (staff && !allowed)) return null;
     const api = (path, options = {}) => request(path, { ...options, headers: { ...(options.headers || {}), "X-BrowseRP-Account": accountId || "" } });
     root.classList.add("privacy-requests");
@@ -139,6 +139,80 @@
         const body = { action: "fulfill", id: item.id, version: item.version, result: result.value, evidence: evidence.value, method, completedAt: actualDate.toISOString(), confirmed: confirmed.checked, key };
         void run(async () => { await post(body); return api(url()); }, payload => { render(payload); feedback.textContent = "Completed follow-up recorded. This form did not perform a data export, correction or erasure."; feedback.focus({ preventScroll: true }); }, "Recording completed follow-up…");
       }); section.append(form); return section;
+    }
+    function erasureReview(item) {
+      const section = make("section", undefined, "privacy-request-erasure-review");
+      const check = button("Check current account records"), report = make("div");
+      section.append(make("h4", "Account-removal review"),
+        make("p", "Review only. This check does not delete data, revoke access or complete the request."), check, report);
+      const stageLabels = {
+        inventory: "Check the account inventory",
+        policy_and_ownership: "Decide retention and shared ownership",
+        freeze_and_revoke: "Stop new activity and revoke access",
+        retained_evidence: "Handle records that must be retained",
+        media: "Remove uploaded files",
+        application_and_auth: "Remove account records",
+        verification_and_follow_up: "Verify the result and record follow-up"
+      };
+      const stateLabels = { review_required: "Review required", incomplete: "Incomplete", blocked: "Awaiting decisions", not_implemented: "Not available" };
+      const validCount = (value, limit = 1000) => Number.isSafeInteger(value) && value >= 0 && value <= limit;
+      const count = (value, lowerBound) => `${lowerBound ? "At least " : ""}${value.toLocaleString()}`;
+      function display(value) {
+        const coverage = value?.coverage, summary = value?.summary;
+        const invalid = () => { throw new Error("The account-removal review could not be verified. Refresh requests and try again."); };
+        if (value?.contractVersion !== 1 || value.mode !== "read-only" || value.executionEnabled !== false
+          || value.request?.id !== item.id || value.request?.version !== item.version || value.request?.status !== item.status
+          || value.subjectId !== item.accountId || !value.asOf || !Number.isFinite(new Date(value.asOf).getTime())
+          || coverage?.fullErasureInventory !== false || coverage.countLimit !== 1000
+          || typeof coverage.boundedCountsComplete !== "boolean" || typeof coverage.dependencyGraphComplete !== "boolean"
+          || !validCount(coverage.dependencyPathsInspected, 250) || !Array.isArray(coverage.missingRelations) || coverage.missingRelations.length > 250
+          || !validCount(summary?.ownedServers) || !validCount(summary?.otherOwnersAdvertsUsingUploads) || !validCount(summary?.storedObjects)
+          || typeof summary.ownedServersCountIsLowerBound !== "boolean" || typeof summary.sharedAdvertsCountIsLowerBound !== "boolean" || typeof summary.activeStaff !== "boolean"
+          || !Array.isArray(value.dependencies) || value.dependencies.length > 250 || !Array.isArray(value.stages) || value.stages.length !== Object.keys(stageLabels).length) invalid();
+        const stages = new Map();
+        for (const stage of value.stages) {
+          if (!stage || !Object.hasOwn(stageLabels, stage.id) || !Object.hasOwn(stateLabels, stage.state) || stages.has(stage.id)) invalid();
+          stages.set(stage.id, stage.state);
+        }
+        const storage = value.dependencies.filter(entry => entry?.category === "stored_objects" && Array.isArray(entry.via) && entry.via.length === 0);
+        if (storage.some(entry => !validCount(entry.count) || typeof entry.countIsLowerBound !== "boolean")) invalid();
+        const storageCount = storage.length && Math.max(...storage.map(entry => entry.count)) === summary.storedObjects
+          ? count(summary.storedObjects, storage.some(entry => entry.countIsLowerBound)) : "Not fully checked";
+        const content = make("div");
+        content.append(make("p", `Checked ${date(value.asOf)}. This is a snapshot; check again after any account or request changes.`, "privacy-request-date"), make("h5", "Snapshot counts"));
+        const counts = make("ul");
+        counts.append(make("li", `Owned listings: ${count(summary.ownedServers, summary.ownedServersCountIsLowerBound)}`),
+          make("li", `Other owners’ adverts using this account’s uploads: ${count(summary.otherOwnersAdvertsUsingUploads, summary.sharedAdvertsCountIsLowerBound)}`),
+          make("li", `Stored files: ${storageCount}`), make("li", `Active staff membership: ${summary.activeStaff ? "Yes" : "No"}`));
+        content.append(counts, make("p", `${coverage.dependencyPathsInspected.toLocaleString()} record links checked. Counts can overlap and must not be added together. “At least” marks a count that reached the check’s limit.`),
+          make("p", coverage.boundedCountsComplete && coverage.dependencyGraphComplete
+            ? "The bounded database check finished. Free-text records, shared content, external copies and backups still need separate review."
+            : "This database check is incomplete. Some links or counts need further review; missing results must not be treated as zero."));
+        if (coverage.missingRelations.length) content.append(make("p", "Some record types are absent from this database and were not checked. This does not confirm that copies are absent elsewhere."));
+        content.append(make("h5", "Review and removal stages"));
+        const stageList = make("ul");
+        for (const [id, label] of Object.entries(stageLabels)) stageList.append(make("li", `${label}: ${stateLabels[stages.get(id)]}`));
+        content.append(stageList, make("p", "Retention, shared ownership and backup handling still need decisions. Removal actions are not available in this review. Keep the request open until any separately completed work has been verified."));
+        return content;
+      }
+      check.addEventListener("click", () => {
+        if (busy || destroyed || !section.isConnected) return;
+        report.replaceChildren();
+        void run(async () => {
+          try { return await api("/api/admin/account-erasure-preflight", { method: "POST", body: JSON.stringify({ requestId: item.id, version: item.version }) }); }
+          catch (error) {
+            const message = error?.status === 409 ? "This request changed or closed. Refresh requests before checking it again."
+              : error?.status === 429 ? "Too many checks were requested. Wait a few minutes before trying again."
+              : "The account-removal review could not be loaded. Try the check again.";
+            throw Object.assign(new Error(message), { status: error?.status });
+          }
+        }, value => {
+          if (!section.isConnected) return;
+          report.replaceChildren(display(value));
+          feedback.textContent = "Account-removal review loaded. No data was deleted and the request remains open.";
+        }, "Checking the account-removal review…");
+      });
+      return section;
     }
     function copySection(item, canApprove) {
       const section = make("section", undefined, "privacy-request-copy"); section.append(make("h4", "Your structured account copy"));
@@ -291,6 +365,8 @@
         detail.append(requestHistory(item));
         const closed = ["declined", "withdrawn", "fulfilled"].includes(item.status);
         if (staff && !closed) detail.append(staffForm(item));
+        if (staff && isOwner === true && payload.canFulfill === true && item.kind === "delete"
+          && ["submitted", "reviewing", "information_needed", "ready"].includes(item.status)) detail.append(erasureReview(item));
         if (staff && item.status === "ready" && payload.canFulfill === true) detail.append(completionForm(item));
         if (item.kind === "copy" && item.status === "ready") detail.append(copySection(item, payload.canFulfill === true));
         if (!staff && !closed) {

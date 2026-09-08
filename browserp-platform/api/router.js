@@ -17,6 +17,10 @@ import { staffFiveM, staffCfx } from "../lib/fivem-workflow.js";
 import { fetchServerImage } from "../lib/server-media.js";
 import { moderationMutation, moderationQuery } from "../lib/staff-moderation.js";
 import { staffAuthenticators } from "../lib/staff-authenticators.js";
+import { staffDuty } from "../lib/staff-duty.js";
+import { memberPreferences } from "../lib/member-preferences.js";
+import { staffAccountErasurePreflight } from "../lib/account-erasure-preflight.js";
+import { qrCodeDataUri } from "../lib/authenticator-qr.js";
 import { prepareInitialStaffAuthenticator, verifyInitialStaffAuthenticator } from "../lib/staff-initial-authenticator.js";
 import { memberPrivacyRequests, staffPrivacyRequests } from "../lib/privacy-requests.js";
 import { memberAdvertisingEnquiries, staffAdvertisingEnquiries } from "../lib/advertising-enquiries.js";
@@ -137,16 +141,6 @@ function plainBlock(value, limit, label) {
     throw Object.assign(new Error(`${label} is missing or too long.`), { status: 400 });
   }
   return text;
-}
-
-function qrCodeDataUri(value) {
-  const source = String(value || "").trim();
-  if (!source) return null;
-  if (/^data:image\/svg\+xml(?:;base64)?,/i.test(source)) return source;
-  if (/^<svg[\s>]/i.test(source)) {
-    return `data:image/svg+xml;base64,${Buffer.from(source, "utf8").toString("base64")}`;
-  }
-  return null;
 }
 
 function profilePictureBytes(value) {
@@ -384,14 +378,16 @@ const routes = {
   "auth/logout": endpoint("POST", async (req, res) => {
     assertSameOrigin(req);
     const session = await getSession(req, res);
+    await signOut(req, res, session?.accessToken);
     if (session) await recordActivitySafely(req, res, {
       userId: session.user.id,
       eventType: "auth.signed_out",
       provider: session.provider
     });
-    await signOut(req, res);
     return ok(res, { signedOut: true });
   }),
+
+  "me/preferences": endpoint(["GET", "POST"], async (req, res) => ok(res, await memberPreferences(req, res))),
 
   "me/overview": endpoint("GET", async (req, res) => {
     const session = await getSession(req, res, { required: true });
@@ -857,6 +853,8 @@ const routes = {
   }),
 
   "admin/authenticators": endpoint(["GET", "POST"], async (req, res, id) => ok(res, await staffAuthenticators(req, res, id))),
+  "admin/duty": endpoint(["GET", "POST"], async (req, res) => ok(res, await staffDuty(req, res))),
+  "admin/account-erasure-preflight": endpoint("POST", async (req, res) => ok(res, await staffAccountErasurePreflight(req, res))),
 
   "admin/adverts/media": endpoint("POST", staffAdvertMedia),
 

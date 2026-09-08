@@ -72,6 +72,13 @@ test("blocked artwork renders a compact labelled advert, does not retry failures
   assert.equal(h.$("[data-ad-copy] strong").textContent, "Reviewed advert 1");
   assert.equal(h.$("[data-ad-copy] a").getAttribute("href"), "/servers?campaign=1");
   assert.equal(image.classList.contains("is-changing"), false);
+  const controls = h.$('.ad-controls-v3'), pause = h.$('.ad-pause-v7');
+  assert.equal(controls.getAttribute('role'), 'group');
+  assert.equal(controls.getAttribute('aria-label'), 'Advertisement controls');
+  assert.equal(controls.firstElementChild, h.$('.ad-dots-v3'));
+  assert.equal(controls.lastElementChild, pause);
+  pause.click(); assert.equal(pause.textContent, 'Resume rotation'); assert.equal(pause.getAttribute('aria-pressed'), 'true');
+  pause.click(); assert.equal(pause.textContent, 'Pause rotation'); assert.equal(pause.getAttribute('aria-pressed'), 'false');
   h.$('[data-ad-direction="next"]').click();
   assert.equal(h.root.classList.contains("artwork-unavailable"), false);
   assert.equal(h.w.getComputedStyle(h.$(".side-ad-stage-v3")).minHeight, "570px");
@@ -82,6 +89,13 @@ test("blocked artwork renders a compact labelled advert, does not retry failures
   assert.equal(h.root.classList.contains("artwork-unavailable"), true);
   assert.equal(h.requests.filter(request => request.image === image && request.src === artwork[0]).length, firstRequests);
   assert.ok(h.requests.every(request => artwork.includes(request.src)), "No alternate paths or hosts bypass artwork blocking");
+});
+
+test("house advert wording describes the four current launch games", async t => {
+  const h = await harness(t);
+  assert.equal(h.$("[data-ad-copy] span").textContent, "Compare FiveM, RedM, Roblox and Minecraft communities in one place.");
+  assert.equal(h.root.textContent.includes("racing and simulation"), false);
+  await h.hydrate();
 });
 
 test("the fallback uses the existing wordmark only when needed and remains usable if branding is blocked too", async t => {

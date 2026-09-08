@@ -136,3 +136,19 @@ test("aggregated periods expose their full UTC date range and preserve zero coun
   assert.match(app.nodes.get("#overview-chart-caption").textContent, /Weekly counts in UTC/);
   controller.destroy();
 });
+
+test("session end destroys a duty mount that finishes after access is revoked", async () => {
+  const app = harness(async () => fixture());
+  let finishDuty; let dutyDestroyed = 0;
+  app.window.BrowseRPStaffDuty = {
+    init: () => new Promise(resolve => { finishDuty = () => resolve({ destroy() { dutyDestroyed += 1; } }); })
+  };
+  const pending = app.init();
+  await flush();
+  app.window.emit("browserp:session-ended");
+  finishDuty();
+  const controller = await pending;
+  assert.equal(dutyDestroyed, 1);
+  assert.equal(app.timers.length, 0, "revoked access cannot start the overview refresh timer");
+  assert.equal(await controller.refresh(), null);
+});

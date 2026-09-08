@@ -312,7 +312,7 @@
         if (view === "summary") { summary(); status(`Updated ${date(state.summary.generatedAt)}`); return state.summary; }
         if (view === "data-requests") {
           const mount = make("section"); root.replaceChildren(heading(view), mount);
-          privacyController = window.BrowseRPPrivacyRequests.initStaff({ api, accountId, root: mount, allowed: true, onAuthFailure: error => {
+          privacyController = window.BrowseRPPrivacyRequests.initStaff({ api, accountId, root: mount, allowed: true, isOwner: state.summary?.permissions?.isOwner === true, onAuthFailure: error => {
             if (state.destroyed) return;
             clearPrivateRequests(); state.canReviewData = false; renderTabs();
             root.replaceChildren(empty("Private requests unavailable", "Your account or permission has changed. Sign in again or choose another available section."));

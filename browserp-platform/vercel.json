@@ -146,6 +146,10 @@
       "destination": "/api/router?_route=me/overview"
     },
     {
+      "source": "/api/me/preferences",
+      "destination": "/api/router?_route=me/preferences"
+    },
+    {
       "source": "/api/me/connections",
       "destination": "/api/router?_route=me/connections"
     },
@@ -212,6 +216,14 @@
     {
       "source": "/api/admin/authenticators",
       "destination": "/api/router?_route=admin/authenticators"
+    },
+    {
+      "source": "/api/admin/duty",
+      "destination": "/api/router?_route=admin/duty"
+    },
+    {
+      "source": "/api/admin/account-erasure-preflight",
+      "destination": "/api/router?_route=admin/account-erasure-preflight"
     },
     {
       "source": "/api/admin/adverts/media",

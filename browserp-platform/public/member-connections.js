@@ -38,7 +38,7 @@
       const result = new URLSearchParams(location.search).get("connections");
       if (result) {
         const confirmed = connections.providers.filter(provider => provider.connected).length > 1;
-        const feedback = make("p", result === "linked" ? (confirmed ? "Your account connection was completed. Your current connections are shown below." : "Connection status refreshed. Your verified connections are shown below.") : "The connection was not completed. Your existing sign-in still works; you can try connecting again.", "member-connections-result"); feedback.setAttribute("role", "status"); root.insertBefore(feedback, grid);
+        const feedback = make("p", result === "linked" ? (confirmed ? "Your account connection was completed. Your current connections are shown below." : "Connection status refreshed. Your verified connections are shown below.") : "We couldn’t confirm the connection attempt. Your current connections are shown below.", "member-connections-result"); feedback.setAttribute("role", "status"); root.insertBefore(feedback, grid);
       }
       let busy = false;
       const usableProviders = connections.providers.filter(item => item.connected && item.enabled).map(item => item.provider);

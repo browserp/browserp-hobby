@@ -35,17 +35,57 @@
         form.querySelectorAll(".field-v3,button[type=submit]").forEach(control => { control.hidden = true; });
         status.textContent = "Sign in first. We’ll bring you back to this server."; status.hidden = false;
       }
+      let replyInput = null;
+      let replyContext = null;
+      if (action === "comment") {
+        const textarea = form.querySelector('textarea[name="comment"]');
+        const label = form.querySelector(".field-v3 > span");
+        replyInput = document.createElement("input");
+        replyInput.type = "hidden";
+        replyInput.name = "parentCommentId";
+        replyContext = document.createElement("div");
+        replyContext.className = "comment-reply-context-v3";
+        replyContext.hidden = true;
+        const replyCopy = document.createElement("span");
+        const cancelReply = document.createElement("button");
+        cancelReply.type = "button";
+        cancelReply.textContent = "Cancel";
+        cancelReply.setAttribute("aria-label", "Cancel reply");
+        replyContext.append(replyCopy, cancelReply);
+        form.prepend(replyInput, replyContext);
+        const clearReply = ({ focus = false } = {}) => {
+          replyInput.value = "";
+          replyContext.hidden = true;
+          replyCopy.textContent = "";
+          if (label) label.textContent = "Add a comment";
+          if (focus) textarea?.focus({ preventScroll: true });
+        };
+        cancelReply.addEventListener("click", () => clearReply({ focus: true }));
+        document.querySelectorAll("[data-comment-reply-v3]").forEach(button => button.addEventListener("click", () => {
+          if (!signedIn) { location.assign(signInUrl); return; }
+          const parentId = button.dataset.commentReplyV3 || "";
+          if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(parentId)) return;
+          const author = button.dataset.commentAuthorV3 || "this member";
+          replyInput.value = parentId;
+          replyCopy.textContent = `Replying to ${author}`;
+          replyContext.hidden = false;
+          if (label) label.textContent = `Reply to ${author}`;
+          textarea?.focus({ preventScroll: true });
+          form.scrollIntoView?.({ block: "center" });
+        }));
+        form.__clearCommentReply = clearReply;
+      }
       let busy = false;
       form.addEventListener("submit", async event => {
         event.preventDefault();
         if (!signedIn || busy || !form.dataset.serverId) return;
         busy = true; if (submit) submit.disabled = true; form.setAttribute("aria-busy", "true");
         const data = new FormData(form);
-        const body = action === "comment" ? { action, serverId: form.dataset.serverId, body: data.get("comment") }
+        const body = action === "comment" ? { action, serverId: form.dataset.serverId, body: data.get("comment"), ...(replyInput?.value ? { parentCommentId: replyInput.value } : {}) }
           : { action, serverId: form.dataset.serverId, category: data.get("category"), body: data.get("details") };
         try {
           await api("/api/servers", { method: "POST", body: JSON.stringify(body) });
-          form.reset(); status.hidden = false;
+          form.reset(); form.__clearCommentReply?.(); status.hidden = false;
           status.textContent = action === "comment" ? "Comment sent for moderation." : "Report received. Staff can now review it.";
           toast(status.textContent);
         } catch (error) {
@@ -53,7 +93,10 @@
           status.hidden = false;
           status.textContent = error.status === 401
             ? "Your sign-in has expired. Your text is still here. Copy it before signing in again."
-            : error.message;
+            : action === "comment" && error.status === 404 && replyInput?.value
+              ? "That comment is no longer available to reply to. Your text is still here; choose another comment or send it on its own."
+              : error.message;
+          if (action === "comment" && error.status === 404 && replyInput?.value) form.__clearCommentReply?.();
           if (error.status === 401) signIn.hidden = false;
           toast(error.message, "error");
         } finally { busy = false; if (submit) submit.disabled = false; form.removeAttribute("aria-busy"); }

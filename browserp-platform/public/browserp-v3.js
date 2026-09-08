@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const state = { session: null, ads: new Map(), sessionGeneration: 0 };
+  const state = { session: null, ads: new Map(), sessionGeneration: 0, recommendationObserver: null };
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
@@ -12,13 +12,46 @@
     return element;
   }
 
+  const PUBLIC_THEME_KEY = "browserp-theme";
+
+  function isPublicPage() {
+    return !document.body.hasAttribute("data-staff-page") && !location.pathname.startsWith("/staffpanel");
+  }
+
   function preferredTheme() {
+    if (!isPublicPage()) return "dark";
+    try {
+      const saved = localStorage.getItem(PUBLIC_THEME_KEY);
+      if (saved === "light" || saved === "dark") return saved;
+    } catch { /* Appearance remains usable when local storage is unavailable. */ }
     return "dark";
   }
 
-  function applyTheme(theme) {
-    document.documentElement.dataset.theme = "dark";
+  function applyTheme(theme, { persist = false } = {}) {
+    const selected = isPublicPage() && theme === "light" ? "light" : "dark";
+    document.documentElement.dataset.theme = selected;
+    document.documentElement.style.colorScheme = selected;
+    const colour = document.querySelector('meta[name="theme-color"]');
+    if (colour) colour.content = selected === "light" ? "#f8f5f8" : "#050507";
+    if (persist && isPublicPage()) {
+      try { localStorage.setItem(PUBLIC_THEME_KEY, selected); } catch { /* The visible choice still applies for this page. */ }
+    }
+    $$('[data-theme-choice-v6]').forEach(button => button.setAttribute("aria-pressed", String(button.dataset.themeChoiceV6 === selected)));
+    window.dispatchEvent(new CustomEvent("browserp:theme-changed", { detail: { theme: selected } }));
+    return selected;
   }
+
+  if (isPublicPage() && !document.querySelector('link[data-public-theme],link[href^="/theme.css"]')) {
+    const themeStyles = document.createElement("link");
+    themeStyles.rel = "stylesheet";
+    themeStyles.href = "/theme.css?v=2.22.0";
+    themeStyles.dataset.publicTheme = "";
+    document.head.append(themeStyles);
+  }
+  window.BrowseRPTheme = Object.freeze({ get: preferredTheme, set: theme => applyTheme(theme, { persist: true }) });
+  window.addEventListener("storage", event => {
+    if (event.key === PUBLIC_THEME_KEY && (event.newValue === "light" || event.newValue === "dark")) applyTheme(event.newValue);
+  });
 
   function initials(value) {
     return String(value || "BrowseRP member").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
@@ -276,6 +309,7 @@
 
   window.addEventListener("browserp:session-ended", () => {
     state.sessionGeneration++;
+    state.recommendationObserver?.destroy(); state.recommendationObserver = null;
     state.claimsController?.endSession(); state.claimsController = null;
     state.session = { authenticated: false, csrfToken: "" };
     document.dispatchEvent(new Event("navigation:close"));
@@ -313,9 +347,9 @@
     "/assets/adverts/community-stories.jpg"
   ]);
   const HOUSE_ADVERTS = Object.freeze([
-    { name: "BrowseRP discovery", headline: "Find the roleplay that fits you", body: "Explore communities across games, worlds and simulators.", ctaLabel: "Browse communities", destinationUrl: "/servers", imageUrl: ADVERT_ARTWORK[0] },
+    { name: "BrowseRP discovery", headline: "Find the roleplay that fits you", body: "Compare FiveM, RedM, Roblox and Minecraft communities in one place.", ctaLabel: "Browse communities", destinationUrl: "/servers", imageUrl: ADVERT_ARTWORK[0] },
     { name: "BrowseRP advertising", headline: "Put your community in front of roleplayers", body: "Personalised picture placements are reviewed before they go live.", ctaLabel: "Advertise here", destinationUrl: "/advertise", imageUrl: ADVERT_ARTWORK[1] },
-    { name: "BrowseRP stories", headline: "Every game has a roleplay community", body: "From city life to westerns, block worlds, survival and driving groups.", ctaLabel: "Explore the directory", destinationUrl: "/servers", imageUrl: ADVERT_ARTWORK[2] }
+    { name: "BrowseRP stories", headline: "Every game creates a different kind of roleplay", body: "Explore city, western, block-world and Roblox roleplay communities.", ctaLabel: "Explore the directory", destinationUrl: "/servers", imageUrl: ADVERT_ARTWORK[2] }
   ]);
 
   function safeAdvertImage(value, fallbackIndex = 0) {
@@ -367,6 +401,7 @@
     let copy = $("[data-ad-copy]", root);
     let image;
     let dots;
+    let controls;
     let markArtworkUnavailable;
     let imageSource = "";
     let imageRequest = 0;
@@ -430,8 +465,12 @@
           dot.addEventListener("click", () => { index = position; draw(); restart(); });
           dots.append(dot);
         });
+        controls = node("div", "ad-controls-v3");
+        controls.setAttribute("role", "group");
+        controls.setAttribute("aria-label", "Advertisement controls");
+        controls.append(dots);
       }
-      root.replaceChildren(label, stage, ...(dots ? [dots] : []));
+      root.replaceChildren(label, stage, ...(controls ? [controls] : []));
     }
     function draw() {
       const advert = list[index];
@@ -493,7 +532,7 @@
     if (visual && list.length > 1) {
       const pause = node("button", "ad-pause-v7", "Pause rotation"); pause.type = "button"; pause.setAttribute("aria-pressed", "false");
       pause.addEventListener("click", () => { paused = !paused; pause.textContent = paused ? "Resume rotation" : "Pause rotation"; pause.setAttribute("aria-pressed", String(paused)); restart(); });
-      root.append(pause);
+      controls?.append(pause);
     }
     $$('[data-ad-direction]', root).forEach((button) => button.addEventListener("click", () => {
       index = (index + (button.dataset.adDirection === "next" ? 1 : -1) + list.length) % list.length;
@@ -530,7 +569,7 @@
     const grid = node("div", "shell-v3 footer-grid-v3");
     const brand = node("div", "footer-brand-v3");
     const lockup = node("span", "logo-lockup-v3"); const mark = new Image(); mark.src = "/assets/browserp-logo-v5.png"; mark.alt = "BrowseRP"; mark.className = "logo-full-v5";
-    lockup.append(mark); brand.append(lockup, node("p", "", "A clearer way to discover roleplay communities across games and simulators."));
+    lockup.append(mark); brand.append(lockup, node("p", "", "A clearer way to discover roleplay communities across games."));
     grid.append(brand);
     const groups = [
       ["Discover", [["Browse servers","/servers"],["UK servers","/servers?region=United%20Kingdom"],["US servers","/servers?region=United%20States"],["Blog","/blog"]]],
@@ -700,6 +739,25 @@
       const server = payload.servers?.[0];
       if (!server) throw Object.assign(new Error("Server not found"), { status: 404 });
       window.BrowseRPRecommendations?.record(server);
+      state.recommendationObserver?.destroy(); state.recommendationObserver = null;
+      const viewedPath = location.pathname;
+      const viewedAccountId = state.session?.authenticated ? state.session.user?.id : null;
+      if (viewedAccountId && typeof window.BrowseRPRecommendations?.getConsentState === "function") {
+        const recordWhenReady = () => {
+          const consent = window.BrowseRPRecommendations?.getConsentState?.();
+          const currentAccountId = state.session?.authenticated ? state.session.user?.id : null;
+          if (document.visibilityState !== "visible" || location.pathname !== viewedPath || currentAccountId !== viewedAccountId) return;
+          if (consent?.phase !== "ready" || consent.enabled !== true || consent.accountId !== viewedAccountId) return;
+          window.BrowseRPRecommendations?.record(server);
+        };
+        const destroy = () => {
+          window.removeEventListener("browserp:recommendations-changed", recordWhenReady);
+          window.removeEventListener("pagehide", destroy);
+        };
+        window.addEventListener("browserp:recommendations-changed", recordWhenReady);
+        window.addEventListener("pagehide", destroy, { once: true });
+        state.recommendationObserver = { destroy };
+      }
       window.BrowseRPShortlist?.mountDetail(root, server);
       try {
         const recent = JSON.parse(localStorage.getItem("browserp-recent-servers") || "[]");
@@ -760,11 +818,7 @@
       $("#comment-form-v3").dataset.serverId = server.id;
       $("#report-form-v3").dataset.serverId = server.id;
       const comments = $("#comments-v3");
-      comments.replaceChildren(...(engagement.comments || []).map((comment) => {
-        const item = node("article", "comment-v3");
-        item.append(node("strong", "", comment.author || "BrowseRP member"), node("time", "", readableDate(comment.createdAt)), node("p", "", comment.body));
-        return item;
-      }));
+      comments.replaceChildren(...(engagement.comments || []).map((comment) => window.BrowseRPPublicComments?.render(comment) || node("article", "comment-v3", comment.body)));
       $("#comments-empty-v3").hidden = (engagement.comments || []).length > 0;
       document.title = `${server.name} — ${platform} roleplay — BrowseRP`;
       const claimRoot = $("#server-claim-panel");

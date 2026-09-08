@@ -7,19 +7,21 @@ const source = readFileSync(new URL("../public/recommendations.js", import.meta.
 const key = "browserp-recommendations-v1";
 const choiceKey = "browserp-cookie-choice-v1";
 const markup = '<body><footer class="footer-v3"><div class="footer-column-v3"><a href="/legal#cookies">Cookie policy</a></div></footer></body>';
-function page(t, setup = () => {}) {
-  const dom = new JSDOM(markup, { url: "https://browserp.test/legal", runScripts: "outside-only" });
+async function page(t, setup = () => {}) {
+  const dom = new JSDOM(markup, { url: "https://browserp.test/legal", runScripts: "outside-only", pretendToBeVisual: true });
   t.after(() => dom.window.close());
   const w = dom.window;
   w.HTMLDialogElement.prototype.showModal = function () { this.open = true; };
   w.HTMLDialogElement.prototype.close = function () { this.open = false; this.dispatchEvent(new w.Event("close")); };
+  w.fetch = async () => ({ ok: true, json: async () => ({ authenticated: false }) });
   setup(w); w.eval(source); w.document.dispatchEvent(new w.Event("DOMContentLoaded"));
+  await new Promise(resolve => setImmediate(resolve));
   const button = text => [...(w.document.querySelector("dialog[open]") || w.document).querySelectorAll("button")].find(item => item.textContent === text && !item.closest('[hidden]'));
   return { w, button, open() { button("Cookie preferences").click(); return w.document.querySelector("dialog"); } };
 }
 
-test("footer preferences are opt-in, reopenable and restore focus without touching other storage or cookies", t => {
-  const { w, button, open } = page(t, w => {
+test("footer preferences are opt-in, reopenable and restore focus without touching other storage or cookies", async t => {
+  const { w, button, open } = await page(t, w => {
     w.localStorage.setItem("browserp-history", "existing shortcut");
     w.localStorage.setItem("browserp-compare", "existing shortlist");
     w.document.cookie = "brp_csrf=test-session";
@@ -49,8 +51,8 @@ test("footer preferences are opt-in, reopenable and restore focus without touchi
   button("Close preferences").click(); open(); assert.match(dialog.querySelector('[role="status"]').textContent, /are off/);
 });
 
-test("first visit offers equal choices without enabling storage and a rejection survives another page", t => {
-  const first = page(t);
+test("first visit offers equal choices without enabling storage and a rejection survives another page", async t => {
+  const first = await page(t);
   const prompt = first.w.document.querySelector('[data-cookie-prompt]');
   assert.ok(prompt && !prompt.hidden);
   assert.equal(prompt.getAttribute("role"), "region");
@@ -63,27 +65,27 @@ test("first visit offers equal choices without enabling storage and a rejection 
   reject.click();
   assert.equal(prompt.hidden, true);
   assert.equal(first.w.localStorage.getItem(key), null);
-  const next = page(t, w => w.localStorage.setItem(choiceKey, first.w.localStorage.getItem(choiceKey)));
-  assert.equal(next.w.document.querySelector('[data-cookie-prompt]'), null);
+  const next = await page(t, w => w.localStorage.setItem(choiceKey, first.w.localStorage.getItem(choiceKey)));
+  assert.ok(!next.w.document.querySelector('[data-cookie-prompt]') || next.w.document.querySelector('[data-cookie-prompt]').hidden);
   assert.equal(next.w.BrowseRPRecommendations.read().enabled, false);
 });
 
-test("acceptance persists and existing explicit recommendation opt-in is not prompted again", t => {
-  const first = page(t); first.button("Accept recommendations").click();
+test("acceptance persists and existing explicit recommendation opt-in is not prompted again", async t => {
+  const first = await page(t); first.button("Accept recommendations").click();
   assert.equal(first.w.document.querySelector('[data-cookie-prompt]').hidden, true);
   assert.equal(first.w.BrowseRPRecommendations.read().enabled, true);
   for (const includeChoice of [true, false]) {
-    const next = page(t, w => {
+    const next = await page(t, w => {
       w.localStorage.setItem(key, first.w.localStorage.getItem(key));
       if (includeChoice) w.localStorage.setItem(choiceKey, "accepted");
     });
-    assert.equal(next.w.document.querySelector('[data-cookie-prompt]'), null);
+    assert.ok(!next.w.document.querySelector('[data-cookie-prompt]') || next.w.document.querySelector('[data-cookie-prompt]').hidden);
     assert.equal(next.w.BrowseRPRecommendations.read().enabled, true);
   }
 });
 
-test("blocked choice storage leaves a usable notice and never claims a remembered decision", t => {
-  const { w, button } = page(t, w => { w.Storage.prototype.setItem = () => { throw Error("Storage blocked"); }; });
+test("blocked choice storage leaves a usable notice and never claims a remembered decision", async t => {
+  const { w, button } = await page(t, w => { w.Storage.prototype.setItem = () => { throw Error("Storage blocked"); }; });
   button("Accept recommendations").click();
   assert.equal(w.BrowseRPRecommendations.read().enabled, false);
   button("Reject recommendations").click();
@@ -96,8 +98,8 @@ test("blocked choice storage leaves a usable notice and never claims a remembere
   assert.equal(w.document.querySelector("dialog").open, true);
 });
 
-test("failed preference writes never display a saved choice and preserve the actual setting", t => {
-  const { w, button, open } = page(t);
+test("failed preference writes never display a saved choice and preserve the actual setting", async t => {
+  const { w, button, open } = await page(t);
   open();
   const save = w.Storage.prototype.setItem;
   w.Storage.prototype.setItem = () => { throw Error("Storage blocked"); };
@@ -107,12 +109,12 @@ test("failed preference writes never display a saved choice and preserve the act
   save.call(w.localStorage, key, JSON.stringify({ enabled: true, views: [] }));
   w.Storage.prototype.removeItem = () => { throw Error("Storage blocked"); };
   button("Reject recommendations").click();
-  assert.equal(w.BrowseRPRecommendations.read().enabled, true);
+  assert.equal(w.BrowseRPRecommendations.read().enabled, false);
   assert.match(w.document.querySelector('dialog [role="status"]').textContent, /could not save/);
 });
 
-test("existing profile controls and cross-tab changes stay in sync with footer choices", t => {
-  const { w, button, open } = page(t, w => {
+test("existing profile controls and cross-tab changes stay in sync with footer choices", async t => {
+  const { w, button, open } = await page(t, w => {
     const profile = w.document.createElement("section"); profile.dataset.recommendationSettings = ""; w.document.body.prepend(profile);
   });
   open(); const input = w.document.querySelector('input[type="checkbox"]');

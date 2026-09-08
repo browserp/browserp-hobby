@@ -1,0 +1,88 @@
+.staff-duty { overflow: clip; }
+.staff-duty-heading { align-items: center; border-bottom: 1px solid var(--line); }
+.staff-duty-live { display: flex; align-items: center; gap: 8px; margin: 0 !important; color: var(--copy); font-size: 12px; }
+.staff-duty-live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.staff-duty-live[data-state="live"]::before { background: #68e3b0; box-shadow: 0 0 9px #68e3b044; }
+.staff-duty-live[data-state="error"] { color: #ffd29a; }
+.staff-duty-live[data-state="error"]::before { background: #f6ba70; }
+.staff-duty-content { display: grid; gap: 18px; padding: clamp(18px,2.5vw,28px); }
+.staff-duty-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.staff-duty-period { display: grid; gap: 7px; color: var(--copy); font-size: 12px; }
+.staff-duty-period select { min-width: 150px; min-height: 42px; padding: 9px 38px 9px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--bg-soft); color: var(--text); font: inherit; }
+.staff-duty-primary { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.staff-duty-card,.staff-duty-block { min-width: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--bg-soft); }
+.staff-duty-card { padding: clamp(17px,2vw,22px); }
+.staff-duty-card h3,.staff-duty-block h3 { margin: 7px 0 0; font-size: clamp(18px,2vw,22px); letter-spacing: -.025em; }
+.staff-duty-card > p:not(.staff-duty-warning),.staff-duty-help { margin: 10px 0 16px; color: var(--copy); font-size: 12px; line-height: 1.65; }
+.staff-duty-clock .button-v3 { margin-top: 4px; min-width: 126px; }
+.staff-duty-choices { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; margin-top: 15px; }
+.staff-duty-choice { min-height: 42px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 9px; background: transparent; color: var(--copy); font: inherit; font-size: 12px; cursor: pointer; }
+.staff-duty-choice:hover { border-color: #8a5877; color: var(--text); }
+.staff-duty-choice[aria-pressed="true"] { border-color: #bd568f; background: #382039; color: #ffd0e9; box-shadow: inset 0 0 0 1px #bd568f33; }
+.staff-duty-help { margin-bottom: 0 !important; }
+.staff-duty-warning { margin: 12px 0; padding: 10px 12px; border: 1px solid #7b5836; border-radius: 9px; background: #332515; color: #ffd6a0; font-size: 12px; line-height: 1.6; }
+.staff-duty-totals { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.staff-duty-total { min-width: 0; padding: 17px; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(145deg,var(--panel),var(--bg-soft)); }
+.staff-duty-total span,.staff-duty-total small { display: block; color: var(--copy); font-size: 11px; line-height: 1.45; }
+.staff-duty-total strong { display: block; margin: 8px 0 5px; color: var(--text); font-size: 25px; font-variant-numeric: tabular-nums; letter-spacing: -.035em; }
+.staff-duty-block { padding: clamp(17px,2vw,22px); }
+.staff-duty-block > .eyebrow-v3 { display: block; }
+.staff-duty-block-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+.staff-duty-session-list { display: grid; gap: 10px; margin-top: 15px; }
+.staff-duty-session { padding: 15px; border: 1px solid var(--line); border-radius: 11px; background: var(--panel); }
+.staff-duty-session-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.staff-duty-session-heading > div { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.staff-duty-session-heading strong { overflow-wrap: anywhere; }
+.staff-duty-duration { color: #ffafd9; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.staff-duty-pill,.staff-duty-availability { display: inline-flex; align-items: center; min-height: 24px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--copy); font-size: 10px; line-height: 1; white-space: nowrap; }
+.staff-duty-pill-open,.staff-duty-availability-available { border-color: #326a56; background: #173429; color: #8bedc2; }
+.staff-duty-pill-review,.staff-duty-availability-away { border-color: #7b5836; background: #332515; color: #ffd6a0; }
+.staff-duty-pill-confirmed { border-color: #614b84; background: #291f3d; color: #d8c3ff; }
+.staff-duty-availability-off_duty { color: #b2a6b1; }
+.staff-duty-times { display: grid; grid-template-columns: auto 1fr; gap: 5px 12px; margin: 13px 0 0; color: var(--copy); font-size: 11px; }
+.staff-duty-times dt { color: #9d919c; }
+.staff-duty-times dd { margin: 0; color: var(--text); }
+.staff-duty-correction { margin-top: 13px; border-top: 1px solid var(--line); }
+.staff-duty-correction summary { padding-top: 13px; color: #ffafd9; font-size: 12px; cursor: pointer; }
+.staff-duty-correction form { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin-top: 13px; }
+.staff-duty-field { display: grid; gap: 6px; color: var(--copy); font-size: 11px; }
+.staff-duty-field:has(textarea),.staff-duty-confirm,.staff-duty-correction form .button-v3 { grid-column: 1 / -1; }
+.staff-duty-field input,.staff-duty-field textarea { width: 100%; min-height: 42px; padding: 10px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg-soft); color: var(--text); font: inherit; }
+.staff-duty-field textarea { min-height: 84px; resize: vertical; }
+.staff-duty-confirm { display: flex; align-items: flex-start; gap: 9px; color: var(--copy); font-size: 11px; line-height: 1.5; }
+.staff-duty-confirm input { flex: 0 0 auto; margin-top: 2px; accent-color: #ec4fa6; }
+.staff-duty-people { display: grid; gap: 7px; margin: 15px 0 0; padding: 0; list-style: none; }
+.staff-duty-people li { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 54px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+.staff-duty-people li > div { display: grid; gap: 3px; min-width: 0; }
+.staff-duty-people strong { overflow-wrap: anywhere; font-size: 12px; }
+.staff-duty-people small { color: var(--copy); font-size: 10px; }
+.staff-duty-team-totals { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin-top: 15px; }
+.staff-duty-team-totals article { display: grid; gap: 4px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+.staff-duty-team-totals strong { overflow-wrap: anywhere; font-size: 11px; }
+.staff-duty-team-totals span { color: #ffafd9; font-size: 19px; font-weight: 750; }
+.staff-duty-team-totals small { color: var(--copy); font-size: 10px; }
+.staff-duty-notice { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid #72556a; border-radius: 10px; background: #281a24; }
+.staff-duty-notice p { margin: 0; color: #eadde7; font-size: 12px; line-height: 1.5; }
+.staff-duty-empty { margin: 0; padding: 18px; color: var(--copy); font-size: 12px; line-height: 1.6; text-align: center; }
+.staff-duty-block > .button-v3 { margin-top: 13px; }
+.staff-duty[aria-busy="true"] { cursor: progress; }
+@media (max-width: 900px) {
+  .staff-duty-primary,.staff-duty-totals { grid-template-columns: 1fr; }
+  .staff-duty-team-totals { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 560px) {
+  .staff-duty-content { padding-inline: 14px; }
+  .staff-duty-heading { align-items: flex-start; }
+  .staff-duty-live { width: 100%; }
+  .staff-duty-toolbar { align-items: stretch; }
+  .staff-duty-period,.staff-duty-toolbar .button-v3 { width: 100%; }
+  .staff-duty-period select { width: 100%; }
+  .staff-duty-choices,.staff-duty-team-totals { grid-template-columns: 1fr; }
+  .staff-duty-correction form { grid-template-columns: 1fr; }
+  .staff-duty-field { grid-column: 1; }
+  .staff-duty-session-heading { align-items: flex-start; }
+  .staff-duty-people li { align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .staff-duty * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}

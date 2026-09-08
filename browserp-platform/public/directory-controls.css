@@ -17,6 +17,22 @@
 .directory-filter-panel .smart-refinements { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
 .directory-filter-panel .smart-checks { margin-top: 4px; }
 .directory-game-hint { margin: 16px 0 0; color: var(--muted); font-size: 13px; }
+/* Keep the advert, its position controls and the rotation action together as
+   one card. The approved creatives are 4:5, so the rail must not stretch them
+   to the viewport height. */
+.directory-layout-v3 > .side-ad-v3 {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(180deg,var(--panel),color-mix(in srgb,var(--panel-2) 72%,var(--panel)));
+  box-shadow: 0 18px 48px rgb(0 0 0 / .24);
+}
+.directory-layout-v3 > .side-ad-v3 .ad-label-v3 { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); }
+.directory-layout-v3 > .side-ad-v3 .side-ad-stage-v3 { border: 0; border-radius: 0; }
+.directory-layout-v3 > .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 { min-height: 0; aspect-ratio: 4 / 5; }
+.directory-layout-v3 > .side-ad-v3 .ad-controls-v3 { border-top: 1px solid var(--line); background: color-mix(in srgb,var(--panel-2) 70%,var(--panel)); }
+.directory-layout-v3 > .side-ad-v3 .ad-pause-v7 { min-height: 44px; padding-inline: 12px; color: var(--copy); }
+.directory-layout-v3 > .side-ad-v3 .ad-pause-v7:focus-visible { outline: 2px solid var(--pink-strong); outline-offset: -3px; }
 /* Failed artwork is a compact text advert, not a portrait-sized creative.
    Scope this to Discover so healthy artwork and other placements keep their layout. */
 .directory-layout-v3 > .side-ad-v3.artwork-unavailable .side-ad-stage-v3 { min-height: 0; padding: 16px; gap: 12px; }
@@ -27,7 +43,8 @@
 .directory-layout-v3 > .side-ad-v3.artwork-unavailable .side-ad-copy-v3 a { margin-top: 0; line-height: 1.4; }
 @media(max-width:760px) {
   /* Let longer advert copy size the stage instead of clipping above 210px. */
-  .directory-layout-v3 > .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { position: relative; padding-inline: 64px; }
+  .directory-layout-v3 > .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 { display: flex; flex-direction: column; justify-content: flex-end; }
+  .directory-layout-v3 > .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { position: relative; width: 100%; margin-top: auto; padding-inline: 64px; }
   .directory-control-row { gap: 6px; }
   .directory-control-row button { padding: 8px 3px; min-height: 70px; font-size: 12px; }
   .directory-control-row .smart-filter-toggle { gap: 7px; }
@@ -36,6 +53,15 @@
   .directory-filter-panel { padding: 16px; }
   .directory-filter-panel .smart-primary-filters .field-v3:last-child { grid-column: auto; }
   .directory-filter-panel .smart-refinements { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media(min-width:901px) {
+  /* A 200px rail cannot hold the approved copy inside a portrait creative. */
+  .directory-layout-v3 { grid-template-columns: clamp(250px,20vw,280px) minmax(0,1fr); }
+}
+@media(max-width:900px) {
+  .directory-layout-v3 { display: flex; flex-direction: column; gap: 28px; }
+  .directory-layout-v3 > .directory-main-v3 { order: 1; width: 100%; }
+  .directory-layout-v3 > .side-ad-v3 { position: static; order: 2; width: min(100%,440px); margin-inline: auto; }
 }
 @media(max-width:420px) {
   .directory-control-row button { font-size: 11px; }

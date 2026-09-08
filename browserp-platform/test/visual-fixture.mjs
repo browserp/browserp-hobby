@@ -38,7 +38,10 @@ createServer(async (req, res) => {
         const slug = url.searchParams.get("slug");
         const items = servers.filter(server => (!slug || server.slug === slug) && discovery.matches(server, filters));
         const end = filters.offset + filters.limit;
-        data = { servers: items.slice(filters.offset, end), total: items.length, nextOffset: end < items.length ? end : null, engagement: { voteCount: 0, comments: [] }, facets: discovery.facets(servers, filters) };
+        data = { servers: items.slice(filters.offset, end), total: items.length, nextOffset: end < items.length ? end : null, engagement: { voteCount: 12, comments: slug ? [
+          { id: "33333333-3333-4333-8333-333333333333", author: "Morgan Reed", avatarUrl: "https://www.browserp.com/assets/browserp-icon-192.png", createdAt: "2026-09-08T09:30:00.000Z", editedAt: null, badges: [{ kind: "server_owner", label: "Server owner" }], parent: null, body: "Clear joining information and a helpful community welcome made this easy to understand." },
+          { id: "44444444-4444-4444-8444-444444444444", author: "Alex Rivers", avatarUrl: null, createdAt: "2026-09-08T10:45:00.000Z", editedAt: "2026-09-08T11:05:00.000Z", badges: [{ kind: "staff", label: "Moderator" }], parent: { id: "33333333-3333-4333-8333-333333333333", author: "Morgan Reed", body: "Clear joining information and a helpful community welcome made this easy to understand.", createdAt: "2026-09-08T09:30:00.000Z", unavailable: false }, body: "The listing now also explains its access requirements before you leave BrowseRP." }
+        ] : [] }, facets: discovery.facets(servers, filters) };
       }
       if (url.pathname === "/api/me/favorites") {
         if (req.method === "GET") data = { serverIds: [...favorites] };

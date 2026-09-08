@@ -3,6 +3,13 @@
 
   // Public pages share one menu; staff navigation has its own controller.
   if (document.body.hasAttribute("data-staff-page") || location.pathname.startsWith("/staffpanel")) return;
+  const themeKey = "browserp-theme";
+  let initialTheme = "dark";
+  try {
+    const savedTheme = localStorage.getItem(themeKey);
+    if (savedTheme === "light" || savedTheme === "dark") initialTheme = savedTheme;
+  } catch { /* Dark remains the public default. */ }
+  document.documentElement.dataset.theme = initialTheme;
   const header = document.querySelector(".header-v3, [data-site-header]");
   const nav = header?.querySelector("nav");
   if (!nav || header.dataset.publicNavigation) return;
@@ -149,6 +156,35 @@
   });
   games.append(gamesHeading, gameLinks);
 
+  const appearance = make("section", "navigation-appearance-v6 navigation-enter-v6");
+  appearance.setAttribute("aria-labelledby", "navigation-appearance-title-v6");
+  const appearanceHeading = make("div", "navigation-appearance-heading-v6");
+  const appearanceTitle = make("h3", "", "Appearance");
+  appearanceTitle.id = "navigation-appearance-title-v6";
+  appearanceHeading.append(appearanceTitle, make("span", "", "Saved on this device"));
+  const themeChoices = make("div", "navigation-theme-choices-v6");
+  themeChoices.setAttribute("role", "group");
+  themeChoices.setAttribute("aria-label", "Choose the public site appearance");
+  [["Dark", "dark"], ["Light", "light"]].forEach(([label, value]) => {
+    const button = make("button", "navigation-theme-choice-v6", label);
+    button.type = "button";
+    button.dataset.themeChoiceV6 = value;
+    button.setAttribute("aria-pressed", String(document.documentElement.dataset.theme === value));
+    button.addEventListener("click", () => {
+      const selected = window.BrowseRPTheme?.set?.(value) || value;
+      if (!window.BrowseRPTheme) {
+        document.documentElement.dataset.theme = selected;
+        try { localStorage.setItem(themeKey, selected); } catch { /* The visible choice still applies for this page. */ }
+        window.dispatchEvent(new CustomEvent("browserp:theme-changed", { detail: { theme: selected } }));
+      }
+    });
+    themeChoices.append(button);
+  });
+  appearance.append(appearanceHeading, themeChoices);
+  window.addEventListener("browserp:theme-changed", event => {
+    themeChoices.querySelectorAll("[data-theme-choice-v6]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.themeChoiceV6 === event.detail?.theme)));
+  });
+
   const account = make("div", "navigation-account-v6 navigation-enter-v6");
   account.append(accountLink());
   const foot = make("div", "navigation-footer-v6 navigation-enter-v6");
@@ -158,7 +194,7 @@
   extra.setAttribute("aria-label", "More from BrowseRP");
   extra.append(link("Find my server", "/find-server", "discovery-link-v9"), link("Compare servers", "/compare", "discovery-link-v9"), link("Advertise", "/advertise"), link("Help & contact", "/legal#contact"), link("Policies", "/legal"));
   foot.append(cta, extra);
-  scroll.append(intro, search, links, games, account, foot);
+  scroll.append(intro, search, links, games, appearance, account, foot);
   panel.append(top, scroll);
   dialog.append(panel);
   document.body.append(dialog);

@@ -45,11 +45,143 @@
     return { read, enable, record, preferred, rank, clear: () => read().enabled ? save({ enabled: true, views: [] }) : enable(false), prune: () => { const data = read(); if (data.enabled) save(data); } };
   }
   globalThis.BrowseRPRecommendationModel = { create, region, key: KEY };
+  const CHOICE_KEY = "browserp-cookie-choice-v1";
+  const ACCOUNT_KEY = "browserp-consent-account-v1";
+  const DECISION_KEY = "browserp-consent-decision-v1";
+  // A short-lived confirmation gates *all* optional reads and writes. Cached
+  // acceptance is never sufficient while account identity or the API is unknown.
+  function createConsent({ storage, model, request, now = Date.now, changed = () => {} }) {
+    let generation = 0, csrf = "", verifiedUntil = 0, rejectionPending = false;
+    let state = { phase: "loading", accountId: null, choice: null, version: 0, enabled: false, localSaveFailed: false };
+    const localChoice = () => storage.getItem(CHOICE_KEY);
+    const enabled = () => {
+      try { return !rejectionPending && state.enabled && now() < verifiedUntil && localChoice() !== "rejected" && storage.getItem(ACCOUNT_KEY) === (state.accountId || "guest"); }
+      catch { return false; }
+    };
+    const notify = () => changed();
+    function pause(phase = "loading") { generation++; verifiedUntil = 0; state = { ...state, phase, enabled: false }; notify(); }
+    function fail() { verifiedUntil = 0; state = { ...state, phase: "error", enabled: false }; notify(); }
+    function clear() { if (!model.enable(false)) throw Error("Local history could not be cleared"); }
+    function validate(value, accountId) {
+      if (value?.accountId !== accountId || value.schemaVersion !== 1 || ![null, "accepted", "rejected"].includes(value.choice)
+        || !Number.isSafeInteger(value.version) || value.version < 0 || (value.choice === null) !== (value.version === 0)) throw Error("Invalid preference response");
+      return value;
+    }
+    async function remote(choice, version, accountId) {
+      return validate(await request("/api/me/preferences", {
+        method: "POST", headers: { "X-BrowseRP-Account": accountId, "X-BrowseRP-CSRF": csrf },
+        body: JSON.stringify({ schemaVersion: 1, choice, expectedVersion: version })
+      }), accountId);
+    }
+    function ready(choice, version, allow) {
+      if (allow) { if (!model.enable(true)) throw Error("Local preference could not be saved"); }
+      else clear();
+      state = { ...state, phase: "ready", choice, version, enabled: allow, localSaveFailed: false };
+      verifiedUntil = now() + 30000; notify();
+    }
+    async function sync() {
+      pause(); const ticket = generation;
+      try {
+        const session = await request("/api/auth/session");
+        if (ticket !== generation) return;
+        if (typeof session?.authenticated !== "boolean") throw Error("Account unavailable");
+        const accountId = session.authenticated ? session.user?.id : null;
+        if (session.authenticated && (typeof accountId !== "string" || !/^[0-9a-f-]{36}$/i.test(accountId))) throw Error("Account unavailable");
+        const binding = accountId || "guest", previous = storage.getItem(ACCOUNT_KEY);
+        if (previous !== binding) {
+          // Never carry another account's (or a guest's) history into an account.
+          // Rejection survives account changes; acceptance must be checked anew.
+          if (previous !== null || accountId) {
+            clear();
+            if (localChoice() === "accepted") storage.removeItem(CHOICE_KEY);
+          }
+          storage.setItem(ACCOUNT_KEY, binding);
+        }
+        state = { ...state, accountId, choice: null, version: 0 };
+        csrf = session.csrfToken || "";
+        if (!accountId) {
+          if (rejectionPending) storage.setItem(CHOICE_KEY, "rejected");
+          const choice = localChoice();
+          ready(choice, 0, choice !== "rejected" && (choice === "accepted" || model.read().enabled));
+          return;
+        }
+        let value = validate(await request("/api/me/preferences", { headers: { "X-BrowseRP-Account": accountId } }), accountId);
+        if (ticket !== generation) return;
+        if ((rejectionPending || localChoice() === "rejected") && value.choice !== "rejected") {
+          clear(); value = await remote("rejected", value.version, accountId);
+          if (ticket !== generation) return;
+        }
+        if (value.choice === "rejected") storage.setItem(CHOICE_KEY, "rejected");
+        ready(value.choice, value.version, value.choice === "accepted" && !rejectionPending && localChoice() !== "rejected");
+      } catch { if (ticket === generation) fail(); }
+    }
+    function choose(allow) {
+      const confirmedGuest = state.phase === "ready" && state.accountId === null && now() < verifiedUntil;
+      // Local rejection takes effect even if removing storage or contacting the
+      // server fails. Keep the tombstone so a future remote read cannot opt in.
+      if (!allow) {
+        rejectionPending = true;
+        pause("saving");
+        state.localSaveFailed = false;
+        for (const attempt of [() => storage.setItem(CHOICE_KEY, "rejected"), () => storage.setItem(DECISION_KEY, `${now()}:${Math.random()}`), clear]) {
+          try { attempt(); } catch { state.localSaveFailed = true; }
+        }
+      } else if (state.phase !== "ready" || now() >= verifiedUntil) {
+        fail(); return false;
+      }
+      if (state.accountId === null) {
+        if (!allow && !confirmedGuest) {
+          // Identity may still be unknown; recheck before treating it as guest.
+          void sync(); return !state.localSaveFailed;
+        }
+        try { storage.setItem(CHOICE_KEY, allow ? "accepted" : "rejected"); if (allow) rejectionPending = false; ready(allow ? "accepted" : "rejected", 0, allow); return true; }
+        catch { state.localSaveFailed = true; fail(); return false; }
+      }
+      const accountId = state.accountId, version = state.version;
+      if (allow) pause("saving");
+      const ticket = generation;
+      let decision;
+      try { decision = storage.getItem(DECISION_KEY); } catch { fail(); return false; }
+      void (async () => {
+        try {
+          const value = await remote(allow ? "accepted" : "rejected", version, accountId);
+          if (ticket !== generation) return;
+          if (storage.getItem(ACCOUNT_KEY) !== accountId || (allow && storage.getItem(DECISION_KEY) !== decision)) throw Error("Choice or account changed");
+          if (value.choice !== (allow ? "accepted" : "rejected")) throw Error("Preference was not saved");
+          if (state.localSaveFailed) throw Error("Local preference was not saved");
+          storage.setItem(CHOICE_KEY, allow ? "accepted" : "rejected");
+          if (allow) rejectionPending = false;
+          ready(value.choice, value.version, allow);
+        } catch { if (ticket === generation) fail(); }
+      })();
+      notify(); return !state.localSaveFailed;
+    }
+    return { sync, pause, choose, enabled, getState: () => ({ ...state, enabled: enabled() }) };
+  }
+  globalThis.BrowseRPConsentModel = { create: createConsent, choiceKey: CHOICE_KEY, accountKey: ACCOUNT_KEY, decisionKey: DECISION_KEY };
   if (typeof document === "undefined" || location.pathname.startsWith("/staffpanel")) return;
   let storage;
   try { storage = localStorage; } catch { storage = { getItem: () => null, setItem: () => { throw Error("Storage unavailable"); }, removeItem: () => {} }; }
-  const model = create(storage); model.prune();
-  const CHOICE_KEY = "browserp-cookie-choice-v1";
+  const localModel = create(storage);
+  async function preferenceRequest(path, options = {}) {
+    const abort = new AbortController(), timeout = setTimeout(() => abort.abort(), 10000);
+    try {
+      const response = await fetch(path, { ...options, credentials: "same-origin", cache: "no-store", signal: abort.signal,
+        headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers } });
+      if (!response.ok) throw Error("Preference unavailable");
+      return await response.json();
+    } finally { clearTimeout(timeout); }
+  }
+  const consent = createConsent({ storage, model: localModel, request: preferenceRequest, changed });
+  const collectionAllowed = () => !document.hidden && consent.enabled();
+  const model = { ...localModel,
+    read: () => collectionAllowed() ? localModel.read() : { enabled: false, views: [] },
+    record: server => collectionAllowed() && localModel.record(server),
+    preferred: game => collectionAllowed() ? localModel.preferred(game) : "",
+    rank: (servers, filters) => collectionAllowed() ? localModel.rank(servers, filters) : [...servers],
+    enable: value => consent.choose(Boolean(value)),
+    getConsentState: () => ({ ...consent.getState(), enabled: collectionAllowed() })
+  };
   let choiceSaveFailed = false;
   function hasCookieChoice() {
     try { if (["accepted", "rejected"].includes(storage.getItem(CHOICE_KEY))) return true; } catch {}
@@ -57,37 +189,44 @@
     return model.read().enabled;
   }
   function chooseRecommendations(enabled) {
-    if (!model.enable(enabled)) return false;
-    try { storage.setItem(CHOICE_KEY, enabled ? "accepted" : "rejected"); choiceSaveFailed = false; return true; }
-    catch { choiceSaveFailed = true; return false; }
+    const okay = consent.choose(enabled); choiceSaveFailed = !okay; return okay;
   }
   window.BrowseRPRecommendations = model;
   const el = (tag, className, text) => { const item = document.createElement(tag); item.className = className; if (text) item.textContent = text; return item; };
   let section, results, message, request = 0, controller;
   const routeGame = /^\/games\/(fivem|redm|roblox|minecraft)$/.exec(location.pathname)?.[1];
   function changed() { window.dispatchEvent(new Event("browserp:recommendations-changed")); }
+  function consentStatus() {
+    const state = consent.getState();
+    if (state.localSaveFailed) return "Recommendations are off. Your browser could not save this choice or clear its history. Clear BrowseRP site data in browser settings.";
+    if (state.phase === "error") return "Recommendations are off because your preference could not be checked or saved. Reopen this page to try again; other devices may still have their previous choice.";
+    if (state.phase === "loading") return "Recommendations are off while we check your account and preference.";
+    if (state.phase === "saving") return "Recommendations are off while your account preference is saved.";
+    if (state.accountId && state.choice === null) return "Recommendations are off. Choose whether to save this preference to your account.";
+    return state.enabled ? state.accountId ? "Recommendations are on. Your account saves this choice; history stays on this browser." : "Recommendations are on for this browser."
+      : state.accountId ? "Recommendations are off and their local history has been cleared. Your account saves this choice." : "Recommendations are off for this browser and their history has been cleared.";
+  }
   function controls(root) {
     if (root.dataset.recommendationMounted) return;
     root.dataset.recommendationMounted = "true";
     const heading = el("h3", "", "Your discovery preferences");
-    const copy = el("p", "", "Use the servers you view on BrowseRP to suggest communities in regions you enjoy. Optional, stored only in this browser for up to 30 days. Never your activity on other websites.");
+    const copy = el("p", "", "Use the servers you view on BrowseRP to suggest communities in regions you enjoy. Your signed-in account saves this optional choice. Viewing history stays on this browser for up to 30 days; it is never uploaded.");
     const label = el("label", "recommendation-toggle");
     const input = document.createElement("input"); input.type = "checkbox"; input.checked = model.read().enabled;
     label.append(input, el("span", "", "Personalise with my BrowseRP history"));
     const clear = el("button", "button-v3 button-secondary-v3", "Clear recommendation history"); clear.type = "button";
     const status = el("p", "recommendation-status"); status.setAttribute("role", "status");
-    input.addEventListener("change", () => { const okay = chooseRecommendations(input.checked); input.checked = model.read().enabled; status.textContent = okay ? input.checked ? "Personalisation is on for this browser." : "Personalisation is off and its history has been cleared." : "Your browser could not save this preference."; changed(); });
+    input.addEventListener("change", () => { chooseRecommendations(input.checked); input.checked = model.read().enabled; changed(); });
     clear.addEventListener("click", () => { status.textContent = model.clear() ? "Recommendation history cleared." : "Your browser could not clear this history."; changed(); });
     root.classList.add("recommendation-settings"); root.replaceChildren(heading, copy, label, clear, status);
-    window.addEventListener("browserp:recommendations-changed", () => { input.checked = model.read().enabled; clear.disabled = !model.read().views.length; });
+    window.addEventListener("browserp:recommendations-changed", () => { input.checked = model.read().enabled; clear.disabled = !model.read().views.length; status.textContent = consentStatus(); });
+    status.textContent = consentStatus();
     clear.disabled = !model.read().views.length;
   }
   model.mountSettings = root => root?.querySelectorAll("[data-recommendation-settings]").forEach(controls);
   let preferenceDialog, preferenceStatus, preferenceTrigger;
   function preferenceState() {
-    if (preferenceStatus) preferenceStatus.textContent = model.read().enabled
-      ? "Recommendations are on for this browser."
-      : "Recommendations are off for this browser.";
+    if (preferenceStatus) preferenceStatus.textContent = consentStatus();
   }
   function openCookiePreferences(trigger) {
     if (!preferenceDialog) {
@@ -97,16 +236,13 @@
       const heading = el("h2", "", "Cookie preferences"); heading.id = "cookie-preferences-title";
       const intro = el("p", "", "Essential cookies keep sign-in and security working and stay on. BrowseRP does not use advertising or optional analytics cookies."); intro.id = "cookie-preferences-intro";
       const detail = el("p", "", "You can choose whether recommendations remember the BrowseRP servers you view, using local storage on this browser for up to 30 days. Rejecting turns recommendations off and clears their history.");
-      const scope = el("p", "", "This choice applies to anyone sharing this browser. Your separate Recently viewed and Compare shortcuts are unchanged.");
+      const scope = el("p", "", "Guests choose for this browser. Signed-in accounts save the choice across devices, but viewing history is never uploaded. A rejection on this browser keeps recommendations off until you explicitly accept here. Other devices check for changes when active; an offline device cannot receive a change immediately. Theme, Recently viewed and Compare have separate controls.");
       preferenceStatus = el("p", "cookie-preferences-status-v3"); preferenceStatus.setAttribute("role", "status");
       const choices = el("div", "cookie-preferences-choices-v3");
       for (const [label, enabled] of [["Accept recommendations", true], ["Reject recommendations", false]]) {
         const button = el("button", "button-v3 button-secondary-v3", label); button.type = "button";
         button.addEventListener("click", () => {
-          const okay = chooseRecommendations(enabled); changed();
-          if (okay) {
-            preferenceStatus.textContent = enabled ? "Recommendations are on for this browser." : "Recommendations are off and their history has been cleared.";
-          } else preferenceStatus.textContent = "Your browser could not save this choice. Please check your browser’s site-data settings.";
+          chooseRecommendations(enabled); changed();
         });
         choices.append(button);
       }
@@ -201,7 +337,7 @@
     const area = model.preferred(routeGame);
     section.querySelector("[data-enable-recommendations]").hidden = enabled;
     section.querySelector("[data-reset-recommendations]").hidden = !enabled;
-    message.textContent = !enabled ? "Discover more communities in the regions you enjoy. Turn on optional, browser-only recommendations." : !area ? "As you explore a few server pages, communities from your favourite regions will appear here." : `More ${area} communities, based on the servers you viewed on BrowseRP.`;
+    message.textContent = !enabled ? consent.getState().phase !== "ready" ? consentStatus() : "Discover more communities in the regions you enjoy. Turn on optional recommendations; viewing history stays on this browser." : !area ? "As you explore a few server pages, communities from your favourite regions will appear here." : `More ${area} communities, based on the servers you viewed on BrowseRP.`;
     if (!enabled || !area) return;
     controller = new AbortController();
     const currentController = controller;
@@ -220,6 +356,7 @@
     finally { clearTimeout(timeout); }
   }
   function init() {
+    void consent.sync();
     model.mountCookiePreferences(document.querySelector(".footer-v3"));
     cookiePrompt();
     document.querySelectorAll("[data-recommendation-settings]").forEach(controls);
@@ -241,6 +378,14 @@
     refresh();
   }
   window.addEventListener("browserp:recommendations-changed", refresh);
-  window.addEventListener("storage", event => { if (event.key === KEY || event.key === CHOICE_KEY || event.key === null) changed(); });
+  window.addEventListener("storage", event => {
+    if ([KEY, CHOICE_KEY, ACCOUNT_KEY, DECISION_KEY, null].includes(event.key)) { consent.pause(); void consent.sync(); }
+  });
+  window.addEventListener("browserp:session-ended", () => { consent.pause(); localModel.enable(false); });
+  window.addEventListener("pagehide", () => consent.pause());
+  window.addEventListener("focus", () => { if (!document.hidden) void consent.sync(); });
+  window.addEventListener("pageshow", event => { if (event.persisted && !document.hidden) void consent.sync(); });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) consent.pause(); else void consent.sync(); });
+  setInterval(() => { if (!document.hidden && consent.getState().phase !== "saving") void consent.sync(); }, 30000);
   document.addEventListener("DOMContentLoaded", init, { once: true });
 })();

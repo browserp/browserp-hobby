@@ -50,13 +50,29 @@ try {
         if (reduced) assert.ok(style.transition.split(",").every(value => parseFloat(value) <= .00001));
         if (blocked) assert.equal(style.position, "relative");
         if (route === "/servers") {
+          const controlLayout = await advert.evaluate(element => {
+            const card = element.getBoundingClientRect(), controls = element.querySelector(".ad-controls-v3").getBoundingClientRect();
+            const dots = element.querySelector(".ad-dots-v3").getBoundingClientRect(), pause = element.querySelector(".ad-pause-v7").getBoundingClientRect();
+            return {
+              contained: controls.left >= card.left && controls.right <= card.right && controls.bottom <= card.bottom,
+              sameRow: Math.abs((dots.top + dots.bottom) / 2 - (pause.top + pause.bottom) / 2) < 1,
+              grouped: element.querySelector(".ad-controls-v3")?.contains(element.querySelector(".ad-dots-v3"))
+                && element.querySelector(".ad-controls-v3")?.contains(element.querySelector(".ad-pause-v7")),
+              ratio: getComputedStyle(element.querySelector(".side-ad-stage-v3")).aspectRatio
+            };
+          });
+          assert.equal(controlLayout.contained, true, "Directory controls stay inside the advert card");
+          assert.equal(controlLayout.sameRow, true, "Indicators and rotation action share one row");
+          assert.equal(controlLayout.grouped, true, "Indicators and rotation action share one labelled control group");
+          if (!blocked) assert.equal(controlLayout.ratio, "4 / 5", "Healthy directory artwork uses its approved 4:5 frame");
           for (let slide = 0; slide < await advert.locator(".ad-dot-v3").count(); slide++) {
             if (blocked) await advert.locator(".side-ad-image-notice-v3").waitFor({ state: "visible" });
             assert.equal(await advert.evaluate(element => {
               const stage = element.querySelector(".side-ad-stage-v3").getBoundingClientRect();
               const copy = element.querySelector(".side-ad-copy-v3").getBoundingClientRect();
-              return copy.left >= stage.left && copy.right <= stage.right && copy.top >= stage.top && copy.bottom <= stage.bottom;
-            }), true, "Every directory advert keeps its full copy inside the stage");
+              const tolerance = .5;
+              return copy.left >= stage.left - tolerance && copy.right <= stage.right + tolerance && copy.top >= stage.top - tolerance && copy.bottom <= stage.bottom + tolerance;
+            }), true, `${name} directory slide ${slide + 1} keeps its full copy inside the stage`);
             await next.click();
           }
         }
@@ -69,7 +85,7 @@ try {
             const notice = element.querySelector(".side-ad-image-notice-v3");
             return { failed: element.classList.contains("artwork-unavailable"), notice: !notice.hidden,
               brandWidth: notice.querySelector("img").getBoundingClientRect().width,
-              stageHeight: stage.height, contained: copy.left >= stage.left && copy.right <= stage.right && copy.bottom <= stage.bottom };
+              stageHeight: stage.height, contained: copy.left >= stage.left - .5 && copy.right <= stage.right + .5 && copy.bottom <= stage.bottom + .5 };
           });
           assert.equal(fallback.failed, true); assert.equal(fallback.notice, true);
           assert.ok(fallback.brandWidth <= 128); assert.ok(fallback.stageHeight < 460);

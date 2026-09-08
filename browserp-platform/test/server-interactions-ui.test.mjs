@@ -4,10 +4,11 @@ import { readFileSync } from "node:fs";
 import { JSDOM } from "jsdom";
 const read = file => readFileSync(new URL(`../public/${file}`, import.meta.url), "utf8");
 const tick = () => new Promise(resolve => setImmediate(resolve));
-function harness(t, authenticated, api) {
+function harness(t, authenticated, api, beforeInit = null) {
   const dom = new JSDOM(read("server.html"), { url: "https://browserp.test/server/cali-rp", runScripts: "outside-only" });
   t.after(() => dom.window.close()); const w = dom.window; w.eval(read("server-interactions.js"));
   w.document.querySelectorAll("form,#vote-server-v3").forEach(form => { form.dataset.serverId = "fixture-server"; });
+  beforeInit?.(w.document);
   w.BrowseRPServerInteractions.init({ api, session: { authenticated }, toast() {} });
   return { w, doc: w.document, submit: form => form.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })) };
 }
@@ -41,6 +42,39 @@ test("successful comments reset only after the server accepts them and votes use
   const vote = h.doc.querySelector("#vote-server-v3"); vote.click(); vote.click(); await tick();
   assert.equal(calls.filter(item => item.action === "vote").length, 1); assert.equal(h.doc.querySelector("#server-votes-v3").textContent, "42 votes");
   assert.equal(vote.getAttribute("aria-pressed"), "true"); assert.equal(vote.disabled, true);
+});
+test("replying sends the published parent id, can be cancelled and preserves text when the parent disappears", async t => {
+  const calls = [];
+  const parentId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+  const h = harness(t, true, async (_path, options) => {
+    const body = JSON.parse(options.body); calls.push(body);
+    if (body.parentCommentId) throw Object.assign(new Error("Not found"), { status: 404 });
+    return { result: { id: "pending", status: "pending_review" } };
+  }, document => {
+    const reply = document.createElement("button");
+    reply.type = "button";
+    reply.dataset.commentReplyV3 = parentId;
+    reply.dataset.commentAuthorV3 = "Morgan Reed";
+    document.querySelector("#comments-v3").append(reply);
+  });
+  const form = h.doc.querySelector("#comment-form-v3");
+  const reply = h.doc.querySelector("[data-comment-reply-v3]");
+  const input = form.querySelector("textarea");
+  reply.click();
+  assert.equal(form.elements.parentCommentId.value, parentId);
+  assert.match(form.querySelector(".comment-reply-context-v3").textContent, /Replying to Morgan Reed/);
+  assert.match(form.querySelector(".field-v3 > span").textContent, /Reply to Morgan Reed/);
+  input.value = "A useful reply with enough context.";
+  h.submit(form); await tick();
+  assert.deepEqual(calls[0], { action: "comment", serverId: "fixture-server", body: input.value, parentCommentId: parentId });
+  assert.equal(input.value, "A useful reply with enough context.", "a rejected parent does not erase the reply");
+  assert.equal(form.elements.parentCommentId.value, "");
+  assert.match(form.querySelector('[role="status"]').textContent, /no longer available/);
+  assert.equal(form.querySelector(".comment-reply-context-v3").hidden, true);
+  reply.click();
+  form.querySelector('[aria-label="Cancel reply"]').click();
+  assert.equal(form.elements.parentCommentId.value, "");
+  assert.equal(form.querySelector(".field-v3 > span").textContent, "Add a comment");
 });
 test("provider buttons retain a valid server destination and reject external or encoded redirect tricks", async t => {
   for (const destination of ["/server/cali-rp", "https://evil.example", "//evil.example", "/server/a?next=https://evil.example", "/server/%2f%2fevil.example"]) {

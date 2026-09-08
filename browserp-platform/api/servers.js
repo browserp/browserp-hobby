@@ -29,12 +29,21 @@ export default endpoint(["GET", "POST"], async (req, res) => {
     if (!/^[0-9a-f-]{36}$/.test(serverId) || !["vote", "unvote", "comment", "report"].includes(action)) {
       throw Object.assign(new Error("Choose a valid server action."), { status: 400 });
     }
+    const hasParent = body.parentCommentId != null;
+    if (hasParent && (action !== "comment" || typeof body.parentCommentId !== "string"
+      || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.parentCommentId))) {
+      throw Object.assign(new Error("Choose a published comment to reply to."), { status: 400 });
+    }
     const text = sanitizePlainText(body.body, action === "report" ? 2000 : 1000);
     if (["comment", "report"].includes(action)) {
       const moderation = assessContent({ body: text });
       if (moderation.action === "reject") throw Object.assign(new Error("This content cannot be submitted."), { status: 422 });
     }
-    const result = await rpc("member_server_interaction", {
+    const result = hasParent ? await rpc("member_server_comment_reply", {
+      p_server_id: serverId,
+      p_parent_comment_id: body.parentCommentId.toLowerCase(),
+      p_body: text || null
+    }, session.accessToken) : await rpc("member_server_interaction", {
       p_server_id: serverId,
       p_action: action,
       p_body: text || null,
