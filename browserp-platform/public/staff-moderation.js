@@ -14,19 +14,19 @@
     claims: ["Server claims", "Review ownership requests and filter verified Discord community owners.", "reviewClaims", null],
     reports: ["Reports", "Review active reports and their history. Deleted reports remain recoverable and audited.", "readReports", "reports"],
     queue: ["Listing reviews", "Review submitted server listings and record a decision.", "readListings", "listings"],
-    content: ["Content reviews", "Review content and comments flagged for a moderation decision.", "readQueue", "queue"],
+    content: ["Content moderation", "Review comments, display names and profile pictures in one private queue.", "readQueue", null],
     profiles: ["Profiles", "Screen profile content before it appears publicly.", "reviewProfiles", "profiles"],
     activity: ["Account activity", "Inspect recorded account and sign-in events, with protected network evidence handled separately.", "readActivity", "activity"],
-    staff: ["Staff & roles", "Create roles, assign staff and manage individual permission exceptions.", "manageStaff", "staff"],
+    staff: ["Staff & roles", "View role responsibilities, request reviewed changes and manage staff within your authority.", "readStaff", "staff"],
     bans: ["Bans", "Review account, IP and browser/device restrictions. Handle security signals in Website risks.", "manageBans", "bans"],
     appeals: ["Appeals", "Review requests to restore access and record your decision.", "reviewAppeals", "appeals"],
     security: ["Website risks", "Investigate recorded site-wide security signals, MFA controls and protected evidence requests.", "readSecurity", "security"],
     "data-requests": ["Data requests", "Review private requests for a copy, correction or deletion of account data.", null, null],
     logs: ["Logs", "Search recorded staff audit events. Account activity and security signals have their own sections.", "readAudit", "audit"]
   };
-  const ACTIVE_VIEWS = ["reports", "queue", "content", "profiles", "bans", "appeals", "security"];
-  const LABELS = { q: "Search", status: "Status", platform: "Game", region: "Region", language: "Language", mode: "Framework / mode", feature: "Feature / tag", access: "Access", online: "Online now", verified: "Verified", beginner: "Beginner friendly", from: "From", to: "To", severity: "Severity", targetType: "Target", userId: "Account ID" };
-  const FALLBACKS = { reports: [["active", "Active"], ["history", "History"], ["deleted", "Deleted"], ["open", "Open"], ["triaged", "Triaged"], ["resolved", "Resolved"], ["dismissed", "Dismissed"]], servers: ["draft", "pending_review", "published", "suspended", "rejected", "archived"], queue: ["pending_review", "approved", "changes_requested", "rejected"], content: ["open", "claimed", "resolved"], profiles: ["pending_review", "approved", "rejected"], bans: ["active", "revoked"], appeals: ["submitted", "under_review", "approved", "denied"], security: ["open", "resolved"] };
+  const ACTIVE_VIEWS = ["reports", "queue", "profiles", "bans", "appeals", "security"];
+  const LABELS = { q: "Search", status: "Status", kind: "Content type", platform: "Game", region: "Region", language: "Language", mode: "Framework / mode", feature: "Feature / tag", access: "Access", online: "Online now", verified: "Verified", beginner: "Beginner friendly", from: "From", to: "To", severity: "Severity", targetType: "Target", userId: "Account ID" };
+  const FALLBACKS = { reports: [["active", "Active"], ["history", "History"], ["deleted", "Deleted"], ["open", "Open"], ["triaged", "Triaged"], ["resolved", "Resolved"], ["dismissed", "Dismissed"]], servers: ["draft", "pending_review", "published", "suspended", "rejected", "archived"], queue: ["pending_review", "approved", "changes_requested", "rejected"], content: ["pending_review", "published", "blocked", "superseded"], profiles: ["pending_review", "approved", "rejected"], bans: ["active", "revoked"], appeals: ["submitted", "under_review", "approved", "denied"], security: ["open", "resolved"] };
   let active = null;
   function button(text, primary = false) { const element = make("button", text, `button-v3 ${primary ? "button-primary-v3" : "button-secondary-v3"}`); element.type = "button"; return element; }
   function field(label, name, { value = "", type = "text", required = false, minLength, maxLength, options = [], wide = false } = {}) {
@@ -40,6 +40,7 @@
     control.value = value ?? ""; wrapper.append(make("span", label), control); return { wrapper, control };
   }
   function safeLink(value) { try { const url = new URL(value, location.origin); return ["https:", "http:"].includes(url.protocol) ? url.href : null; } catch { return null; } }
+  function safeInternalLink(value) { try { const raw = String(value || ""); if (!raw.startsWith("/") || raw.startsWith("//")) return null; const url = new URL(raw, location.origin); return url.origin === location.origin ? `${url.pathname}${url.search}${url.hash}` : null; } catch { return null; } }
 
   async function init({ api, accountId, onAuthFailure, actions = {} } = {}) {
     if (typeof api !== "function" || !F) throw new Error("The authorised moderation API is required.");
@@ -54,7 +55,7 @@
     function clearPrivateRequests() { privacyController?.destroy(); privacyController = null; }
     const listen = (node, event, callback) => { node.addEventListener(event, callback); removers.push(() => node.removeEventListener(event, callback)); };
     const key = (name) => state.keys.includes(name);
-    const allowed = (view) => view === "summary" || (view === "data-requests" ? state.canReviewData : view === "claims" ? key("servers.claims.review") || state.summary?.permissions?.isOwner === true : view === "staff" ? state.permissions.manageStaff || state.permissions.manageRoles : view === "queue" ? state.permissions.readListings || key("servers.review") : state.permissions[META[view]?.[2]]) === true;
+    const allowed = (view) => view === "summary" || (view === "data-requests" ? state.canReviewData : view === "claims" ? key("servers.claims.review") || state.summary?.permissions?.isOwner === true : view === "staff" ? state.permissions.readStaff || state.permissions.manageStaff || state.permissions.manageRoles : view === "queue" ? state.permissions.readListings || key("servers.review") : view === "content" ? state.permissions.readQueue || state.permissions.manageQueue || state.permissions.reviewProfiles || key("moderation.resolve") || key("profiles.review") : state.permissions[META[view]?.[2]]) === true;
     const status = (message, error = false) => { const target = $("#moderation-live-status"); target.textContent = message; target.dataset.error = String(error); };
     const busy = (value) => { state.busy = value; root.setAttribute("aria-busy", String(value)); $("#moderation-refresh").disabled = value; };
     const empty = (title, description) => { const box = make("div", undefined, "moderation-empty"); box.append(make("h3", title), make("p", description)); return box; };
@@ -95,6 +96,16 @@
     }
     function renderFilters() {
       const form = make("form", undefined, "moderation-filter"); form.setAttribute("aria-label", `${META[state.view][0]} filters`);
+      if (state.view === "content") {
+        const row = make("div", undefined, "moderation-filter-grid");
+        const select = (name, options) => { const item = field(LABELS[name], name, { value: state.filters[name] || (name === "status" ? "all" : ""), type: "select", options }); item.control.addEventListener("change", () => applyFilter(name, item.control.value)); return item.wrapper; };
+        row.append(select("kind", [{ value: "", label: "All content types" }, { value: "comment", label: "Comments" }, { value: "display_name", label: "Display names" }, { value: "avatar", label: "Profile pictures" }]));
+        const clear = button("Clear filters"); clear.addEventListener("click", () => { state.filters = {}; state.cursors = [null]; updateUrl(); void loadRecords(); });
+        form.append(row, clear);
+        const chips = make("div", undefined, "moderation-filter-chips");
+        for (const [name, value] of Object.entries(state.filters)) { const chip = make("button", `${LABELS[name] || name}: ${human(value)} ×`, "moderation-chip"); chip.type = "button"; chip.setAttribute("aria-label", `Remove ${LABELS[name] || name} filter`); chip.addEventListener("click", () => applyFilter(name, "")); chips.append(chip); }
+        form.append(chips); return form;
+      }
       const row = make("div", undefined, "moderation-search-row"); const label = make("label", undefined, "moderation-search-label"); const search = make("input"); search.type = "search"; search.name = "q"; search.value = state.filters.q || ""; search.maxLength = 200; search.placeholder = state.view === "servers" ? "Search names, descriptions or community features…" : state.view === "members" ? "Search name, BrowseRP ID or Discord ID…" : "Search these records…"; label.append(make("span", `Search ${META[state.view][0].toLowerCase()}`), search); const submit = button("Search", true); submit.type = "submit"; const clear = button("Clear filters"); clear.addEventListener("click", () => { state.filters = {}; state.cursors = [null]; updateUrl(); void loadRecords(); }); row.append(label, submit, clear); form.append(row);
       form.addEventListener("submit", (event) => { event.preventDefault(); clearTimeout(state.debounce); applyFilter("q", search.value); });
       const suggestions = make("div", undefined, "moderation-suggestions"); suggestions.setAttribute("aria-label", "Matching filters"); form.append(suggestions);
@@ -141,8 +152,56 @@
       }
       disclosure.append(list); return disclosure;
     }
+    const contentKindLabel = (value) => ({ comment: "Comment", display_name: "Display name", avatar: "Profile picture" })[value] || "Content";
+    const contentVersion = (record) => {
+      const value = Number(record?.version ?? record?.expectedVersion);
+      return Number.isSafeInteger(value) && value > 0 ? value : 0;
+    };
+    const canDecideContent = (record) => record.kind === "comment" ? key("moderation.resolve") : ["display_name", "avatar"].includes(record.kind) ? key("profiles.review") : false;
+    function contentAction(record, action) {
+      const appealed = ["submitted", "pending", "pending_review", "under_review"].includes(String(record.appealStatus || "").toLowerCase());
+      const copy = action === "approve"
+        ? appealed
+          ? ["Approve appeal", "Accept this appeal and publish the reviewed item. The current version will be checked before saving.", "Approve appeal"]
+          : ["Approve content", "Publish this reviewed item. The current version will be checked before the decision is saved.", "Approve and publish"]
+        : [appealed ? "Keep content blocked" : "Block content", appealed ? "Keep this item private after reviewing the member's appeal." : "Keep this item private and give the member a clear reason they can review and appeal.", appealed ? "Keep blocked" : "Block content"];
+      return modal(copy[0], copy[1], () => ({}), copy[2], async (_, reason) => {
+        const version = contentVersion(record);
+        if (!version) throw new Error("Refresh this item before recording a decision.");
+        await api("/api/admin/content-moderation", { method: "POST", body: JSON.stringify({ id: record.id, action, expectedVersion: version, reason }) });
+      });
+    }
+    function contentRecordCard(record) {
+      const card = make("article", undefined, "moderation-record moderation-content-record-v3");
+      const head = make("div", undefined, "moderation-record-head"); const copy = make("div", undefined, "moderation-record-title");
+      copy.append(make("h3", contentKindLabel(record.kind)), make("p", [record.displayName || record.memberName || "", date(record.createdAt)].filter(Boolean).join(" · "), "moderation-record-meta"));
+      head.append(copy); if (record.status) { const badge = make("span", human(record.status), "moderation-state"); badge.dataset.state = record.status; head.append(badge); } card.append(head);
+      if (record.kind === "avatar") {
+        const supplied = safeInternalLink(record.previewUrl || record.preview_url || record.avatarPreviewUrl || record.avatar_preview_url);
+        const preview = supplied || (/^[0-9a-f-]{36}$/i.test(String(record.id || "")) ? `/api/content-moderation/preview?id=${encodeURIComponent(record.id)}` : null);
+        if (preview) { const image = make("img", undefined, "moderation-content-avatar-v3"); image.src = preview; image.alt = "Private profile picture submitted for review"; image.loading = "lazy"; card.append(image); }
+      } else if (typeof record.text === "string" && record.text.trim()) card.append(make("p", record.text, "moderation-record-copy moderation-content-evidence-v3"));
+      if (record.reason) card.append(make("p", `Decision reason: ${record.reason}`, "moderation-record-copy"));
+      if (record.appealStatement) card.append(make("p", `Member appeal: ${record.appealStatement}`, "moderation-record-copy moderation-content-appeal-v3"));
+      const actionsRoot = make("div", undefined, "moderation-record-actions");
+      const decisionAllowed = canDecideContent(record) && contentVersion(record);
+      if (record.status === "pending_review") {
+        addAction(actionsRoot, "Approve", () => contentAction(record, "approve"), decisionAllowed);
+        addAction(actionsRoot, "Block", () => contentAction(record, "block"), decisionAllowed);
+      }
+      const appealOpen = ["submitted", "pending", "pending_review", "under_review"].includes(String(record.appealStatus || "").toLowerCase());
+      if (record.status === "blocked" && appealOpen) {
+        addAction(actionsRoot, "Approve appeal", () => contentAction(record, "approve"), decisionAllowed);
+        addAction(actionsRoot, "Keep blocked", () => contentAction(record, "block"), decisionAllowed);
+      }
+      card.append(actionsRoot);
+      if (canDecideContent(record) && !contentVersion(record) && ["pending_review", "blocked"].includes(record.status)) card.append(make("p", "Refresh this item before recording a decision.", "moderation-inline-note"));
+      card.append(details(record, [["id", "Content ID"], ["kind", "Content type"], ["status", "Status"], ["reason", "Decision reason"], ["createdAt", "Submitted"], ["reviewedAt", "Reviewed"], ["appealStatus", "Appeal status"], ["appealDecision", "Appeal decision"]]));
+      return card;
+    }
     function recordCard(record) {
       const kind = state.view;
+      if (kind === "content") return contentRecordCard(record);
       const card = make("article", undefined, "moderation-record");
       const head = make("div", undefined, "moderation-record-head"); const copy = make("div", undefined, "moderation-record-title");
       const title = kind === "reports" ? record.category || "Member report" : kind === "logs" ? human(record.action || record.eventType || "Audit event") : kind === "activity" || kind === "security" ? human(record.eventType || record.title || "Recorded event") : kind === "bans" || kind === "appeals" ? record.reference || "Access restriction" : record.name || record.displayName || record.username || record.title || human(record.targetType || "Record");
@@ -157,6 +216,7 @@
       if (kind === "members") {
         addAction(actionsRoot, "Edit member", () => edit(record, "member"), state.permissions.editMembers);
         if (state.permissions.readActivity) { const activity = make("a", "View activity", "button-v3 button-secondary-v3"); activity.href = F.serialize("activity", { userId: record.userId || record.id }); actionsRoot.append(activity); }
+        addAction(actionsRoot, "Apply restriction", actions.applyBan ? () => actions.applyBan({ ...record, userId: record.userId || record.id }, { kind, restrictionMaxMinutes: state.permissions.restrictionMaxMinutes }) : null, state.permissions.manageBans);
         addAction(actionsRoot, "End sessions", actions.revokeSessions ? () => actions.revokeSessions({ ...record, userId: record.userId || record.id }) : null, key("accounts.sessions.revoke"));
       }
       if (kind === "servers") {
@@ -167,10 +227,10 @@
         addAction(actionsRoot, "Review report", actions.openReview ? () => actions.openReview({ ...record, kind: "report" }) : null, !record.deletedAt && ["open", "triaged"].includes(record.status) && key("reports.resolve"));
         addAction(actionsRoot, record.deletedAt ? "Restore report" : "Delete report", () => reportAction(record, record.deletedAt ? "restore" : "delete"), state.permissions.manageReports);
       }
-      if (kind === "queue" || kind === "content") addAction(actionsRoot, "Review item", actions.openReview ? () => actions.openReview({ ...record, kind: kind === "queue" ? "listing" : "moderation", target_type: record.targetType || record.target_type }) : null, kind === "queue" ? ["pending", "pending_review", "changes_requested"].includes(record.status) && key("servers.review") : ["open", "claimed"].includes(record.status) && (state.permissions.manageQueue || key("moderation.resolve")));
+      if (kind === "queue") addAction(actionsRoot, "Review item", actions.openReview ? () => actions.openReview({ ...record, kind: "listing", target_type: record.targetType || record.target_type }) : null, ["pending", "pending_review", "changes_requested"].includes(record.status) && key("servers.review"));
       if (kind === "profiles" && record.bioStatus === "pending_review") for (const action of ["approve", "reject"]) addAction(actionsRoot, `${action === "approve" ? "Approve" : "Reject"} bio`, actions.reviewProfile ? () => actions.reviewProfile(record.userId || record.id, "bio", action) : null, state.permissions.reviewProfiles);
       if (kind === "activity") {
-        addAction(actionsRoot, "Apply restriction", actions.applyBan ? () => actions.applyBan(record) : null, state.permissions.manageBans);
+        addAction(actionsRoot, "Apply restriction", actions.applyBan ? () => actions.applyBan(record, { kind, restrictionMaxMinutes: state.permissions.restrictionMaxMinutes }) : null, state.permissions.manageBans);
         addAction(actionsRoot, "End sessions", actions.revokeSessions ? () => actions.revokeSessions(record) : null, record.userId && key("accounts.sessions.revoke"));
         addAction(actionsRoot, "View protected IP", actions.viewNetwork ? () => actions.viewNetwork(record.id, record.requestId || null) : null, key("security.network.approve") || record.networkRevealApproved === true);
         addAction(actionsRoot, "Request protected IP", actions.networkRequest ? () => actions.networkRequest(record.id) : null, key("security.network.request") && !key("security.network.approve") && !record.networkRevealApproved);
@@ -191,7 +251,7 @@
         appeals: [["reference", "Restriction reference"], ["statement", "Appeal statement"], ["userId", "Account ID"], ["decisionNote", "Decision note"]],
         profiles: [["userId", "Account ID"], ["bio", "Bio"], ["bioStatus", "Bio status"], ["avatarStatus", "Avatar status"], ["avatarUrl", "Current avatar"], ["createdAt", "Joined"]],
         queue: [["platform", "Game"], ["region", "Region"], ["language", "Language"], ["framework", "Framework"], ["description", "Description"]],
-        content: [["targetType", "Content type"], ["targetId", "Content ID"], ["confidence", "Review confidence"], ["details", "Details"]]
+        content: []
       };
       card.append(details(record, [...(specific[kind] || []), ...common])); return card;
     }
@@ -270,9 +330,9 @@
         root.replaceChildren(heading(state.view), renderFilters());
         if (state.view === "bans") root.append(make("p", "IP restrictions match the IP address used for the recorded activity; shared connections may be affected. Browser/device restrictions use BrowseRP’s first-party device token.", "moderation-inline-note"));
         if (state.view === "security") { const extra = make("section"); extra.id = "moderation-security-controls"; root.append(extra); }
-        const meta = make("p", `${number.format(workspace.items.length)} shown · ${hasCount(workspace.total) ? number.format(workspace.total) : "Unknown"} matching records`, "moderation-result-meta"); root.append(meta);
+        const meta = make("p", state.view === "content" ? `${number.format(workspace.items.length)} private item${workspace.items.length === 1 ? "" : "s"} shown on this page` : `${number.format(workspace.items.length)} shown · ${hasCount(workspace.total) ? number.format(workspace.total) : "Unknown"} matching records`, "moderation-result-meta"); root.append(meta);
         const records = make("div", undefined, "moderation-records");
-        if (workspace.items.length) records.append(...workspace.items.map(recordCard)); else records.append(empty("No matching records", "Try a different search or clear the filters. No placeholder results are shown.")); root.append(records);
+        if (workspace.items.length) records.append(...workspace.items.map(recordCard)); else records.append(empty("No matching records", state.view === "content" ? "No private content items match these filters." : "Try a different search or clear the filters. No placeholder results are shown.")); root.append(records);
         const paging = make("div", undefined, "moderation-pagination"); const previous = button("← Previous"); previous.disabled = state.cursors.length < 2; previous.addEventListener("click", () => { state.cursors.pop(); void loadRecords(); }); const next = button("Next →"); next.disabled = !workspace.nextCursor; next.addEventListener("click", () => { if (workspace.nextCursor) { state.cursors.push(workspace.nextCursor); void loadRecords(); } }); paging.append(previous, make("span", `Page ${state.cursors.length} · Up to 25 records per page`), next); root.append(paging);
       });
       if (state.view === "security" && actions.securityControls) {
@@ -296,7 +356,7 @@
         const reason = field("Reason for this change", "reason", { type: "textarea", required: true, minLength: 5, maxLength: 500 }); const save = button("Save permission overrides", true); save.type = "submit"; form.append(user.wrapper, grid, reason.wrapper, save); permissions.append(form); root.append(permissions);
       }
       const tasks = [];
-      if (window.BrowseRPStaffRoles) tasks.push(window.BrowseRPStaffRoles.init({ api, permissions: { manageRoles: state.permissions.manageRoles, isOwner: state.summary?.permissions?.isOwner === true } }));
+      if (window.BrowseRPStaffRoles) tasks.push(window.BrowseRPStaffRoles.init({ api, permissions: { readStaff: state.permissions.readStaff, manageStaff: state.permissions.manageStaff, manageRoles: state.permissions.manageRoles, isOwner: state.summary?.permissions?.isOwner === true } }));
       if (actions.permissionOverrides && key("staff.permissions.manage")) tasks.push(actions.permissionOverrides());
       const results = await Promise.allSettled(tasks);
       for (const result of results) if (result.status === "rejected") root.append(make("p", `Some staff controls could not load: ${result.reason?.message || "Please refresh."}`, "moderation-inline-note"));
@@ -312,7 +372,7 @@
         if (view === "summary") { summary(); status(`Updated ${date(state.summary.generatedAt)}`); return state.summary; }
         if (view === "data-requests") {
           const mount = make("section"); root.replaceChildren(heading(view), mount);
-          privacyController = window.BrowseRPPrivacyRequests.initStaff({ api, accountId, root: mount, allowed: true, isOwner: state.summary?.permissions?.isOwner === true, onAuthFailure: error => {
+          privacyController = window.BrowseRPPrivacyRequests.initStaff({ api, accountId, root: mount, allowed: true, isOwner: state.summary?.permissions?.isOwner === true, canReviewErasure: state.permissions.reviewErasure === true, onAuthFailure: error => {
             if (state.destroyed) return;
             clearPrivateRequests(); state.canReviewData = false; renderTabs();
             root.replaceChildren(empty("Private requests unavailable", "Your account or permission has changed. Sign in again or choose another available section."));
@@ -333,12 +393,19 @@
         if (view === "staff") { await renderStaff(); status("Staff tools ready. Changes are checked by the server."); return null; }
         const payload = await api(F.query(view, state.filters, state.cursors.at(-1)));
         if (state.destroyed || request !== state.request || state.view !== view) return null;
-        const workspace = payload.workspace;
+        const workspace = view === "content" ? {
+          kind: "content",
+          items: payload.items,
+          nextCursor: typeof payload.nextBefore === "string" || (payload.nextBefore && typeof payload.nextBefore === "object") ? payload.nextBefore : null,
+          total: null,
+          generatedAt: null,
+          facets: {}
+        } : payload.workspace;
         if (!workspace || !Array.isArray(workspace.items)) throw new Error("The workspace response was incomplete. Refresh to try again.");
         state.workspace = workspace; if (workspace.permissions) state.permissions = { ...state.permissions, ...workspace.permissions };
         await renderRecords(workspace);
         if (state.destroyed || request !== state.request || state.view !== view) return null;
-        status(`Updated ${date(workspace.generatedAt)} · All dates in UTC`); return workspace;
+        status(view === "content" ? "Private content queue updated · All dates in UTC" : `Updated ${date(workspace.generatedAt)} · All dates in UTC`); return workspace;
       } catch (error) {
         if (state.destroyed || request !== state.request) return null;
         if (error.status === 401) { controller.destroy(); root.replaceChildren(empty("Sign in again", "Your staff session has ended.")); onAuthFailure?.(error); return null; }

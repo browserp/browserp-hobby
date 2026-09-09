@@ -54,6 +54,9 @@ test("public staff projection exposes every active member with a boolean presenc
 });
 
 test("public roster uses only approved, allowlisted avatar locations", () => {
+  assert.equal(safePublicStaffAvatar(`https://www.browserp.com/api/public/profile-avatar?id=${ownerId}`), `https://www.browserp.com/api/public/profile-avatar?id=${ownerId}`);
+  assert.equal(safePublicStaffAvatar(`https://www.browserp.com/api/content-moderation/preview?id=${ownerId}`), null);
+  assert.equal(safePublicStaffAvatar(`https://www.browserp.com/api/public/profile-avatar?id=${ownerId}&other=1`), null);
   assert.match(safePublicStaffAvatar("https://cdn.discordapp.com/avatars/123456789012345678/hash.png"), /^https:\/\/cdn\.discordapp\.com\//);
   assert.match(safePublicStaffAvatar("https://lh3.googleusercontent.com/a/example"), /^https:\/\/lh3\.googleusercontent\.com\//);
   assert.match(safePublicStaffAvatar(`https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/${ownerId}/avatar.png`), /profile-media/);

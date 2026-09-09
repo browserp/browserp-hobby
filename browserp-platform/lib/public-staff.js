@@ -20,6 +20,8 @@ export function safePublicStaffAvatar(value) {
   try {
     const url = new URL(value);
     if (url.protocol !== "https:" || url.username || url.password || url.port) return null;
+    if (url.origin === "https://www.browserp.com" && url.pathname === "/api/public/profile-avatar"
+      && [...url.searchParams.keys()].join(",") === "id" && UUID.test(url.searchParams.get("id") || "") && !url.hash) return url.href;
     if (url.hostname === "cdn.discordapp.com" && /^\/avatars\/[0-9]{17,20}\/[A-Za-z0-9_-]+\.(?:png|jpe?g|webp|gif)$/i.test(url.pathname)) return url.href;
     if (url.hostname === "lh3.googleusercontent.com" && url.pathname.startsWith("/")) return url.href;
     if (url.origin === PROFILE_MEDIA_ORIGIN && /^\/storage\/v1\/object\/public\/profile-media\/[0-9a-f-]{36}\/[A-Za-z0-9._-]+\.png$/i.test(url.pathname)) return url.href;

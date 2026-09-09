@@ -96,9 +96,9 @@ for (const scenario of [
   });
 }
 
-test("legacy permission saving cannot run overlapping batches and becomes editable after an error", async (t) => {
+test("legacy permission saving carries the staff version, cannot overlap and becomes editable after an error", async (t) => {
   const request = deferred(); const calls = [];
-  const h = harness(t, `<form>
+  const h = harness(t, `<form data-version="4">
     <select id="permission-user"><option value="staff-123" selected>Staff member</option></select>
     <select data-permission="servers.edit"><option value="true" selected>Allow</option></select>
     <textarea name="reason">Cover launch queue</textarea>
@@ -111,7 +111,7 @@ test("legacy permission saving cannot run overlapping batches and becomes editab
   assert.equal(h.form.getAttribute("aria-busy"), "true");
   assert.match(h.status(), /Saving permission overrides/);
   assert.deepEqual(JSON.parse(calls[0].options.body), {
-    discordUserId: "staff-123", permissionKey: "servers.edit", allowed: true, reason: "Cover launch queue"
+    discordUserId: "staff-123", permissionKey: "servers.edit", allowed: true, expectedVersion: 4, reason: "Cover launch queue"
   });
 
   request.resolve(json({ error: "Permission update failed." }, 503));
@@ -130,8 +130,8 @@ test("the consolidated permission editor also exposes busy state and rejects dup
     <button type="submit">Save overrides</button>
   </form>`, async (path, options = {}) => {
     calls.push({ path, options });
-    if (path === "/api/admin/staff") return json({ staff: { members: [{ userId: "user-123", discordUserId: "staff-123", displayName: "Sam", roleKey: "moderator", roleName: "Moderator" }] } });
-    if (path === "/api/admin/permissions" && options.method === "GET") return json({ control: { permissions: [{ key: "servers.edit", description: "Edit servers", delegatable: true }], overrides: [] } });
+    if (path === "/api/admin/staff") return json({ staff: { members: [{ userId: "user-123", discordUserId: "staff-123", displayName: "Sam", roleKey: "moderator", roleName: "Moderator", version: 4, rank: 300, manageable: true }] } });
+    if (path === "/api/admin/permissions" && options.method === "GET") return json({ control: { permissions: [{ key: "servers.edit", description: "Edit servers", delegatable: true, minimumRank: 1 }], overrides: [] } });
     return mutation.promise;
   });
   await h.actions.permissionOverrides();
@@ -142,10 +142,36 @@ test("the consolidated permission editor also exposes busy state and rejects dup
   assert.equal(calls.filter(({ options }) => options.method === "POST").length, 1);
   assert.equal(h.form.getAttribute("aria-busy"), "true");
   assert.ok([...h.form.elements].every((control) => control.disabled));
+  assert.equal(JSON.parse(calls.find(({ options }) => options.method === "POST").options.body).expectedVersion, 4);
 
   mutation.resolve(json({ error: "Permission update failed." }, 503));
   await tick();
   assert.equal(h.form.hasAttribute("aria-busy"), false);
   assert.ok([...h.form.elements].every((control) => !control.disabled));
   assert.match(h.form.querySelector('[role="status"]').textContent, /retry to finish the remaining changes/i);
+});
+
+test("consolidated permission batches advance the returned version after every saved override", async t => {
+  const calls = []; let version = 4;
+  const h = harness(t, `<form id="permission-form-v3">
+    <select id="permission-user"></select>
+    <div id="permission-grid-v3"></div>
+    <textarea name="reason">Cover launch queue</textarea>
+    <button type="submit">Save overrides</button>
+  </form>`, async (path, options = {}) => {
+    calls.push({ path, options });
+    if (path === "/api/admin/staff") return json({ staff: { members: [{ userId: "user-123", discordUserId: "staff-123", displayName: "Sam", roleKey: "moderator", roleName: "Moderator", version, rank: 300, manageable: true }] } });
+    if (path === "/api/admin/permissions" && options.method === "GET") return json({ control: { permissions: [
+      { key: "servers.edit", description: "Edit servers", delegatable: true, minimumRank: 1 },
+      { key: "reports.resolve", description: "Resolve reports", delegatable: true, minimumRank: 1 }
+    ], overrides: [] } });
+    return json({ result: { userId: "user-123", permission: JSON.parse(options.body).permissionKey, allowed: true, version: ++version } });
+  });
+  await h.actions.permissionOverrides();
+  const choices = [...h.form.querySelectorAll("[data-permission]")]; choices[0].value = "true"; choices[1].value = "false";
+  h.form.dispatchEvent(new h.w.Event("submit", { bubbles: true, cancelable: true })); await tick(); await tick();
+  const writes = calls.filter(({ options }) => options.method === "POST").map(({ options }) => JSON.parse(options.body));
+  assert.deepEqual(writes.map(write => write.expectedVersion), [4, 5]);
+  assert.deepEqual(writes.map(write => write.allowed), [true, false]);
+  assert.match(h.form.querySelector('[role="status"]').textContent, /saved/i);
 });

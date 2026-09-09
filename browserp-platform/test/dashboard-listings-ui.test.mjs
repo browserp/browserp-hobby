@@ -19,7 +19,7 @@ async function dashboard(t, servers) {
     assert.ok(payload, `Unexpected request: ${path}`);
     return { ok: true, json: async () => payload };
   };
-  w.eval(read("browserp-portal-v2.js"));
+  w.eval(read("owner-badge.js")); w.eval(read("browserp-portal-v2.js"));
   for (let i = 0; i < 5; i += 1) await new Promise(resolve => setImmediate(resolve));
   const $ = selector => w.document.querySelector(selector);
   assert.equal($("#portal-root").getAttribute("aria-busy"), "false");
@@ -43,6 +43,7 @@ test("dashboard counts only published records while retaining the full recent li
   assert.equal(archived.querySelector("a"), null);
   const publicLinks = [...h.w.document.querySelectorAll('#listings a[href^="/server/"]')];
   assert.deepEqual(publicLinks.map(link => link.getAttribute("href")), ["/server/published-community"]);
+  assert.equal(h.w.document.querySelectorAll("#listings [data-owner-badge-action]").length, 1);
 });
 
 test("an archived-only account shows zero published listings without hiding the archive", async t => {
@@ -51,6 +52,7 @@ test("an archived-only account shows zero published listings without hiding the 
   assert.match(h.$("#listings").textContent, /FloridaDOJRO/);
   assert.match(h.$("#listings").textContent, /Archived/);
   assert.equal(h.$('#listings a[href^="/server/"]'), null);
+  assert.equal(h.$("#listings [data-owner-badge-action]"), null);
   assert.doesNotMatch(h.$("#listings").textContent, /No listings yet|Your published listings/);
 });
 

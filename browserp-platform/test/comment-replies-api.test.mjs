@@ -15,6 +15,8 @@ async function fixture(run,replyStatus=200){
   if(path.endsWith('/consume_rate_limit'))return json(true);
   if(path.endsWith('/member_server_comment_reply'))return replyStatus===200?json({id:'new-reply',status:'pending_review',parentCommentId:body.p_parent_comment_id}):json({message:'This comment is unavailable for replies.',code:'PT404'},replyStatus);
   if(path.endsWith('/member_server_interaction'))return json({id:'new-comment',status:'pending_review'});
+  if(path.endsWith('/member_content_moderation_item'))return json({id:'33333333-0000-4000-8000-000000000003',kind:'comment',targetId:body.p_target||'new-comment',status:'pending_review',version:1});
+  if(path.endsWith('/service_content_check_input'))return json(null);
   throw Error('Unexpected fixture route '+path);
  };try{await run(calls);}finally{globalThis.fetch=original;for(const[k,v]of previous)v===undefined?delete process.env[k]:process.env[k]=v;}
 }

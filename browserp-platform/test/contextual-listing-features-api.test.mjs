@@ -41,7 +41,7 @@ async function fixture(run, override = () => undefined) {
     if (call.url.pathname === "/auth/v1/user") return response({ id: owner, app_metadata: { provider: "discord", providers: ["discord"] }, identities: [{ provider: "discord" }] });
     if (call.url.pathname.endsWith("/check_security_ban_server")) return response(null);
     if (call.url.pathname.endsWith("/consume_rate_limit")) return response(true);
-    if (call.url.pathname.endsWith("/member_connection_status")) return response({ active: true, userId: owner, sessionId });
+    if (call.url.pathname.endsWith("/member_connection_status_v2")) return response({ active: true, userId: owner, sessionId });
     if (call.url.pathname.endsWith("/propose_owned_listing_update_server") || call.url.pathname.endsWith("/correct_owned_listing_update_server")) return response({ id: submissionId, status: "pending_review" });
     if (call.url.pathname.endsWith(`/${SERVER_APPLICATION_RPC}`)) return response({ id: submissionId, status: "pending_review" });
     if (call.url.pathname.endsWith("/attach_server_submission_metadata_server")) return response({ id: submissionId, tags: valid.tags, accessType: valid.accessType });

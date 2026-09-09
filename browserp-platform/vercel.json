@@ -22,6 +22,22 @@
   },
   "rewrites": [
     {
+      "source": "/api/me/content-moderation",
+      "destination": "/api/router?_route=me/content-moderation"
+    },
+    {
+      "source": "/api/admin/content-moderation",
+      "destination": "/api/router?_route=admin/content-moderation"
+    },
+    {
+      "source": "/api/content-moderation/preview",
+      "destination": "/api/router?_route=content-moderation/preview"
+    },
+    {
+      "source": "/api/public/profile-avatar",
+      "destination": "/api/router?_route=public/profile-avatar"
+    },
+    {
       "source": "/api/health",
       "destination": "/api/router?_route=health"
     },

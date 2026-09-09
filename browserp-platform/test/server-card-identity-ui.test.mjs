@@ -29,7 +29,6 @@ for (const kind of ['directory', 'game']) {
   test(`${kind} card keeps the first three feature cues and metadata order without feature counts`, t => {
     const h = fixture(t, kind), card = h.render();
     assert.deepEqual([...card.querySelectorAll('.server-tags > span')].map(n => n.textContent), server.tags.slice(0, 3));
-    assert.equal(card.querySelector('.server-description').nextElementSibling.className, 'server-tags');
     assert.equal(card.querySelector('.server-tags').nextElementSibling.className, 'server-card-bottom');
     assert.deepEqual([...card.querySelector('.platform-meta-v5').children].map(n => n.getAttribute('aria-label')), ['Game: FiveM', 'Region: United Kingdom', 'Language: French', 'Server setup: QBCore', 'Access: Approval required']);
     const escaped = h.render({ ...server, tags: ['<img src=x onerror=bad()>'], logo_url: 'javascript:bad()', banner_url: '//untrusted.example/image.png' });
@@ -40,6 +39,23 @@ for (const kind of ['directory', 'game']) {
     const card = fixture(t, kind).render({ ...server, platform_id: 'roblox', framework: 'Emergency experience', applicationOnly: true });
     assert.equal(card.querySelector('.status').textContent, 'Community listing'); assert.equal(card.querySelector('.status').classList.contains('online'), false);
     assert.equal(card.querySelector('.server-card-bottom strong').textContent, 'Live player count not provided');
+  });
+}
+for (const [kind, playerText] of [['directory', '41 / 100 players'], ['game', '41 players']]) {
+  test(`${kind} card follows the premium reading order without changing its content or actions`, t => {
+    const card = fixture(t, kind).render();
+    assert.deepEqual([...card.children].map(node => node.matches('h3') ? 'title' : node.className), [
+      'server-card-top',
+      'title',
+      'server-description',
+      'server-meta platform-meta-v5',
+      'server-tags',
+      'server-card-bottom'
+    ]);
+    assert.equal(card.querySelector('.server-description').textContent, server.description);
+    assert.equal(card.querySelector('.server-meta').nextElementSibling, card.querySelector('.server-tags'));
+    assert.equal(card.querySelector('.server-card-bottom strong').textContent, playerText);
+    assert.equal(card.querySelector('.server-card-action').textContent, 'View listing');
   });
 }
 test('public and staff controller documents load the same standalone touch helper once', () => {

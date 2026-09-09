@@ -231,7 +231,7 @@ export async function hasStaffMembership(userId) {
 }
 
 export async function connectionSessionStatus(session, { requireRecent = false } = {}) {
-  const access = await rpc("member_connection_status", {}, session.accessToken);
+  const access = await rpc("member_connection_status_v2", {}, session.accessToken);
   if (access?.active !== true || access.userId !== session.user.id || !access.sessionId) {
     throw Object.assign(new Error("Sign in again to manage your connected accounts."), { status: 401 });
   }
@@ -568,7 +568,8 @@ export async function rest(path, options = {}) {
   return (await supabaseRequest(`rest/v1/${path}`, options)).data;
 }
 
-export async function uploadStorageObject(bucket, objectPath, bytes, contentType) {
+export async function uploadStorageObject(bucket, objectPath, bytes, contentType, { signal } = {}) {
+  signal?.throwIfAborted();
   const config = supabaseConfig();
   if (!config.url || !config.secretKey) {
     throw Object.assign(new Error("The server-only media boundary is not configured."), {
@@ -587,7 +588,7 @@ export async function uploadStorageObject(bucket, objectPath, bytes, contentType
     method: "POST",
     headers,
     body: bytes,
-    signal: AbortSignal.timeout(timeoutMs())
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs())]) : AbortSignal.timeout(timeoutMs())
   });
   const payload = await response.json().catch(() => null);
   if (!response.ok) {

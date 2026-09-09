@@ -187,6 +187,8 @@
       suspended: "Suspended",
       pending: "Pending Discord sign-in",
       protected: "Protected owner",
+      blocked: "Blocked",
+      superseded: "Replaced",
       revoked: "Revoked",
       high: "High",
       critical: "Critical",
@@ -200,12 +202,21 @@
     const normalized = String(value || "").toLowerCase();
     if (["published", "approved", "resolved", "active"].includes(normalized)) return "success";
     if (["pending_review", "changes_requested", "open", "claimed", "triaged", "medium"].includes(normalized)) return "warning";
-    if (["rejected", "critical", "high", "suspended", "revoked"].includes(normalized)) return "danger";
+    if (["rejected", "blocked", "critical", "high", "suspended", "revoked"].includes(normalized)) return "danger";
     return "info";
   }
 
   function statusChip(value) {
     return make("span", `status-chip ${statusTone(value)}`, friendlyStatus(value));
+  }
+
+  function moderationFeedback(kind, moderation) {
+    const status = String(moderation?.status || moderation?.state || "").toLowerCase();
+    const noun = kind === "avatar" ? "profile picture" : kind === "profile" ? "profile details" : "content";
+    if (status === "published") return `${noun[0].toUpperCase()}${noun.slice(1)} published.`;
+    if (status === "pending_review") return `Saved for review. Your current approved ${noun} ${kind === "profile" ? "stay" : "stays"} live until a decision is made.`;
+    if (status === "blocked") return `Not published. Open Content status to review the reason or appeal.`;
+    return kind === "avatar" ? "Profile picture submitted." : "Profile saved. Changes may still require review.";
   }
 
   function setRoot(content, { accessGate = false } = {}) {
@@ -359,6 +370,8 @@
       const actions = [];
       if (server.slug && String(server.status).toLowerCase() === "published") actions.push(link(`/server/${encodeURIComponent(server.slug)}`, "small-button", "View listing"));
       if (server.id && String(server.status).toLowerCase() === "published") actions.push(link(`/list-server?listing=${encodeURIComponent(server.id)}`, "small-button", "Request update"));
+      const badgeAction = window.BrowseRPOwnerBadge?.createAction({ slug: server.slug, status: server.status, serverName: server.name });
+      if (badgeAction) actions.push(badgeAction);
       list.append(listItem(server.name || "Roleplay server", `Updated ${dateLabel(server.updated_at)}`, actions, { status: server.status }));
     });
     section.append(list);
@@ -427,7 +440,7 @@
     const preview = profileAvatar(profile, "profile-picture-preview-v3");
     const choose = button("button button-secondary", "Upload profile picture");
     const input = make("input"); input.type = "file"; input.accept = "image/png,image/jpeg,image/webp"; input.hidden = true;
-    const help = make("small", "portal-help", "PNG, JPEG or WebP, up to 5 MB. Images are cropped to 512 × 512, validated and published immediately.");
+    const help = make("small", "portal-help", "PNG, JPEG or WebP, up to 5 MB. Images are cropped to 512 × 512 and checked before they appear publicly. Your current approved picture stays live during review.");
     shell.append(preview, choose, input, help);
     choose.addEventListener("click", () => input.click());
     input.addEventListener("change", async () => {
@@ -489,7 +502,7 @@
         const canvas=document.createElement("canvas");canvas.width=512;canvas.height=512;const context=canvas.getContext("2d",{alpha:false});
         context.fillStyle="#0b0910";context.fillRect(0,0,512,512);
         const size=scaleState();const factor=512/viewportSize;context.drawImage(image,((viewportSize-size.width)/2+offsetX)*factor,((viewportSize-size.height)/2+offsetY)*factor,size.width*factor,size.height*factor);
-        try { const result = await api("/api/me/avatar",{method:"POST",body:JSON.stringify({imageData:canvas.toDataURL("image/png")})});publishProfile(result.profile || { ...profile, avatar_url: result.avatarUrl, avatar_review_status: "approved" });dialog.close();toast("Profile picture updated and is now live.");await refresh(); }
+        try { const result = await api("/api/me/avatar",{method:"POST",body:JSON.stringify({imageData:canvas.toDataURL("image/png")})});if(result.profile)publishProfile(result.profile);dialog.close();toast(moderationFeedback("avatar",result.moderation));await refresh(); }
         catch(error){toast(error.message,"error");save.disabled=false;save.textContent="Save cropped picture";}
       });
       const resize = new ResizeObserver(() => {
@@ -505,7 +518,7 @@
   }
 
   function dashboardProfile(profile, refresh) {
-    const section = panel("account", "Profile & privacy", "Validated profile pictures appear immediately. Bio changes remain screened before public display.");
+    const section = panel("account", "Profile & privacy", "Profile changes are checked before public display. Your current approved name and picture stay visible while replacements are reviewed.");
     const form = make("form", "profile-form-v2");
     const nameField = make("label", "portal-field");
     append(nameField, make("span", "", "Display name"));
@@ -530,8 +543,9 @@
       event.preventDefault(); submit.disabled = true;
       const data = Object.fromEntries(new FormData(form));
       try {
-        await api("/api/me/profile", { method: "POST", body: JSON.stringify(data) });
-        toast("Profile saved. Bio changes may still require review."); await refresh();
+        const result = await api("/api/me/profile", { method: "POST", body: JSON.stringify(data) });
+        if (result.profile) publishProfile(result.profile);
+        toast(moderationFeedback("profile", result.moderation)); await refresh();
       } catch (error) { toast(error.message, "error"); submit.disabled = false; }
     });
     const settings = make("div", "profile-settings-layout-v7");
@@ -617,6 +631,86 @@
     return section;
   }
 
+  function dashboardContentModeration() {
+    const section = panel("content-status", "Content status", "Private review history for your comments, display name and profile pictures. Blocked items stay private and can be appealed here for a free staff review.");
+    const live = make("p", "portal-status", "Loading your content status…"); live.setAttribute("role", "status");
+    const list = make("div", "member-moderation-list-v3");
+    const paging = make("div", "member-moderation-paging-v3");
+    section.append(live, list, paging);
+    let items = [];
+    let nextBefore = "";
+    let loading = false;
+    const label = (kind) => ({ comment: "Comment", display_name: "Display name", avatar: "Profile picture" })[kind] || "Content";
+    const version = (item) => {
+      const value = Number(item?.version ?? item?.expectedVersion);
+      return Number.isSafeInteger(value) && value > 0 ? value : 0;
+    };
+    const previewUrl = (item) => {
+      if (item.kind !== "avatar") return "";
+      const supplied = safeInternalUrl(item.previewUrl || item.preview_url || item.avatarPreviewUrl || item.avatar_preview_url || "");
+      if (supplied) return supplied;
+      return /^[0-9a-f-]{36}$/i.test(String(item.id || "")) ? `/api/content-moderation/preview?id=${encodeURIComponent(item.id)}` : "";
+    };
+    const render = () => {
+      list.replaceChildren(); paging.replaceChildren();
+      if (!items.length) list.append(emptyState("No content review history", "Comments and identity changes that need review will appear here."));
+      for (const item of items) {
+        const card = make("article", "member-moderation-card-v3");
+        const head = make("div", "member-moderation-head-v3");
+        const copy = make("div");
+        append(copy, make("h3", "", label(item.kind)), make("p", "", `Submitted ${dateLabel(item.createdAt)}`));
+        append(head, copy, statusChip(item.status)); card.append(head);
+        const preview = previewUrl(item);
+        if (preview) { const image = make("img", "member-moderation-avatar-v3"); image.src = preview; image.alt = "Private profile picture submitted for review"; image.loading = "lazy"; card.append(image); }
+        else if (typeof item.text === "string" && item.text.trim()) card.append(make("blockquote", "member-moderation-evidence-v3", item.text));
+        if (item.reason) card.append(make("p", "member-moderation-reason-v3", `Review reason: ${item.reason}`));
+        const appealLabel = ({ pending: "Waiting for staff review", resolved: "Reviewed", submitted: "Waiting for staff review", pending_review: "Waiting for staff review", under_review: "In review" })[String(item.appealStatus || "").toLowerCase()] || "";
+        const dates = [item.reviewedAt ? `Reviewed ${dateLabel(item.reviewedAt)}` : "", appealLabel ? `Appeal: ${appealLabel}` : ""].filter(Boolean);
+        if (dates.length) card.append(make("p", "member-moderation-meta-v3", dates.join(" · ")));
+        if (item.appealDecision) card.append(make("p", "member-moderation-reason-v3", `Appeal decision: ${item.appealDecision}`));
+        const appealStatus = String(item.appealStatus || "none").toLowerCase();
+        if (item.status === "blocked" && appealStatus === "none") {
+          const form = make("form", "member-moderation-appeal-v3");
+          const field = make("label", "portal-field"); field.append(make("span", "", "Why should this decision be reconsidered?"));
+          const statement = make("textarea"); statement.name = "statement"; statement.required = true; statement.minLength = 5; statement.maxLength = 1000; field.append(statement);
+          const submit = button("small-button small-button-primary", "Send appeal"); submit.type = "submit"; submit.disabled = !version(item);
+          if (!version(item)) form.append(make("p", "portal-status error", "Refresh this item before appealing."));
+          form.append(field, submit);
+          form.addEventListener("submit", async (event) => {
+            event.preventDefault(); if (!version(item) || !form.reportValidity()) return;
+            submit.disabled = true; form.setAttribute("aria-busy", "true");
+            try {
+              await api("/api/me/content-moderation", { method: "POST", body: JSON.stringify({ id: item.id, action: "appeal", statement: statement.value.trim(), expectedVersion: version(item) }) });
+              toast("Appeal sent for review."); await load("", false);
+            } catch (error) { toast(error.message, "error"); submit.disabled = false; form.removeAttribute("aria-busy"); }
+          });
+          card.append(form);
+        }
+        list.append(card);
+      }
+      if (nextBefore) {
+        const older = button("small-button", "Load older"); older.addEventListener("click", () => load(nextBefore, true)); paging.append(older);
+      }
+    };
+    const load = async (before = "", appendOlder = false) => {
+      if (loading || state.sessionEnded) return;
+      loading = true; live.textContent = appendOlder ? "Loading older items…" : "Loading your content status…";
+      try {
+        const parameters = new URLSearchParams(); if (before) parameters.set("before", typeof before === "string" ? before : JSON.stringify(before));
+        const payload = await api(`/api/me/content-moderation${parameters.size ? `?${parameters}` : ""}`);
+        if (!Array.isArray(payload.items)) throw new Error("Your content status response was incomplete.");
+        items = appendOlder ? [...items, ...payload.items.filter((item) => !items.some((current) => current.id === item.id))] : payload.items;
+        nextBefore = typeof payload.nextBefore === "string" || (payload.nextBefore && typeof payload.nextBefore === "object") ? payload.nextBefore : "";
+        render(); live.textContent = `${items.length.toLocaleString("en-GB")} private item${items.length === 1 ? "" : "s"} shown.`;
+      } catch (error) {
+        live.textContent = error.message || "Your content status could not be loaded.";
+        if (!appendOlder && !items.length) list.replaceChildren(emptyState("Content status unavailable", "Use the button below to try again.", (() => { const retry = button("button button-secondary", "Try again"); retry.addEventListener("click", () => load()); return retry; })()));
+      } finally { loading = false; }
+    };
+    Promise.resolve().then(() => load());
+    return section;
+  }
+
   async function dashboardPage(session) {
     if (!session?.authenticated) {
       const authState = new URLSearchParams(location.search).get("auth");
@@ -649,7 +743,7 @@
       logout.addEventListener("click", signOut);
       heading.actions.append(logout);
       content.append(heading.head);
-      content.append(portalNav([["#listings", "Listings"], ["#submissions", "Reviews"], ["#saved", "Favourites"], ["#recent", "Recent"], ["#notifications", "Notifications"], ["#account", "Profile"]]));
+      content.append(portalNav([["#listings", "Listings"], ["#submissions", "Reviews"], ["#saved", "Favourites"], ["#recent", "Recent"], ["#notifications", "Notifications"], ["#content-status", "Content status"], ["#account", "Profile"]]));
 
       const metrics = make("section", "metric-grid-v2");
       metrics.setAttribute("aria-label", "Account summary");
@@ -668,6 +762,7 @@
         dashboardFavorites(favorites, refresh),
         dashboardRecent(),
         dashboardNotifications(notifications, unread, refresh),
+        dashboardContentModeration(),
         dashboardProfile(profile, refresh)
       );
       content.append(stack);
@@ -705,7 +800,7 @@
       const dataBody = make("div"); dataBody.dataset.privacyRequestsContent = "";
       data.append(make("summary", "", "Your data"), dataBody);
       if (location.hash === "#your-data" || new URLSearchParams(location.search).get("section") === "your-data") data.open = true;
-      stack.append(dashboardProfile(profile, refresh), data, dashboardRecent());
+      stack.append(dashboardProfile(profile, refresh), dashboardContentModeration(), data, dashboardRecent());
       content.append(stack);
       setRoot(content);
       privacyController = window.BrowseRPPrivacyRequests?.initMember({ api, accountId: session.user.id, root: data, onAuthFailure: () => {

@@ -10,7 +10,7 @@ body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage > .shell {
 .dashboard-view .portal-kicker { font-size: 12px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
 .dashboard-view .portal-head .portal-avatar { width: 76px; height: 76px; border-radius: 50%; box-shadow: 0 0 0 5px var(--bg-soft); }
 .dashboard-view .portal-head-actions { flex: none; }
-.dashboard-view .portal-panel-v2 { border-radius: 16px; padding: clamp(22px, 3vw, 36px); }
+.dashboard-view .portal-panel-v2 { border-radius: var(--radius-md); padding: clamp(22px, 3vw, 36px); }
 .dashboard-view .portal-panel-head { margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
 .dashboard-view .portal-panel-head h2 { font-size: clamp(23px, 2.3vw, 30px); letter-spacing: -.025em; }
 .dashboard-view .portal-panel-head p { max-width: 65ch; font-size: 15px; line-height: 1.65; }
@@ -29,13 +29,27 @@ body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage > .shell {
 .profile-picture-editor-v3 .button { justify-self: start; max-width: 100%; }
 .profile-picture-editor-v3 .portal-help { grid-column: 2; line-height: 1.65; }
 .profile-form-v2 .portal-field input[readonly] { color: var(--copy); background: var(--bg-soft); cursor: default; }
-.profile-form-v2 .portal-field :is(input, textarea, select) { min-width: 0; border-color: var(--line); background-color: var(--bg); border-radius: 10px; transition: border-color .18s ease, box-shadow .18s ease; }
-.profile-form-v2 .portal-field :is(input, textarea, select):focus-visible { border-color: var(--pink); outline: 2px solid color-mix(in srgb, var(--pink) 25%, transparent); outline-offset: 2px; }
+.profile-form-v2 .portal-field :is(input, textarea, select) { min-width: 0; border-color: var(--line); background-color: var(--bg); border-radius: var(--radius-sm); transition: border-color .18s ease, box-shadow .18s ease; }
+.profile-form-v2 .portal-field :is(input, textarea, select):focus-visible { border-color: var(--cyan); outline: 3px solid var(--focus); outline-offset: 3px; }
 .profile-form-v2 .portal-status { margin: 0; font-size: 13px; }
-.dashboard-view .portal-nav { top: 88px; background: color-mix(in srgb, var(--panel) 96%, transparent); border-radius: 12px; }
-.dashboard-view .metric-v2 { min-height: 128px; border-radius: 12px; }
-.dashboard-view .portal-empty-v2 { border-style: solid; border-color: var(--line-soft); background: var(--bg-soft); border-radius: 12px; }
+.dashboard-view .portal-nav { top: 88px; background: color-mix(in srgb, var(--panel) 96%, transparent); border-radius: var(--radius-sm); }
+.dashboard-view .metric-v2 { min-height: 128px; border-radius: var(--radius-sm); }
+.dashboard-view .portal-empty-v2 { border-style: solid; border-color: var(--line-soft); background: var(--bg-soft); border-radius: var(--radius-sm); }
 .dashboard-view .portal-empty-v2 h3 { font-size: 20px; }
+.member-moderation-list-v3 { display: grid; gap: 14px; }
+.member-moderation-card-v3 { min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg-soft); }
+.member-moderation-head-v3 { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.member-moderation-head-v3 h3 { margin: 0; font-size: 18px; }
+.member-moderation-head-v3 p { margin: 5px 0 0; color: var(--quiet); font-size: 13px; }
+.member-moderation-head-v3 .status-chip { flex: none; margin-top: 0; }
+.member-moderation-evidence-v3 { margin: 16px 0 0; padding: 14px 16px; border-left: 3px solid var(--pink); border-radius: 0 10px 10px 0; background: var(--bg); color: var(--copy); white-space: pre-wrap; overflow-wrap: anywhere; }
+.member-moderation-avatar-v3 { display: block; width: 112px; height: 112px; margin-top: 16px; border: 1px solid var(--line); border-radius: 50%; object-fit: cover; }
+.member-moderation-reason-v3 { margin: 14px 0 0; color: var(--copy); line-height: 1.65; overflow-wrap: anywhere; }
+.member-moderation-meta-v3 { margin: 12px 0 0; color: var(--quiet); font-size: 13px; }
+.member-moderation-appeal-v3 { display: grid; gap: 12px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line-soft); }
+.member-moderation-appeal-v3 textarea { min-height: 110px; }
+.member-moderation-appeal-v3 .small-button { justify-self: start; }
+.member-moderation-paging-v3 { display: flex; justify-content: center; margin-top: 18px; }
 @media (max-width: 1040px) {
   .dashboard-view .portal-head { align-items: flex-start; }
   .dashboard-view .portal-head-actions { max-width: 210px; }
@@ -55,6 +69,7 @@ body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage > .shell {
   .dashboard-view .portal-panel-v2 { padding: 22px 18px; }
   .dashboard-view .portal-nav { top: 78px; }
   .profile-settings-layout-v7 .member-connections-grid { grid-template-columns: minmax(0, 1fr); }
+  .member-moderation-head-v3 { flex-wrap: wrap; }
 }
 @media (max-width: 400px) {
   .profile-picture-editor-v3 { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; }

@@ -10,6 +10,12 @@ const root = fileURLToPath(new URL(".", import.meta.url));
 const publicDir = join(root, "public");
 
 const apiRoutes = new Map([
+  ["GET /api/me/content-moderation", ["api/router.js", "me/content-moderation"]],
+  ["POST /api/me/content-moderation", ["api/router.js", "me/content-moderation"]],
+  ["GET /api/admin/content-moderation", ["api/router.js", "admin/content-moderation"]],
+  ["POST /api/admin/content-moderation", ["api/router.js", "admin/content-moderation"]],
+  ["GET /api/content-moderation/preview", ["api/router.js", "content-moderation/preview"]],
+  ["GET /api/public/profile-avatar", ["api/router.js", "public/profile-avatar"]],
   ["GET /api/health", ["api/router.js", "health"]],
   ["GET /api/platforms", ["api/router.js", "platforms"]],
   ["GET /api/categories", ["api/router.js", "categories"]],

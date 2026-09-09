@@ -49,6 +49,9 @@
 .moderation-record h3 { font-size: 17px; overflow-wrap: anywhere; }
 .moderation-record-meta { color: var(--copy); font-size: 12px; line-height: 1.8; margin: 6px 0 0; overflow-wrap: anywhere; }
 .moderation-record-copy { color: var(--copy); font-size: 14px; line-height: 1.7; white-space: pre-line; overflow-wrap: anywhere; margin: 15px 0 0; }
+.moderation-content-evidence-v3 { padding: 14px 16px; border-left: 3px solid var(--pink); border-radius: 0 10px 10px 0; background: var(--bg); }
+.moderation-content-appeal-v3 { border-left-color: var(--cyan); }
+.moderation-content-avatar-v3 { display: block; width: 128px; height: 128px; margin-top: 16px; border: 1px solid var(--line); border-radius: 50%; object-fit: cover; }
 .moderation-state { flex-shrink: 0; padding: 5px 9px; border: 1px solid var(--line); border-radius: 30px; color: #d7c5e8; font-size: 11px; background: #ffffff05; text-transform: capitalize; }
 .moderation-state[data-state="deleted"],.moderation-state[data-state="critical"] { color: #ffb1bd; border-color: #753a48; }
 .moderation-state[data-state="published"],.moderation-state[data-state="resolved"] { color: #9ee6c2; border-color: #365d4e; }

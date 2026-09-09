@@ -201,7 +201,7 @@ test("expired staff access clears a previously open mobile menu and leaves the s
 
 test("recorded staff action dialogs expose an accessible name and cancellation makes no mutation", async t => {
   const calls = [];
-  const h = await harness(t, async (path, options) => { calls.push({ path, options }); return json({ ...session, mfa: { required: false } }); }, "moderation");
+  const h = await harness(t, async (path, options) => { calls.push({ path, options }); return path === "/api/admin/bans?view=access" ? json({ access: { rank: 300, maxMinutes: 2880, canIndefinite: false, canDeviceNetwork: false } }) : json({ ...session, mfa: { required: false } }); }, "moderation");
   const pending = h.moderation().actions.applyBan({ userId: "fixture-user", displayName: "Fixture member" }); await tick();
   const dialog = h.$("dialog"); assert.ok(dialog); assert.equal(dialog.getAttribute("aria-label"), dialog.querySelector("h2").textContent);
   h.button("Cancel").click(); await pending; assert.equal(calls.filter(call => call.options.method === "POST").length, 0);

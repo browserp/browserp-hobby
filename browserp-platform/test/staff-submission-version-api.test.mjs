@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import router from "../api/router.js";
 
-test("staff listing decisions require both displayed versions; other review kinds keep their own handlers", async t => {
+test("staff listing decisions require both displayed versions and legacy comment actions fail closed", async t => {
   const account = "00000000-0000-4000-8000-000000000001", submission = "22222222-0000-4000-8000-000000000002", csrf = "c".repeat(43);
   const token = `fixture.${Buffer.from(JSON.stringify({ sub: account, aal: "aal2" })).toString("base64url")}.fixture`;
   const previous = { ...process.env }, originalFetch = globalThis.fetch;
@@ -17,7 +17,7 @@ test("staff listing decisions require both displayed versions; other review kind
     else if (path.endsWith("/rpc/consume_rate_limit")) payload = true;
     else if (path.endsWith("/rpc/staff_server_submission_review")) payload = { id: submission, reviewVersion: 4, queueVersion: 2 };
     else if (path.endsWith("/rpc/staff_review_server_application") && conflict) { payload = { message: "This submission changed. Reopen it before deciding.", code: "PT409" }; status = 409; }
-    else if (/\/(staff_review_server_application|staff_resolve_queue_item|staff_resolve_comment_review)$/.test(path)) payload = { ok: true };
+    else if (/\/(staff_review_server_application|staff_resolve_queue_item)$/.test(path)) payload = { ok: true };
     else throw new Error(`Unexpected fixture request ${path}`);
     return new Response(JSON.stringify(payload), { status, headers: { "Content-Type": "application/json" } });
   };
@@ -39,8 +39,9 @@ test("staff listing decisions require both displayed versions; other review kind
   assert.deepEqual({ ...decision.body, p_request_id: "present" }, { p_submission_id: submission, p_expected_version: 4, p_expected_queue_version: 2, p_control_reviewed: false, p_control_note: null, p_action: "approved", p_reason: base.reason, p_request_id: "present" });
   assert.match(decision.body.p_request_id, /^[a-f0-9-]{36}$/); assert.equal(decision.options.headers.Authorization, `Bearer ${token}`);
   conflict = true; assert.equal((await request({ ...base, expectedVersion: 4, expectedQueueVersion: 2 })).status, 409);
-  for (const kind of ["comment", "report"]) assert.equal((await request({ ...base, kind })).status, 200);
+  assert.equal((await request({ ...base, kind: "comment" })).status, 409);
+  assert.equal((await request({ ...base, kind: "report" })).status, 200);
   assert.equal(calls.some(call => call.path.endsWith("/rpc/staff_resolve_queue_item") && call.body.p_kind === "listing"), false);
   assert.ok(calls.some(call => call.path.endsWith("/rpc/staff_resolve_queue_item") && call.body.p_kind === "report"));
-  assert.ok(calls.some(call => call.path.endsWith("/rpc/staff_resolve_comment_review")));
+  assert.equal(calls.some(call => call.path.endsWith("/rpc/staff_resolve_comment_review")), false);
 });

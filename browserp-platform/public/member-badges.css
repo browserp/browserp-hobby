@@ -1,0 +1,92 @@
+.comment-badges-v3 {
+  --member-badge-gold: #f1bd6b;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.comment-badge-v3,
+.comment-staff-rank-v7 {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--pink) 42%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pink) 8%, var(--panel));
+  color: var(--pink-strong);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.comment-badge-v3[data-kind="browserp_staff"] {
+  border-color: color-mix(in srgb, var(--cyan) 48%, var(--pink));
+  background: linear-gradient(110deg, color-mix(in srgb, var(--pink) 11%, var(--panel)), color-mix(in srgb, var(--cyan) 10%, var(--panel)));
+  color: var(--text);
+}
+
+.comment-staff-mark-v7 {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  object-fit: contain;
+}
+
+.comment-staff-rank-v7 {
+  max-width: min(28ch, calc(100vw - 72px));
+  overflow: hidden;
+  border-color: var(--line-strong);
+  background: var(--panel-2);
+  color: var(--copy);
+  text-overflow: ellipsis;
+}
+
+.comment-badge-v3[data-kind="verified_owner"] {
+  border-color: color-mix(in srgb, var(--violet) 48%, var(--line));
+  background: color-mix(in srgb, var(--violet) 9%, var(--panel));
+  color: var(--violet);
+}
+
+.comment-badge-v3[data-kind="discord_verified_email"] {
+  border-color: color-mix(in srgb, var(--success) 48%, var(--line));
+  background: color-mix(in srgb, var(--success) 9%, var(--panel));
+  color: var(--success);
+}
+
+.comment-badge-v3[data-kind="first_100"] {
+  border-color: color-mix(in srgb, var(--member-badge-gold) 58%, var(--line));
+  background: color-mix(in srgb, var(--member-badge-gold) 10%, var(--panel));
+  color: var(--member-badge-gold);
+}
+
+.comment-badge-v3[data-kind="first_500"] {
+  border-color: color-mix(in srgb, var(--cyan) 45%, var(--line));
+  background: color-mix(in srgb, var(--cyan) 8%, var(--panel));
+  color: var(--cyan);
+}
+
+.comment-badge-v3[data-kind="community_helper"] { color: var(--pink-strong); }
+
+.comment-badge-v3[data-kind="new_joiner"] {
+  border-color: color-mix(in srgb, var(--violet) 38%, var(--line));
+  background: color-mix(in srgb, var(--violet) 7%, var(--panel));
+  color: var(--info);
+}
+
+.comment-badge-overflow-v7 {
+  border-color: var(--line-strong);
+  background: var(--panel-2);
+  color: var(--muted);
+  cursor: help;
+}
+
+.comment-badge-overflow-v7:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+:root[data-theme="light"] .comment-badges-v3 { --member-badge-gold: #765000; }

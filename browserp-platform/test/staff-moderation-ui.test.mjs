@@ -5,7 +5,7 @@ import vm from "node:vm";
 const filterSource = readFileSync(new URL("../public/staff-moderation-filter.js", import.meta.url), "utf8");
 const source = readFileSync(new URL("../public/staff-moderation.js", import.meta.url), "utf8");
 function filters() { const window = {}; vm.runInNewContext(filterSource, { window, URLSearchParams, Date }); return window.BrowseRPModerationFilters; }
-const capabilities = { readMembers: true, editMembers: true, readServers: true, editServers: true, readReports: true, manageReports: true, readListings: true, readQueue: true, manageQueue: true, readActivity: true, readAudit: true, readSecurity: true, manageBans: true, reviewAppeals: true, reviewProfiles: true, manageStaff: false, manageRoles: false };
+const capabilities = { readMembers: true, editMembers: true, readServers: true, editServers: true, readReports: true, manageReports: true, readListings: true, readQueue: true, manageQueue: true, readActivity: true, readAudit: true, readSecurity: true, manageBans: true, reviewAppeals: true, reviewProfiles: true, readStaff: false, manageStaff: false, manageRoles: false, reviewErasure: false, restrictionMaxMinutes: 2880 };
 const summary = (overrides = {}) => ({ generatedAt: "2026-09-04T11:00:00Z", counts: { members: 4, servers: 3, reports: 2, listings: 1, queue: 1, security: 0 }, capabilities: { ...capabilities, ...overrides }, permissions: { keys: ["reports.resolve", "servers.review", "moderation.resolve", "accounts.sessions.revoke", "security.network.request"], isOwner: false } });
 const server = { id: "server-1", version: 8, name: "Sample Roleplay", description: "A long enough synthetic server description for moderation editing checks.", platform: "fivem", region: "United Kingdom", language: "French", framework: "QBCore", access: "allowlisted", status: "published", slug: "sample-roleplay", createdAt: "2026-09-01T12:00:00Z", verified: true, beginnerFriendly: false };
 const workspace = (items = [], extra = {}) => ({ kind: "servers", items, total: items.length, nextCursor: null, generatedAt: "2026-09-04T11:00:00Z", permissions: capabilities, facets: { platform: [{ value: "fivem", label: "FiveM", count: 3 }], region: [{ value: "United Kingdom", label: "United Kingdom", count: 2 }], mode: [{ value: "QBCore", label: "QBCore", count: 2 }] }, ...extra });
@@ -57,9 +57,28 @@ test("staff controls receive the backend owner decision separately from role-man
     const app = harness(async () => ({ summary: data }), "#staff");
     app.window.BrowseRPStaffRoles = { init: async ({ permissions }) => { received = permissions; } };
     const controller = await app.init();
-    assert.equal(received.manageRoles, true); assert.equal(received.isOwner, isOwner);
+    assert.deepEqual(JSON.parse(JSON.stringify(received)), { readStaff: false, manageStaff: false, manageRoles: true, isOwner });
     controller.destroy();
   }
+});
+
+test("staff catalogue is available to readers without exposing management controls", async () => {
+  let received;
+  const app = harness(async () => ({ summary: summary({ readStaff: true, manageStaff: false, manageRoles: false }) }), "#staff");
+  app.window.BrowseRPStaffRoles = { init: async options => { received = options.permissions; } };
+  const controller = await app.init();
+  assert.ok(app.document.querySelector("#moderation-tabs").children.some(item => item.href === "#staff"));
+  assert.deepEqual(JSON.parse(JSON.stringify(received)), { readStaff: true, manageStaff: false, manageRoles: false, isOwner: false });
+  controller.destroy();
+});
+
+test("erasure-review capability is passed independently from owner identity", async () => {
+  let received;
+  const app = harness(async url => url.includes("data-requests?access=1") ? { canReview: true } : { summary: summary({ reviewErasure: true }) }, "#data-requests");
+  app.window.BrowseRPPrivacyRequests = { initStaff: options => { received = options; return { destroy() {} }; } };
+  const controller = await app.init({ accountId: "55555555-5555-4555-8555-555555555555" });
+  assert.equal(received.canReviewErasure, true); assert.equal(received.isOwner, false);
+  controller.destroy();
 });
 
 test("individual permission guidance is attached to the authorised form and absent without delegation access", async () => {
@@ -84,10 +103,13 @@ test("individual permission guidance is attached to the authorised form and abse
   }
 });
 
-test("moderation filters round-trip privately, map both queues, and reset platform and region descendants", () => {
+test("moderation filters round-trip privately, route the content queue, and reset platform and region descendants", () => {
   const f = filters();
-  assert.equal(f.parse("#content?status=open").view, "content");
-  assert.match(f.query("content", { q: "private content" }), /^\/api\/admin\/moderation\?view=queue/);
+  const content = f.parse("#content?status=blocked&kind=avatar&q=ignored");
+  assert.equal(content.view, "content"); assert.deepEqual(JSON.parse(JSON.stringify(content.filters)), { kind: "avatar" });
+  const cursor = { createdAt: "2026-09-09T10:00:00Z", id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" };
+  const contentUrl = new URL(f.query("content", content.filters, cursor), "https://example.com");
+  assert.equal(contentUrl.pathname, "/api/admin/content-moderation"); assert.equal(contentUrl.searchParams.has("status"), false); assert.equal(contentUrl.searchParams.has("limit"), false); assert.equal(contentUrl.searchParams.get("kind"), "avatar"); assert.deepEqual(JSON.parse(contentUrl.searchParams.get("before")), cursor);
   assert.match(f.query("queue"), /view=listings/);
   assert.match(f.query("reports", { status: "all" }), /status=all/);
   const original = { q: "story", platform: "fivem", region: "Europe", language: "English", mode: "QBCore", feature: "cars", access: "allowlisted", online: "true", verified: "true", beginner: "true" };
@@ -97,6 +119,54 @@ test("moderation filters round-trip privately, map both queues, and reset platfo
   assert.equal(parsed.filters.q, "French & cars"); assert.equal(parsed.filters.online, undefined); assert.equal(parsed.filters.arbitrary, undefined);
   const url = new URL(f.query("servers", parsed.filters, { createdAt: "2026-09-01", id: "a" }), "https://example.com");
   assert.equal(url.searchParams.get("from"), "2026-09-01T00:00:00.000Z"); assert.equal(JSON.parse(url.searchParams.get("cursor")).id, "a");
+});
+
+test("unified content moderation uses private evidence, type permissions and versioned direct decisions", async () => {
+  const writes = []; const requests = [];
+  const comment = { id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", kind: "comment", status: "pending_review", text: "Private pending comment", createdAt: "2026-09-09T09:00:00Z", version: 4 };
+  const avatar = { id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", kind: "avatar", status: "pending_review", createdAt: "2026-09-09T09:05:00Z", version: 2 };
+  const app = harness(async (url, options) => {
+    requests.push(url);
+    if (options?.method === "POST") { writes.push(JSON.parse(options.body)); return { item: { ...comment, status: "published", version: 5 } }; }
+    if (url.includes("view=summary")) return { summary: summary({ readQueue: false, manageQueue: false, reviewProfiles: false }) };
+    return { items: [comment, avatar], nextBefore: "2026-09-08T00:00:00Z" };
+  }, "#content?kind=comment");
+  const controller = await app.init();
+  assert.ok(requests.some((url) => url.startsWith("/api/admin/content-moderation?")));
+  assert.match(text(app.root), /Private pending comment/);
+  assert.ok(app.document.querySelector("img").src.includes("/api/content-moderation/preview?id=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"));
+  assert.equal(app.nodes('[name="q"]').length, 0);
+  assert.equal(app.button("Approve") !== undefined, true);
+  const editing = app.button("Approve").emit("click"); await flush();
+  const dialog = app.document.querySelector("dialog"); dialog.querySelector("textarea").value = "Reviewed against the content policy.";
+  await dialog.querySelector("form").emit("submit"); await editing;
+  assert.deepEqual(writes[0], { id: comment.id, action: "approve", expectedVersion: 4, reason: "Reviewed against the content policy." });
+  controller.destroy();
+
+  const profileOnly = summary({ readQueue: false, manageQueue: false, reviewProfiles: false });
+  profileOnly.permissions.keys = ["profiles.review"];
+  const profileApp = harness(async url => url.includes("view=summary") ? { summary: profileOnly } : { items: [comment, avatar], nextBefore: null }, "#content");
+  const profileController = await profileApp.init();
+  const profileCards = profileApp.nodes(".moderation-record");
+  assert.equal(profileCards[0].querySelectorAll("button").some(button => button.textContent === "Approve"), false, "profile reviewers cannot decide comments");
+  assert.equal(profileCards[1].querySelectorAll("button").some(button => button.textContent === "Approve"), true, "profile reviewers can decide profile pictures");
+  assert.match(text(profileApp.root), /Profile picture/);
+  profileController.destroy();
+});
+
+test("content appeals expose approve or keep-blocked decisions without a public warning state", async () => {
+  const writes = [];
+  const item = { id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc", kind: "display_name", status: "blocked", text: "Private submitted name", reason: "Impersonation risk", appealStatus: "pending_review", appealStatement: "This is my established community name.", createdAt: "2026-09-09T09:00:00Z", version: 7 };
+  const overview = summary({ readQueue: false, manageQueue: false, reviewProfiles: false }); overview.permissions.keys = ["profiles.review"];
+  const app = harness(async (url, options) => {
+    if (options?.method === "POST") { writes.push(JSON.parse(options.body)); return { item: { ...item, status: "published", version: 8 } }; }
+    return url.includes("view=summary") ? { summary: overview } : { items: [item], nextBefore: null };
+  }, "#content");
+  const controller = await app.init(); assert.ok(app.button("Approve appeal")); assert.ok(app.button("Keep blocked"));
+  const editing = app.button("Approve appeal").emit("click"); await flush(); const dialog = app.document.querySelector("dialog"); dialog.querySelector("textarea").value = "Identity context confirmed by staff.";
+  await dialog.querySelector("form").emit("submit"); await editing;
+  assert.deepEqual(writes[0], { id: item.id, action: "approve", expectedVersion: 7, reason: "Identity context confirmed by staff." });
+  controller.destroy();
 });
 
 test("moderation does not request records before authorized init and hides unavailable views and editors", async () => {

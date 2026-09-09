@@ -13,6 +13,7 @@
 #server-detail-v3.server-page-v7 .detail-title-v3 { padding: clamp(24px, 3vw, 40px); background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--bg) 85%, transparent)); }
 #server-detail-v3.server-page-v7 .detail-title-v3 h1 { font-size: clamp(30px, 3.7vw, 52px); letter-spacing: -.035em; line-height: 1.15; }
 #server-detail-v3.server-page-v7 .detail-logo-v3 { width: 86px; height: 86px; border-radius: 18px; border-color: color-mix(in srgb, var(--text) 18%, transparent); box-shadow: 0 8px 24px #0003; }
+#server-detail-v3.server-page-v7 .detail-logo-v3 > .server-import-logo-v3 { object-fit: contain; object-position: center; padding: 6px; border-radius: 0; }
 #server-detail-v3.server-page-v7 .detail-grid-v3 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); gap: clamp(28px, 2.4vw, 56px); padding: 32px 0 0; }
 #server-detail-v3.server-page-v7 .detail-grid-v3 > * { min-width: 0; }
 #server-detail-v3.server-page-v7 .server-community-v7 { max-width: none; padding: 0; }

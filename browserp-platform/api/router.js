@@ -4,12 +4,12 @@ import health from "../lib/health.js";
 import { staffMinecraft } from "../lib/minecraft-workflow.js";
 import { scheduledDiscordRoleSync, ownerDiscordRoleSync } from "../lib/discord-role-sync.js";
 import { scheduledStatusRefresh } from "../lib/status-refresh-workflow.js";
-import { createHash, randomBytes } from "node:crypto";
 import { endpoint, ok } from "../lib/api.js";
+import { contentWritePaused } from "../lib/content-write-gate.js";
 import { appUrl, developmentCatalogAllowed, supabaseConfig } from "../lib/config.js";
 import { categoriesFromServers, platforms as fallbackPlatforms, servers as fallbackServers } from "../lib/catalog.js";
 import { assertSameOrigin, cookieValue, parseCookies, publicJson, readBody, redirect, safeReturnPath } from "../lib/http.js";
-import { assessDisplayName, sanitizePlainText } from "../lib/moderation.js";
+import { sanitizePlainText } from "../lib/moderation.js";
 import { rateLimit } from "../lib/rate-limit.js";
 import { recordAccountActivity, unsealAddress } from "../lib/security.js";
 import { memberClaims, staffClaims } from "../lib/claim-workflow.js";
@@ -25,6 +25,7 @@ import { prepareInitialStaffAuthenticator, verifyInitialStaffAuthenticator } fro
 import { memberPrivacyRequests, staffPrivacyRequests } from "../lib/privacy-requests.js";
 import { memberAdvertisingEnquiries, staffAdvertisingEnquiries } from "../lib/advertising-enquiries.js";
 import { staffAdvertMedia } from "../lib/staff-advert-media.js";
+import { contentModeration, contentAvatar, processContentCheck, processOAuthContent, registerPrivateAvatar } from "../lib/content-moderation.js";
 import { preparedPngRaster } from "../lib/prepared-png.js";
 import { publicStaffRoster } from "../lib/public-staff.js";
 import {
@@ -41,7 +42,6 @@ import {
   rest,
   rpc,
   signOut,
-  uploadStorageObject,
   unlinkMemberIdentity,
   verifyTotp
 } from "../lib/supabase.js";
@@ -63,7 +63,7 @@ function safeServerRead() {
 async function currentAccountSession(session) {
   // Auth can recognise a signed JWT after its session has been revoked. Check
   // the live session before reading personal data or writing with service access.
-  const access = await rpc("member_connection_status", {}, session.accessToken);
+  const access = await rpc("member_connection_status_v2", {}, session.accessToken);
   return access?.active === true && access.userId === session.user.id && Boolean(access.sessionId);
 }
 
@@ -98,14 +98,13 @@ export function customRoleMutation(body) {
   const name = sanitizePlainText(body.name, 60);
   const description = sanitizePlainText(body.description, 300);
   const expectedVersion = Number(body.expectedVersion);
-  if ((key && !/^custom_[a-z0-9_]{1,33}$/.test(key)) || name.length < 2 || description.length < 5) {
-    throw Object.assign(new Error("Check the custom role name and description."), { status: 400 });
+  if ((key && (key === "owner" || !/^[a-z0-9_]{2,40}$/.test(key))) || name.length < 2 || description.length < 5) {
+    throw Object.assign(new Error("Check the role name and description."), { status: 400 });
   }
   if (!Number.isSafeInteger(expectedVersion) || expectedVersion < 0) {
     throw Object.assign(new Error("Reload roles before saving."), { status: 409 });
   }
-  const blocked = new Set(["staff.manage", "staff.permissions.manage", "security.network.approve"]);
-  if (!Array.isArray(body.permissions) || body.permissions.length > 80 || body.permissions.some((key) => typeof key !== "string" || !/^[a-z][a-z0-9_.]{2,79}$/.test(key) || blocked.has(key))) {
+  if (!Array.isArray(body.permissions) || body.permissions.length > 80 || body.permissions.some((key) => typeof key !== "string" || !/^[a-z][a-z0-9_.]{2,79}$/.test(key))) {
     throw Object.assign(new Error("Choose valid assignable permissions."), { status: 400 });
   }
   return { key: key || null, name, description, permissions: [...new Set(body.permissions)], expectedVersion, reason: reason(body.reason, 5) };
@@ -242,7 +241,8 @@ const routes = {
 
   "auth/callback": endpoint("GET", async (req, res, requestId) => {
     try {
-      const { returnTo, provider, user, linked } = await finishOAuth(req, res);
+      const { returnTo, provider, user, linked, accessToken } = await finishOAuth(req, res);
+      await processOAuthContent({ user, accessToken });
       await recordActivitySafely(req, res, {
         userId: user.id,
         eventType: linked ? "auth.identity_linked" : "auth.signed_in",
@@ -434,7 +434,13 @@ const routes = {
   "me/data-requests": endpoint(["GET", "POST"], async (req, res) => ok(res, await memberPrivacyRequests(req, res))),
   "admin/data-requests": endpoint(["GET", "POST"], async (req, res) => ok(res, await staffPrivacyRequests(req, res))),
 
+  "me/content-moderation": endpoint(["GET", "POST"], async (req, res) => ok(res, await contentModeration(req, res))),
+  "admin/content-moderation": endpoint(["GET", "POST"], async (req, res, requestId) => ok(res, await contentModeration(req, res, { staff: true, requestId }))),
+  "content-moderation/preview": endpoint("GET", (req, res) => contentAvatar(req, res)),
+  "public/profile-avatar": endpoint("GET", (req, res) => contentAvatar(req, res, { publicImage: true })),
+
   "me/profile": endpoint(["GET", "POST"], async (req, res) => {
+    if (req.method === "POST" && contentWritePaused(res)) return;
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true });
     if (req.method === "GET") {
@@ -453,13 +459,9 @@ const routes = {
       || session.user?.user_metadata?.user_name
       || session.user?.user_metadata?.preferred_username
       || body.displayName;
-    const nameAssessment = assessDisplayName(identityName);
-    const displayName = nameAssessment.value;
+    const displayName = sanitizePlainText(typeof body.displayName === "string" ? body.displayName : identityName, 48);
     const bio = String(body.bio || "").replace(/\r\n?/g, "\n").trim();
     const visibility = String(body.visibility || "public").trim().toLowerCase();
-    if (!nameAssessment.allowed) {
-      throw Object.assign(new Error(`${nameAssessment.reason} Change it on Discord or Google, then try again.`), { status: 422 });
-    }
     if (bio.length > 500 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(bio)
       || !["public", "members", "private"].includes(visibility)) {
       throw Object.assign(new Error("Check your display name, bio and visibility."), { status: 400 });
@@ -471,10 +473,14 @@ const routes = {
       userId: session.user.id, eventType: "profile.updated", provider: session.provider,
       metadata: { bioSubmitted: Boolean(bio), identityNameSynchronized: true }
     });
-    return ok(res, { profile });
+    let moderation = profile?.moderation || null;
+    if (moderation) moderation = await processContentCheck(session, moderation.id);
+    const approved = (await rest(`profiles?select=display_name,bio,profile_visibility,avatar_url,avatar_review_status,bio_review_status&id=eq.${encodeURIComponent(session.user.id)}&limit=1`, { useSecret: true }))?.[0] || profile;
+    return ok(res, { profile: approved, moderation });
   }),
 
   "me/avatar": endpoint("POST", async (req, res, requestId) => {
+    if (contentWritePaused(res)) return;
     assertSameOrigin(req);
     const session = await getSession(req, res, { required: true });
     if (!await currentAccountSession(session)) throw Object.assign(new Error("Your sign-in expired. Sign in again to continue."), { status: 401 });
@@ -482,39 +488,15 @@ const routes = {
     // A 1 MiB PNG expands to approximately 1.4 MB in the JSON data URL.
     const body = await readBody(req, 1_500_000);
     const bytes = profilePictureBytes(body.imageData);
-    const objectPath = `${session.user.id}/${Date.now()}-${randomBytes(12).toString("hex")}.png`;
-    const sha256 = createHash("sha256").update(bytes).digest("hex");
-    await uploadStorageObject("profile-media", objectPath, bytes, "image/png");
-    const asset = (await rest("uploaded_assets", {
-      method: "POST",
-      body: {
-        owner_id: session.user.id,
-        bucket: "profile-media",
-        object_path: objectPath,
-        media_type: "avatar",
-        mime_type: "image/png",
-        byte_size: bytes.length,
-        sha256,
-        moderation_status: "approved",
-        moderation_result: { source: "member-crop", requestId, publication: "immediate", safety: "validated-raster" }
-      },
-      useSecret: true,
-      headers: { Prefer: "return=representation" }
-    }))?.[0];
-    if (!asset?.id) throw Object.assign(new Error("The profile picture could not be registered."), { status: 502 });
-    const avatarUrl = `${supabaseConfig().url}/storage/v1/object/public/profile-media/${objectPath}`;
-    const profile = await rpc("member_set_profile_avatar", {
-      p_avatar_url: avatarUrl,
-      p_asset_id: asset.id
-    }, session.accessToken);
+    const asset = await registerPrivateAvatar(session.user.id, bytes);
+    const submitted = await rpc("member_submit_profile_avatar", { p_asset_id: asset.id }, session.accessToken);
+    const moderation = await processContentCheck(session, submitted.id);
+    const profile = (await rest(`profiles?select=display_name,bio,profile_visibility,avatar_url,avatar_review_status,bio_review_status&id=eq.${encodeURIComponent(session.user.id)}&limit=1`, { useSecret: true }))?.[0] || null;
     await recordActivitySafely(req, res, {
-      userId: session.user.id,
-      eventType: "profile.media_submitted",
-      provider: session.provider,
-      requestId,
-      metadata: { assetId: asset.id, byteSize: bytes.length, sha256, publication: "immediate" }
+      userId: session.user.id, eventType: "profile.media_submitted", provider: session.provider, requestId,
+      metadata: { assetId: asset.id, byteSize: bytes.length, publication: "private-review" }
     });
-    return ok(res, { profile, avatarUrl }, 201);
+    return ok(res, { profile, avatarUrl: profile?.avatar_url || null, moderation }, 201);
   }),
 
   "me/favorites": endpoint(["GET", "POST"], async (req, res) => {
@@ -635,20 +617,16 @@ const routes = {
         p_request_id: id
       }, session.accessToken) });
     }
-    const result = kind === "comment"
-      ? await rpc("staff_resolve_comment_review", {
-        p_queue_id: uuid(itemId, "Choose a valid comment review."),
-        p_action: action,
-        p_reason: reason,
-        p_request_id: id
-      }, session.accessToken)
-      : await rpc("staff_resolve_queue_item", {
-        p_kind: kind,
-        p_item_id: itemId,
-        p_action: action,
-        p_reason: reason,
-        p_request_id: id
-      }, session.accessToken);
+    if (kind === "comment") {
+      throw Object.assign(new Error("Open the current comment in Content review before recording a decision."), { status: 409 });
+    }
+    const result = await rpc("staff_resolve_queue_item", {
+      p_kind: kind,
+      p_item_id: itemId,
+      p_action: action,
+      p_reason: reason,
+      p_request_id: id
+    }, session.accessToken);
     return ok(res, { result });
   }),
 
@@ -666,12 +644,31 @@ const routes = {
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true, provider: "discord" });
     if (req.method === "GET") {
+      if (new URL(req.url, appUrl()).searchParams.get("view") === "requests") {
+        return ok(res, { requests: await rpc("staff_access_request_control", {}, session.accessToken) });
+      }
       const staff = await rpc("staff_list_access", {}, session.accessToken);
       return ok(res, { staff: staff && typeof staff === "object" ? staff : { members: [], roles: [] } });
     }
 
     await rateLimit(req, "staff-access", 20, 300);
-    const body = staffAccessMutation(await readBody(req, 12 * 1024));
+    const input = await readBody(req, 12 * 1024);
+    if (input.requestAction === "decide") {
+      const version = Number(input.expectedVersion);
+      if (!Number.isSafeInteger(version) || version < 1 || typeof input.approved !== "boolean") throw Object.assign(new Error("Reload the role request before reviewing it."), { status: 409 });
+      return ok(res, { request: await rpc("staff_decide_access_request", {
+        p_id: uuid(input.id), p_expected_version: version, p_approve: input.approved,
+        p_reason: reason(input.reason, 5), p_request_id: id
+      }, session.accessToken) });
+    }
+    if (input.requestAction !== undefined && input.requestAction !== "create") throw Object.assign(new Error("Choose a valid role request action."), { status: 400 });
+    const body = staffAccessMutation(input);
+    if (input.requestAction === "create") {
+      return ok(res, { request: await rpc("staff_request_access", {
+        p_discord_user_id: body.discordUserId, p_action: body.action, p_role_key: body.roleKey,
+        p_reason: body.reason, p_expected_version: body.expectedVersion, p_request_key: uuid(input.requestKey)
+      }, session.accessToken) });
+    }
     let result;
     try {
       result = await rpc("staff_mutate_access", {
@@ -745,13 +742,16 @@ const routes = {
     const body = await readBody(req, 8 * 1024);
     const discordUserId = String(body.discordUserId || "").trim();
     const permissionKey = String(body.permissionKey || "").trim().toLowerCase();
-    const allowed = body.allowed === null ? null : Boolean(body.allowed);
+    const allowed = body.allowed;
+    const expectedVersion = Number(body.expectedVersion);
+    if ((allowed !== null && typeof allowed !== "boolean") || !Number.isSafeInteger(expectedVersion) || expectedVersion < 1) throw Object.assign(new Error("Reload staff permissions before saving."), { status: 409 });
     if (!/^[0-9]{17,20}$/.test(discordUserId) || !/^[a-z][a-z0-9_.-]{2,79}$/.test(permissionKey)) {
       throw Object.assign(new Error("Choose a valid staff account and permission."), { status: 400 });
     }
     return ok(res, { result: await rpc("staff_mutate_permission", {
       p_discord_user_id: discordUserId,
       p_permission_key: permissionKey,
+      p_expected_version: expectedVersion,
       p_allowed: allowed,
       p_reason: reason(body.reason, 5),
       p_request_id: id
@@ -919,12 +919,22 @@ const routes = {
   "admin/bans": endpoint(["GET", "POST"], async (req, res, id) => {
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true, provider: "discord" });
-    if (req.method === "GET") return ok(res, { control: await rpc("staff_ban_control", {}, session.accessToken) });
+    if (req.method === "GET") {
+      if (new URL(req.url, appUrl()).searchParams.get("view") === "access") return ok(res, { access: await rpc("staff_restriction_capabilities", {}, session.accessToken) });
+      return ok(res, { control: await rpc("staff_ban_control", {}, session.accessToken) });
+    }
     await rateLimit(req, "staff-bans", 15, 300);
     const body = await readBody(req, 12 * 1024);
     const action = String(body.action || "").trim().toLowerCase();
     let result;
-    if (action === "apply") {
+    if (action === "restrict_account" || action === "apply") {
+      const minutes = body.minutes === null ? null : Number(body.minutes);
+      if (minutes !== null && (!Number.isSafeInteger(minutes) || minutes < 5 || minutes > 2147483647)) throw Object.assign(new Error("Choose a valid restriction duration."), { status: 400 });
+      if (action === "restrict_account") {
+        result = await rpc("staff_restrict_account", { p_user_id: uuid(body.userId), p_minutes: minutes,
+          p_reason_code: sanitizePlainText(body.reasonCode, 80), p_reason: reason(body.reason), p_request_id: id }, session.accessToken);
+        return ok(res, { result });
+      }
       const activityId = Number(body.activityId);
       if (!Number.isSafeInteger(activityId) || activityId < 1) throw Object.assign(new Error("Choose a valid account activity."), { status: 400 });
       result = await rpc("staff_apply_security_ban", {
@@ -933,7 +943,8 @@ const routes = {
         p_scope: String(body.scope || "platform").trim().toLowerCase(),
         p_reason_code: sanitizePlainText(body.reasonCode, 80),
         p_reason: reason(body.reason),
-        p_permanent: body.permanent !== false,
+        p_permanent: minutes === null,
+        p_minutes: minutes,
         p_request_id: id
       }, session.accessToken);
     } else if (action === "decide_appeal") {

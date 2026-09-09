@@ -84,7 +84,7 @@
     const form = $("#permission-form-v3");
     if (!form) return;
     const [{ staff }, { control }] = await Promise.all([api("/api/admin/staff"), api("/api/admin/permissions")]);
-    const people = (staff?.members || []).filter((person) => person.roleKey !== "owner" && person.userId);
+    const people = (staff?.members || []).filter((person) => person.manageable === true && person.roleKey !== "owner" && person.userId);
     const permissions = (control?.permissions || []).filter((permission) => permission.delegatable);
     const overrides = control?.overrides || [];
     const select = $("#permission-user", form); const grid = $("#permission-grid-v3", form);
@@ -96,10 +96,13 @@
       baseline = new Map();
       grid.replaceChildren(...permissions.map((permission) => {
         const label = make("label", undefined, "permission-item-v3"); const choice = document.createElement("select"); choice.dataset.permission = permission.key;
-        for (const [value, text] of [["", "Use role default"], ["true", "Allow"], ["false", "Deny"]]) { const option = make("option", text); option.value = value; choice.append(option); }
+        const canAllow = !Number.isFinite(Number(permission.minimumRank)) || Number(person?.rank || 0) >= Number(permission.minimumRank);
+        for (const [value, text] of [["", "Use role default"], ["true", "Allow"], ["false", "Deny"]]) { const option = make("option", text); option.value = value; if (value === "true" && !canAllow) option.disabled = true; choice.append(option); }
         const existing = overrides.find((item) => item.userId === person?.userId && item.permissionKey === permission.key);
         choice.value = existing ? String(existing.allowed) : ""; baseline.set(permission.key, choice.value);
-        label.append(make("span", permission.description), choice); return label;
+        label.append(make("span", permission.description), choice);
+        if (!canAllow) label.append(make("small", "This capability cannot be granted to the selected role. Role default and Deny remain available.", "staff-state-v3 staff-permission-limit-v3"));
+        return label;
       }));
     };
     select.addEventListener("change", render); render();
@@ -114,9 +117,11 @@
       feedback.textContent = "Saving permission changes…";
       try {
         for (const [permissionKey, value] of changes) {
-          await api("/api/admin/permissions", { method: "POST", body: JSON.stringify({ discordUserId, permissionKey, allowed: value === "" ? null : value === "true", reason }) });
-          baseline.set(permissionKey, value);
           const user = people.find((item) => item.discordUserId === discordUserId);
+          const response = await api("/api/admin/permissions", { method: "POST", body: JSON.stringify({ discordUserId, permissionKey, allowed: value === "" ? null : value === "true", expectedVersion: user?.version, reason }) });
+          if (!Number.isSafeInteger(response?.result?.version) || response.result.version < 1) throw new Error("The saved permission version was not returned. Reload before making another change.");
+          user.version = response.result.version;
+          baseline.set(permissionKey, value);
           const index = overrides.findIndex((item) => item.userId === user?.userId && item.permissionKey === permissionKey);
           if (index >= 0) overrides.splice(index, 1);
           if (value !== "") overrides.push({ userId: user?.userId, permissionKey, allowed: value === "true" });
@@ -129,19 +134,22 @@
 
   async function securityControls(mount, permissions = {}) {
     const keys = new Set(permissions.keys || []);
+    let statusPromise;
+    const securityStatus = () => statusPromise ||= api("/api/admin/security?view=status").then(result => result.status || {});
     mount.replaceChildren();
     const tasks = [];
     const section = (title) => { const details = make("details", undefined, "staff-section-v3"); details.append(make("summary", title)); const body = make("div", undefined, "staff-security-controls-body"); details.append(body); mount.append(details); return body; };
     const failure = (body, error) => body.append(make("p", error.message || "This section could not be loaded.", "staff-state-v3"));
-    if (permissions.isOwner || permissions.manageStaff) {
+    if (permissions.readSecurity || permissions.manageStaff || keys.has("settings.manage")) {
       const body = section("Staff sign-in protection");
       tasks.push((async () => {
         try {
-          const { policy } = await api("/api/admin/security?view=policy");
+          const [{ policy }, current] = await Promise.all([api("/api/admin/security?view=policy"), securityStatus()]);
           const banner = make("div", undefined, "security-banner-v3"); banner.id = "mfa-enforcement-v3";
           banner.append(make("strong", policy.staffMfaRequired ? "Staff two-factor verification is required." : "Staff two-factor verification is currently optional.")); body.append(banner);
-          if (policy.staffMfaRequired || !permissions.isOwner) return;
-          if (state.session.aal === "aal2") {
+          if (policy.staffMfaRequired) return;
+          if (current.canRequireMfa !== true) { body.append(make("p", "Your role can view this setting but cannot make two-factor verification mandatory.", "staff-state-v3")); return; }
+          if (current.sessionAal === "aal2" && current.totpVerified === true) {
             const activate = make("button", "Require two-factor verification", "button-v3 button-primary-v3"); activate.type = "button";
             activate.addEventListener("click", async () => {
               const input = await decision({ title: "Require two-factor verification for staff?", description: "All staff will need their authenticator when accessing the panel.", fields: [{ name: "reason", label: "Reason", type: "textarea", minlength: 5, maxlength: 500 }], submitLabel: "Require verification" });
@@ -156,16 +164,16 @@
         } catch (error) { failure(body, error); }
       })());
     }
-    if (permissions.isOwner || keys.has("security.network.request") || keys.has("security.network.approve")) {
+    if (keys.has("security.network.request") || keys.has("security.network.approve")) {
       const body = section("Protected IP requests");
       tasks.push((async () => {
         try {
-          const { revealRequests = [] } = await api("/api/admin/security?view=requests");
+          const [{ revealRequests = [] }, current] = await Promise.all([api("/api/admin/security?view=requests"), securityStatus()]);
           if (!revealRequests.length) body.append(make("p", "No protected IP requests."));
           for (const request of revealRequests) {
             const card = make("article", undefined, "staff-section-v3");
             card.append(make("h3", request.requesterName || "Staff member"), make("p", `${request.maskedNetwork || "Network unavailable"} · ${request.status} · ${date(request.createdAt)}`), make("p", request.reason));
-            if (permissions.isOwner && request.status === "pending") {
+            if (current.canApproveNetwork === true && request.status === "pending") {
               for (const [approved, text] of [[true, "Approve one-time view"], [false, "Deny request"]]) { const button = make("button", text, "button-v3 button-secondary-v3"); button.type = "button"; button.addEventListener("click", () => decideNetwork(request.requestId, approved)); card.append(button); }
             }
             if (request.requestedByMe && request.status === "approved") { const button = make("button", "View approved IP", "button-v3 button-secondary-v3"); button.type = "button"; button.addEventListener("click", async () => { button.disabled = true; await viewNetwork(request.activityId, request.requestId); }); card.append(button); }
@@ -476,33 +484,61 @@
     tableRows($("#account-activity-rows"), activity.map((item) => {
       const actions = make("div", undefined, "staff-row-actions-v3");
       const ownRequest = revealRequests.find((request) => request.activityId === item.id && request.requestedByMe && ["pending","approved"].includes(request.status));
-      if (securityStatus.isOwner || ownRequest?.status === "approved") {
+      if (securityStatus.canApproveNetwork === true || ownRequest?.status === "approved") {
         const view = make("button", "View protected IP", "button-v3 button-quiet-v3"); view.type = "button";
-        view.addEventListener("click", () => viewNetwork(item.id, securityStatus.isOwner ? null : ownRequest.requestId)); actions.append(view);
+        view.addEventListener("click", () => viewNetwork(item.id, securityStatus.canApproveNetwork === true ? null : ownRequest.requestId)); actions.append(view);
       } else if (ownRequest?.status === "pending") {
-        const pending = make("span", "Awaiting owner", "staff-state-v3"); actions.append(pending);
+        const pending = make("span", "Awaiting review", "staff-state-v3"); actions.append(pending);
       } else {
         const request = make("button", "Request IP", "button-v3 button-quiet-v3"); request.type = "button"; request.addEventListener("click", () => networkRequest(item.id)); actions.append(request);
       }
-      const ban = make("button", "Ban", "button-v3 button-quiet-v3"); ban.type = "button"; ban.addEventListener("click", () => applyBan(item)); actions.append(ban);
+      const ban = make("button", "Restrict", "button-v3 button-quiet-v3"); ban.type = "button"; ban.addEventListener("click", () => applyBan(item, { kind: "activity" })); actions.append(ban);
       if (item.userId) { const revoke = make("button", "End sessions", "button-v3 button-quiet-v3"); revoke.type = "button"; revoke.addEventListener("click", () => revokeSessions(item)); actions.append(revoke); }
       return row([item.displayName||item.userId,item.eventType,item.provider,item.maskedNetwork||"Unavailable",[item.browser,item.os,item.device].filter(Boolean).join(" · "),date(item.createdAt),actions]);
     }));
   }
   async function networkRequest(activityId) {
-    const input = await decision({ title: "Request protected IP evidence", description: "Explain why the masked network is not enough. The owner will see and audit this reason.", fields: [{ name: "reason", label: "Reason", type: "textarea", minlength: 10, maxlength: 500 }], submitLabel: "Send request" });
-    if (!input) return; try { await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"request_network",activityId,reason:input.reason})}); status("Reveal request sent to the owner."); } catch(error){status(error.message,true);}
+    const input = await decision({ title: "Request protected IP evidence", description: "Explain why the masked network is not enough. An authorised reviewer will see and audit this reason.", fields: [{ name: "reason", label: "Reason", type: "textarea", minlength: 10, maxlength: 500 }], submitLabel: "Send request" });
+    if (!input) return; try { await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"request_network",activityId,reason:input.reason})}); status("Reveal request sent for review."); } catch(error){status(error.message,true);}
   }
   async function viewNetwork(activityId, requestId) {
     try { const { result } = await api("/api/admin/security", { method: "POST", body: JSON.stringify({ action: "reveal_network", activityId, requestId }) }); await decision({ title: "Protected IP evidence", description: `IP address: ${result.address}\n\nThis audited view closes after 60 seconds.`, fields: [], submitLabel: "Close", expiresInSeconds: 60 }); } catch (error) { status(error.message, true); }
   }
-  async function applyBan(item) {
-    const input = await decision({ title: "Apply a permanent platform ban", description: "Choose the restriction for this activity. An IP ban matches the exact address and can affect a shared connection. A device ban uses this browser’s device token.", fields: [
-      { name: "targetType", label: "Ban target", type: "select", options: [{value:"account",label:"Account"},{value:"device",label:"Browser / device token"},{value:"network_prefix",label:"IP address"}] },
+  async function applyBan(item, context = {}) {
+    let access;
+    try { ({ access } = await api("/api/admin/bans?view=access")); }
+    catch (error) { status(error.message || "Restriction authority could not be checked.", true); return; }
+    const maximum = access?.maxMinutes;
+    const unlimited = maximum === null && access?.canIndefinite === true;
+    const durationOptions = [
+      { value: "2880", label: "48 hours" },
+      { value: "4320", label: "72 hours" },
+      { value: "10080", label: "7 days" },
+      { value: "43200", label: "30 days" }
+    ].filter(option => unlimited || Number(option.value) <= Number(maximum));
+    if (unlimited) durationOptions.push({ value: "unlimited", label: "Unlimited — no scheduled end" });
+    if (!durationOptions.length) { status("Your role cannot apply a restriction at this level. Ask a higher-authority staff member to review it.", true); return; }
+    const memberRestriction = context.kind === "members" || (!item.id && Boolean(item.userId));
+    const targetOptions = [{ value: "account", label: "Account" }];
+    if (!memberRestriction && access?.canDeviceNetwork === true) targetOptions.push({ value: "device", label: "Browser / device token" }, { value: "network_prefix", label: "IP address" });
+    const description = memberRestriction
+      ? "This restricts the selected account for the chosen duration. Only a lower-ranked account can be changed, and the server rechecks that authority when you submit."
+      : access?.canDeviceNetwork === true
+        ? "Choose the account, browser/device token or IP address recorded for this activity. IP restrictions can affect a shared connection."
+        : "Your role can restrict the account recorded for this activity. Browser/device and IP restrictions require a higher staff role.";
+    const input = await decision({ title: "Apply access restriction", description, fields: [
+      ...(memberRestriction ? [] : [{ name: "targetType", label: "Restriction target", type: "select", options: targetOptions }]),
+      { name: "duration", label: "Duration", type: "select", options: durationOptions },
       { name: "reasonCode", label: "Public reason code", value: "platform-abuse", minlength: 3, maxlength: 80 },
       { name: "reason", label: "Internal decision reason", type: "textarea", minlength: 10, maxlength: 500 }
-    ], submitLabel: "Apply permanent ban", danger: true });
-    if (!input) return; try { const { result } = await api("/api/admin/bans", { method: "POST", body: JSON.stringify({ action: "apply", activityId: item.id, targetType: input.targetType, scope: "platform", reasonCode: input.reasonCode, reason: input.reason, permanent: true }) }); status(`Ban applied. Appeal reference: ${result.reference}`); } catch (error) { status(error.message, true); }
+    ], submitLabel: "Apply restriction", danger: true });
+    if (!input) return;
+    const minutes = input.duration === "unlimited" ? null : Number(input.duration);
+    const body = memberRestriction
+      ? { action: "restrict_account", userId: item.userId || item.id, minutes, reasonCode: input.reasonCode, reason: input.reason }
+      : { action: "apply", activityId: item.id, targetType: input.targetType, scope: "platform", minutes, reasonCode: input.reasonCode, reason: input.reason };
+    try { const { result } = await api("/api/admin/bans", { method: "POST", body: JSON.stringify(body) }); status(`Restriction applied${result?.reference ? `. Appeal reference: ${result.reference}` : "."}`); }
+    catch (error) { status(error.message, true); }
   }
   async function revokeSessions(item) {
     const input = await decision({ title: "End every active session", description: "BrowseRP accounts use Discord or Google OAuth, so there is no BrowseRP password to reset. This immediately signs the account out everywhere so the provider recovery flow can be used safely.", fields: [{ name: "reason", label: "Security reason", type: "textarea", minlength: 10, maxlength: 500 }], submitLabel: "End sessions", danger: true });
@@ -514,20 +550,20 @@
     const permissions = control?.permissions || []; const overrides = control?.overrides || [];
     let accessForm;
     tableRows($("#staff-members-rows"),(staff?.members||[]).map((member)=>{
-      const manage = member.roleKey === "owner" ? make("span", "Protected owner", "staff-state-v3") : make("button", "Manage", "button-v3 button-quiet-v3");
-      if (member.roleKey !== "owner") { manage.type="button"; manage.addEventListener("click",()=>{ if (!accessForm) return; accessForm.elements.discordUserId.value=member.discordUserId||""; accessForm.elements.roleKey.value=member.roleKey||"support"; accessForm.elements.action.value=member.status==="active"?"change_role":"reactivate"; accessForm.elements.expectedVersion.value=member.version||0; accessForm.elements.reason.focus(); accessForm.scrollIntoView({behavior:"smooth",block:"center"}); }); }
+      const manage = member.manageable === true ? make("button", "Manage", "button-v3 button-quiet-v3") : make("span", member.roleKey === "owner" ? "Protected owner" : "Outside your authority", "staff-state-v3");
+      if (member.manageable === true) { manage.type="button"; manage.addEventListener("click",()=>{ if (!accessForm) return; accessForm.elements.discordUserId.value=member.discordUserId||""; accessForm.elements.roleKey.value=member.roleKey||"support"; accessForm.elements.action.value=member.status==="active"?"change_role":"reactivate"; accessForm.elements.expectedVersion.value=member.version||0; accessForm.elements.reason.focus(); accessForm.scrollIntoView({behavior:"smooth",block:"center"}); }); }
       return row([member.displayName||"Not signed in",member.discordUserId,member.roleName||member.roleKey,member.status,date(member.updatedAt),manage]);
     }));
-    const select=$("#permission-user"); select?.replaceChildren(...(staff?.members||[]).filter((m)=>m.roleKey!=="owner"&&m.userId).map((m)=>{const option=make("option",`${m.displayName||m.discordUserId} — ${m.roleName||m.roleKey}`);option.value=m.discordUserId;return option;}));
+    const select=$("#permission-user"); select?.replaceChildren(...(staff?.members||[]).filter((m)=>m.manageable===true&&m.roleKey!=="owner"&&m.userId).map((m)=>{const option=make("option",`${m.displayName||m.discordUserId} — ${m.roleName||m.roleKey}`);option.value=m.discordUserId;option.dataset.version=String(m.version||0);return option;}));
     const grid=$("#permission-grid-v3"); grid?.replaceChildren(...permissions.filter((p)=>p.delegatable).map((permission)=>{const label=make("label",undefined,"permission-item-v3");const copy=make("span",`${permission.key} — ${permission.description}`);const box=document.createElement("select");box.dataset.permission=permission.key;[["","Use rank default"],["true","Allow"],["false","Deny"]].forEach(([value,text])=>{const option=make("option",text);option.value=value;box.append(option);});label.append(copy,box);return label;}));
-    $("#permission-user")?.addEventListener("change",()=>{const user=(staff?.members||[]).find((m)=>m.discordUserId===$("#permission-user").value); $$('[data-permission]').forEach((box)=>{const found=overrides.find((o)=>o.userId===user?.userId&&o.permissionKey===box.dataset.permission);box.value=found?String(found.allowed):"";});}); $("#permission-user")?.dispatchEvent(new Event("change"));
+    $("#permission-user")?.addEventListener("change",()=>{const user=(staff?.members||[]).find((m)=>m.discordUserId===$("#permission-user").value);const permissionForm=$("#permission-form-v3");if(permissionForm)permissionForm.dataset.version=String(user?.version||0); $$('[data-permission]').forEach((box)=>{const found=overrides.find((o)=>o.userId===user?.userId&&o.permissionKey===box.dataset.permission);box.value=found?String(found.allowed):"";});}); $("#permission-user")?.dispatchEvent(new Event("change"));
     const section=$("#staff-members-rows")?.closest(".staff-section-v3"); const form=make("form",undefined,"staff-form-v3"); accessForm=form; form.id="staff-access-form-v3"; const accessGrid=make("div",undefined,"staff-form-grid-v3");
-    const idField=field("Discord user ID","discordUserId"); const roleField=field("Rank","roleKey","select"); (staff?.roles||[]).filter((role)=>role.key!=="owner").forEach((role)=>{const option=make("option",role.name);option.value=role.key;$("select",roleField).append(option);}); const actionField=field("Action","action","select"); [["assign","Assign new staff"],["change_role","Change rank"],["suspend","Suspend"],["reactivate","Reactivate"],["revoke","Revoke"]].forEach(([value,text])=>{const option=make("option",text);option.value=value;$("select",actionField).append(option);}); const versionField=field("Current version (filled when managing existing staff)","expectedVersion"); $("input",versionField).type="number";$("input",versionField).min="0";$("input",versionField).value="0"; const reasonField=field("Reason","reason","textarea"); [idField,roleField,actionField,versionField,reasonField].forEach((item)=>accessGrid.append(item)); const submit=make("button","Apply staff access change","button-v3 button-primary-v3");submit.type="submit";form.append(make("h3","Assign or change staff access"),accessGrid,submit);form.addEventListener("submit",saveStaffAccess);section?.append(form);
+    const idField=field("Discord user ID","discordUserId"); const roleField=field("Rank","roleKey","select"); (staff?.roles||[]).filter((role)=>role.assignable===true).forEach((role)=>{const option=make("option",role.name);option.value=role.key;$("select",roleField).append(option);}); const actionField=field("Action","action","select"); [["assign","Assign new staff"],["change_role","Change rank"],["suspend","Suspend"],["reactivate","Reactivate"],["revoke","Revoke"]].forEach(([value,text])=>{const option=make("option",text);option.value=value;$("select",actionField).append(option);}); const versionField=field("Current version (filled when managing existing staff)","expectedVersion"); $("input",versionField).type="number";$("input",versionField).min="0";$("input",versionField).value="0"; const reasonField=field("Reason","reason","textarea"); [idField,roleField,actionField,versionField,reasonField].forEach((item)=>accessGrid.append(item)); const submit=make("button","Apply staff access change","button-v3 button-primary-v3");submit.type="submit";form.append(make("h3","Assign or change staff access"),accessGrid,submit);form.addEventListener("submit",saveStaffAccess);section?.append(form);
   }
 
   async function saveStaffAccess(event){event.preventDefault();const form=event.currentTarget;const data=Object.fromEntries(new FormData(form));const release=beginFormSubmission(form);if(!release)return;status("Applying staff access change…");try{await api("/api/admin/staff",{method:"POST",body:JSON.stringify({...data,expectedVersion:Number(data.expectedVersion)})});location.reload();}catch(error){release();status(error.message,true);}}
 
-  async function savePermission(event) { event.preventDefault(); const form=event.currentTarget; const discordUserId=$("#permission-user",form).value; const reasonText=new FormData(form).get("reason"); const entries=$$('[data-permission]',form).map((box)=>[box.dataset.permission,box.value]); const release=beginFormSubmission(form); if(!release)return; status("Saving permission overrides…"); try { for(const [permissionKey,value] of entries) await api("/api/admin/permissions",{method:"POST",body:JSON.stringify({discordUserId,permissionKey,allowed:value===""?null:value==="true",reason:reasonText})}); status("Permission overrides saved."); } catch(error){status(error.message,true);} finally { release(); } }
+  async function savePermission(event) { event.preventDefault(); const form=event.currentTarget; const discordUserId=$("#permission-user",form).value; const reasonText=new FormData(form).get("reason"); const entries=$$('[data-permission]',form).map((box)=>[box.dataset.permission,box.value]); let expectedVersion=Number(form.dataset.version||$("#permission-user",form).selectedOptions?.[0]?.dataset.version); const release=beginFormSubmission(form); if(!release)return; status("Saving permission overrides…"); try { for(const [permissionKey,value] of entries){const response=await api("/api/admin/permissions",{method:"POST",body:JSON.stringify({discordUserId,permissionKey,allowed:value===""?null:value==="true",expectedVersion,reason:reasonText})});if(!Number.isSafeInteger(response?.result?.version))throw new Error("Reload staff permissions before saving another change.");expectedVersion=response.result.version;form.dataset.version=String(expectedVersion);} status("Permission overrides saved."); } catch(error){status(error.message,true);} finally { release(); } }
 
   async function profileQueue() { const { profiles=[] }=await api("/api/admin/profiles"); tableRows($("#profile-review-rows"),profiles.map((profile)=>{const actions=make("div",undefined,"staff-row-actions-v3");if(profile.bioStatus==="pending_review")["approve","reject"].forEach((action)=>{const button=make("button",`${action} bio`,"button-v3 button-quiet-v3");button.type="button";button.addEventListener("click",()=>reviewProfile(profile.userId,"bio",action));actions.append(button);});if(!actions.childElementCount)actions.append(make("span","No action needed","staff-state-v3"));const avatar=make("div",undefined,"profile-evidence-v3");if(profile.avatarUrl){const image=new Image();image.src=profile.avatarUrl;image.alt=`Live profile picture for ${profile.displayName}`;image.referrerPolicy="no-referrer";avatar.append(image);}avatar.append(make("span",profile.avatarStatus));return row([profile.displayName,avatar,profile.bioStatus,profile.bio||"—",date(profile.joinedAt),actions]);})); }
   async function reviewProfile(userId,field,action){const input=await decision({title:`${action==="approve"?"Approve":"Reject"} ${field}`,description:"This decision controls what can appear on public BrowseRP pages and is recorded in the audit log.",fields:[{name:"reason",label:"Decision reason",type:"textarea",minlength:5,maxlength:500}],submitLabel:action==="approve"?"Approve":"Reject",danger:action==="reject"});if(!input)return;try{await api("/api/admin/profiles",{method:"POST",body:JSON.stringify({userId,field,action,reason:input.reason})});location.reload();}catch(error){status(error.message,true);}}
@@ -565,6 +601,10 @@
     const baseKind = record.kind.toLowerCase();
     const normalKind = baseKind === "queue" ? "moderation" : baseKind;
     const kind = normalKind === "moderation" && (record.target_type || record.targetType) === "server_comment" ? "comment" : normalKind;
+    if (kind === "comment") {
+      location.hash = "#content?kind=comment";
+      return;
+    }
     try {
       const { item } = await api(`/api/admin/item?kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(record.id)}`);
       if (generation !== reviewGeneration) return;
@@ -619,13 +659,13 @@
     const [{ status: securityStatus = {}, revealRequests = [], flags = [], retention = [] }, { control = {} }] = await Promise.all([api("/api/admin/security"), api("/api/admin/bans")]);
     const banner = $("#mfa-enforcement-v3");
     banner.classList.toggle("good", securityStatus.staffMfaRequired === true);
-    banner.replaceChildren(make("strong", securityStatus.staffMfaRequired ? "Mandatory staff MFA is active." : "Mandatory staff MFA is not active yet."), make("p", securityStatus.staffMfaRequired ? "Every staff API request now requires a Discord OAuth session verified at AAL2 with TOTP." : "The owner must enrol and verify an authenticator before activating enforcement."));
+    banner.replaceChildren(make("strong", securityStatus.staffMfaRequired ? "Mandatory staff MFA is active." : "Mandatory staff MFA is not active yet."), make("p", securityStatus.staffMfaRequired ? "Every staff API request now requires a Discord OAuth session verified at AAL2 with TOTP." : securityStatus.canRequireMfa === true ? "Verify an authenticator before activating enforcement." : "Your role can view this setting but cannot activate enforcement."));
     const activate = $("#mfa-activate-form-v3");
-    if (!securityStatus.staffMfaRequired && state.session.aal === "aal2") { activate.hidden = false; activate.inert = false; }
-    if (!securityStatus.staffMfaRequired && !state.session.mfa?.enrolled) {
+    if (!securityStatus.staffMfaRequired && securityStatus.canRequireMfa === true && securityStatus.sessionAal === "aal2" && securityStatus.totpVerified === true) { activate.hidden = false; activate.inert = false; }
+    if (!securityStatus.staffMfaRequired && securityStatus.canRequireMfa === true && !state.session.mfa?.enrolled) {
       const setup = make("button", "Set up authenticator", "button-v3 button-primary-v3"); setup.type = "button"; setup.addEventListener("click", setupAuthenticatorHere); banner.append(setup);
     }
-    tableRows($("#network-request-rows"),revealRequests.map((request)=>{const actions=make("div",undefined,"staff-row-actions-v3");if(securityStatus.isOwner&&request.status==="pending")[[true,"Approve"],[false,"Deny"]].forEach(([approved,label])=>{const button=make("button",label,"button-v3 button-quiet-v3");button.type="button";button.addEventListener("click",()=>decideNetwork(request.requestId,approved));actions.append(button);});else actions.append(make("span",request.status,"staff-state-v3"));return row([request.requesterName,request.maskedNetwork||"Unavailable",request.reason,request.status,date(request.createdAt),actions]);}));
+    tableRows($("#network-request-rows"),revealRequests.map((request)=>{const actions=make("div",undefined,"staff-row-actions-v3");if(securityStatus.canApproveNetwork===true&&request.status==="pending")[[true,"Approve"],[false,"Deny"]].forEach(([approved,label])=>{const button=make("button",label,"button-v3 button-quiet-v3");button.type="button";button.addEventListener("click",()=>decideNetwork(request.requestId,approved));actions.append(button);});else actions.append(make("span",request.status,"staff-state-v3"));return row([request.requesterName,request.maskedNetwork||"Unavailable",request.reason,request.status,date(request.createdAt),actions]);}));
     tableRows($("#security-flag-rows"),flags.map((flag)=>{const actions=make("div",undefined,"staff-row-actions-v3");if(!flag.resolvedAt){const button=make("button","Resolve","button-v3 button-quiet-v3");button.type="button";button.addEventListener("click",()=>resolveSecurityFlag(flag));actions.append(button);}else actions.append(make("span","Resolved","staff-state-v3"));return row([flag.eventType,flag.displayName||"Unknown account",flag.severity,JSON.stringify(flag.details||{}),date(flag.createdAt),actions]);}));
     tableRows($("#retention-flag-rows"),retention.map((flag)=>row([flag.displayName||flag.userId,flag.status,date(flag.lastActiveAt),date(flag.dueAt),flag.blockReason||"None"])));
     tableRows($("#security-ban-rows"),(control.bans||[]).map((ban)=>{const button=make("button","Revoke","button-v3 button-quiet-v3");button.type="button";button.addEventListener("click",()=>revokeBan(ban));return row([ban.reference,ban.targetType,ban.scope,ban.reason,date(ban.createdAt),button]);}));
@@ -635,7 +675,7 @@
   async function setupAuthenticatorHere() {
     try { const { factor }=await api("/api/auth/mfa/enroll",{method:"POST",body:JSON.stringify({friendlyName:"BrowseRP staff"})}); authenticatorSetup($("#mfa-enforcement-v3"), factor); } catch(error){status(error.message,true);} }
   async function resolveSecurityFlag(flag){const input=await decision({title:"Resolve security flag",description:`${flag.eventType} · ${flag.displayName||"Unknown account"}`,fields:[{name:"reason",label:"Resolution reason",type:"textarea",minlength:5,maxlength:500}],submitLabel:"Mark resolved"});if(!input)return;try{await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"resolve_flag",eventId:flag.id,reason:input.reason})});location.reload();}catch(error){status(error.message,true);}}
-  async function decideNetwork(requestId,approved){const input=await decision({title:`${approved?"Approve":"Deny"} protected IP request`,description:approved?"The requesting staff member gets one view within ten minutes. The address remains encrypted at rest.":"The requester will not receive the address.",fields:[{name:"reason",label:"Owner decision reason",type:"textarea",minlength:10,maxlength:500}],submitLabel:approved?"Approve one-time view":"Deny request",danger:!approved});if(!input)return;try{await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"decide_network",requestId,approved,reason:input.reason})});location.reload();}catch(error){status(error.message,true);}}
+  async function decideNetwork(requestId,approved){const input=await decision({title:`${approved?"Approve":"Deny"} protected IP request`,description:approved?"The requesting staff member gets one view within ten minutes. The address remains encrypted at rest.":"The requester will not receive the address.",fields:[{name:"reason",label:"Decision reason",type:"textarea",minlength:10,maxlength:500}],submitLabel:approved?"Approve one-time view":"Deny request",danger:!approved});if(!input)return;try{await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"decide_network",requestId,approved,reason:input.reason})});location.reload();}catch(error){status(error.message,true);}}
   async function decideAppeal(appealId,approved){const input=await decision({title:`${approved?"Approve":"Deny"} ban appeal`,description:approved?"Approval revokes the active ban immediately.":"The restriction remains active.",fields:[{name:"reason",label:"Decision reason",type:"textarea",minlength:10,maxlength:500}],submitLabel:approved?"Approve and revoke ban":"Deny appeal",danger:!approved});if(!input)return;try{await api("/api/admin/bans",{method:"POST",body:JSON.stringify({action:"decide_appeal",appealId,approved,reason:input.reason})});location.reload();}catch(error){status(error.message,true);}}
   async function revokeBan(ban){const input=await decision({title:`Revoke ban ${ban.reference}`,description:"This restores access for this ban target and records the reason.",fields:[{name:"reason",label:"Revocation reason",type:"textarea",minlength:10,maxlength:500}],submitLabel:"Revoke ban"});if(!input)return;try{await api("/api/admin/bans",{method:"POST",body:JSON.stringify({action:"revoke",banId:ban.id,reason:input.reason})});location.reload();}catch(error){status(error.message,true);}}
 

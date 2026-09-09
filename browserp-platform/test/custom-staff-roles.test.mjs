@@ -11,15 +11,17 @@ test("staff assignment accepts custom role keys and continues to reject owner as
   assert.throws(() => staffAccessMutation({ ...body, expectedVersion: -1 }), /Reload/);
 });
 
-test("custom role input limits permission grants and protects built-in role keys", () => {
+test("role input validates shape while the database enforces delegated hierarchy", () => {
   const body = { name: "Community editor", description: "Writes articles for the community", permissions: ["website.overview.read", "blogs.manage", "blogs.manage"], expectedVersion: 0, reason: "Create an editorial role" };
   assert.deepEqual(customRoleMutation(body).permissions, ["website.overview.read", "blogs.manage"]);
   assert.equal(customRoleMutation(body).key, null);
   assert.equal(customRoleMutation({ ...body, key: "custom_community_editor", expectedVersion: 2 }).key, "custom_community_editor");
-  for (const key of ["owner", "administrator", "moderator", "custom_"]) {
-    assert.throws(() => customRoleMutation({ ...body, key }), /custom role name/);
+  for (const key of ["administrator", "moderator"]) assert.equal(customRoleMutation({ ...body, key }).key, key);
+  for (const key of ["owner", "role with spaces", "x".repeat(41)]) {
+    assert.throws(() => customRoleMutation({ ...body, key }), /role name/);
   }
-  for (const permissions of [["staff.manage"], ["staff.permissions.manage"], ["security.network.approve"], [null], ["unknown role"], "blogs.manage"]) {
+  for (const permissions of [["staff.manage"], ["staff.permissions.manage"], ["security.network.approve"]]) assert.deepEqual(customRoleMutation({ ...body, permissions }).permissions, permissions);
+  for (const permissions of [[null], ["unknown role"], "blogs.manage"]) {
     assert.throws(() => customRoleMutation({ ...body, permissions }), /assignable permissions/);
   }
   assert.throws(() => customRoleMutation({ ...body, expectedVersion: 1.5 }), /Reload roles/);

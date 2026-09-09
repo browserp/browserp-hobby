@@ -111,8 +111,8 @@
     card.append(top);
 
     card.append(element("h3", "", server.name || "Roleplay server"));
-    card.append(window.BrowseRPPlatforms.metadata(server));
     card.append(element("p", "server-description", server.description || "Open the listing to learn more about this community."));
+    card.append(window.BrowseRPPlatforms.metadata(server));
 
     const tags = element("div", "server-tags");
     (Array.isArray(server.tags) ? server.tags : []).slice(0, 3).forEach((tag) => tags.append(element("span", "", tag)));

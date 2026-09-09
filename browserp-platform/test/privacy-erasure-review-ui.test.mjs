@@ -20,13 +20,13 @@ const report = () => ({
   policyDecisions: [{ decision: "FORBIDDEN_PRIVATE_DECISION" }], technicalBlockers: [{ detail: "FORBIDDEN_PRIVATE_DETAIL" }], warnings: ["FORBIDDEN_WARNING"], reportSha256: "FORBIDDEN_DIGEST", privateMetadata: "FORBIDDEN_METADATA"
 });
 
-async function harness(t, { isOwner = true, canFulfill = true, staff = true, allowed = true, items = [item], preflight = async () => report() } = {}) {
+async function harness(t, { isOwner = true, canReviewErasure = false, canFulfill = true, staff = true, allowed = true, items = [item], preflight = async () => report() } = {}) {
   const dom = new JSDOM('<section id="root"></section>', { url: "https://browserp.test/staff/moderation", runScripts: "outside-only" });
   t.after(() => dom.window.close());
   const w = dom.window, root = w.document.querySelector("#root"), calls = [], failures = [];
   w.eval(source);
   const controller = w.BrowseRPPrivacyRequests[staff ? "initStaff" : "initMember"]({
-    root, isOwner, allowed, accountId: "owner-account", onAuthFailure: error => failures.push(error.status),
+    root, isOwner, canReviewErasure, allowed, accountId: "owner-account", onAuthFailure: error => failures.push(error.status),
     api: async (path, options) => { calls.push({ path, options }); return path === endpoint ? preflight() : { items, canFulfill }; }
   });
   await tick();
@@ -60,9 +60,9 @@ test("owner review renders bounded counts and fixed stage labels without report 
   assert.ok(h.button("Record review"), "existing request review remains available");
 });
 
-test("members, delegated nonowners, denied fulfilment and closed or nondelete requests never get the review control", async t => {
+test("members, unpermitted nonowners, denied fulfilment and closed or nondelete requests never get the review control", async t => {
   for (const options of [
-    { staff: false }, { allowed: false }, { isOwner: false }, { isOwner: "true" }, { canFulfill: false }, { canFulfill: "true" },
+    { staff: false }, { allowed: false }, { isOwner: false }, { isOwner: "true" }, { isOwner: false, canReviewErasure: "true" }, { canFulfill: false }, { canFulfill: "true" },
     ...["declined", "withdrawn", "fulfilled", "unknown"].map(status => ({ items: [{ ...item, status }] })),
     ...["copy", "correction"].map(kind => ({ items: [{ ...item, kind }] }))
   ]) {
@@ -74,6 +74,8 @@ test("members, delegated nonowners, denied fulfilment and closed or nondelete re
     assert.ok(h.section());
     if (status === "ready") assert.ok(h.root.querySelector(".privacy-request-completion"), "independent completion form is preserved");
   }
+  const delegated = await harness(t, { isOwner: false, canReviewErasure: true });
+  assert.ok(delegated.section(), "the explicit fulfilment capability enables the same bounded review without owner identity");
 });
 
 test("complete bounded checks still require external review and missing storage is never invented as zero", async t => {

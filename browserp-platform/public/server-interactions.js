@@ -1,5 +1,12 @@
 (() => {
   "use strict";
+  function commentResultMessage(moderation) {
+    const value = String(moderation?.status || moderation?.state || "").toLowerCase();
+    if (value === "published") return "Comment published.";
+    if (value === "pending_review") return "Comment saved for review. It will appear here only after it is approved.";
+    if (value === "blocked") return "Comment not published. Open Content status in your account to review the reason or appeal.";
+    return "Comment sent for moderation.";
+  }
   function init({ api, session, toast }) {
     const returnTo = /^\/server\/[a-z0-9-]+\/?$/i.test(location.pathname) ? location.pathname : "/servers";
     const signInUrl = `/dashboard?returnTo=${encodeURIComponent(returnTo)}`;
@@ -84,9 +91,9 @@
         const body = action === "comment" ? { action, serverId: form.dataset.serverId, body: data.get("comment"), ...(replyInput?.value ? { parentCommentId: replyInput.value } : {}) }
           : { action, serverId: form.dataset.serverId, category: data.get("category"), body: data.get("details") };
         try {
-          await api("/api/servers", { method: "POST", body: JSON.stringify(body) });
+          const response = await api("/api/servers", { method: "POST", body: JSON.stringify(body) });
           form.reset(); form.__clearCommentReply?.(); status.hidden = false;
-          status.textContent = action === "comment" ? "Comment sent for moderation." : "Report received. Staff can now review it.";
+          status.textContent = action === "comment" ? commentResultMessage(response?.moderation) : "Report received. Staff can now review it.";
           toast(status.textContent);
         } catch (error) {
           // Keep the actual form values on failures, including session expiry.

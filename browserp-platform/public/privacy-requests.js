@@ -9,7 +9,7 @@
   const date = value => { const parsed = new Date(value); return Number.isFinite(parsed.getTime()) ? parsed.toLocaleString() : "Date unavailable"; };
   function textArea(name, minimum = 0) { const node = make("textarea"); node.name = name; node.maxLength = 1000; node.minLength = minimum; node.required = minimum > 0; node.rows = 4; return node; }
 
-  function init({ api: request, accountId, root, staff = false, allowed = false, isOwner = false, onAuthFailure } = {}) {
+  function init({ api: request, accountId, root, staff = false, allowed = false, isOwner = false, canReviewErasure = false, onAuthFailure } = {}) {
     if (!root || typeof request !== "function" || (staff && !allowed)) return null;
     const api = (path, options = {}) => request(path, { ...options, headers: { ...(options.headers || {}), "X-BrowseRP-Account": accountId || "" } });
     root.classList.add("privacy-requests");
@@ -365,7 +365,7 @@
         detail.append(requestHistory(item));
         const closed = ["declined", "withdrawn", "fulfilled"].includes(item.status);
         if (staff && !closed) detail.append(staffForm(item));
-        if (staff && isOwner === true && payload.canFulfill === true && item.kind === "delete"
+        if (staff && (canReviewErasure === true || isOwner === true) && payload.canFulfill === true && item.kind === "delete"
           && ["submitted", "reviewing", "information_needed", "ready"].includes(item.status)) detail.append(erasureReview(item));
         if (staff && item.status === "ready" && payload.canFulfill === true) detail.append(completionForm(item));
         if (item.kind === "copy" && item.status === "ready") detail.append(copySection(item, payload.canFulfill === true));

@@ -36,12 +36,20 @@ test("comments and reports retain their text on failures and one pending action 
   assert.equal(form.querySelector("a").hidden, false); assert.match(form.querySelector('[role="status"]').textContent, /text is still here/);
 });
 test("successful comments reset only after the server accepts them and votes use the returned total", async t => {
-  const calls = []; const h = harness(t, true, async (_path, options) => { const body = JSON.parse(options.body); calls.push(body); return { result: { voteCount: 42 } }; });
+  const calls = []; const h = harness(t, true, async (_path, options) => { const body = JSON.parse(options.body); calls.push(body); return body.action === "comment" ? { result: { id: "pending" }, moderation: { status: "pending_review" } } : { result: { voteCount: 42 } }; });
   const form = h.doc.querySelector("#comment-form-v3"), input = form.querySelector("textarea"); input.value = "Helpful fixture comment";
-  h.submit(form); await tick(); assert.equal(input.value, ""); assert.match(form.textContent, /sent for moderation/);
+  h.submit(form); await tick(); assert.equal(input.value, ""); assert.match(form.textContent, /saved for review.*only after it is approved/i);
   const vote = h.doc.querySelector("#vote-server-v3"); vote.click(); vote.click(); await tick();
   assert.equal(calls.filter(item => item.action === "vote").length, 1); assert.equal(h.doc.querySelector("#server-votes-v3").textContent, "42 votes");
   assert.equal(vote.getAttribute("aria-pressed"), "true"); assert.equal(vote.disabled, true);
+});
+test("blocked comments stay off the public list and direct the member to their private content status", async t => {
+  const h = harness(t, true, async () => ({ result: { id: "blocked" }, moderation: { status: "blocked" } }));
+  const form = h.doc.querySelector("#comment-form-v3"), input = form.querySelector("textarea"); input.value = "A submitted comment";
+  h.submit(form); await tick();
+  assert.equal(input.value, "");
+  assert.match(form.querySelector('[role="status"]').textContent, /not published.*Content status.*appeal/i);
+  assert.doesNotMatch(h.doc.querySelector("#comments-v3").textContent, /A submitted comment/);
 });
 test("replying sends the published parent id, can be cancelled and preserves text when the parent disappears", async t => {
   const calls = [];

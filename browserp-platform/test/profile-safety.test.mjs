@@ -5,21 +5,14 @@ import { assessDisplayName } from "../lib/moderation.js";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("profile avatars publish immediately while bios remain reviewed", async () => {
-  const [router, portal, migration] = await Promise.all([
-    read("api/router.js"),
-    read("public/browserp-portal-v2.js"),
-    read("supabase/migrations/20260820023114_profile_avatar_immediate_name_filter.sql")
-  ]);
+test("profile UI submits identity changes for review and preserves the approved public identity", async () => {
+  const portal = await read("public/browserp-portal-v2.js");
 
-  assert.match(router, /moderation_status:\s*"approved"/);
-  assert.match(router, /publication:\s*"immediate"/);
-  assert.match(router, /field !== "bio"/);
-  assert.match(portal, /published immediately/i);
-  assert.match(portal, /Bio changes remain screened/i);
-  assert.match(migration, /avatar_review_status='approved'/);
-  assert.match(migration, /approved_avatar_url=avatar_url/);
-  assert.match(migration, /bio_review_status='pending_review'/);
+  assert.match(portal, /checked before they appear publicly/i);
+  assert.match(portal, /current approved picture stays live during review/i);
+  assert.match(portal, /if\(result\.profile\)publishProfile\(result\.profile\)/);
+  assert.doesNotMatch(portal, /result\.avatarUrl/);
+  assert.doesNotMatch(portal, /published immediately/i);
 });
 
 test("display-name safety exists in both application and database boundaries", async () => {

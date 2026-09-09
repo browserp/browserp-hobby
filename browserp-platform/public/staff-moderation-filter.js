@@ -1,10 +1,10 @@
 (() => {
   "use strict";
   const VIEWS = ["summary", "members", "servers", "claims", "reports", "queue", "content", "profiles", "activity", "staff", "bans", "appeals", "security", "logs", "data-requests"];
-  const FIELDS = ["q", "status", "platform", "region", "language", "mode", "feature", "access", "online", "verified", "beginner", "from", "to", "severity", "targetType", "userId"];
+  const FIELDS = ["q", "status", "kind", "platform", "region", "language", "mode", "feature", "access", "online", "verified", "beginner", "from", "to", "severity", "targetType", "userId"];
   const COMMON = ["q", "from", "to"];
-  const ALLOWED = { "data-requests": [], summary: [], staff: [], claims: [], members: [...COMMON, "status"], servers: [...COMMON, "status", "platform", "region", "language", "mode", "feature", "access", "online", "verified", "beginner"], reports: [...COMMON, "status", "targetType", "userId"], queue: [...COMMON, "status", "platform"], content: [...COMMON, "status"], profiles: [...COMMON, "status"], activity: [...COMMON, "userId", "status"], bans: [...COMMON, "status", "targetType", "userId"], appeals: [...COMMON, "status"], security: [...COMMON, "status", "severity", "userId"], logs: [...COMMON, "userId"] };
-  const KIND = { queue: "listings", content: "queue", logs: "audit" };
+  const ALLOWED = { "data-requests": [], summary: [], staff: [], claims: [], members: [...COMMON, "status"], servers: [...COMMON, "status", "platform", "region", "language", "mode", "feature", "access", "online", "verified", "beginner"], reports: [...COMMON, "status", "targetType", "userId"], queue: [...COMMON, "status", "platform"], content: ["kind"], profiles: [...COMMON, "status"], activity: [...COMMON, "userId", "status"], bans: [...COMMON, "status", "targetType", "userId"], appeals: [...COMMON, "status"], security: [...COMMON, "status", "severity", "userId"], logs: [...COMMON, "userId"] };
+  const KIND = { queue: "listings", logs: "audit" };
   function normalize(view, input = {}) {
     const output = {};
     for (const key of ALLOWED[view] || []) {
@@ -23,7 +23,14 @@
   }
   function serialize(view, filters = {}) { const query = new URLSearchParams(normalize(view, filters)).toString(); return `#${VIEWS.includes(view) ? view : "summary"}${query ? `?${query}` : ""}`; }
   function query(view, filters = {}, cursor) {
-    const values = normalize(view, filters); const parameters = new URLSearchParams({ view: KIND[view] || view, limit: "25" });
+    const values = normalize(view, filters);
+    if (view === "content") {
+      const parameters = new URLSearchParams();
+      for (const [key, value] of Object.entries(values)) parameters.set(key, value);
+      if (cursor) parameters.set("before", typeof cursor === "string" ? cursor : JSON.stringify(cursor));
+      return `/api/admin/content-moderation?${parameters}`;
+    }
+    const parameters = new URLSearchParams({ view: KIND[view] || view, limit: "25" });
     for (const [key, value] of Object.entries(values)) parameters.set(key, key === "from" ? `${value}T00:00:00.000Z` : key === "to" ? `${value}T23:59:59.999Z` : value);
     if (cursor) parameters.set("cursor", JSON.stringify(cursor));
     return `/api/admin/moderation?${parameters}`;

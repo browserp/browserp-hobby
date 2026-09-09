@@ -1,0 +1,680 @@
+{
+  "schemaVersion": 1,
+  "status": "Built and locally tested; no hosted migration, deployment or identity assignment performed.",
+  "migration": "20260909105431_staff_capability_hierarchy.sql",
+  "migrationSha256": "6e39ed60b7d73dc26cfc3ee777dc985b71d3e6b76c9749c211dbfe2d12bcca16",
+  "catalogueSource": "Actual migration applied to isolated PostgreSQL, with all default role actors authenticated through the real staff guard.",
+  "rules": {
+    "minimumRestrictionMinutes": 5,
+    "episodeContinuityMinutes": 5,
+    "requestLimit": 50,
+    "staffMembershipsPerAccount": 1,
+    "directAppointments": "Strictly below actor authority; Moderator and Senior Moderator appointments are limited to Community Moderator and Support.",
+    "caps": "Same or lower authority cannot restart an overlapping restriction clock by revoking and reapplying; a strictly higher authority may approve a new window.",
+    "overrides": "Explicit denies retain precedence. Assignments/reactivations include retained overrides; permission resets check the effective default.",
+    "recognition": "No recognition badge or display label grants staff authorization.",
+    "deferred": "Discord role sync remains deferred. Account erasure is a count-only review, not execution. External provider credentials and billing are outside staff-panel authority."
+  },
+  "permissions": [
+    {
+      "key": "accounts.manage",
+      "description": "Edit member display names, bios and profile visibility."
+    },
+    {
+      "key": "accounts.read",
+      "description": "Read privacy-safe account creation and sign-in activity."
+    },
+    {
+      "key": "accounts.sessions.revoke",
+      "description": "Revoke member sessions and start account recovery."
+    },
+    {
+      "key": "advertising.review",
+      "description": "Review advertisements and campaigns."
+    },
+    {
+      "key": "adverts.manage",
+      "description": "Create, schedule, pause and archive site advertisements."
+    },
+    {
+      "key": "announcements.manage",
+      "description": "Draft, schedule, publish and archive public announcements."
+    },
+    {
+      "key": "appeals.review",
+      "description": "Review ban appeals."
+    },
+    {
+      "key": "audit.read",
+      "description": "Read staff audit events."
+    },
+    {
+      "key": "bans.manage",
+      "description": "Apply and revoke account, device and network-prefix bans."
+    },
+    {
+      "key": "blogs.manage",
+      "description": "Create, review, publish and archive blog posts."
+    },
+    {
+      "key": "content.edit",
+      "description": "Create and update structured site content drafts."
+    },
+    {
+      "key": "content.publish",
+      "description": "Publish or roll back structured site content."
+    },
+    {
+      "key": "developers.verify",
+      "description": "Review developer verification."
+    },
+    {
+      "key": "moderation.read",
+      "description": "Read the moderation queue."
+    },
+    {
+      "key": "moderation.resolve",
+      "description": "Resolve moderation cases."
+    },
+    {
+      "key": "privacy.requests.fulfill",
+      "description": "Approve structured account copies and record verified completed follow-up. Requires data-request review permission; does not itself erase accounts."
+    },
+    {
+      "key": "privacy.requests.manage",
+      "description": "Review private account data requests. This does not grant export or deletion access."
+    },
+    {
+      "key": "profiles.review",
+      "description": "Review profile text and quarantined profile pictures."
+    },
+    {
+      "key": "reports.read",
+      "description": "Read the report queue."
+    },
+    {
+      "key": "reports.resolve",
+      "description": "Resolve or dismiss reports."
+    },
+    {
+      "key": "scrapers.manage",
+      "description": "Review, import and refresh external server listings."
+    },
+    {
+      "key": "security.network.approve",
+      "description": "Approve or deny network-evidence requests."
+    },
+    {
+      "key": "security.network.request",
+      "description": "Request temporary access to protected network evidence."
+    },
+    {
+      "key": "security.read",
+      "description": "Read privacy-preserving security signals."
+    },
+    {
+      "key": "security.reveal",
+      "description": "Request tightly controlled sensitive reveals."
+    },
+    {
+      "key": "servers.claims.review",
+      "description": "Review and decide requests to claim an unclaimed server."
+    },
+    {
+      "key": "servers.enforce",
+      "description": "Suspend or restore server listings."
+    },
+    {
+      "key": "servers.manage",
+      "description": "Edit server listing metadata and publication state."
+    },
+    {
+      "key": "servers.review",
+      "description": "Review listing submissions."
+    },
+    {
+      "key": "settings.manage",
+      "description": "Manage platform settings."
+    },
+    {
+      "key": "staff.manage",
+      "description": "Manage staff memberships."
+    },
+    {
+      "key": "staff.permissions.manage",
+      "description": "Manage per-person staff permission overrides."
+    },
+    {
+      "key": "staff.read",
+      "description": "View the staff hierarchy and role capabilities."
+    },
+    {
+      "key": "staff.requests.create",
+      "description": "Request a reviewed staff appointment or role change."
+    },
+    {
+      "key": "staff.requests.review",
+      "description": "Review requested staff changes within your appointment authority."
+    },
+    {
+      "key": "users.enforce",
+      "description": "Apply member restrictions and bans."
+    },
+    {
+      "key": "website.overview.read",
+      "description": "Read aggregate website and registered-account statistics."
+    }
+  ],
+  "roles": [
+    {
+      "key": "owner",
+      "name": "Owner",
+      "rank": 1000,
+      "permissions": [
+        "accounts.manage",
+        "accounts.read",
+        "accounts.sessions.revoke",
+        "advertising.review",
+        "adverts.manage",
+        "announcements.manage",
+        "appeals.review",
+        "audit.read",
+        "bans.manage",
+        "blogs.manage",
+        "content.edit",
+        "content.publish",
+        "developers.verify",
+        "moderation.read",
+        "moderation.resolve",
+        "privacy.requests.fulfill",
+        "privacy.requests.manage",
+        "profiles.review",
+        "reports.read",
+        "reports.resolve",
+        "scrapers.manage",
+        "security.network.approve",
+        "security.network.request",
+        "security.read",
+        "security.reveal",
+        "servers.claims.review",
+        "servers.enforce",
+        "servers.manage",
+        "servers.review",
+        "settings.manage",
+        "staff.manage",
+        "staff.permissions.manage",
+        "staff.read",
+        "staff.requests.create",
+        "staff.requests.review",
+        "users.enforce",
+        "website.overview.read"
+      ],
+      "capabilities": {
+        "readAudit": true,
+        "readQueue": true,
+        "readStaff": true,
+        "manageBans": true,
+        "editMembers": true,
+        "editServers": true,
+        "manageQueue": true,
+        "manageRoles": true,
+        "manageStaff": true,
+        "readMembers": true,
+        "readReports": true,
+        "readServers": true,
+        "readActivity": true,
+        "readListings": true,
+        "readSecurity": true,
+        "requestStaff": true,
+        "manageReports": true,
+        "reviewAppeals": true,
+        "reviewErasure": true,
+        "manageListings": true,
+        "reviewProfiles": true,
+        "restrictionMaxMinutes": null
+      },
+      "canEditRoles": true,
+      "canRequestStaffChanges": true,
+      "canReviewStaffRequests": true,
+      "assignableRoles": [
+        "custom_full_access",
+        "head_administrator",
+        "administrator",
+        "senior_moderator",
+        "moderator",
+        "community_moderator",
+        "support"
+      ],
+      "maximumRestrictionMinutes": null
+    },
+    {
+      "key": "custom_full_access",
+      "name": "Management",
+      "rank": 900,
+      "permissions": [
+        "accounts.manage",
+        "accounts.read",
+        "accounts.sessions.revoke",
+        "advertising.review",
+        "adverts.manage",
+        "announcements.manage",
+        "appeals.review",
+        "audit.read",
+        "bans.manage",
+        "blogs.manage",
+        "content.edit",
+        "content.publish",
+        "developers.verify",
+        "moderation.read",
+        "moderation.resolve",
+        "privacy.requests.fulfill",
+        "privacy.requests.manage",
+        "profiles.review",
+        "reports.read",
+        "reports.resolve",
+        "scrapers.manage",
+        "security.network.approve",
+        "security.network.request",
+        "security.read",
+        "security.reveal",
+        "servers.claims.review",
+        "servers.enforce",
+        "servers.manage",
+        "servers.review",
+        "settings.manage",
+        "staff.manage",
+        "staff.permissions.manage",
+        "staff.read",
+        "staff.requests.create",
+        "staff.requests.review",
+        "users.enforce",
+        "website.overview.read"
+      ],
+      "capabilities": {
+        "readAudit": true,
+        "readQueue": true,
+        "readStaff": true,
+        "manageBans": true,
+        "editMembers": true,
+        "editServers": true,
+        "manageQueue": true,
+        "manageRoles": true,
+        "manageStaff": true,
+        "readMembers": true,
+        "readReports": true,
+        "readServers": true,
+        "readActivity": true,
+        "readListings": true,
+        "readSecurity": true,
+        "requestStaff": true,
+        "manageReports": true,
+        "reviewAppeals": true,
+        "reviewErasure": true,
+        "manageListings": true,
+        "reviewProfiles": true,
+        "restrictionMaxMinutes": null
+      },
+      "canEditRoles": true,
+      "canRequestStaffChanges": true,
+      "canReviewStaffRequests": true,
+      "assignableRoles": [
+        "head_administrator",
+        "administrator",
+        "senior_moderator",
+        "moderator",
+        "community_moderator",
+        "support"
+      ],
+      "maximumRestrictionMinutes": null
+    },
+    {
+      "key": "head_administrator",
+      "name": "Head Admin",
+      "rank": 850,
+      "permissions": [
+        "accounts.manage",
+        "accounts.read",
+        "accounts.sessions.revoke",
+        "advertising.review",
+        "adverts.manage",
+        "announcements.manage",
+        "appeals.review",
+        "audit.read",
+        "bans.manage",
+        "blogs.manage",
+        "content.edit",
+        "content.publish",
+        "developers.verify",
+        "moderation.read",
+        "moderation.resolve",
+        "privacy.requests.fulfill",
+        "privacy.requests.manage",
+        "profiles.review",
+        "reports.read",
+        "reports.resolve",
+        "scrapers.manage",
+        "security.network.approve",
+        "security.network.request",
+        "security.read",
+        "security.reveal",
+        "servers.claims.review",
+        "servers.enforce",
+        "servers.manage",
+        "servers.review",
+        "settings.manage",
+        "staff.manage",
+        "staff.permissions.manage",
+        "staff.read",
+        "staff.requests.create",
+        "staff.requests.review",
+        "users.enforce",
+        "website.overview.read"
+      ],
+      "capabilities": {
+        "readAudit": true,
+        "readQueue": true,
+        "readStaff": true,
+        "manageBans": true,
+        "editMembers": true,
+        "editServers": true,
+        "manageQueue": true,
+        "manageRoles": true,
+        "manageStaff": true,
+        "readMembers": true,
+        "readReports": true,
+        "readServers": true,
+        "readActivity": true,
+        "readListings": true,
+        "readSecurity": true,
+        "requestStaff": true,
+        "manageReports": true,
+        "reviewAppeals": true,
+        "reviewErasure": true,
+        "manageListings": true,
+        "reviewProfiles": true,
+        "restrictionMaxMinutes": 43200
+      },
+      "canEditRoles": true,
+      "canRequestStaffChanges": true,
+      "canReviewStaffRequests": true,
+      "assignableRoles": [
+        "administrator",
+        "senior_moderator",
+        "moderator",
+        "community_moderator",
+        "support"
+      ],
+      "maximumRestrictionMinutes": 43200
+    },
+    {
+      "key": "administrator",
+      "name": "Admin",
+      "rank": 800,
+      "permissions": [
+        "accounts.manage",
+        "accounts.read",
+        "accounts.sessions.revoke",
+        "advertising.review",
+        "adverts.manage",
+        "announcements.manage",
+        "appeals.review",
+        "audit.read",
+        "bans.manage",
+        "blogs.manage",
+        "content.edit",
+        "content.publish",
+        "developers.verify",
+        "moderation.read",
+        "moderation.resolve",
+        "privacy.requests.fulfill",
+        "privacy.requests.manage",
+        "profiles.review",
+        "reports.read",
+        "reports.resolve",
+        "scrapers.manage",
+        "security.network.request",
+        "security.read",
+        "servers.claims.review",
+        "servers.enforce",
+        "servers.manage",
+        "servers.review",
+        "settings.manage",
+        "staff.manage",
+        "staff.read",
+        "staff.requests.create",
+        "staff.requests.review",
+        "users.enforce",
+        "website.overview.read"
+      ],
+      "capabilities": {
+        "readAudit": true,
+        "readQueue": true,
+        "readStaff": true,
+        "manageBans": true,
+        "editMembers": true,
+        "editServers": true,
+        "manageQueue": true,
+        "manageRoles": false,
+        "manageStaff": true,
+        "readMembers": true,
+        "readReports": true,
+        "readServers": true,
+        "readActivity": true,
+        "readListings": true,
+        "readSecurity": true,
+        "requestStaff": true,
+        "manageReports": true,
+        "reviewAppeals": true,
+        "reviewErasure": true,
+        "manageListings": true,
+        "reviewProfiles": true,
+        "restrictionMaxMinutes": 10080
+      },
+      "canEditRoles": false,
+      "canRequestStaffChanges": true,
+      "canReviewStaffRequests": true,
+      "assignableRoles": [
+        "senior_moderator",
+        "moderator",
+        "community_moderator",
+        "support"
+      ],
+      "maximumRestrictionMinutes": 10080
+    },
+    {
+      "key": "senior_moderator",
+      "name": "Senior Moderator",
+      "rank": 500,
+      "permissions": [
+        "accounts.read",
+        "advertising.review",
+        "announcements.manage",
+        "appeals.review",
+        "audit.read",
+        "bans.manage",
+        "developers.verify",
+        "moderation.read",
+        "moderation.resolve",
+        "profiles.review",
+        "reports.read",
+        "reports.resolve",
+        "servers.enforce",
+        "servers.review",
+        "staff.manage",
+        "staff.read",
+        "staff.requests.create",
+        "staff.requests.review",
+        "users.enforce",
+        "website.overview.read"
+      ],
+      "capabilities": {
+        "readAudit": true,
+        "readQueue": true,
+        "readStaff": true,
+        "manageBans": true,
+        "editMembers": false,
+        "editServers": false,
+        "manageQueue": true,
+        "manageRoles": false,
+        "manageStaff": true,
+        "readMembers": true,
+        "readReports": true,
+        "readServers": true,
+        "readActivity": true,
+        "readListings": true,
+        "readSecurity": false,
+        "requestStaff": true,
+        "manageReports": true,
+        "reviewAppeals": true,
+        "reviewErasure": false,
+        "manageListings": true,
+        "reviewProfiles": true,
+        "restrictionMaxMinutes": 4320
+      },
+      "canEditRoles": false,
+      "canRequestStaffChanges": true,
+      "canReviewStaffRequests": true,
+      "assignableRoles": [
+        "community_moderator",
+        "support"
+      ],
+      "maximumRestrictionMinutes": 4320
+    },
+    {
+      "key": "moderator",
+      "name": "Moderator",
+      "rank": 300,
+      "permissions": [
+        "accounts.read",
+        "announcements.manage",
+        "bans.manage",
+        "moderation.read",
+        "moderation.resolve",
+        "profiles.review",
+        "reports.read",
+        "reports.resolve",
+        "servers.review",
+        "staff.manage",
+        "staff.read",
+        "staff.requests.create",
+        "staff.requests.review",
+        "website.overview.read"
+      ],
+      "capabilities": {
+        "readAudit": false,
+        "readQueue": true,
+        "readStaff": true,
+        "manageBans": true,
+        "editMembers": false,
+        "editServers": false,
+        "manageQueue": true,
+        "manageRoles": false,
+        "manageStaff": true,
+        "readMembers": true,
+        "readReports": true,
+        "readServers": true,
+        "readActivity": true,
+        "readListings": true,
+        "readSecurity": false,
+        "requestStaff": true,
+        "manageReports": true,
+        "reviewAppeals": false,
+        "reviewErasure": false,
+        "manageListings": true,
+        "reviewProfiles": true,
+        "restrictionMaxMinutes": 2880
+      },
+      "canEditRoles": false,
+      "canRequestStaffChanges": true,
+      "canReviewStaffRequests": true,
+      "assignableRoles": [
+        "community_moderator",
+        "support"
+      ],
+      "maximumRestrictionMinutes": 2880
+    },
+    {
+      "key": "community_moderator",
+      "name": "Community Moderator",
+      "rank": 200,
+      "permissions": [
+        "moderation.read",
+        "moderation.resolve",
+        "reports.read",
+        "reports.resolve",
+        "staff.read",
+        "staff.requests.create",
+        "website.overview.read"
+      ],
+      "capabilities": {
+        "readAudit": false,
+        "readQueue": true,
+        "readStaff": true,
+        "manageBans": false,
+        "editMembers": false,
+        "editServers": false,
+        "manageQueue": true,
+        "manageRoles": false,
+        "manageStaff": false,
+        "readMembers": false,
+        "readReports": true,
+        "readServers": false,
+        "readActivity": false,
+        "readListings": false,
+        "readSecurity": false,
+        "requestStaff": true,
+        "manageReports": true,
+        "reviewAppeals": false,
+        "reviewErasure": false,
+        "manageListings": false,
+        "reviewProfiles": false,
+        "restrictionMaxMinutes": 0
+      },
+      "canEditRoles": false,
+      "canRequestStaffChanges": true,
+      "canReviewStaffRequests": false,
+      "assignableRoles": [],
+      "maximumRestrictionMinutes": 0
+    },
+    {
+      "key": "support",
+      "name": "Support",
+      "rank": 100,
+      "permissions": [
+        "reports.read",
+        "staff.read",
+        "staff.requests.create",
+        "website.overview.read"
+      ],
+      "capabilities": {
+        "readAudit": false,
+        "readQueue": false,
+        "readStaff": true,
+        "manageBans": false,
+        "editMembers": false,
+        "editServers": false,
+        "manageQueue": false,
+        "manageRoles": false,
+        "manageStaff": false,
+        "readMembers": false,
+        "readReports": true,
+        "readServers": false,
+        "readActivity": false,
+        "readListings": false,
+        "readSecurity": false,
+        "requestStaff": true,
+        "manageReports": false,
+        "reviewAppeals": false,
+        "reviewErasure": false,
+        "manageListings": false,
+        "reviewProfiles": false,
+        "restrictionMaxMinutes": 0
+      },
+      "canEditRoles": false,
+      "canRequestStaffChanges": true,
+      "canReviewStaffRequests": false,
+      "assignableRoles": [],
+      "maximumRestrictionMinutes": 0
+    }
+  ]
+}

@@ -14,11 +14,12 @@
   --pink: #b91f72;
   --pink-strong: #9c155f;
   --violet: #6740bb;
-  --cyan: #5b36a4;
+  --cyan: #006d94;
+  --info: #5b36a4;
   --success: #16734f;
   --warning: #895609;
   --danger: #a3253c;
-  --focus: #7c3cc4;
+  --focus: var(--cyan);
   --ink: var(--text);
   --quiet: var(--muted);
   --canvas: var(--bg);
@@ -41,7 +42,7 @@
 :root[data-theme="light"] ::selection { color: #fff; background: rgb(156 21 95 / .65); }
 :root[data-theme="light"] .header-v3,
 :root[data-theme="light"] .public-header-v6 { background: rgb(255 253 253 / .93); border-color: var(--line-soft); }
-:root[data-theme="light"] .navigation-dialog-v6 { box-shadow: -20px 0 80px rgb(62 36 61 / .22); }
+:root[data-theme="light"] .navigation-dialog-v6 { box-shadow: var(--shadow-lg); }
 :root[data-theme="light"] .navigation-dialog-v6::backdrop { background: rgb(45 31 45 / .45); }
 
 :root[data-theme="light"] :is(
@@ -67,19 +68,34 @@
   .hero-proof div,
   .empty-panel,
   .review-dialog-shell
-) { color: var(--text); background: var(--panel); border-color: var(--line); box-shadow: var(--shadow-sm); }
+) { color: var(--text); background: var(--panel); border-color: var(--line); box-shadow: none; }
+:root[data-theme="light"] .review-dialog-shell { box-shadow: var(--shadow-lg); }
 
 :root[data-theme="light"] :is(.server-card:hover,.game-grid-v3 a:hover,.category-card:hover) {
-  background: var(--panel-2);
-  border-color: color-mix(in srgb,var(--pink) 42%,var(--line));
-  box-shadow: var(--shadow-md);
+  background: var(--surface-hover);
+  border-color: var(--interactive-edge);
+  box-shadow: var(--shadow-sm);
 }
 :root[data-theme="light"] :is(.server-description,.section-head-v3 p,.editorial-v3 p,.game-grid-v3 small,.side-ad-copy-v3 span) { color: var(--copy); }
 :root[data-theme="light"] .game-grid-v3 .game-all-v3 .game-art-v3 { background: #eee5f0; }
-:root[data-theme="light"] :is(.search-suggestion-v3[aria-selected="true"],.search-suggestion-v3:hover) { background: #f3e4ee; }
-:root[data-theme="light"] .search-suggestion-v3[aria-selected="true"] { background: linear-gradient(100deg,#f3e4ee,#ece6f6); }
-:root[data-theme="light"] .account-popover-v3 { box-shadow: 0 18px 55px rgb(62 36 61 / .2); }
+:root[data-theme="light"] :is(.search-suggestion-v3[aria-selected="true"],.search-suggestion-v3:hover) { background: var(--selection-surface); }
+:root[data-theme="light"] .account-popover-v3 { box-shadow: var(--shadow-md); }
 :root[data-theme="light"] .account-popover-v3 :is(a,button):is(:hover,:focus-visible) { background: rgb(185 31 114 / .08); }
+/* The same game hues need darker ink on light cards and selected controls. */
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform] { --platform-accent: #6740bb; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="fivem"] { --platform-accent: #9b470e; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="redm"] { --platform-accent: #aa2941; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="roblox"] { --platform-accent: #394052; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="minecraft"] { --platform-accent: #1c6938; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="forza"] { --platform-accent: #992d76; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="gmod"] { --platform-accent: #1b6199; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="arma"] { --platform-accent: #566915; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="vrchat"] { --platform-accent: #08656e; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="dayz"] { --platform-accent: #77572d; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="project-zomboid"] { --platform-accent: #6b4794; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="ets2"] { --platform-accent: #795c13; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="assetto-corsa"] { --platform-accent: #a83e36; }
+:root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) [data-platform="beamng"] { --platform-accent: #935116; }
 :root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) .navigation-game-v6[data-platform="roblox"] { --platform-accent: #394052; --game-colour: #394052; color: #394052; }
 
 :root[data-theme="light"] :is(input,select,textarea,.control-v3) { color-scheme: light; }
@@ -95,12 +111,14 @@
 :root[data-theme] :is(.navigation-toggle-v6,.navigation-close-v6) { transition-property: border-color; }
 
 :root[data-theme="light"] .hero-v3 { background: linear-gradient(180deg,rgb(185 31 114 / .055),transparent 48%); }
+:root[data-theme="light"] [data-wordmark-surface]::after { background: linear-gradient(90deg,rgb(248 245 248 / .9),rgb(248 245 248 / .75) 60%,rgb(248 245 248 / .2)); }
 :root[data-theme="light"] :is(.section-v3,.footer-v3,.page-body,.platform-band,.discover-section,.category-section,.credits-section,.tools-section,.staff-section,.foundation-section) { background-color: var(--bg); border-color: var(--line-soft); }
 :root[data-theme="light"] :is(.discover-section,.tools-section,.foundation-section) { background-color: #fbf8fb; }
 :root[data-theme="light"] .footer-v3 { background: var(--bg-soft); }
 
 :root[data-theme="light"] .side-ad-v3 { background: var(--panel); border-color: var(--line); }
-:root[data-theme="light"] .side-ad-stage-v3 { border-color: var(--line); }
+/* Artwork and fallback advert stages retain a dark canvas in either theme. */
+:root[data-theme="light"] .side-ad-stage-v3 { --copy: #e0dce6; --cyan: #68dafa; border-color: var(--line); }
 :root[data-theme="light"] .ad-label-v3,
 :root[data-theme="light"] .ad-pause-v7 { color: var(--muted); }
 :root[data-theme="light"] .ad-pause-v7:hover { color: var(--text); background: rgb(185 31 114 / .07); }
