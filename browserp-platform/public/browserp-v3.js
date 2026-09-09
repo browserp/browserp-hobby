@@ -572,12 +572,18 @@
     const root = $(".footer-v3");
     if (!root) return;
     if ($(".footer-grid-v3", root)) {
+      const lockup = $(".footer-brand-v3 .logo-lockup-v3", root);
+      if (lockup && !lockup.closest("a")) {
+        const home = node("a", "footer-home-v3");
+        home.href = "/"; home.setAttribute("aria-label", "BrowseRP home");
+        lockup.replaceWith(home); home.append(lockup);
+      }
       window.BrowseRPRecommendations?.mountCookiePreferences?.(root);
       return;
     }
     const grid = node("div", "shell-v3 footer-grid-v3");
     const brand = node("div", "footer-brand-v3");
-    const lockup = node("span", "logo-lockup-v3"); const mark = new Image(); mark.src = "/assets/browserp-logo-v5.png?v=20260908"; mark.alt = "BrowseRP"; mark.className = "logo-full-v5";
+    const lockup = node("a", "logo-lockup-v3"); lockup.href = "/"; lockup.setAttribute("aria-label", "BrowseRP home"); const mark = new Image(); mark.src = "/assets/browserp-logo-v5.png?v=20260908"; mark.alt = "BrowseRP"; mark.className = "logo-full-v5";
     lockup.append(mark); brand.append(lockup, node("p", "", "A clearer way to discover roleplay communities across games."));
     grid.append(brand);
     const groups = [

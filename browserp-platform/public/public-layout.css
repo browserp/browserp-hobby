@@ -1,6 +1,9 @@
 /* Loaded only by public pages. Staff layouts keep their own spacing. */
+/* Prevent trackpad/touch overscroll from revealing a blank canvas above the
+   sticky header. Normal page scrolling and the menu's own scroll area remain. */
+html { overscroll-behavior-y: none; }
 :root {
-  --public-space-lead: clamp(48px, 5vw, 72px);
+  --public-space-lead: clamp(32px, 4vw, 48px);
   --public-space-section: clamp(40px, 4.5vw, 64px);
   --public-space-utility: clamp(24px, 2.5vw, 36px);
   --public-space-heading: clamp(20px, 2vw, 28px);
@@ -8,8 +11,11 @@
 
 /* Introductions lead directly into their controls or content, without stacking
    two full section paddings. Advert rails retain their existing spacing. */
-body[data-page="servers"] > main.section-v3 { padding-block: var(--public-space-lead) var(--public-space-section); }
+body[data-page="servers"] > main.section-v3 { padding-block: 0 var(--public-space-section); }
 .directory-intro-v3 { padding-block: 0 var(--public-space-utility); }
+/* Keep breathing room inside the branded introduction, not in an empty band
+   between the sticky navigation and the page's first visible surface. */
+body[data-page="servers"] .directory-intro-v3 { padding-top: var(--public-space-lead); }
 .journal-hero-v6 { padding-block: var(--public-space-lead) var(--public-space-utility); }
 .journal-feed-v6 { padding-block: var(--public-space-utility) var(--public-space-section); }
 :is(.home-hero-intro, .directory-intro-v3, .game-page-hero-v4, .journal-hero-v6, .public-intro-surface-v7) .eyebrow-v3 { margin-bottom: 10px; }

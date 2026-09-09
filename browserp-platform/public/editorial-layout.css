@@ -1,0 +1,72 @@
+/* Scoped to the About page and journal index; shared navigation and motion
+   keep their own styles. Lead spacing belongs inside the patterned surface. */
+body[data-page="about"] > main.section-v3 {
+  padding-block: 0 var(--public-space-section);
+}
+body[data-page="about"] .legal-v3 {
+  max-width: 1040px;
+}
+body[data-page="about"] .legal-v3 p {
+  max-width: 68ch;
+}
+body[data-page="about"] .public-intro-surface-v7 {
+  padding-block: var(--public-space-lead) var(--public-space-utility);
+}
+body[data-page="about"] .public-intro-surface-v7 h1 {
+  max-width: 30ch;
+  font-size: clamp(32px, 3.4vw, 44px);
+  line-height: 1.12;
+  letter-spacing: -.04em;
+  text-wrap: balance;
+}
+body[data-page="about"] .legal-v3 h2 {
+  font-size: clamp(25px, 2.5vw, 30px);
+  line-height: 1.2;
+  letter-spacing: -.025em;
+}
+body[data-page="about"] .legal-v3 section {
+  padding-block: var(--public-space-utility);
+}
+body[data-page="about"] .legal-v3 section > p:last-child {
+  margin-bottom: 0;
+}
+
+/* One common measure for the introduction, article grid and advert. */
+body[data-blog-page="index"] .journal-v6 > .advert-banner-shell-v7,
+body[data-blog-page="index"] .journal-hero-v6 > .shell-v3,
+body[data-blog-page="index"] .journal-feed-v6 > .shell-v3 {
+  max-width: 1040px;
+}
+body[data-blog-page="index"] .journal-feed-v6 {
+  padding-bottom: var(--public-space-utility);
+}
+body[data-blog-page="index"] .advert-banner-shell-v7 {
+  margin-top: 0;
+}
+body[data-blog-page="index"] .banner-ad-v7 {
+  max-width: none;
+}
+/* A single published story fills the available row, without an empty column. */
+body[data-blog-page="index"] .journal-card-v6:only-child {
+  grid-column: 1 / -1;
+}
+body[data-blog-page="index"] .journal-card-featured-v6 h3 {
+  max-width: 32ch;
+  font-size: clamp(28px, 3vw, 36px);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+body[data-blog-page="index"] .journal-card-v6 p {
+  max-width: 72ch;
+}
+body[data-blog-page="index"] .journal-explore-v6,
+body[data-blog-page="index"] .journal-card-meta-v6 > span {
+  color: var(--pink-strong);
+}
+body[data-blog-page="index"] .journal-explore-v6:hover {
+  color: var(--text);
+}
+@media (max-width: 600px) {
+  body[data-blog-page="index"] .journal-heading-v6 h2 { font-size: 28px; }
+  body[data-blog-page="index"] .journal-heading-v6 > span { flex-shrink: 0; }
+}
