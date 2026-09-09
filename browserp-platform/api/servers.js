@@ -10,6 +10,7 @@ import { assertSameOrigin, publicJson, readBody } from "../lib/http.js";
 import { assessContent, sanitizePlainText } from "../lib/moderation.js";
 import { rateLimit } from "../lib/rate-limit.js";
 import { getSession, rpc } from "../lib/supabase.js";
+import { readPlayerHistory } from "../lib/player-history.js";
 
 function safeText(value, limit) {
   return String(value || "").trim().slice(0, limit);
@@ -17,6 +18,9 @@ function safeText(value, limit) {
 
 export default endpoint(["GET", "POST"], async (req, res) => {
   const url = new URL(req.url, "http://browserp.local");
+  if (req.method === "GET" && url.searchParams.has("history")) {
+    return publicJson(res, await readPlayerHistory(req, url.searchParams), 60);
+  }
   const filters = Object.fromEntries(url.searchParams.entries());
   const slug = safeText(filters.slug, 100).toLowerCase();
   if (req.method === "POST") {

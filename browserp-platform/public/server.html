@@ -1,6 +1,7 @@
 <!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07080b"><meta name="application-name" content="BrowseRP"><meta name="apple-mobile-web-app-title" content="BrowseRP"><meta property="og:site_name" content="BrowseRP">
   <meta property="og:title" content="Roleplay server — BrowseRP">
   <link rel="stylesheet" href="/server-tags.css?v=2.19.2">
+  <link rel="stylesheet" href="/player-history.css?v=1"><script src="/player-history.js?v=1" defer></script>
   <meta property="og:description" content="View a reviewed roleplay server listing and its community details on BrowseRP.">
   <meta property="og:type" content="website"><meta property="og:image" content="https://www.browserp.com/browserp-mark-v3.png">
   <meta property="og:image:type" content="image/png">
@@ -36,6 +37,12 @@
       <div class="detail-grid-v3">
         <article class="prose-v3 server-community-v7">
           <section class="server-about-v7"><h2>About this community</h2><p id="server-description-v3">Loading listing details…</p><div id="server-tags-v3" class="server-tags"></div></section>
+          <section class="player-history" id="player-history" aria-labelledby="player-history-title" hidden>
+            <div class="player-history-heading"><h2 id="player-history-title">Player history</h2><label class="field-v3"><span>History</span><select aria-label="Player history range"><option value="1h">1 hour</option><option value="8h" selected>8 hours</option><option value="12h">12 hours</option><option value="24h">24 hours</option></select></label></div>
+            <div class="player-history-chart" data-history-chart></div><p data-history-status role="status" aria-live="polite"></p><p data-history-scope hidden></p>
+            <button class="button-v3 button-secondary-v3" data-history-retry type="button" hidden>Try again</button>
+            <details hidden><summary>View observations</summary><div data-history-table></div></details>
+          </section>
           <section class="server-comments-v7"><h2>Community comments</h2><p>Share helpful experiences with other roleplayers. Comments are reviewed before publication.</p>
             <div class="comments-v3" id="comments-v3"></div><p id="comments-empty-v3">No published comments yet.</p>
             <form class="panel-v3" id="comment-form-v3"><label class="field-v3"><span>Add a comment</span><textarea disabled name="comment" minlength="3" maxlength="1000" required placeholder="Share useful, respectful information about this community."></textarea></label><button class="button-v3 button-secondary-v3" type="submit" disabled>Send for review</button></form>

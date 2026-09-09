@@ -1,5 +1,8 @@
 /* A quiet wordmark texture for selected public page introductions. */
 [data-wordmark-surface] { position: relative; isolation: isolate; }
+.directory-intro-v3[data-wordmark-surface] { max-width: none; }
+.public-intro-copy-v7 { position: relative; max-width: 850px; }
+.public-intro-surface-v7 { padding: 16px 0 30px; }
 .home-hero-pattern {
   position: absolute;
   inset: 0;

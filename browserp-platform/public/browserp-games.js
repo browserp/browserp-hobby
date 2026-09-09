@@ -21,7 +21,6 @@
   const AVAILABLE_GAME_IDS = new Set(["fivem", "redm", "roblox", "minecraft"]);
   const AVAILABLE_GAMES = GAMES.filter((game) => AVAILABLE_GAME_IDS.has(game.id));
   const UPCOMING_GAMES = GAMES.filter((game) => !AVAILABLE_GAME_IDS.has(game.id) && !game.future);
-  const FUTURE_GAMES = GAMES.filter((game) => game.future);
 
   const $ = (selector) => document.querySelector(selector);
   const node = (tag, className, text) => { const item = document.createElement(tag); if (className) item.className = className; if (text !== undefined) item.textContent = text; return item; };
@@ -48,6 +47,24 @@
     const copy = node("span", "game-hub-copy-v4"); copy.append(node("strong", "", game.name), node("small", "", game.line));
     link.append(mark, copy, node("b", comingSoon ? "coming-soon-label-v5" : "", comingSoon ? "Coming soon" : "Explore servers"));
     return link;
+  }
+
+  function futureGameCard() {
+    const card = node("article", "game-future-combined-v7");
+    window.BrowseRPPlatforms.theme(card, "gta6");
+    const mark = node("span", "game-hub-mark-v4");
+    mark.append(gameMark("gta6", "game-card-artwork-v5"));
+    const copy = node("div", "game-future-combined-copy-v7");
+    copy.append(
+      node("span", "game-future-status-v7", "Coming soon"),
+      node("h3", "", "One future home for GTA VI and 6M."),
+      node("p", "", "BrowseRP is reserving this area for GTA VI roleplay discovery. 6M is a community term, not a confirmed platform or launch. Listings stay closed until supported tools exist.")
+    );
+    const actions = node("div", "game-future-actions-v7");
+    const gta = node("a", "button-v3 button-primary-v3", "GTA VI roleplay plans"); gta.href = "/games/gta6";
+    const sixm = node("a", "button-v3 button-secondary-v3", "What 6M means"); sixm.href = "/games/6m";
+    actions.append(gta, sixm); copy.append(actions); card.append(mark, copy);
+    return card;
   }
 
   function serverCard(server) {
@@ -83,7 +100,7 @@
     const nav = $("#game-page-nav-v4");
     nav.replaceChildren(...AVAILABLE_GAMES.map((item) => { const link = node("a", "game-nav-chip-v4", item.name); link.href = `/games/${item.id}`; link.dataset.game = item.id; window.BrowseRPPlatforms.theme(link, item.id); link.prepend(gameMark(item.id, "game-nav-mark-v4")); if (game?.id === item.id) { link.classList.add("is-selected"); link.setAttribute("aria-current", "page"); } return link; }));
     $("#game-upcoming-grid-v5").replaceChildren(...UPCOMING_GAMES.map((item) => gameCard(item, true)));
-    $("#game-future-grid-v6").replaceChildren(...FUTURE_GAMES.map((item) => gameCard(item, true)));
+    $("#game-future-grid-v6").replaceChildren(futureGameCard());
     if (!game) {
       nav.hidden = true;
       const allGamesLogo = node("img", "game-page-all-logo-v5 game-artwork-v5");

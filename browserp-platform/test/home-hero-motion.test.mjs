@@ -58,7 +58,7 @@ test("hero movement pauses offscreen, in hidden pages and for reduced motion, th
 });
 
 test("selected public introductions share one inert pattern while forms and staff pages stay undecorated", t => {
-  for (const page of ["index", "game", "about", "blog"]) {
+  for (const page of ["index", "servers", "game", "about", "advertise", "blog", "blog-post"]) {
     const dom = new JSDOM(readFileSync(new URL(`../public/${page}.html`, import.meta.url), "utf8"));
     t.after(() => dom.window.close());
     const d = dom.window.document;

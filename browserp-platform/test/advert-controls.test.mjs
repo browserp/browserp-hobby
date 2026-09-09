@@ -102,6 +102,23 @@ test("failed-artwork controls remain in normal flow and anchor their own decorat
   }
 });
 
+test("page banners clear the sticky rail offset and keep healthy and blocked artwork compact", t => {
+  for (const width of [390, 1280]) {
+    const h = harness(t, { width, coarse: width < 768 });
+    const banner = h.doc.querySelector("#banner-ad"), stage = banner.querySelector(".side-ad-stage-v3");
+    assert.equal(h.css(banner).position, "relative");
+    assert.equal(h.css(banner).top, "auto", `${width}px banner must not inherit the rail's 96px offset`);
+    assert.equal(h.css(stage).height, width <= 760 ? "210px" : "190px");
+    assert.equal(h.css(stage).minHeight, "0px");
+    assert.equal(h.css(stage).maxHeight, width <= 760 ? "210px" : "190px");
+    banner.classList.add("artwork-unavailable");
+    assert.equal(h.css(stage).height, "auto");
+    assert.equal(h.css(stage).maxHeight, "none");
+    assert.equal(h.css(stage).display, "grid");
+    assert.equal(h.css(stage).gridTemplateColumns, width <= 760 ? "86px minmax(0,1fr)" : "120px minmax(0,1fr) 44px 44px");
+  }
+});
+
 test("keyboard focus is visible and reduced motion stops press scaling without hiding chevrons", t => {
   for (const reduced of [false, true]) {
     const h = harness(t, { width: 390, coarse: true, reduced });

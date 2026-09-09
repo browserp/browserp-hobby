@@ -379,7 +379,7 @@
     if (["home", "games"].includes(document.body.dataset.page) || document.body.hasAttribute("data-blog-page")) {
       const main = $("main");
       if (main && !$(".banner-ad-v7", main)) {
-        const wrapper = node("div", "shell-v3");
+        const wrapper = node("div", "shell-v3 advert-banner-shell-v7");
         const banner = node("aside", "side-ad-v3 banner-ad-v7"); banner.dataset.adPlacement = "side"; banner.dataset.adStart = "1"; banner.hidden = true; wrapper.append(banner);
         const featured = $("#featured-server-list")?.closest("section");
         if (featured) featured.after(wrapper); else main.append(wrapper);
