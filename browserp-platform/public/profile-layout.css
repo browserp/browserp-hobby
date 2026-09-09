@@ -10,7 +10,7 @@ body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage > .shell {
 .dashboard-view .portal-kicker { font-size: 12px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
 .dashboard-view .portal-head .portal-avatar { width: 76px; height: 76px; border-radius: 50%; box-shadow: 0 0 0 5px var(--bg-soft); }
 .dashboard-view .portal-head-actions { flex: none; }
-.dashboard-view .portal-panel-v2 { border-radius: 16px; padding: clamp(22px, 3vw, 36px); }
+.dashboard-view .portal-panel-v2 { border-radius: var(--radius-md); padding: clamp(22px, 3vw, 36px); }
 .dashboard-view .portal-panel-head { margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
 .dashboard-view .portal-panel-head h2 { font-size: clamp(23px, 2.3vw, 30px); letter-spacing: -.025em; }
 .dashboard-view .portal-panel-head p { max-width: 65ch; font-size: 15px; line-height: 1.65; }
@@ -29,12 +29,12 @@ body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage > .shell {
 .profile-picture-editor-v3 .button { justify-self: start; max-width: 100%; }
 .profile-picture-editor-v3 .portal-help { grid-column: 2; line-height: 1.65; }
 .profile-form-v2 .portal-field input[readonly] { color: var(--copy); background: var(--bg-soft); cursor: default; }
-.profile-form-v2 .portal-field :is(input, textarea, select) { min-width: 0; border-color: var(--line); background-color: var(--bg); border-radius: 10px; transition: border-color .18s ease, box-shadow .18s ease; }
-.profile-form-v2 .portal-field :is(input, textarea, select):focus-visible { border-color: var(--pink); outline: 2px solid color-mix(in srgb, var(--pink) 25%, transparent); outline-offset: 2px; }
+.profile-form-v2 .portal-field :is(input, textarea, select) { min-width: 0; border-color: var(--line); background-color: var(--bg); border-radius: var(--radius-sm); transition: border-color .18s ease, box-shadow .18s ease; }
+.profile-form-v2 .portal-field :is(input, textarea, select):focus-visible { border-color: var(--cyan); outline: 3px solid var(--focus); outline-offset: 3px; }
 .profile-form-v2 .portal-status { margin: 0; font-size: 13px; }
-.dashboard-view .portal-nav { top: 88px; background: color-mix(in srgb, var(--panel) 96%, transparent); border-radius: 12px; }
-.dashboard-view .metric-v2 { min-height: 128px; border-radius: 12px; }
-.dashboard-view .portal-empty-v2 { border-style: solid; border-color: var(--line-soft); background: var(--bg-soft); border-radius: 12px; }
+.dashboard-view .portal-nav { top: 88px; background: color-mix(in srgb, var(--panel) 96%, transparent); border-radius: var(--radius-sm); }
+.dashboard-view .metric-v2 { min-height: 128px; border-radius: var(--radius-sm); }
+.dashboard-view .portal-empty-v2 { border-style: solid; border-color: var(--line-soft); background: var(--bg-soft); border-radius: var(--radius-sm); }
 .dashboard-view .portal-empty-v2 h3 { font-size: 20px; }
 @media (max-width: 1040px) {
   .dashboard-view .portal-head { align-items: flex-start; }

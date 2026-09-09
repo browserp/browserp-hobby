@@ -33,8 +33,13 @@ test("games hub offers exactly the four launch games in the requested order", ()
   assert.equal(forza.children[0].children[0].src, "/assets/games/forza-official.jpg");
   assert.ok(upcoming.every((card) => card.tagName === "a" && card.href.startsWith("/games/") && card.children.at(-1).textContent === "Coming soon"));
   const future = nodes.get("#game-future-grid-v6").children;
-  assert.deepEqual(future.map(card => card.href), ["/games/gta6", "/games/6m"]);
-  assert.ok(future.every(card => card.children.at(-1).textContent === "Coming soon"));
+  assert.equal(future.length, 1);
+  assert.equal(future[0].tagName, "article");
+  assert.equal(future[0].dataset.platform, "gta6");
+  assert.equal(future[0].children[0].children[0].src, "/assets/games/gta6-official.jpg");
+  assert.equal(future[0].children[1].children[0].textContent, "Coming soon");
+  assert.deepEqual(future[0].children[1].children.at(-1).children.map(link => link.href), ["/games/gta6", "/games/6m"]);
+  assert.match(future[0].children[1].children[2].textContent, /not a confirmed platform or launch/);
   const html = readFileSync(new URL("../public/game.html", import.meta.url), "utf8");
   assert.match(html, /<details class="game-upcoming-v5" id="game-upcoming-v5">/);
   assert.doesNotMatch(html, /<details[^>]*\bopen\b/);

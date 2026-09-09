@@ -231,7 +231,7 @@ export async function hasStaffMembership(userId) {
 }
 
 export async function connectionSessionStatus(session, { requireRecent = false } = {}) {
-  const access = await rpc("member_connection_status", {}, session.accessToken);
+  const access = await rpc("member_connection_status_v2", {}, session.accessToken);
   if (access?.active !== true || access.userId !== session.user.id || !access.sessionId) {
     throw Object.assign(new Error("Sign in again to manage your connected accounts."), { status: 401 });
   }

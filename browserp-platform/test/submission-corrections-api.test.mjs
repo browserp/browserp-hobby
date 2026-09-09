@@ -12,7 +12,7 @@ async function isolated(run,override=()=>undefined){const env={SUPABASE_URL:"htt
  if(c.url.pathname==="/auth/v1/user")return response({id:owner,app_metadata:{provider:"discord",providers:["discord"]},identities:[{provider:"discord"}]});
  if(c.url.pathname.endsWith("/check_security_ban_server"))return response(null);
  if(c.url.pathname.endsWith("/consume_rate_limit"))return response(true);
- if(c.url.pathname.endsWith("/member_connection_status"))return response({active:true,userId:owner,sessionId:sid});
+ if(c.url.pathname.endsWith("/member_connection_status_v2"))return response({active:true,userId:owner,sessionId:sid});
  if(c.url.pathname.endsWith("/member_server_submission"))return response({submission:{id,review_version:3,status:"changes_requested",review_note:"Please correct the details."},history:[]});
  if(c.url.pathname.endsWith('/'+SERVER_SUBMISSION_CORRECTION_RPC))return response({id,status:"pending_review",review_version:4,idempotent:false});
  throw new Error(`Unexpected fixture route ${c.url.pathname}`);};
@@ -36,7 +36,7 @@ test("correction API rejects foreign origin, CSRF, missing consent, changed acco
  ])await isolated(async calls=>{const r=req();change(r);const output=res();await handler(r,output);assert.equal(output.statusCode,status,output.body.error);assert.equal(calls.some(c=>c.url.pathname.endsWith('/'+SERVER_SUBMISSION_CORRECTION_RPC)),false);});
 });
 test("revoked or cross-account session state is rejected even when Auth still accepts the access token",async()=>{
- for(const access of [{active:false},{active:true,userId:other,sessionId:sid},{active:true,userId:owner,sessionId:"bad"}])await isolated(async calls=>{const output=res();await handler(req(),output);assert.equal(output.statusCode,401);assert.equal(calls.some(c=>c.url.pathname.endsWith('/'+SERVER_SUBMISSION_CORRECTION_RPC)),false);},c=>c.url.pathname.endsWith("/member_connection_status")?response(access):undefined);
+ for(const access of [{active:false},{active:true,userId:other,sessionId:sid},{active:true,userId:owner,sessionId:"bad"}])await isolated(async calls=>{const output=res();await handler(req(),output);assert.equal(output.statusCode,401);assert.equal(calls.some(c=>c.url.pathname.endsWith('/'+SERVER_SUBMISSION_CORRECTION_RPC)),false);},c=>c.url.pathname.endsWith("/member_connection_status_v2")?response(access):undefined);
 });
 test("single submission read uses owner-scoped authenticated RPC and checks the account displayed in the form",async()=>isolated(async calls=>{
  const r=req("GET");r.url=`/api/submissions?id=${id}&account=${owner}`;const output=res();await handler(r,output);assert.equal(output.statusCode,200);const read=calls.find(c=>c.url.pathname.endsWith("/member_server_submission"));assert.equal(read.options.headers.Authorization,`Bearer ${token}`);assert.equal(read.options.headers.apikey,"sb_publishable_fixture");assert.deepEqual(read.body,{p_submission_id:id});

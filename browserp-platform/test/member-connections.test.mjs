@@ -35,7 +35,7 @@ async function isolated(handler, run) {
     if (call.url.pathname === "/auth/v1/settings") return response({ external: { google: true, discord: true } });
     if (call.url.pathname.endsWith("/rpc/check_security_ban_server")) return response(null);
     if (call.url.pathname.endsWith("/rpc/consume_rate_limit")) return response(true);
-    if (call.url.pathname.endsWith("/rpc/member_connection_status")) return response(access);
+    if (call.url.pathname.endsWith("/rpc/member_connection_status_v2")) return response(access);
     if (call.url.pathname.endsWith("/rpc/member_connection_operation")) return response(call.body.p_action === "begin" ? "dddddddd-0000-4000-8000-000000000001" : null);
     throw new Error(`Unexpected fixture request ${call.url.pathname}`);
   };
@@ -138,7 +138,7 @@ test("provider redirects only allow the matching HTTPS consent endpoint", () => 
 
 test("linking refuses revoked and stale original sessions before calling the provider", async () => {
   for (const [status, expected] of [[{ active: false }, 401], [{ ...access, recent: false }, 428]]) {
-    await isolated(call => call.url.pathname.endsWith("/rpc/member_connection_status") ? response(status) : undefined, async calls => {
+    await isolated(call => call.url.pathname.endsWith("/rpc/member_connection_status_v2") ? response(status) : undefined, async calls => {
       await assert.rejects(beginIdentityLink(request("POST"), output(), "google"), { status: expected });
       assert.equal(calls.some(call => call.url.pathname.endsWith("/identities/authorize")), false);
     });
@@ -149,7 +149,7 @@ test("link callback requires the original active, recent session even after prov
   for (const changed of [{ active: false }, { ...access, recent: false }, { ...access, sessionId: otherId }, { ...access, authenticatedAt: authenticatedAt + 1 }]) {
     let callbackStage = false; let authorization;
     await isolated(call => {
-      if (call.url.pathname.endsWith("/rpc/member_connection_status")) return response(callbackStage ? changed : access);
+      if (call.url.pathname.endsWith("/rpc/member_connection_status_v2")) return response(callbackStage ? changed : access);
       if (call.url.pathname.endsWith("/identities/authorize")) { authorization = call.url; return response({ url: "https://accounts.google.com/o/oauth2/v2/auth" }); }
     }, async calls => {
       const start = output(); const req = request("POST"); await beginIdentityLink(req, start, "google"); callbackStage = true;
@@ -199,7 +199,7 @@ test("disconnect reuses the refreshed token under its lease instead of refreshin
     const result = await unlinkMemberIdentity(request("POST", `brp_access=expired; brp_refresh=fixture-original-refresh; brp_csrf=${csrf}`), output(), { provider: "google", identityId: googleIdentity, accountId: userId });
     assert.equal(result.disconnected, true); assert.equal(refreshes, 1);
     assert.equal(calls.filter(call => call.url.pathname === "/auth/v1/user").length, 3);
-    assert.equal(calls.filter(call => call.url.pathname.endsWith("/rpc/member_connection_status")).length, 2);
+    assert.equal(calls.filter(call => call.url.pathname.endsWith("/rpc/member_connection_status_v2")).length, 2);
   });
 });
 
@@ -209,8 +209,8 @@ test("disconnect preserves the last enabled login and rejects stale-page ownersh
       if (call.url.pathname === "/auth/v1/user") return response(scenario === "last" ? user : scenario === "identity-owner" ? { ...linked, identities: linked.identities.map(item => ({ ...item, user_id: otherId })) } : linked);
       if (scenario === "disabled" && call.url.pathname === "/auth/v1/settings") return response({ external: { google: true, discord: false } });
       if (scenario === "staff" && call.url.pathname === "/rest/v1/staff_memberships") return response([{ user_id: userId, status: "revoked" }]);
-      if (scenario === "revoked" && call.url.pathname.endsWith("/rpc/member_connection_status")) return response({ active: false });
-      if (scenario === "stale" && call.url.pathname.endsWith("/rpc/member_connection_status")) return response({ ...access, recent: false });
+      if (scenario === "revoked" && call.url.pathname.endsWith("/rpc/member_connection_status_v2")) return response({ active: false });
+      if (scenario === "stale" && call.url.pathname.endsWith("/rpc/member_connection_status_v2")) return response({ ...access, recent: false });
     }, async calls => {
       await assert.rejects(unlinkMemberIdentity(request("POST"), output(), { provider: scenario === "last" ? "discord" : "google", identityId: scenario === "last" ? discordIdentity : scenario === "wrong-identity" ? otherId : scenario === "provider-id" ? "fixture-google" : googleIdentity, accountId: scenario === "wrong-account" ? otherId : userId }));
       assert.equal(calls.some(call => call.options.method === "DELETE"), false, scenario);
@@ -241,7 +241,7 @@ test("disconnect fails closed on CSRF and an in-progress operation; logout outag
 });
 
 test("connection API requires the displayed account and exposes stale authentication without mutation controls", async () => {
-  await isolated(call => call.url.pathname.endsWith("/rpc/member_connection_status") ? response({ ...access, recent: false }) : undefined, async () => {
+  await isolated(call => call.url.pathname.endsWith("/rpc/member_connection_status_v2") ? response({ ...access, recent: false }) : undefined, async () => {
     const res = output(); await router({ ...request(), browserpRoute: "me/connections" }, res);
     assert.equal(res.statusCode, 200); assert.equal(res.body.connections.accountId, userId); assert.equal(res.body.connections.reauthenticationRequired, true);
     assert.ok(res.body.connections.providers.every(item => !item.canConnect && !item.canDisconnect));

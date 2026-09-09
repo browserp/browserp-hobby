@@ -28,7 +28,7 @@ function result() {
 const isSubmissionWrite = call => /\/(?:create_server_application|create_server_submission|attach_server_submission)/.test(call.url.pathname);
 async function fixture(run, override = () => undefined) {
   const env = { SUPABASE_URL: "https://fixture.supabase.co", SUPABASE_PUBLISHABLE_KEY: "sb_publishable_fixture",
-    SUPABASE_SECRET_KEY: "sb_secret_fixture", APP_URL: "http://localhost:8080", NODE_ENV: "test", VERCEL: "0", PRIVACY_HASH_SECRET: "fixture-private-hash" };
+    SUPABASE_SECRET_KEY: "sb_secret_fixture", APP_URL: "http://localhost:8080", NODE_ENV: "test", VERCEL: "0", PRIVACY_HASH_SECRET: "fixture-private-hash", CONTENT_WRITES_PAUSED: "true" };
   const previous = new Map(Object.keys(env).map(key => [key, process.env[key]]));
   const originalFetch = globalThis.fetch;
   const calls = [];
@@ -41,7 +41,7 @@ async function fixture(run, override = () => undefined) {
     if (call.url.pathname === "/auth/v1/user") return response({ id: owner, app_metadata: { provider: "discord", providers: ["discord"] }, identities: [{ provider: "discord" }] });
     if (call.url.pathname.endsWith("/check_security_ban_server")) return response(null);
     if (call.url.pathname.endsWith("/consume_rate_limit")) return response(true);
-    if (call.url.pathname.endsWith("/member_connection_status")) return response({ active: true, userId: owner, sessionId });
+    if (call.url.pathname.endsWith("/member_connection_status_v2")) return response({ active: true, userId: owner, sessionId });
     if (call.url.pathname.endsWith(`/${SERVER_APPLICATION_RPC}`)) return response({ id: submissionId, status: "pending_review" });
     if (call.url.pathname.endsWith("/attach_server_submission_metadata_server")) return response({ id: submissionId, tags: valid.tags, accessType: valid.accessType });
     throw new Error(`Unexpected fixture route ${call.url.pathname}`);
@@ -58,7 +58,7 @@ test("new listing revalidates the current member before a single atomic privileg
   await handler(request(), output);
   assert.equal(output.statusCode, 202, output.body.error);
   assert.equal(output.body.submission.id, submissionId);
-  const check = calls.find(call => call.url.pathname.endsWith("/member_connection_status"));
+  const check = calls.find(call => call.url.pathname.endsWith("/member_connection_status_v2"));
   assert.deepEqual(check.body, {});
   assert.equal(check.options.headers.Authorization, `Bearer ${token}`);
   assert.equal(check.options.headers.apikey, "sb_publishable_fixture");
@@ -94,7 +94,7 @@ test("revoked, expired and cross-account session results cannot create a new lis
     assert.ok(calls.some(call => call.url.pathname === "/auth/v1/user"));
     assert.equal(calls.some(isSubmissionWrite), false);
     assert.equal(calls.some(call => call.url.pathname.endsWith("/consume_rate_limit")), false);
-  }, call => call.url.pathname.endsWith("/member_connection_status") ? response(access) : undefined));
+  }, call => call.url.pathname.endsWith("/member_connection_status_v2") ? response(access) : undefined));
 });
 
 test("an unavailable current-session check fails closed without clearing the accepted session or writing", async () => fixture(async calls => {
@@ -103,7 +103,7 @@ test("an unavailable current-session check fails closed without clearing the acc
   assert.equal(output.statusCode, 503);
   assert.equal(calls.some(isSubmissionWrite), false);
   assert.equal(JSON.stringify(output.headers.get("Set-Cookie") || []).includes("brp_access=;"), false);
-}, call => call.url.pathname.endsWith("/member_connection_status") ? response({ message: "Session check temporarily unavailable" }, 503) : undefined));
+}, call => call.url.pathname.endsWith("/member_connection_status_v2") ? response({ message: "Session check temporarily unavailable" }, 503) : undefined));
 
 test("new listing origin and CSRF checks run before session eligibility and privileged submission writes", async t => {
   for (const [name, mutate, noProviderCalls] of [
@@ -114,7 +114,7 @@ test("new listing origin and CSRF checks run before session eligibility and priv
     const req = request(); mutate(req); const output = result(); await handler(req, output);
     assert.equal(output.statusCode, 403, output.body.error);
     assert.equal(calls.some(isSubmissionWrite), false);
-    assert.equal(calls.some(call => call.url.pathname.endsWith("/member_connection_status")), false);
+    assert.equal(calls.some(call => call.url.pathname.endsWith("/member_connection_status_v2")), false);
     if (noProviderCalls) assert.equal(calls.length, 0);
   }));
 });

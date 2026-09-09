@@ -359,6 +359,8 @@
       const actions = [];
       if (server.slug && String(server.status).toLowerCase() === "published") actions.push(link(`/server/${encodeURIComponent(server.slug)}`, "small-button", "View listing"));
       if (server.id && String(server.status).toLowerCase() === "published") actions.push(link(`/list-server?listing=${encodeURIComponent(server.id)}`, "small-button", "Request update"));
+      const badgeAction = window.BrowseRPOwnerBadge?.createAction({ slug: server.slug, status: server.status, serverName: server.name });
+      if (badgeAction) actions.push(badgeAction);
       list.append(listItem(server.name || "Roleplay server", `Updated ${dateLabel(server.updated_at)}`, actions, { status: server.status }));
     });
     section.append(list);

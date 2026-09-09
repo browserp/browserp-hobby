@@ -1,0 +1,140 @@
+{
+  "base_commit": "57e9b528d87156b3d4d8bf33b72050c66937eb6a",
+  "changed_product_files": [
+    "browserp-platform/public/game-artwork.css",
+    "browserp-platform/public/homepage.css",
+    "browserp-platform/public/public-layout.css",
+    "browserp-platform/public/server-detail.css"
+  ],
+  "responsive_intent": [
+    {
+      "viewport_css_px": 320,
+      "lead": 48.0,
+      "section": 40.0,
+      "utility": 24.0,
+      "heading": 20.0,
+      "home_picker_to_listing_padding_before": 96,
+      "home_picker_to_listing_padding_after": 48.0,
+      "game_hero_to_browser_padding_before": 98,
+      "game_hero_to_browser_padding_after": 48.0,
+      "server_identity_outer_frame_px": 64,
+      "identity_image_inset_px": 6
+    },
+    {
+      "viewport_css_px": 390,
+      "lead": 48.0,
+      "section": 40.0,
+      "utility": 24.0,
+      "heading": 20.0,
+      "home_picker_to_listing_padding_before": 96,
+      "home_picker_to_listing_padding_after": 48.0,
+      "game_hero_to_browser_padding_before": 98,
+      "game_hero_to_browser_padding_after": 48.0,
+      "server_identity_outer_frame_px": 64,
+      "identity_image_inset_px": 6
+    },
+    {
+      "viewport_css_px": 760,
+      "lead": 48.0,
+      "section": 40.0,
+      "utility": 24.0,
+      "heading": 20.0,
+      "home_picker_to_listing_padding_before": 96,
+      "home_picker_to_listing_padding_after": 48.0,
+      "game_hero_to_browser_padding_before": 98,
+      "game_hero_to_browser_padding_after": 48.0,
+      "server_identity_outer_frame_px": 64,
+      "identity_image_inset_px": 6
+    },
+    {
+      "viewport_css_px": 768,
+      "lead": 48.0,
+      "section": 40.0,
+      "utility": 24.0,
+      "heading": 20.0,
+      "home_picker_to_listing_padding_before": 136,
+      "home_picker_to_listing_padding_after": 48.0,
+      "game_hero_to_browser_padding_before": 98,
+      "game_hero_to_browser_padding_after": 48.0,
+      "server_identity_outer_frame_px": 96,
+      "identity_image_inset_px": 6
+    },
+    {
+      "viewport_css_px": 1024,
+      "lead": 51.2,
+      "section": 46.08,
+      "utility": 25.6,
+      "heading": 20.48,
+      "home_picker_to_listing_padding_before": 136,
+      "home_picker_to_listing_padding_after": 51.2,
+      "game_hero_to_browser_padding_before": 98,
+      "game_hero_to_browser_padding_after": 51.2,
+      "server_identity_outer_frame_px": 96,
+      "identity_image_inset_px": 6
+    },
+    {
+      "viewport_css_px": 1440,
+      "lead": 72.0,
+      "section": 64.0,
+      "utility": 36.0,
+      "heading": 28.0,
+      "home_picker_to_listing_padding_before": 136,
+      "home_picker_to_listing_padding_after": 72.0,
+      "game_hero_to_browser_padding_before": 98,
+      "game_hero_to_browser_padding_after": 72.0,
+      "server_identity_outer_frame_px": 96,
+      "identity_image_inset_px": 6
+    },
+    {
+      "viewport_css_px": 1920,
+      "lead": 72.0,
+      "section": 64.0,
+      "utility": 36.0,
+      "heading": 28.0,
+      "home_picker_to_listing_padding_before": 136,
+      "home_picker_to_listing_padding_after": 72.0,
+      "game_hero_to_browser_padding_before": 98,
+      "game_hero_to_browser_padding_after": 72.0,
+      "server_identity_outer_frame_px": 96,
+      "identity_image_inset_px": 6
+    }
+  ],
+  "heading_measures": {
+    "intro_heading": "22ch",
+    "intro_copy": "68ch",
+    "section_heading": "28ch",
+    "section_copy": "65ch",
+    "eyebrow_gap": "10px",
+    "intro_heading_to_copy_gap": "14px"
+  },
+  "image_framing": {
+    "main_game_card_and_hero_ratio": "460 / 215, unchanged",
+    "game_navigation_thumbnail": "46px wide, auto height at 460 / 215; previously 46 x 30",
+    "all_games_artwork": "square frame unchanged; object-fit contain",
+    "server_card_identity": "Existing 96px / 64px frame, contained image with 6px inset; existing logo/banner/error/initials behavior unchanged",
+    "server_card_initials": "fill and center in existing frame",
+    "server_detail_logo": "Existing frame unchanged; containment plus 6px inset; image corner rounding removed to preserve artwork",
+    "editorial_feature_and_ad_crops": "unchanged; no blanket media override"
+  },
+  "preservation": {
+    "only_four_owned_css_product_files": true,
+    "all_ad_and_rail_rules_identical": true,
+    "all_existing_motion_and_colour_declarations_identical": true,
+    "asset_urls_pixels_html_and_javascript_unchanged": true,
+    "card_grid_and_frame_geometry_unchanged": true,
+    "no_theme_switching_changes": true,
+    "no_new_stylesheet_layers_or_packages": true
+  },
+  "focused_tests": {
+    "pass": 14,
+    "fail": 0,
+    "skipped": 0,
+    "suites": [
+      "server-card-identity-ui",
+      "games-launch",
+      "game-results-visibility"
+    ]
+  },
+  "review": "Independent read-only cascade/scope review found no actionable issue. Chat5 confirmed card media classes; Chat2 confirmed detail logo classes.",
+  "limits": "Spacing values are calculated CSS intent, not rendered bounding boxes. No browser batch, screenshot, live verification or deployment was performed; Main owns integration and final unified design pass."
+}

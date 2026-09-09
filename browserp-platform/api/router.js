@@ -6,6 +6,7 @@ import { scheduledDiscordRoleSync, ownerDiscordRoleSync } from "../lib/discord-r
 import { scheduledStatusRefresh } from "../lib/status-refresh-workflow.js";
 import { createHash, randomBytes } from "node:crypto";
 import { endpoint, ok } from "../lib/api.js";
+import { contentWritePaused } from "../lib/content-write-gate.js";
 import { appUrl, developmentCatalogAllowed, supabaseConfig } from "../lib/config.js";
 import { categoriesFromServers, platforms as fallbackPlatforms, servers as fallbackServers } from "../lib/catalog.js";
 import { assertSameOrigin, cookieValue, parseCookies, publicJson, readBody, redirect, safeReturnPath } from "../lib/http.js";
@@ -63,7 +64,7 @@ function safeServerRead() {
 async function currentAccountSession(session) {
   // Auth can recognise a signed JWT after its session has been revoked. Check
   // the live session before reading personal data or writing with service access.
-  const access = await rpc("member_connection_status", {}, session.accessToken);
+  const access = await rpc("member_connection_status_v2", {}, session.accessToken);
   return access?.active === true && access.userId === session.user.id && Boolean(access.sessionId);
 }
 
@@ -435,6 +436,7 @@ const routes = {
   "admin/data-requests": endpoint(["GET", "POST"], async (req, res) => ok(res, await staffPrivacyRequests(req, res))),
 
   "me/profile": endpoint(["GET", "POST"], async (req, res) => {
+    if (req.method === "POST" && contentWritePaused(res)) return;
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true });
     if (req.method === "GET") {
@@ -475,6 +477,7 @@ const routes = {
   }),
 
   "me/avatar": endpoint("POST", async (req, res, requestId) => {
+    if (contentWritePaused(res)) return;
     assertSameOrigin(req);
     const session = await getSession(req, res, { required: true });
     if (!await currentAccountSession(session)) throw Object.assign(new Error("Your sign-in expired. Sign in again to continue."), { status: 401 });

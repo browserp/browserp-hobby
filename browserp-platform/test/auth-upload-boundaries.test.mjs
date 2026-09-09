@@ -62,7 +62,7 @@ test("avatar validation decodes pixels and rejects malformed PNGs before any sto
     const path = new URL(value).pathname;
     if (path === "/auth/v1/user") return response(user);
     if (path.endsWith("/rpc/check_security_ban_server")) return response(null);
-    if (path.endsWith("/rpc/member_connection_status")) return response({ active: true, userId: user.id, sessionId: "fixture-active-session" });
+    if (path.endsWith("/rpc/member_connection_status_v2")) return response({ active: true, userId: user.id, sessionId: "fixture-active-session" });
     if (path.endsWith("/rpc/consume_rate_limit")) return response(true);
     writes.push(path); throw new Error("Malformed avatar must not reach storage or profile updates");
   }, async () => {
@@ -203,7 +203,7 @@ test("a real cropped PNG crosses the avatar route and storage boundary using onl
     const url = new URL(value);
     if (url.pathname === "/auth/v1/user") return response(user);
     if (url.pathname.endsWith("/rpc/check_security_ban_server")) return response(null);
-    if (url.pathname.endsWith("/rpc/member_connection_status")) return response({ active: true, userId: user.id, sessionId: "fixture-active-session" });
+    if (url.pathname.endsWith("/rpc/member_connection_status_v2")) return response({ active: true, userId: user.id, sessionId: "fixture-active-session" });
     if (url.pathname.endsWith("/rpc/consume_rate_limit")) return response(true);
     if (url.pathname.startsWith("/storage/v1/object/profile-media/")) { storedPath = url.pathname; assert.deepEqual(options.body, png); assert.equal(options.headers["x-upsert"], "false"); return response({ Key: url.pathname }); }
     if (url.pathname === "/rest/v1/uploaded_assets") { registered = JSON.parse(options.body); assert.equal(registered.owner_id, user.id); return response([{ id: "00000000-0000-4000-8000-000000000002" }]); }
@@ -227,7 +227,7 @@ test("revoked but otherwise valid JWTs cannot read private profiles, expose sess
       const path = new URL(value).pathname;
       if (path === "/auth/v1/user") return response({ ...user, email: "private-fixture@example.test", factors: [{ id: "private-factor", factor_type: "totp", status: "verified" }] });
       if (path.endsWith("/rpc/check_security_ban_server")) return response(null);
-      if (path.endsWith("/rpc/member_connection_status")) return response(denied);
+      if (path.endsWith("/rpc/member_connection_status_v2")) return response(denied);
       privileged.push({ path, method: options.method }); throw new Error("Privileged work must not run for a revoked session");
     }, async () => {
       for (const route of ["auth/session", "me/profile", "me/avatar"]) {
@@ -251,7 +251,7 @@ test("current account sessions can read profiles and AAL1 staff setup remains av
       const path = new URL(value).pathname;
       if (path === "/auth/v1/user") return response(user);
       if (path.endsWith("/rpc/check_security_ban_server")) return response(null);
-      if (path.endsWith("/rpc/member_connection_status")) return unavailable ? response({ message: "Unavailable" }, 503) : response({ active: true, userId: user.id, sessionId: "fixture-active-session", recent: false });
+      if (path.endsWith("/rpc/member_connection_status_v2")) return unavailable ? response({ message: "Unavailable" }, 503) : response({ active: true, userId: user.id, sessionId: "fixture-active-session", recent: false });
       if (path === "/rest/v1/profiles") { profileReads++; return response([{ display_name: "Fixture member" }]); }
       if (path.endsWith("/rpc/staff_mfa_enrollment_allowed")) return response(true);
       if (path.endsWith("/rpc/staff_mfa_policy")) return response({ staffMfaRequired: true });
@@ -283,7 +283,7 @@ test("staff entry eligibility and MFA-verified workspace access remain separate 
       const path = new URL(value).pathname;
       if (path === "/auth/v1/user") return response({ ...user, user_metadata: { role: "owner", staff: true }, factors: [{ factor_type: "totp", status: "verified", id: "fixture-factor" }] });
       if (path.endsWith("/rpc/check_security_ban_server")) return response(null);
-      if (path.endsWith("/rpc/member_connection_status")) return response({ active: true, userId: user.id, sessionId: "fixture-live-session" });
+      if (path.endsWith("/rpc/member_connection_status_v2")) return response({ active: true, userId: user.id, sessionId: "fixture-live-session" });
       if (path === "/rest/v1/profiles") return response([{ display_name: "Fixture member" }]);
       if (path.endsWith("/rpc/staff_mfa_enrollment_allowed")) return response(fixture.membership);
       if (path.endsWith("/rpc/staff_mfa_policy")) return fixture.unavailable ? response({ message: "Unavailable" }, 503) : response({ staffMfaRequired: fixture.required });

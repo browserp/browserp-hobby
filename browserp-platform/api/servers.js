@@ -1,6 +1,7 @@
 import { enrichRobloxApplications } from "../lib/roblox-listings.js";
 import { enrichMinecraftServers, refreshDueMinecraftServers } from "../lib/minecraft-workflow.js";
 import { endpoint, ok } from "../lib/api.js";
+import { contentWritePaused } from "../lib/content-write-gate.js";
 import { servers as fallbackServers } from "../lib/catalog.js";
 import { developmentCatalogAllowed } from "../lib/config.js";
 import { enrichImportedServers, refreshDueFiveMServers } from "../lib/fivem-workflow.js";
@@ -10,6 +11,8 @@ import { assertSameOrigin, publicJson, readBody } from "../lib/http.js";
 import { assessContent, sanitizePlainText } from "../lib/moderation.js";
 import { rateLimit } from "../lib/rate-limit.js";
 import { getSession, rpc } from "../lib/supabase.js";
+import { readPlayerHistory } from "../lib/player-history.js";
+import { readSimilarCommunities, selectSimilarCommunities } from "../lib/similar-communities.js";
 
 function safeText(value, limit) {
   return String(value || "").trim().slice(0, limit);
@@ -17,14 +20,30 @@ function safeText(value, limit) {
 
 export default endpoint(["GET", "POST"], async (req, res) => {
   const url = new URL(req.url, "http://browserp.local");
+  if (req.method === "GET" && url.searchParams.has("history")) {
+    return publicJson(res, await readPlayerHistory(req, url.searchParams), 60);
+  }
+  if (req.method === "GET" && url.searchParams.has("similar")) {
+    const similarSlug = safeText(url.searchParams.get("similar"), 100).toLowerCase();
+    let similar;
+    try { similar = await readSimilarCommunities(similarSlug); }
+    catch (error) {
+      if (!developmentCatalogAllowed() || error.status === 400) throw error;
+      const candidates = filterServers(fallbackServers, { limit: 60 });
+      similar = selectSimilarCommunities(candidates.find(server => server.slug === similarSlug), candidates);
+    }
+    similar = await enrichRobloxApplications(await enrichMinecraftServers(await enrichImportedServers(similar, { refresh: false }), { refresh: false }));
+    return publicJson(res, { servers: similar }, 60);
+  }
   const filters = Object.fromEntries(url.searchParams.entries());
   const slug = safeText(filters.slug, 100).toLowerCase();
   if (req.method === "POST") {
     assertSameOrigin(req);
-    const session = await getSession(req, res, { required: true });
-    await rateLimit(req, "server-interaction", 20, 300);
     const body = await readBody(req, 8 * 1024);
     const action = safeText(body.action, 20).toLowerCase();
+    if (action === "comment" && contentWritePaused(res)) return;
+    const session = await getSession(req, res, { required: true });
+    await rateLimit(req, "server-interaction", 20, 300);
     const serverId = safeText(body.serverId, 40).toLowerCase();
     if (!/^[0-9a-f-]{36}$/.test(serverId) || !["vote", "unvote", "comment", "report"].includes(action)) {
       throw Object.assign(new Error("Choose a valid server action."), { status: 400 });

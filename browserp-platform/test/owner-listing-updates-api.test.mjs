@@ -41,7 +41,7 @@ async function fixture(run, override = () => undefined) {
     if (call.url.pathname === "/auth/v1/user") return response({ id: owner, app_metadata: { provider: "discord", providers: ["discord"] }, identities: [{ provider: "discord" }] });
     if (call.url.pathname.endsWith("/check_security_ban_server")) return response(null);
     if (call.url.pathname.endsWith("/consume_rate_limit")) return response(true);
-    if (call.url.pathname.endsWith("/member_connection_status")) return response({ active: true, userId: owner, sessionId });
+    if (call.url.pathname.endsWith("/member_connection_status_v2")) return response({ active: true, userId: owner, sessionId });
     if (call.url.pathname.endsWith("/propose_owned_listing_update_server") || call.url.pathname.endsWith("/correct_owned_listing_update_server")) return response({ id: submissionId, status: "pending_review" });
     if (call.url.pathname.endsWith(`/${SERVER_APPLICATION_RPC}`)) return response({ id: submissionId, status: "pending_review" });
     if (call.url.pathname.endsWith("/attach_server_submission_metadata_server")) return response({ id: submissionId, tags: valid.tags, accessType: valid.accessType });
@@ -62,7 +62,7 @@ test("owner proposal reaches only the dedicated atomic writer with account, targ
 }));
 test("revoked, stale, foreign, malformed and CSRF requests cannot reach an owner write",async t=>{
  for(const [name,change] of [["wrong account",r=>r.body.expectedAccountId=other],["invalid version",r=>r.body.expectedServerVersion=0],["missing target",r=>r.body.listingUpdate="bad"],["foreign origin",r=>r.headers.origin="https://attacker.example"],["CSRF",r=>delete r.headers["x-browserp-csrf"]]])await t.test(name,async()=>fixture(async calls=>{const req=ownerRequest();change(req);const out=result();await handler(req,out);assert.ok(out.statusCode>=400);assert.equal(calls.filter(isSubmissionWrite).length,0);}));
- await t.test("revoked live session",async()=>fixture(async calls=>{const out=result();await handler(ownerRequest(),out);assert.equal(out.statusCode,401);assert.equal(calls.filter(isSubmissionWrite).length,0);},c=>c.url.pathname.endsWith("/member_connection_status")?response({active:false}):undefined));
+ await t.test("revoked live session",async()=>fixture(async calls=>{const out=result();await handler(ownerRequest(),out);assert.equal(out.statusCode,401);assert.equal(calls.filter(isSubmissionWrite).length,0);},c=>c.url.pathname.endsWith("/member_connection_status_v2")?response({active:false}):undefined));
 });
 test("correction proposals use the ownership-aware writer, preserving ordinary correction behavior",async()=>fixture(async calls=>{
  const req=ownerRequest();req.method="PATCH";delete req.body.listingUpdate;Object.assign(req.body,{ownerUpdate:true,submissionId,expectedVersion:2,expectedQueueVersion:3});const out=result();await handler(req,out);assert.equal(out.statusCode,202,out.body.error);const write=calls.filter(isSubmissionWrite)[0];assert.match(write.url.pathname,/correct_owned_listing_update_server$/);assert.equal(write.body.p_expected_server_version,4);assert.equal(write.body.p_submission_id,submissionId);

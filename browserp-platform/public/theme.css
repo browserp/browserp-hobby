@@ -14,11 +14,12 @@
   --pink: #b91f72;
   --pink-strong: #9c155f;
   --violet: #6740bb;
-  --cyan: #5b36a4;
+  --cyan: #006d94;
+  --info: #5b36a4;
   --success: #16734f;
   --warning: #895609;
   --danger: #a3253c;
-  --focus: #7c3cc4;
+  --focus: var(--cyan);
   --ink: var(--text);
   --quiet: var(--muted);
   --canvas: var(--bg);
@@ -41,7 +42,7 @@
 :root[data-theme="light"] ::selection { color: #fff; background: rgb(156 21 95 / .65); }
 :root[data-theme="light"] .header-v3,
 :root[data-theme="light"] .public-header-v6 { background: rgb(255 253 253 / .93); border-color: var(--line-soft); }
-:root[data-theme="light"] .navigation-dialog-v6 { box-shadow: -20px 0 80px rgb(62 36 61 / .22); }
+:root[data-theme="light"] .navigation-dialog-v6 { box-shadow: var(--shadow-lg); }
 :root[data-theme="light"] .navigation-dialog-v6::backdrop { background: rgb(45 31 45 / .45); }
 
 :root[data-theme="light"] :is(
@@ -67,18 +68,18 @@
   .hero-proof div,
   .empty-panel,
   .review-dialog-shell
-) { color: var(--text); background: var(--panel); border-color: var(--line); box-shadow: var(--shadow-sm); }
+) { color: var(--text); background: var(--panel); border-color: var(--line); box-shadow: none; }
+:root[data-theme="light"] .review-dialog-shell { box-shadow: var(--shadow-lg); }
 
 :root[data-theme="light"] :is(.server-card:hover,.game-grid-v3 a:hover,.category-card:hover) {
-  background: var(--panel-2);
-  border-color: color-mix(in srgb,var(--pink) 42%,var(--line));
-  box-shadow: var(--shadow-md);
+  background: var(--surface-hover);
+  border-color: var(--interactive-edge);
+  box-shadow: var(--shadow-sm);
 }
 :root[data-theme="light"] :is(.server-description,.section-head-v3 p,.editorial-v3 p,.game-grid-v3 small,.side-ad-copy-v3 span) { color: var(--copy); }
 :root[data-theme="light"] .game-grid-v3 .game-all-v3 .game-art-v3 { background: #eee5f0; }
-:root[data-theme="light"] :is(.search-suggestion-v3[aria-selected="true"],.search-suggestion-v3:hover) { background: #f3e4ee; }
-:root[data-theme="light"] .search-suggestion-v3[aria-selected="true"] { background: linear-gradient(100deg,#f3e4ee,#ece6f6); }
-:root[data-theme="light"] .account-popover-v3 { box-shadow: 0 18px 55px rgb(62 36 61 / .2); }
+:root[data-theme="light"] :is(.search-suggestion-v3[aria-selected="true"],.search-suggestion-v3:hover) { background: var(--selection-surface); }
+:root[data-theme="light"] .account-popover-v3 { box-shadow: var(--shadow-md); }
 :root[data-theme="light"] .account-popover-v3 :is(a,button):is(:hover,:focus-visible) { background: rgb(185 31 114 / .08); }
 :root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) .navigation-game-v6[data-platform="roblox"] { --platform-accent: #394052; --game-colour: #394052; color: #394052; }
 

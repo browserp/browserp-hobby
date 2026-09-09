@@ -1,10 +1,11 @@
 /* Homepage layout; the shared logo treatment lives in wordmark-pattern.css. */
-.home-hero-v3 { padding: 0 0 64px; background: none; }
+.home-hero-v3 { padding: 0 0 var(--public-space-utility); background: none; }
+.home-hero-v3 + .section-v3 { padding-block: var(--public-space-utility) var(--public-space-section); }
 .home-hero-v3::after { display: none; }
-.home-hero-intro { position: relative; padding: 90px 0 30px; isolation: isolate; }
+.home-hero-intro { position: relative; padding: var(--public-space-lead) 0 var(--public-space-utility); isolation: isolate; }
 .home-hero-intro .hero-copy-v3 { max-width: 1000px; }
-.home-hero-intro h1 { max-width: 1000px; }
-.home-hero-intro p { max-width: 780px; }
+.home-hero-intro h1 { max-width: 22ch; }
+.home-hero-intro p { max-width: 68ch; }
 .home-hero-intro .search-v3 { margin-bottom: 0; }
 .home-game-discovery .game-showcase-v3 { box-shadow: none; }
 .home-game-discovery .game-grid-v3 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
@@ -19,7 +20,7 @@
   padding: 12px;
 }
 .home-game-discovery .game-grid-v3 .game-art-all-v5 { width: 136px; height: 136px; }
-.home-game-discovery .game-grid-v3 .game-art-all-v5 img { width: 100%; height: 100%; object-fit: cover; }
+.home-game-discovery .game-grid-v3 .game-art-all-v5 img { width: 100%; height: 100%; object-fit: contain; }
 .home-game-discovery .game-grid-v3 [aria-pressed="true"] {
   border-color: var(--platform-accent, var(--pink));
   background: var(--panel-2);
@@ -60,8 +61,6 @@ body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .side-ad-copy-v3 
 body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .ad-dots-v3 { position: static; }
 body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .ad-arrow-previous-v3 { left: 10px; }
 @media (max-width: 760px) {
-  .home-hero-v3 { padding-bottom: 42px; }
-  .home-hero-intro { padding-top: 60px; }
   .home-game-discovery .game-grid-v3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .home-game-discovery .game-grid-v3 .game-all-v3 { width: 100%; grid-template-columns: 110px minmax(0, 1fr); column-gap: 16px; }
   .home-game-discovery .game-grid-v3 .game-art-all-v5 { width: 110px; height: 110px; }

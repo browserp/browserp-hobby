@@ -184,7 +184,7 @@ export default endpoint(["GET", "POST", "PATCH"], async (req, res, requestId) =>
       if (account !== null && account !== session.user.id) throw Object.assign(new Error("Your signed-in account changed. Sign in again to continue this correction."), { status: 401 });
       return ok(res, await rpc("member_server_submission", { p_submission_id: id }, session.accessToken));
     }
-    const access = await rpc("member_connection_status", {}, session.accessToken);
+    const access = await rpc("member_connection_status_v2", {}, session.accessToken);
     if (access?.active !== true || access.userId !== session.user.id) {
       throw Object.assign(new Error("Sign in again to view your submissions."), { status: 401 });
     }
@@ -199,7 +199,7 @@ export default endpoint(["GET", "POST", "PATCH"], async (req, res, requestId) =>
   if (req.method === "POST") {
     // Auth can still accept an access token after its session is revoked.
     // Recheck the current account before either privileged submission write.
-    const access = creationAccess = await rpc("member_connection_status", {}, session.accessToken);
+    const access = creationAccess = await rpc("member_connection_status_v2", {}, session.accessToken);
     if (access?.active !== true || access.userId !== session.user.id || !UUID.test(String(access.sessionId || ""))) {
       throw Object.assign(new Error("Sign in again before submitting your listing."), { status: 401 });
     }
@@ -238,7 +238,7 @@ export default endpoint(["GET", "POST", "PATCH"], async (req, res, requestId) =>
         || !req.headers?.["idempotency-key"]) {
       throw Object.assign(new Error("Open the original submission from My account before sending corrections."), { status: 400 });
     }
-    const access = await rpc("member_connection_status", {}, session.accessToken);
+    const access = await rpc("member_connection_status_v2", {}, session.accessToken);
     if (access?.active !== true || access.userId !== session.user.id || !UUID.test(String(access.sessionId || ""))) {
       throw Object.assign(new Error("Sign in again before correcting your submission."), { status: 401 });
     }
