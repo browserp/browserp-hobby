@@ -81,7 +81,13 @@ test("selected public introductions share one inert pattern while forms and staf
     assert.ok(patterns[0].parentElement.matches("[data-wordmark-surface]"));
     assert.equal(patterns[0].querySelectorAll("a,button,input,form").length, 0);
   }
-  for (const page of ["profile", "list-server", "staffpanel"]) {
+  for (const page of ["dashboard", "profile"]) {
+    const dom = new JSDOM(readFileSync(new URL(`../public/${page}.html`, import.meta.url), "utf8"));
+    t.after(() => dom.window.close());
+    assert.equal(dom.window.document.querySelectorAll('link[href^="/wordmark-pattern.css"]').length, 1, page);
+    assert.equal(dom.window.document.querySelectorAll('.home-hero-pattern').length, 0, "member pattern waits for the authenticated introduction");
+  }
+  for (const page of ["list-server", "staffpanel"]) {
     const source = readFileSync(new URL(`../public/${page}.html`, import.meta.url), "utf8");
     assert.ok(!source.includes("wordmark-pattern.css") && !source.includes("home-hero-pattern"), page);
   }

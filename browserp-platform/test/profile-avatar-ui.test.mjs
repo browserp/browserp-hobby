@@ -50,6 +50,8 @@ test("private content status shows reasons and sends a versioned appeal while th
   const writes = []; const profileWrites = [];
   const dom = new JSDOM('<body data-page="profile"><main id="portal-root"></main><div id="site-toast"></div></body>', { url: "https://browserp.test/profile", runScripts: "outside-only" });
   t.after(() => dom.window.close()); const w = dom.window;
+  const mountedPatterns = [];
+  w.BrowseRPWordmarks = { mount() { mountedPatterns.push(w.document.querySelector(".home-hero-pattern")); } };
   w.fetch = async (path, options = {}) => {
     const payload = path === "/api/auth/session" ? { authenticated: true, csrfToken: "test-csrf", user: { id: "member-1", profile } }
       : path === "/api/me/profile" ? { profile }
@@ -61,6 +63,11 @@ test("private content status shows reasons and sends a versioned appeal while th
     return { ok: true, json: async () => payload };
   };
   w.eval(source); await settle(); await settle();
+  const firstPattern = w.document.querySelector(".portal-head[data-wordmark-surface] > .home-hero-pattern");
+  assert.ok(firstPattern, "the asynchronous profile intro gets the shared decorative pattern");
+  assert.equal(firstPattern.getAttribute("aria-hidden"), "true");
+  assert.deepEqual(mountedPatterns, [firstPattern], "mount runs after the profile is attached");
+  assert.equal(w.document.querySelectorAll(".home-hero-pattern").length, 1);
   const headingImage = w.document.querySelector(".portal-head .portal-avatar img");
   assert.equal(headingImage.src, profile.avatar_url);
   const privatePreview = w.document.querySelector("#content-status .member-moderation-avatar-v3");
@@ -77,4 +84,14 @@ test("private content status shows reasons and sends a versioned appeal while th
   assert.match(w.document.querySelector("#site-toast").textContent, /Saved for review.*current approved profile details stay live/i);
   assert.equal(w.document.querySelector(".portal-head .portal-avatar img").src, profile.avatar_url);
   assert.doesNotMatch(source, /result\.avatarUrl/, "avatar submission responses are never promoted into the public profile client-side");
+  assert.equal(mountedPatterns.length, 2, "saving profile details remounts the shared lifecycle");
+  assert.equal(firstPattern.isConnected, false);
+  assert.equal(mountedPatterns[1], w.document.querySelector(".portal-head[data-wordmark-surface] > .home-hero-pattern"));
+  assert.equal(w.document.querySelectorAll(".home-hero-pattern").length, 1, "refresh cannot duplicate the decoration");
+  w.dispatchEvent(new w.CustomEvent("browserp:session-ended", { detail: { reason: "connection-removed" } }));
+  await settle();
+  assert.equal(w.document.querySelector(".home-hero-pattern"), null);
+  assert.equal(mountedPatterns.length, 3);
+  assert.equal(mountedPatterns.at(-1), null, "the access gate calls mount with no pattern so the shared renderer disposes");
+
 });

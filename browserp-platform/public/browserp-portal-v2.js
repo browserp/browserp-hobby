@@ -225,7 +225,7 @@
     root.className = "";
     root.setAttribute("aria-busy", "false");
     root.replaceChildren(content);
-    if (page === "dashboard") window.BrowseRPWordmarks?.mount();
+    if (["dashboard", "profile"].includes(page)) window.BrowseRPWordmarks?.mount();
   }
 
   function emptyState(title, description, action) {
@@ -792,6 +792,10 @@
       const content = make("div", "dashboard-view profile-page-v3");
       const name = profile.display_name || profile.displayName || "BrowseRP member";
       const heading = portalHead("Community profile", name, "Your gaming identity across BrowseRP comments, reviews and owned communities.", name, profile);
+      heading.head.setAttribute("data-wordmark-surface", "");
+      const pattern = make("div", "home-hero-pattern");
+      pattern.setAttribute("aria-hidden", "true");
+      heading.head.prepend(pattern);
       heading.actions.append(link("/dashboard", "button button-secondary", "My dashboard"), link("/servers", "button button-primary", "Browse servers"));
       content.append(heading.head);
       const stack = make("div", "portal-stack");
