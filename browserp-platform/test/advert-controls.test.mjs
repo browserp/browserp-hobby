@@ -7,7 +7,7 @@ const read = file => readFileSync(new URL(`../public/${file}`, import.meta.url),
 // Match the server page's real stylesheet order, including its later overrides.
 const files = ["browserp-v3.css", "public-layout.css", "product-polish.css", "server-imports.css", "server-detail.css"];
 
-function styles({ width, reduced = false, coarse = false, forced = false }) {
+function styles({ width, reduced = false, coarse = false, forced = false, page = "server" }) {
   const source = new JSDOM("<head></head>");
   const output = [];
   const applies = condition => condition.split(",").some(branch => {
@@ -33,7 +33,8 @@ function styles({ width, reduced = false, coarse = false, forced = false }) {
       }
     }
   };
-  for (const file of files) {
+  const pageFiles = page === "home" ? [...files.slice(0, 3), "homepage.css"] : files;
+  for (const file of pageFiles) {
     const style = source.window.document.createElement("style");
     style.textContent = read(file); source.window.document.head.append(style); collect(style.sheet.cssRules);
   }
@@ -45,9 +46,9 @@ const buttons = () => `<button type="button" class="ad-arrow-v3 ad-arrow-previou
   <button type="button" class="ad-arrow-v3 ad-arrow-next-v3" aria-label="Next advert" data-ad-direction="next">›<span class="fixture-face" aria-hidden="true"></span><span class="fixture-chevron" aria-hidden="true"></span></button>`;
 
 function harness(t, options) {
-  const dom = new JSDOM(`<style>${styles(options)}</style>
+  const dom = new JSDOM(`<style>${styles(options)}</style><body data-page="${options.page || "server"}">
     <div class="content-with-rail-v3"><aside id="directory-ad" class="side-ad-v3"><div class="side-ad-stage-v3">${buttons()}</div></aside><div>Results</div></div>
-    <aside id="banner-ad" class="side-ad-v3 banner-ad-v7"><div class="side-ad-stage-v3">${buttons()}</div></aside>
+    <aside id="banner-ad" class="side-ad-v3 banner-ad-v7"><div class="side-ad-stage-v3"><img class="side-ad-image-v3" alt=""><div class="side-ad-copy-v3"><strong>Put your community in front of roleplayers</strong><span>Personalised picture placements are reviewed before they go live.</span><a href="/advertise">Advertise here</a></div>${buttons()}</div></aside>
     <main id="server-detail-v3" class="server-page-v7"><aside id="server-ad" class="side-ad-v3 server-ad-rail-v7"><div class="side-ad-stage-v3">${buttons()}</div></aside></main>`);
   t.after(() => dom.window.close());
   return { doc: dom.window.document, css: element => dom.window.getComputedStyle(element) };
@@ -102,20 +103,71 @@ test("failed-artwork controls remain in normal flow and anchor their own decorat
   }
 });
 
-test("page banners clear the sticky rail offset and keep healthy and blocked artwork compact", t => {
-  for (const width of [390, 1280]) {
+test("page banners clear the sticky rail offset and reserve mobile copy and control rows", t => {
+  for (const width of [320, 390, 760, 761, 1280]) {
     const h = harness(t, { width, coarse: width < 768 });
     const banner = h.doc.querySelector("#banner-ad"), stage = banner.querySelector(".side-ad-stage-v3");
+    const copy = banner.querySelector(".side-ad-copy-v3"), image = banner.querySelector(".side-ad-image-v3");
+    const previous = banner.querySelector(".ad-arrow-previous-v3"), next = banner.querySelector(".ad-arrow-next-v3");
+    const mobile = width <= 760;
     assert.equal(h.css(banner).position, "relative");
     assert.equal(h.css(banner).top, "auto", `${width}px banner must not inherit the rail's 96px offset`);
-    assert.equal(h.css(stage).height, width <= 760 ? "210px" : "190px");
-    assert.equal(h.css(stage).minHeight, "0px");
-    assert.equal(h.css(stage).maxHeight, width <= 760 ? "210px" : "190px");
+    // The accepted mobile repair lets long copy size the stage above the controls.
+    // These are cascade checks; actual wrapping/overlap is covered by browser QA.
+    assert.equal(h.css(stage).height, mobile ? "auto" : "190px");
+    assert.equal(h.css(stage).minHeight, mobile ? "210px" : "0px");
+    assert.equal(h.css(stage).maxHeight, mobile ? "none" : "190px");
+    assert.equal(h.css(image).position, "absolute");
+    assert.equal(h.css(image).width, "100%");
+    assert.equal(h.css(image).height, "100%");
+    assert.equal(h.css(image).objectFit, "cover");
+    assert.equal(h.css(copy).position, mobile ? "relative" : "absolute");
+    if (mobile) {
+      assert.equal(h.css(stage).display, "grid");
+      assert.equal(h.css(stage).gridTemplateColumns, "minmax(0,1fr) minmax(0,1fr)");
+      assert.equal(h.css(copy).gridColumn, "1 / -1");
+      assert.equal(h.css(copy).gridRow, "1");
+      assert.equal(h.css(copy).minWidth, "0px");
+      assert.equal(h.css(previous).gridColumn, "1");
+      assert.equal(h.css(next).gridColumn, "2");
+      assert.equal(h.css(next).justifySelf, "end");
+    }
+    for (const button of [previous, next]) {
+      assert.equal(h.css(button).position, mobile ? "relative" : "absolute");
+      assert.equal(h.css(button).top, mobile ? "auto" : "50%");
+      if (mobile) {
+        assert.equal(h.css(button).gridRow, "2");
+        for (const property of ["left", "right"]) assert.equal(h.css(button)[property], "auto");
+        assert.equal(h.css(button).marginTop, "0px");
+      }
+    }
     banner.classList.add("artwork-unavailable");
     assert.equal(h.css(stage).height, "auto");
+    assert.equal(h.css(stage).minHeight, "0px");
     assert.equal(h.css(stage).maxHeight, "none");
     assert.equal(h.css(stage).display, "grid");
-    assert.equal(h.css(stage).gridTemplateColumns, width <= 760 ? "86px minmax(0,1fr)" : "120px minmax(0,1fr) 44px 44px");
+    assert.equal(h.css(stage).gridTemplateColumns, mobile ? "86px minmax(0,1fr)" : "120px minmax(0,1fr) 44px 44px");
+    assert.equal(h.css(image).visibility, "hidden");
+    assert.equal(h.css(copy).position, "static");
+    assert.equal(h.css(copy).gridColumn, "2");
+    assert.equal(h.css(copy).gridRow, "1");
+    assert.equal(h.css(previous).gridColumn, mobile ? "1" : "3");
+    assert.equal(h.css(next).gridColumn, mobile ? "2" : "4");
+    for (const button of [previous, next]) assert.equal(h.css(button).gridRow, mobile ? "2" : "1");
+  }
+});
+
+test("Home retains its separate artwork and copy columns instead of the page banner repair", t => {
+  for (const width of [390, 1280]) {
+    const h = harness(t, { width, page: "home" });
+    const banner = h.doc.querySelector("#banner-ad"), stage = banner.querySelector(".side-ad-stage-v3");
+    const copy = banner.querySelector(".side-ad-copy-v3"), image = banner.querySelector(".side-ad-image-v3");
+    assert.equal(h.css(stage).gridTemplateColumns, width <= 760 ? "minmax(0, 1fr) minmax(0, 1.5fr)" : "180px minmax(0, 1fr)");
+    assert.equal(h.css(stage).minHeight, "0px");
+    assert.equal(h.css(copy).position, "static");
+    assert.notEqual(h.css(copy).gridColumn, "1 / -1");
+    assert.notEqual(h.css(image).position, "absolute");
+    for (const button of banner.querySelectorAll(".ad-arrow-v3")) assert.notEqual(h.css(button).gridRow, "2");
   }
 });
 

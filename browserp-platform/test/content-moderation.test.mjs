@@ -77,7 +77,12 @@ test("OAuth import checks at most its two private identity candidates, and canno
  assert.deepEqual(kinds,["display_name","avatar"]);assert.deepEqual(processed,[submission]);
 });
 
-test("member/staff review endpoints validate actions, versions, cursors and bounded bodies",async()=>{
+test("member/staff review endpoints validate actions, versions, cursors and bounded bodies",async(t)=>{
+ // Keep this local HTTP fixture independent of hosted build origin/runtime flags.
+ const values={APP_URL:"http://localhost:8080",NODE_ENV:"test",VERCEL:"0",VERCEL_ENV:""};
+ const previous=new Map(Object.keys(values).map(key=>[key,process.env[key]]));
+ t.after(()=>{for(const [key,value] of previous)value===undefined?delete process.env[key]:process.env[key]=value;});
+ Object.assign(process.env,values);
  const calls=[],deps={getSession:async()=>session,rateLimit:async()=>{},rpc:async(name,args,token)=>{calls.push({name,args,token});return {id:submission};}};
  for(const value of [null,undefined,0,-1,"1",1.1,Number.MAX_SAFE_INTEGER+1])await assert.rejects(contentModeration(req("POST",{id:submission,action:"appeal",statement:"Please review",expectedVersion:value}),{},deps),/Reload/);
  await assert.rejects(contentModeration(req("POST",{id:submission,action:"approve",expectedVersion:1}),{},deps),/appeal action/);
