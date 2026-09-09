@@ -5,7 +5,7 @@ import { JSDOM } from "jsdom";
 
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const source = read("public/navigation.js");
-const publicPages = ["index", "404", "servers", "game", "server", "list-server", "about", "blog", "blog-post", "advertise", "legal", "privacy", "terms", "appeal", "coins", "dashboard", "profile"];
+const publicPages = ["index", "404", "servers", "game", "server", "list-server", "about", "blog", "blog-post", "advertise", "legal", "privacy", "terms", "appeal", "coins", "dashboard", "profile", "staff"];
 const routes = { index: "/", 404: "/missing-page", game: "/games", server: "/server/community", "blog-post": "/blog/community-guide" };
 const primaryRoutes = ["/servers", "/games", "/blog", "/about"];
 
@@ -183,7 +183,10 @@ test("all public pages expose the same complete header and dialog navigation", a
       assert.equal(h.w.document.querySelectorAll(".public-header-v6").length, 1);
       assert.equal(h.w.document.querySelectorAll("#public-navigation").length, 1);
       assert.deepEqual([...h.$(".public-nav-links-v6").children].map(item => item.getAttribute("href")), primaryRoutes);
-      assert.deepEqual([...h.$(".navigation-links-v6").children].map(item => item.getAttribute("href")), primaryRoutes);
+      assert.deepEqual([...h.$(".navigation-links-v6").children].map(item => item.getAttribute("href")), [...primaryRoutes, "/staff"]);
+      const staffLink = h.$('.navigation-links-v6 a[href="/staff"]');
+      assert.equal(staffLink.querySelector("strong").textContent, "Staff");
+      assert.equal(staffLink.getAttribute("aria-current"), page === "staff" ? "page" : null);
       assert.deepEqual([...h.$(".navigation-game-grid-v6").children].map(item => item.getAttribute("href")).sort(), ["/games/fivem", "/games/minecraft", "/games/redm", "/games/roblox"]);
       assert.deepEqual([...h.w.document.querySelectorAll("[data-theme-choice-v6]")].map(item => item.textContent), ["Dark", "Light"]);
       assert.equal(h.w.document.querySelectorAll("[data-account-v3]").length, 2, "both account slots are available to session hydration");
@@ -660,6 +663,7 @@ test("staff entry waits for the server response and disappears when that session
     assert.ok(h.$("[data-staff-entry-v3]"));
     h.w.dispatchEvent(new h.w.CustomEvent("browserp:session-ended"));
     assert.equal(h.$('[href="/staffpanel"]'), null);
+    assert.ok(h.$('.navigation-links-v6 a[href="/staff"]'), "the public roster stays available after sign-out");
     assert.equal(h.$(".account-menu-v3"), null);
   } finally { h.dom.window.close(); }
 });
