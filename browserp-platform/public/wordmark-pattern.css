@@ -3,6 +3,26 @@
 .directory-intro-v3[data-wordmark-surface] { max-width: none; }
 .public-intro-copy-v7 { position: relative; max-width: 850px; }
 .public-intro-surface-v7 { padding: 16px 0 30px; }
+/* About and Account keep their content columns, while their decorative
+   introductions use the full page width (excluding the scrollbar). */
+body[data-page="about"] > main.section-v3,
+body[data-page="dashboard"] > main.portal-stage { container-type: inline-size; }
+body[data-page="about"] .public-intro-surface-v7 > .home-hero-pattern,
+body[data-page="about"] .public-intro-surface-v7::after,
+body[data-page="dashboard"] .dashboard-view > .portal-head > .home-hero-pattern,
+body[data-page="dashboard"] .dashboard-view > .portal-head::after {
+  left: calc(50% - 50cqw);
+  right: calc(50% - 50cqw);
+}
+body[data-page="dashboard"] .dashboard-view > .portal-head > .home-hero-pattern,
+body[data-page="dashboard"] .dashboard-view > .portal-head::after {
+  top: -42px;
+  bottom: -20px;
+}
+@media (max-width: 760px) {
+  body[data-page="dashboard"] .dashboard-view > .portal-head > .home-hero-pattern,
+  body[data-page="dashboard"] .dashboard-view > .portal-head::after { top: -28px; }
+}
 .home-hero-pattern {
   position: absolute;
   inset: 0;

@@ -44,7 +44,7 @@
   if (isPublicPage() && !document.querySelector('link[data-public-theme],link[href^="/theme.css"]')) {
     const themeStyles = document.createElement("link");
     themeStyles.rel = "stylesheet";
-    themeStyles.href = "/theme.css?v=2.22.0";
+    themeStyles.href = "/theme.css?v=2.23.3";
     themeStyles.dataset.publicTheme = "";
     document.head.append(themeStyles);
   }
@@ -116,7 +116,7 @@
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     let inView = false, parked = false, canvasRenderer = null, disposed = false;
     const sync = () => {
-      pattern.dataset.motion = inView && !parked && !document.hidden && !reduced.matches ? "running" : "paused";
+      pattern.dataset.motion = document.documentElement.dataset.theme !== "light" && inView && !parked && !document.hidden && !reduced.matches ? "running" : "paused";
       canvasRenderer?.setMotion(pattern.dataset.motion === "running", reduced.matches);
     };
     const size = () => {
@@ -155,6 +155,8 @@
       intersectionObserver.observe(pattern);
     }
     document.addEventListener("visibilitychange", sync);
+    // Light mode hides the pattern; remeasure when returning to dark before resuming.
+    window.addEventListener("browserp:theme-changed", size);
     reduced.addEventListener?.("change", sync);
     const hide = () => { parked = true; sync(); };
     const show = () => { parked = false; size(); };
@@ -167,6 +169,7 @@
       resizeObserver?.disconnect(); intersectionObserver?.disconnect();
       window.removeEventListener("resize", size);
       document.removeEventListener("visibilitychange", sync);
+      window.removeEventListener("browserp:theme-changed", size);
       reduced.removeEventListener?.("change", sync);
       window.removeEventListener("pagehide", hide); window.removeEventListener("pageshow", show);
       clearWordmarks = () => {};

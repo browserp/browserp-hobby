@@ -137,3 +137,20 @@
 @media (forced-colors: active) {
   :root[data-theme="light"] { forced-color-adjust: auto; }
 }
+
+/* Light appearance keeps the logo static and omits the decorative wordmark
+   texture. JS also pauses the canvas loop; dark-mode animation phases survive. */
+:root[data-theme="light"] .home-hero-pattern,
+:root[data-theme="light"] [data-wordmark-surface]::after { display: none; }
+:root[data-theme="light"] .logo-lockup-v3,
+:root[data-theme="light"] .public-nav-v6 > .navigation-brand-v6 img {
+  animation-play-state: paused;
+  transform: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+:root[data-theme="light"] .public-nav-v6 > .navigation-brand-v6::before,
+:root[data-theme="light"] .public-nav-v6 > .navigation-brand-v6::after {
+  animation-play-state: paused;
+  visibility: hidden;
+}

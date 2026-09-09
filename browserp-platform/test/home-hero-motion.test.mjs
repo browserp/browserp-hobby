@@ -26,6 +26,18 @@ test("hero movement pauses offscreen, in hidden pages and for reduced motion, th
   assert.deepEqual([...plane.children].map(row => Number(row.style.getPropertyValue("--wave-index"))), Array.from({ length: rows }, (_, index) => index));
   assert.equal(pattern.getAttribute("aria-hidden"), "true");
   assert.equal(pattern.dataset.motion, "running");
+  w.BrowseRPTheme.set("light");
+  assert.equal(pattern.dataset.motion, "paused", "light appearance stops motion even in view");
+  resized();
+  intersect([{ isIntersecting: true }]);
+  assert.equal(pattern.dataset.motion, "paused", "resize and visibility cannot restart light-mode motion");
+  w.BrowseRPTheme.set("dark");
+  assert.equal(pattern.dataset.motion, "running", "returning to dark resumes the existing pattern");
+  assert.equal(pattern.querySelector(".home-hero-wordmarks"), plane, "theme switching retains the same artwork plane");
+  reduced.matches = true; reduced.dispatchEvent(new w.Event("change"));
+  w.BrowseRPTheme.set("light"); w.BrowseRPTheme.set("dark");
+  assert.equal(pattern.dataset.motion, "paused", "switching themes still respects reduced motion");
+  reduced.matches = false; reduced.dispatchEvent(new w.Event("change"));
   intersect([{ isIntersecting: false }]);
   assert.equal(pattern.dataset.motion, "paused");
   hidden = true; intersect([{ isIntersecting: true }]);
