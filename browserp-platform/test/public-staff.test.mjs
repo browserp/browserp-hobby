@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { JSDOM } from "jsdom";
-import { publicStaffView, safePublicStaffAvatar } from "../lib/public-staff.js";
+import { publicStaffRoster, publicStaffView, safePublicStaffAvatar } from "../lib/public-staff.js";
 
 const root = resolve(import.meta.dirname, "..");
 const page = readFileSync(resolve(root, "public/staff.html"), "utf8");
@@ -39,6 +39,64 @@ const profiles = [
   { id: adminId, display_name: "Community Admin", avatar_review_status: "approved", approved_avatar_url: "https://cdn.discordapp.com/avatars/123456789012345678/avatar_hash.png" },
   { id: revokedId, display_name: "Former Staff", avatar_review_status: "approved", approved_avatar_url: "https://cdn.discordapp.com/avatars/123456789012345679/old.png" }
 ];
+
+function rosterTransport(t, { roster = [memberships[2]], rosterStatus = 200, presenceStatus = 200 } = {}) {
+  const values = { SUPABASE_URL: "https://roster-fixture.example.invalid", SUPABASE_PUBLISHABLE_KEY: "public-roster-fixture", SUPABASE_SECRET_KEY: "server-roster-fixture" };
+  const previous = new Map(Object.keys(values).map(key => [key, process.env[key]]));
+  const originalFetch = globalThis.fetch, calls = [];
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+    for (const [key, value] of previous) value === undefined ? delete process.env[key] : process.env[key] = value;
+  });
+  Object.assign(process.env, values);
+  globalThis.fetch = async (input, options = {}) => {
+    const url = new URL(input);
+    assert.equal(url.origin, values.SUPABASE_URL);
+    calls.push({ url, options });
+    const reply = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
+    if (url.pathname === "/rest/v1/rpc/service_public_staff_memberships") return reply(roster, rosterStatus);
+    if (url.pathname === "/rest/v1/staff_roles") return reply(roles);
+    if (url.pathname === "/rest/v1/profiles") return reply(profiles);
+    if (url.pathname === "/rest/v1/rpc/service_public_staff_presence") return reply(presence, presenceStatus);
+    throw new Error(`Unexpected roster request: ${url.pathname}`);
+  };
+  return calls;
+}
+
+test("roster membership comes only from the service-only canonical projection", async t => {
+  const calls = rosterTransport(t);
+  const staff = await publicStaffRoster();
+  assert.deepEqual(staff, publicStaffView([memberships[2]], roles, profiles, presence));
+  assert.equal(staff.length, 1, "extra profile, role and presence rows cannot reintroduce an ineligible membership");
+  assert.equal(calls[0].url.pathname, "/rest/v1/rpc/service_public_staff_memberships");
+  assert.equal(calls[0].options.method, "POST");
+  assert.equal(new Headers(calls[0].options.headers).get("apikey"), "server-roster-fixture");
+  assert.deepEqual(JSON.parse(calls[0].options.body), {});
+  assert.equal(calls.some(call => call.url.pathname === "/rest/v1/staff_memberships"), false);
+});
+
+test("missing or malformed canonical membership fails closed without raw membership fallback", async t => {
+  for (const options of [{ roster: { message: "Function unavailable" }, rosterStatus: 404 }, { roster: null }, { roster: {} }]) {
+    await t.test(JSON.stringify(options), async t => {
+      const calls = rosterTransport(t, options);
+      await assert.rejects(publicStaffRoster(), { status: 503, message: "The staff roster could not be loaded." });
+      assert.equal(calls.length, 1, "eligibility failure cannot read or publish another membership source");
+    });
+  }
+});
+
+test("empty canonical membership stays empty and presence failure keeps eligible offline staff", async t => {
+  await t.test("empty", async t => {
+    const calls = rosterTransport(t, { roster: [] });
+    assert.deepEqual(await publicStaffRoster(), []);
+    assert.equal(calls.length, 1);
+  });
+  await t.test("presence unavailable", async t => {
+    rosterTransport(t, { roster: [memberships[0], memberships[2]], presenceStatus: 503 });
+    const staff = await publicStaffRoster();
+    assert.deepEqual(staff.map(member => [member.roleName, member.online]), [["Owner", false], ["Direct Manager", false]]);
+  });
+});
 
 test("public staff projection exposes every active member with a boolean presence and orders by rank", () => {
   const staff = publicStaffView(memberships, roles, profiles, presence);

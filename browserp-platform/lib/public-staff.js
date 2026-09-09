@@ -77,10 +77,13 @@ function inFilter(values) {
 }
 
 export async function publicStaffRoster() {
-  const memberships = await rest(
-    "staff_memberships?select=user_id,role_key,status,granted_at&status=eq.active&order=granted_at.asc&limit=100",
-    { useSecret: true }
-  );
+  let memberships;
+  try {
+    memberships = await rpc("service_public_staff_memberships", {}, undefined, { useSecret: true });
+  } catch {
+    // Membership status alone cannot establish current canonical staff identity.
+    throw Object.assign(new Error("The staff roster could not be loaded."), { status: 503 });
+  }
   if (!Array.isArray(memberships)) throw Object.assign(new Error("The staff roster could not be loaded."), { status: 503 });
   if (!memberships.length) return [];
 
