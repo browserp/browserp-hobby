@@ -14,11 +14,12 @@
   --pink: #b91f72;
   --pink-strong: #9c155f;
   --violet: #6740bb;
-  --cyan: #5b36a4;
+  --cyan: #006d94;
+  --info: #5b36a4;
   --success: #16734f;
   --warning: #895609;
   --danger: #a3253c;
-  --focus: #7c3cc4;
+  --focus: var(--cyan);
   --ink: var(--text);
   --quiet: var(--muted);
   --canvas: var(--bg);

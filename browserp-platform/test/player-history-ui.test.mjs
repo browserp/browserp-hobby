@@ -19,12 +19,12 @@ function setup(fetch) {
   return { dom, root, select: root.querySelector("select") };
 }
 
-test("default 8h uses the existing select contract, anonymous fetch and measured responsive dots with accessible observations", async () => {
+test("default 8h preserves same-origin preview access and measured responsive dots with accessible observations", async () => {
   const calls = [], { dom, root, select } = setup(async (url, opts) => { calls.push({ url, opts }); return answer(payload()); });
   try {
     await settle();
     assert.equal(select.value, "8h"); assert.deepEqual([...select.options].map(option => option.text), ["1 hour", "8 hours", "12 hours", "24 hours"]);
-    assert.equal(select.hasAttribute("data-native-select"), false); assert.equal(calls[0].opts.credentials, "omit"); assert.match(calls[0].url, /history=8h/);
+    assert.equal(select.hasAttribute("data-native-select"), false); assert.equal(calls[0].opts.credentials, "same-origin"); assert.match(calls[0].url, /^\/api\/servers\?/); assert.match(calls[0].url, /history=8h/);
     const svg = root.querySelector("svg"); assert.equal(svg.getAttribute("viewBox"), "0 0 320 240");
     assert.equal(svg.querySelectorAll("circle").length, 2); assert.equal(svg.querySelectorAll("path,polyline").length, 0);
     assert.ok(Number(svg.querySelector("circle:last-child").getAttribute("cx")) < 300, "Last point is not extended to now");

@@ -126,7 +126,7 @@
   opacity: 0; transition: opacity 180ms ease;
 }
 :is(.server-card:not(.server-card-skeleton), .game-grid-v3 > a, .game-official-card-v6):focus-visible::after { opacity: 1; }
-.public-nav-links-v6 > a::after { background: linear-gradient(90deg, var(--pink-strong), var(--violet)); }
+.public-nav-links-v6 > a::after { background: linear-gradient(90deg, var(--pink-strong), var(--cyan)); }
 .navigation-link-icon-v6 { transition: color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, transform 240ms var(--motion-ease); }
 .navigation-link-v6:focus-visible .navigation-link-icon-v6 { background: rgb(236 79 166 / .16); box-shadow: 0 0 18px rgb(236 79 166 / .15), inset 0 1px 0 #ffffff20; }
 .navigation-game-v6 { transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }

@@ -12,18 +12,21 @@
   --pink: #ec4fa6;
   --pink-strong: #ff6cba;
   --violet: #9b6cff;
-  --cyan: #b79aff;
+  --cyan: #59cde0;
+  --info: #b79aff;
   --success: #57d7a2;
   --warning: #f1bd6b;
   --danger: #ff8192;
-  --focus: #d4b8ff;
+  --focus: var(--cyan);
   --ink: var(--text);
   --quiet: var(--muted);
   --canvas: var(--bg);
   --surface: var(--panel);
   --surface-2: var(--panel-2);
   --line-strong: #4a3853;
-  --brand-gradient: linear-gradient(100deg, var(--pink), #f29bc9 52%, var(--violet));
+  --brand-gradient: linear-gradient(100deg, var(--pink), var(--cyan));
+  /* Deeper logo hues keep white labels readable through the existing sweep. */
+  --brand-action-gradient: linear-gradient(105deg, #ad176f, #00628f 50%, #ad176f);
   --motion-ease: cubic-bezier(.2, .72, .2, 1);
   --accent: var(--pink);
   --accent-strong: var(--pink-strong);
@@ -93,7 +96,7 @@ img { display: block; max-width: 100%; }
   overflow: hidden;
   isolation: isolate;
   color: #fff;
-  background: linear-gradient(105deg, #b92178, #c92c84 25%, #7140cc 50%, #c92c84 75%, #b92178);
+  background: var(--brand-action-gradient);
   background-size: 220% 100%;
   background-position: 0% 50%;
   box-shadow: 0 9px 24px rgb(207 47 136 / .18);
@@ -105,7 +108,7 @@ img { display: block; max-width: 100%; }
   inset: -25% auto -25% -65%;
   width: 48%;
   pointer-events: none;
-  background: linear-gradient(100deg, transparent, rgb(255 255 255 / .34), transparent);
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / .08), transparent);
   opacity: 0;
   transform: skewX(-16deg);
 }
@@ -142,7 +145,7 @@ img { display: block; max-width: 100%; }
 .button-secondary-v3 { color: var(--text); background: var(--panel); border-color: var(--line); }
 .button-quiet-v3 { color: var(--copy); background: transparent; border-color: var(--line); }
 .eyebrow-v3 { display: block; margin-bottom: 12px; color: var(--pink-strong); font-size: 13px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
-.gradient-text-v3 { background: linear-gradient(100deg, var(--pink), #f29bc9 44%, var(--violet)); color: transparent; background-clip: text; -webkit-background-clip: text; }
+.gradient-text-v3 { background: var(--brand-gradient); color: transparent; background-clip: text; -webkit-background-clip: text; }
 
 .ad-track-v3 { min-height: 48px; display: grid; grid-template-columns: 38px 1fr 38px; align-items: center; gap: 8px; }
 .ad-copy-v3 { text-align: center; font-size: 14px; color: var(--copy); animation: advert-copy-enter-v3 .28s var(--motion-ease) both; }

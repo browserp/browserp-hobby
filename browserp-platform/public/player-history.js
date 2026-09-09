@@ -74,7 +74,7 @@
     status.textContent = `Loading ${ranges[range]} of player observations…`;
     current = null; chart.replaceChildren(); table.replaceChildren(); details.open = false; details.hidden = true; scope.hidden = true;
     try {
-      const response = await fetch(`/api/servers?${new URLSearchParams({ slug, history: range })}`, { signal: active.signal, credentials: "omit", headers: { Accept: "application/json" } });
+      const response = await fetch(`/api/servers?${new URLSearchParams({ slug, history: range })}`, { signal: active.signal, credentials: "same-origin", headers: { Accept: "application/json" } });
       if (!response.ok) throw new Error("History unavailable");
       const text = await response.text();
       if (text.length > 64_000) throw new Error("History too large");

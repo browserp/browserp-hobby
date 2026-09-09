@@ -1,0 +1,72 @@
+{
+  "base_commit": "ce9027b6bfd697addfc529ddc3d30f8e3c8889b0",
+  "method": "WCAG relative luminance; 1001 sRGB gradient samples. Conservative CTA case combines full .08 white highlight, brightness(1.12) and saturate(1.06), including stronger overlap than actual .95 animation peak. These are colour calculations, not rendered browser or full-page accessibility certification.",
+  "themes": {
+    "dark": {
+      "blue_link_and_focus": "#59cde0",
+      "pink": "#ec4fa6",
+      "purple_accent": "#9b6cff",
+      "informational_status": "#b79aff",
+      "unchanged_backgrounds": {
+        "--bg": "#050507",
+        "--bg-soft": "#0a080d",
+        "--panel": "#111116",
+        "--panel-2": "#19191f"
+      },
+      "blue_on_background_contrast": {
+        "--bg": 10.8935,
+        "--bg-soft": 10.6637,
+        "--panel": 10.0696,
+        "--panel-2": 9.36
+      },
+      "brand_text_gradient_min_contrast": 5.1608
+    },
+    "light": {
+      "blue_link_and_focus": "#006d94",
+      "pink": "#b91f72",
+      "purple_accent": "#6740bb",
+      "informational_status": "#5b36a4",
+      "unchanged_backgrounds": {
+        "--bg": "#f8f5f8",
+        "--bg-soft": "#f0eaf1",
+        "--panel": "#fffdfd",
+        "--panel-2": "#f6eef7"
+      },
+      "blue_on_background_contrast": {
+        "--bg": 5.3685,
+        "--bg-soft": 4.9084,
+        "--panel": 5.7317,
+        "--panel-2": 5.1151
+      },
+      "brand_text_gradient_min_contrast": 4.9084
+    }
+  },
+  "cta": {
+    "default": 6.68,
+    "focus_hover_with_highlight": 5.1194,
+    "conservative_touch_with_highlight": 4.5987,
+    "pink": "#ad176f",
+    "blue": "#00628f",
+    "white_highlight_alpha": 0.08
+  },
+  "staff_selected_tab_min_contrast": 10.747,
+  "preservation_checks": {
+    "six_css_files_only": true,
+    "background_text_semantic_and_purple_tokens_unchanged": true,
+    "info_status_retains_prior_colour": true,
+    "game_and_logo_rules_unchanged": true,
+    "all_keyframes_unchanged": true,
+    "no_assets_html_or_javascript_changed": true
+  },
+  "existing_focused_tests": {
+    "pass": 18,
+    "fail": 0,
+    "suites": [
+      "theme-control-contrast",
+      "first-visit-appearance",
+      "platform-theme",
+      "premium-interactions"
+    ]
+  },
+  "independent_diff_review": "No actionable findings; read-only scope/cascade review, no browser run."
+}

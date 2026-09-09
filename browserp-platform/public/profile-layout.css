@@ -30,7 +30,7 @@ body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage > .shell {
 .profile-picture-editor-v3 .portal-help { grid-column: 2; line-height: 1.65; }
 .profile-form-v2 .portal-field input[readonly] { color: var(--copy); background: var(--bg-soft); cursor: default; }
 .profile-form-v2 .portal-field :is(input, textarea, select) { min-width: 0; border-color: var(--line); background-color: var(--bg); border-radius: 10px; transition: border-color .18s ease, box-shadow .18s ease; }
-.profile-form-v2 .portal-field :is(input, textarea, select):focus-visible { border-color: var(--pink); outline: 2px solid color-mix(in srgb, var(--pink) 25%, transparent); outline-offset: 2px; }
+.profile-form-v2 .portal-field :is(input, textarea, select):focus-visible { border-color: var(--cyan); outline: 2px solid var(--focus); outline-offset: 2px; }
 .profile-form-v2 .portal-status { margin: 0; font-size: 13px; }
 .dashboard-view .portal-nav { top: 88px; background: color-mix(in srgb, var(--panel) 96%, transparent); border-radius: 12px; }
 .dashboard-view .metric-v2 { min-height: 128px; border-radius: 12px; }
