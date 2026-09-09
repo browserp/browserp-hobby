@@ -521,23 +521,47 @@
     }
     let timer;
     let paused = false;
+    let inView = false, disposed = false, visibilityObserver;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     function stop() { window.clearInterval(timer); }
     root._browserpAdvertCleanup = () => {
+      disposed = true;
       imageRequest++;
       stop();
+      visibilityObserver?.disconnect();
       document.removeEventListener("visibilitychange", visibilityChanged);
+      reducedMotion.removeEventListener?.("change", restart);
       listeners.forEach((remove) => remove());
       if (image) { image.onload = null; image.onerror = null; }
     };
+    function canRotate() {
+      return !disposed && inView && root.isConnected && visual && list.length > 1 && !paused && !reducedMotion.matches && document.visibilityState !== "hidden" && !root.matches(":hover") && !root.contains(document.activeElement);
+    }
     function restart() {
       stop();
-      if (visual && list.length > 1 && !paused && !reducedMotion.matches && document.visibilityState !== "hidden" && !root.matches(":hover") && !root.contains(document.activeElement)) {
-        timer = window.setInterval(() => { index = (index + 1) % list.length; draw(); }, 7000);
+      if (canRotate()) {
+        timer = window.setInterval(() => {
+          if (!canRotate()) { stop(); return; }
+          index = (index + 1) % list.length; draw();
+        }, 7000);
       }
     }
     function visibilityChanged() { restart(); }
     document.addEventListener("visibilitychange", visibilityChanged);
+    reducedMotion.addEventListener?.("change", restart);
+    // Offscreen rotations still change image/copy layout. Keep the current
+    // creative until visible; without observation, manual controls still work.
+    if (visual && list.length > 1 && typeof IntersectionObserver === "function") {
+      visibilityObserver = new IntersectionObserver(entries => {
+        if (disposed) return;
+        const entry = entries.find(item => item.target === root);
+        if (!entry) return;
+        const visible = entry.isIntersecting && entry.intersectionRatio >= .01;
+        if (visible === inView) return;
+        inView = visible; restart();
+      }, { threshold: .01 });
+      visibilityObserver.observe(root);
+    }
     if (visual && list.length > 1) {
       const pause = node("button", "ad-pause-v7", "Pause rotation"); pause.type = "button"; pause.setAttribute("aria-pressed", "false");
       pause.addEventListener("click", () => { paused = !paused; pause.textContent = paused ? "Resume rotation" : "Pause rotation"; pause.setAttribute("aria-pressed", String(paused)); restart(); });

@@ -73,9 +73,16 @@ test("a full asynchronous FiveM page keeps its tall results and dynamic cards fr
 test("reduced-motion game pages display asynchronous results without relying on an observer", async t => {
   const h = await harness(t, { reduced: true });
   await h.loaded();
-  assert.ok(h.observers.every(observer => [...observer.targets].every(target => target.matches(".home-hero-pattern"))), "Only the decorative pattern may retain its offscreen pause observer");
+  assert.equal(h.observers.some(observer => observer.options?.rootMargin === "0px 0px 35% 0px"), false, "Reduced motion must not create a scroll-reveal observer");
+  assert.ok(h.observers.every(observer => [...observer.targets].every(target =>
+    target.matches(".home-hero-pattern") || (target.matches("[data-ad-placement]") && observer.options?.threshold === .01)
+  )), "Only decorative-pattern and advert lifecycle observers may remain under reduced motion");
   for (const selector of ["#game-results-v4", "#game-results-v4 .section-head-v3"]) assert.equal(h.w.getComputedStyle(h.$(selector)).opacity, "1", selector);
   assert.equal(h.$("#game-server-list-v4").children.length, 24);
+  for (const card of h.$("#game-server-list-v4").children) {
+    assert.equal(h.w.getComputedStyle(card).opacity, "1", "Every asynchronous result card must already be visible");
+    assert.equal(h.observers.some(observer => observer.targets.has(card)), false, "Result cards must not depend on any observer");
+  }
 });
 
 test("a browser without IntersectionObserver still renders its game results visibly", async t => {

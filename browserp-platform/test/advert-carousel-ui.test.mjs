@@ -8,13 +8,25 @@ const tick = async () => { for (let i = 0; i < 4; i += 1) await new Promise(reso
 const artwork = ["serious-roleplay", "custom-cars", "community-stories"].map(name => `/assets/adverts/${name}.jpg`);
 const adverts = artwork.map((imageUrl, i) => ({ headline: `Reviewed advert ${i + 1}`, body: `Community information ${i + 1}`, imageUrl, destinationUrl: `/servers?campaign=${i + 1}`, ctaLabel: "Explore" }));
 
-async function harness(t, { outcomes = {}, reduced = false, decoding = false } = {}) {
-  const dom = new JSDOM('<body><aside class="side-ad-v3" data-ad-placement="side" hidden></aside></body>', { url: "https://browserp.test/", runScripts: "outside-only" });
+async function harness(t, { outcomes = {}, reduced = false, decoding = false, visible = true, observation = true, placements = 1 } = {}) {
+  const dom = new JSDOM(`<body>${'<aside class="side-ad-v3" data-ad-placement="side" hidden></aside>'.repeat(placements)}</body>`, { url: "https://browserp.test/", runScripts: "outside-only" });
   const w = dom.window; t.after(() => w.close());
   const style = w.document.createElement("style");
   style.textContent = read("browserp-v3.css").split("\n").filter(line => /^\.side-ad-(?:stage|copy)-v3 \{/.test(line) || line.includes("artwork-unavailable") || line.startsWith(".side-ad-image-notice-v3")).join("\n");
   w.document.head.append(style);
-  w.matchMedia = () => ({ matches: reduced });
+  const motionListeners = new Set();
+  const motion = { matches: reduced, addEventListener: (_type, callback) => motionListeners.add(callback), removeEventListener: (_type, callback) => motionListeners.delete(callback) };
+  w.matchMedia = () => motion;
+  const observers = [];
+  if (observation) w.IntersectionObserver = class {
+    constructor(callback, options) { this.callback = callback; this.options = options; this.targets = new Set(); observers.push(this); }
+    observe(target) { this.targets.add(target); if (visible !== null) this.emit(target, visible); }
+    emit(target, value) { this.callback([{ target, isIntersecting: value, intersectionRatio: value ? 1 : 0 }]); }
+    unobserve(target) { this.targets.delete(target); }
+    disconnect() { this.targets.clear(); }
+  };
+  let visibility = "visible";
+  Object.defineProperty(w.document, "visibilityState", { get: () => visibility });
   const requests = [], images = [], decodes = [], timers = new Map(); let timerId = 0;
   w.setInterval = (callback, delay) => { timers.set(++timerId, { callback, delay }); return timerId; };
   w.clearInterval = id => timers.delete(id);
@@ -46,14 +58,83 @@ async function harness(t, { outcomes = {}, reduced = false, decoding = false } =
     return { ok: true, json: async () => ({ authenticated: false }) };
   };
   const root = w.document.querySelector("aside");
+  // jsdom has no real pointer; control hover independently of synthetic clicks.
+  let hovered = false;
+  const matches = root.matches.bind(root);
+  root.matches = selector => selector === ":hover" ? hovered : matches(selector);
   const activeListeners = new Map();
   const add = root.addEventListener.bind(root), remove = root.removeEventListener.bind(root);
   root.addEventListener = (type, callback, options) => { if (!activeListeners.has(type)) activeListeners.set(type, new Set()); activeListeners.get(type).add(callback); add(type, callback, options); };
   root.removeEventListener = (type, callback, options) => { activeListeners.get(type)?.delete(callback); remove(type, callback, options); };
   w.eval(read("browserp-v3.js")); await tick();
   assert.equal(typeof release, "function");
-  return { w, root, requests, images, decodes, timers, activeListeners, $: selector => root.querySelector(selector), async hydrate(items = adverts) { release(items); await tick(); } };
+  return { w, root, requests, images, decodes, timers, activeListeners, get observers() { return observers.filter(observer => observer.options?.threshold === .01); }, motionListeners,
+    setVisible(value, target = root) { observers.filter(observer => observer.targets.has(target)).forEach(observer => observer.emit(target, value)); },
+    setHidden(value) { visibility = value ? "hidden" : "visible"; w.document.dispatchEvent(new w.Event("visibilitychange")); },
+    setReduced(value) { motion.matches = value; [...motionListeners].forEach(callback => callback()); },
+    setHover(value) { hovered = value; root.dispatchEvent(new w.Event(value ? "mouseenter" : "mouseleave")); },
+    $: selector => root.querySelector(selector), async hydrate(items = adverts) { release(items); await tick(); } };
 }
+
+test("offscreen adverts retain the creative and resume only with viewport, page and user permission", async t => {
+  const h = await harness(t, { visible: null }); await h.hydrate();
+  const source = () => h.$("img").getAttribute("src");
+  assert.equal(h.timers.size, 0, "Wait for actual viewport observation");
+  h.setVisible(true); assert.equal(h.timers.size, 1);
+  const queued = [...h.timers.values()][0]; assert.equal(queued.delay, 7000);
+  queued.callback(); assert.equal(source(), artwork[1]);
+  h.setVisible(false); assert.equal(h.timers.size, 0);
+  const requests = h.requests.length;
+  queued.callback(); assert.equal(h.requests.length, requests, "An already queued tick cannot rotate offscreen");
+  h.setVisible(true); assert.equal(source(), artwork[1], "Re-entry does not advance the creative");
+  assert.equal(h.timers.size, 1);
+  h.setHidden(true); assert.equal(h.timers.size, 0);
+  h.setVisible(false); h.setHidden(false); assert.equal(h.timers.size, 0);
+  h.setVisible(true); assert.equal(h.timers.size, 1);
+  h.$('.ad-pause-v7').click(); assert.equal(h.timers.size, 0);
+  h.setVisible(false); h.setVisible(true); assert.equal(h.timers.size, 0, "Visibility cannot override explicit pause");
+  h.$('[data-ad-direction="next"]').click(); assert.equal(source(), artwork[2]);
+  assert.equal(h.timers.size, 0, "Manual navigation preserves pause");
+  h.$('.ad-pause-v7').click(); assert.equal(h.timers.size, 1);
+  h.setHover(true); assert.equal(h.timers.size, 0);
+  h.setVisible(false); h.setVisible(true); assert.equal(h.timers.size, 0);
+  h.setHover(false); assert.equal(h.timers.size, 1);
+  h.setReduced(true); assert.equal(h.timers.size, 0);
+  h.$('[data-ad-direction="previous"]').click(); assert.equal(source(), artwork[1]);
+  h.setVisible(false); h.setReduced(false); assert.equal(h.timers.size, 0);
+  h.setVisible(true); assert.equal(h.timers.size, 1);
+});
+
+test("multiple adverts have independent visibility and replacement cleanup rejects stale callbacks", async t => {
+  const h = await harness(t, { visible: false, placements: 2 });
+  const old = h.observers.find(observer => observer.targets.has(h.root));
+  await h.hydrate(); assert.equal(old.targets.size, 0);
+  old.emit(h.root, true); assert.equal(h.timers.size, 0, "Detached carousel cannot resume");
+  const second = h.w.document.querySelectorAll("aside")[1];
+  h.setVisible(true); assert.equal(h.timers.size, 1);
+  [...h.timers.values()][0].callback();
+  assert.equal(h.$("img").getAttribute("src"), artwork[1]);
+  assert.equal(second.querySelector("img").getAttribute("src"), artwork[0]);
+  h.setVisible(true, second); assert.equal(h.timers.size, 2);
+  h.setVisible(false); assert.equal(h.timers.size, 1);
+  const current = h.observers.find(observer => observer.targets.has(second));
+  const queued = [...h.timers.values()][0].callback, requests = h.requests.length;
+  second._browserpAdvertCleanup(); current.emit(second, true); queued();
+  assert.equal(h.requests.length, requests); assert.equal(h.timers.size, 0);
+  h.root._browserpAdvertCleanup();
+  assert.equal(h.observers.every(observer => observer.targets.size === 0), true);
+  assert.equal(h.motionListeners.size, 0);
+  h.setHidden(true); h.setHidden(false); h.setReduced(true); h.setReduced(false);
+  assert.equal(h.timers.size, 0, "Cleanup removes all automatic restart paths");
+});
+
+test("without viewport observation adverts remain manually navigable without background rotation", async t => {
+  const h = await harness(t, { observation: false }); await h.hydrate();
+  assert.equal(h.timers.size, 0);
+  h.$('[data-ad-direction="next"]').click();
+  assert.equal(h.$("img").getAttribute("src"), artwork[1]);
+  assert.equal(h.timers.size, 0);
+});
 
 test("blocked artwork renders a compact labelled advert, does not retry failures, and recovers on a healthy slide", async t => {
   const h = await harness(t, { outcomes: { [artwork[0]]: "error" } }); await h.hydrate();
