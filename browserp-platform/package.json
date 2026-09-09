@@ -9,8 +9,8 @@
     "dev:public": "node public-preview.mjs",
     "start": "node dev-server.mjs",
     "check": "node test/check.mjs",
-    "test": "node --test --test-concurrency=2 test/*.test.mjs",
-    "test:db": "node --test --test-concurrency=2 test/*-db.mjs",
+    "test": "node --import ./test/test-env.mjs --test --test-concurrency=2 test/*.test.mjs",
+    "test:db": "node --import ./test/test-env.mjs --test --test-concurrency=2 test/*-db.mjs",
     "verify": "npm run check && npm test && npm run test:db"
   },
   "engines": {
