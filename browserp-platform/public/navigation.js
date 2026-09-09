@@ -29,6 +29,7 @@
     games: "M8 7h8a4 4 0 0 1 4 3l1 6a3 3 0 0 1-5 2l-2-2h-4l-2 2a3 3 0 0 1-5-2l1-6a4 4 0 0 1 4-3ZM7 10v4m-2-2h4m6-1h.01M18 13h.01",
     blog: "M5 3h10l4 4v14H5V3Zm9 0v5h5M8 12h8m-8 4h6",
     about: "M12 11v6m0-10h.01M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0",
+    staff: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m20 0v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0",
     arrow: "M5 12h14m-5-5 5 5-5 5",
     close: "m6 6 12 12M6 18 18 6",
     menu: "M4 7h16M4 12h12M4 17h16"
@@ -132,7 +133,8 @@
 
   const links = make("nav", "navigation-links-v6 navigation-enter-v6");
   links.setAttribute("aria-label", "Explore");
-  items.forEach(([label, href, description, symbol]) => {
+  const menuItems = [...items, ["Staff", "/staff", "Meet the BrowseRP team", "staff"]];
+  menuItems.forEach(([label, href, description, symbol]) => {
     const anchor = link("", href, "navigation-link-v6");
     const copy = make("span", "navigation-link-copy-v6");
     copy.append(make("strong", "", label), make("small", "", description));
