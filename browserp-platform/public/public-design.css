@@ -470,6 +470,10 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
 }
 :root body[data-page="servers"] #server-list .server-card:not(.server-card-skeleton) { grid-template-columns: 88px minmax(0, 1fr) 164px; grid-template-areas: none; gap: 6px 24px; padding: 24px 12px 0; border-radius: 0; background: transparent; }
 :root body[data-page="servers"] #server-list .server-card .server-card-media { grid-area: 1 / 1 / 5 / 2; width: 88px; height: 88px; border-radius: 10px; background: var(--panel); }
+/* A neutral midtone mat keeps both white and dark transparent community artwork
+   visible in light mode. Initials keep the normal themed surface. */
+:root[data-theme="light"] body:not(.staff-v3):not([data-staff-page]) .server-card .server-card-media:has(.server-card-media-image),
+:root[data-theme="light"] body[data-page="servers"] #server-list .server-card .server-card-media:has(.server-card-media-image) { background: #767676; }
 :root body[data-page="servers"] #server-list .server-card > h3 { grid-area: 1 / 2 / 2 / 3; margin: 0; font-size: 23px; overflow-wrap: anywhere; }
 :root body[data-page="servers"] #server-list .server-card .status { grid-area: 1 / 3 / 2 / 4; justify-self: end; text-align: right; }
 :root body[data-page="servers"] #server-list .server-card > .server-description { grid-area: 2 / 2 / 3 / 3; max-width: 68ch; -webkit-line-clamp: 2; }
