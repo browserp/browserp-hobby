@@ -9,7 +9,7 @@
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "medium" });
   const clock = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
   const day = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" });
-  let controller = null, generation = 0, current = null, closed = false, inspection = null, observer = null, resizeFrame = null;
+  let controller = null, generation = 0, current = null, closed = false, inspection = null, observer = null, resizeFrame = null, lastWidth = 0;
   const make = (tag, text) => { const element = document.createElement(tag); if (text !== undefined) element.textContent = text; return element; };
   const svgNode = (tag, attrs = {}) => { const element = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const [key, value] of Object.entries(attrs)) element.setAttribute(key, value); return element; };
   const count = value => Number.isInteger(value) && value >= 0 && value <= 100000;
@@ -158,6 +158,7 @@
 
   function render(data) {
     const previous = current === data ? inspection?.state() : null;
+    observer?.disconnect();
     inspection?.destroy(); inspection = null;
     current = data;
     chart.replaceChildren(); table.replaceChildren(); details.open = false;
@@ -194,11 +195,14 @@
     if (data.truncated) notes.push("Showing the latest available readings.");
     notes.push("Gaps have no reading to show.");
     status.textContent = notes.join(" ");
+    lastWidth = chart.clientWidth;
+    observer?.observe(chart);
   }
 
   async function load() {
     if (closed) return;
     cancelResize();
+    observer?.disconnect();
     controller?.abort();
     controller = new AbortController();
     const active = controller, turn = ++generation, range = select.value;
@@ -244,10 +248,9 @@
   select.addEventListener("change", load);
   retry.addEventListener("click", load);
   if (typeof ResizeObserver === "function") {
-    let lastWidth = 0;
     observer = new ResizeObserver(() => {
       const width = chart.clientWidth;
-      if (closed || !width || width === lastWidth) return;
+      if (closed || !inspection || !width || width === lastWidth) return;
       lastWidth = width;
       if (!current || resizeFrame !== null) return;
       const turn = generation;
@@ -256,9 +259,8 @@
         if (!closed && turn === generation && current) render(current);
       });
     });
-    observer.observe(chart);
   }
   window.addEventListener("pagehide", () => { closed = true; generation++; cancelResize(); controller?.abort(); inspection?.destroy(); inspection = null; observer?.disconnect(); });
-  window.addEventListener("pageshow", event => { if (event.persisted) { closed = false; observer?.observe(chart); load(); } });
+  window.addEventListener("pageshow", event => { if (event.persisted) { closed = false; load(); } });
   load();
 })();

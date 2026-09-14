@@ -14,16 +14,20 @@ function setup(fetch) {
   const dom = new JSDOM(read("public/server.html"), { url: "https://www.browserp.com/server/county-rp", runScripts: "outside-only" });
   dom.window.fetch = fetch;
   const root = dom.window.document.getElementById("player-history");
-  let width = 320, resize, disconnected = 0, nextFrame = 0;
-  const frames = new Map();
+  let width = 320, resize, disconnected = 0, nextFrame = 0, observing = false;
+  const frames = new Map(), observations = [];
   dom.window.requestAnimationFrame = callback => { frames.set(++nextFrame, callback); return nextFrame; };
   dom.window.cancelAnimationFrame = id => frames.delete(id);
   Object.defineProperty(root.querySelector("[data-history-chart]"), "clientWidth", { get: () => width });
-  dom.window.ResizeObserver = class { constructor(callback) { resize = callback; } observe() {} disconnect() { disconnected++; } };
+  dom.window.ResizeObserver = class {
+    constructor(callback) { resize = callback; }
+    observe(target) { observing = true; observations.push({ populated: !!target.querySelector(".player-history-inspector svg"), status: root.querySelector("[data-history-status]").textContent }); }
+    disconnect() { disconnected++; observing = false; }
+  };
   dom.window.eval(read("public/player-history.js"));
   return {
     dom, root, select: root.querySelector("select"), resize: next => { width = next; resize(); }, disconnected: () => disconnected,
-    pendingFrames: () => frames.size,
+    pendingFrames: () => frames.size, observing: () => observing, observations,
     flushFrame: () => { const callbacks = [...frames.values()]; frames.clear(); for (const callback of callbacks) callback(); }
   };
 }
@@ -84,6 +88,46 @@ test("request failure/malformed observations clear stale chart data and expose a
     root.querySelector("[data-history-retry]").click(); await settle();
     assert.equal(calls, 2); assert.equal(root.querySelectorAll(".player-history-point").length, 2); assert.equal(root.querySelector("[data-history-retry]").hidden, true);
     dom.window.dispatchEvent(new dom.window.Event("pagehide")); assert.equal(root.getAttribute("aria-busy"), "false");
+  } finally { dom.window.close(); }
+});
+
+test("resize observation starts after populated renders and stays detached through loading, empty/error states and back-forward restoration", async () => {
+  const pending = [], h = setup(() => new Promise(resolve => pending.push(resolve)));
+  const { dom, root, select } = h;
+  const finish = async data => { pending.shift()(answer(data)); await settle(); };
+  const change = range => { select.value = range; select.dispatchEvent(new dom.window.Event("change")); };
+  try {
+    assert.equal(h.observing(), false);
+    assert.equal(h.observations.length, 0, "The empty initial chart is never observed");
+    h.resize(400); assert.equal(h.pendingFrames(), 0);
+    await finish(payload());
+    assert.equal(h.observing(), true);
+    assert.equal(h.observations.length, 1);
+    h.resize(400); assert.equal(h.pendingFrames(), 0, "Initial delivery at the rendered width needs no redraw");
+
+    change("24h"); assert.equal(h.observing(), false);
+    h.resize(440); assert.equal(h.pendingFrames(), 0);
+    await finish(payload("24h", { points: [], observations: 0, firstAt: null, lastAt: null }));
+    assert.equal(h.observing(), false);
+    h.resize(460); assert.equal(h.pendingFrames(), 0);
+
+    change("8h"); await finish(payload("8h", { points: [{ at: payload().lastAt, players: null, capacity: 128 }] }));
+    assert.equal(h.observing(), false);
+    assert.equal(root.querySelector("[data-history-retry]").hidden, false);
+    root.querySelector("[data-history-retry]").click(); assert.equal(h.observing(), false);
+    await finish(payload()); assert.equal(h.observing(), true);
+
+    dom.window.dispatchEvent(new dom.window.Event("pagehide")); assert.equal(h.observing(), false);
+    const restored = new dom.window.Event("pageshow"); Object.defineProperty(restored, "persisted", { value: true });
+    dom.window.dispatchEvent(restored); assert.equal(h.observing(), false, "Back-forward restoration waits for fresh history");
+    h.resize(480); assert.equal(h.pendingFrames(), 0);
+    await finish(payload()); assert.equal(h.observing(), true);
+
+    change("24h");
+    await finish(payload("24h", { supported: false, platform: "roblox", points: [], observations: 0, firstAt: null, lastAt: null }));
+    assert.equal(h.observing(), false);
+    assert.equal(h.observations.length, 3);
+    assert.ok(h.observations.every(observation => observation.populated && observation.status.startsWith("Last reading:")), "Every observation begins after the complete chart and status exist");
   } finally { dom.window.close(); }
 });
 
@@ -231,7 +275,8 @@ test("deferred resize coalesces widths and preserves latest selection/focus; ran
     assert.equal(replacement.getAttribute("aria-valuenow"), "1");
     replacement.focus(); assert.match(root.querySelector(".player-history-tooltip time").textContent, /·.*·/);
     h.resize(720); assert.equal(h.pendingFrames(), 1);
-    dom.window.dispatchEvent(new dom.window.Event("pagehide")); assert.equal(h.disconnected(), 1);
+    const beforeHide = h.disconnected();
+    dom.window.dispatchEvent(new dom.window.Event("pagehide")); assert.equal(h.disconnected(), beforeHide + 1);
     assert.equal(h.pendingFrames(), 0, "Page exit cancels its scheduled redraw");
     h.resize(740); assert.equal(h.pendingFrames(), 0, "Late observer callbacks cannot schedule a closed page");
     replacement.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "End", bubbles: true }));
