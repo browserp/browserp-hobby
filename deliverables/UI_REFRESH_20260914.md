@@ -61,4 +61,23 @@ The first aa1c9f8 Vercel build failed two stale exact-palette assertions (1455 o
 
 Final visual review found two missing full-width pattern selectors on article and Advertise; 21d3021 adds only the matching main/header selectors. Main also found shared advert unboxing lost to higher-specificity theme/homepage rules; 550165b strengthens seven existing selectors without changing declarations, placement or carousel logic. Only affected visual checks are repeated. The stylesheet URLs are advanced to layout2 for these two CSS files; all other cache identities remain.
 
-Task5 is completing the paired baseline/candidate lag check and targeted final visual corrections. Final full build, source publication, staging health, promotion and canonical verification remain Main's responsibility. Use a staged production deployment (--prod --skip-domain), then promote only after verification; this preserves production environment semantics without changing the live domain during validation.
+## Resumed completion, 14 September 2026
+
+The user paused work and then explicitly asked Main to finish. Main retains release ownership. The complete public/member/staff redesign is integrated; AI moderation, Gemini, bot hosting and billing remain deferred. The historical gm9926 source master remains untouched.
+
+### Completed verification
+
+- aa1c9f8: 12 combined journey cells across Chromium, Firefox and WebKit passed. Supplementary checks covered dark/light, 320–2560px widths, short windows, text zoom, keyboard interaction and reduced motion. These are browser-engine and viewport checks, not a physical-device lab or a field performance guarantee.
+- 5ba616c: the two corrected full-width patterns and shared advertisement styling passed 8 affected groups / 20 checks. Main reviewed the resulting screenshots. Advertising disclosure, 44px interaction targets, pause/focus and creative/link behaviour were preserved.
+- Task6 preservation review passed: 82 private IDs, 15 capability-gated destinations and existing controls/links retained; 19 supporting scripts unchanged. This is source and controlled local-DOM evidence, not a claim that a live owner performed every staff action.
+- 518c829 fixed concrete first-load layout jumps. Discover counted layout shift fell to 0 in the paired normal/4x runs; staff Overview fell from .175739 to .005727. A smaller queue shift was attributed to below-view navigation. The large content movement was removed.
+- dc9dcdb staged production build is READY at dpl_CJVjAwXAyfw3VY24f6EiPP2QGE6v. It passed 1,458 application tests and 57 database checks, with no failures. Bounded authenticated staging reads returned health 200 and server-rendered directory 200 with 63 total communities. This does not establish continuous API availability.
+- Source dc9dcdb (tree 1d1c589cd14eb2a57b340e5cccaa03293913cb74) is preserved on GitHub as 4f22ac5b3660f7eb14eb2f14744d03f67d1a4632 on design/complete-ui-20260914. It is a candidate checkpoint, not a live-release claim.
+
+### Final affected correction
+
+The optional offscreen directory rendering optimisation improved the paired normal Menu measurement (native showModal 311.5 to 181.4ms; event to two animation frames 586.5 to 419.1ms). This is one local pair, not field INP. Chromium deep scrolling, text search, link/focus, Save/Compare and print-content checks passed. Firefox and WebKit affected checks determine whether the optimisation can ship; a possible Firefox blank row is explicitly unresolved at this checkpoint.
+
+baa0008 integrates Task3's narrow focus correction from 5a0897f: the directory listing link draws its existing 2px keyboard outline inward, avoiding the parent's clipping boundary. It changes no dimensions, colours, data or actions. Task5 owns only the remaining affected browser checks; no full matrix restart is required.
+
+Main will record the final source, affected result, source archive and exact deployment in a release receipt. Production promotion and canonical readback follow the final gate. Staging uses --prod --skip-domain to retain production environment semantics while leaving the canonical domain unchanged until promotion. No production promotion has yet occurred as of this checkpoint.

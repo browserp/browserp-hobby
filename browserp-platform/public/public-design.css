@@ -448,10 +448,14 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
 :root body[data-page="servers"] .directory-layout-v3 { display: block; }
 :root body[data-page="servers"] #server-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
 :root body[data-page="servers"] #server-list > .server-shortlist-card { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+/* Keep the shared 2px focus outline inside the row's clipping boundary. */
+:root body[data-page="servers"] #server-list > .server-shortlist-card > .server-card:focus-visible { outline-offset: -2px; }
 /* Skip offscreen listing layout during document-wide modal updates. Keep
    Save/Compare siblings, adverts and overlays outside containment. Auto keeps
-   listing text searchable/focusable; remembered sizes replace these estimates. */
-@supports (content-visibility: auto) and (contain-intrinsic-block-size: auto 160px) {
+   listing text searchable/focusable; remembered sizes replace these estimates.
+   Firefox uses regular layout: its tested offscreen text-find did not reveal
+   the match reliably. This optimisation is optional, never a content gate. */
+@supports (content-visibility: auto) and (contain-intrinsic-block-size: auto 160px) and (not (-moz-appearance: none)) {
   @media screen {
     :root body[data-page="servers"] #server-list > .server-shortlist-card > .server-card:not(.server-card-skeleton) {
       content-visibility: auto;
