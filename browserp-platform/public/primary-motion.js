@@ -9,9 +9,14 @@
   const motion = matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) and (forced-colors: none)");
   const controls = new Set();
   const ramps = new Map();
+  const boundaries = new Map();
   let suspended = document.hidden;
 
   function stop(control) {
+    if (boundaries.has(control)) {
+      cancelAnimationFrame(boundaries.get(control));
+      boundaries.delete(control);
+    }
     const ramp = ramps.get(control);
     if (!ramp) return;
     cancelAnimationFrame(ramp.frame);
@@ -89,7 +94,13 @@
       if (event.pointerType && event.pointerType !== "mouse" && event.pointerType !== "pen") return;
       const control = event.target.closest?.(selector);
       if (!control || (event.relatedTarget instanceof Node && control.contains(event.relatedTarget))) return;
-      refresh(control);
+      // Firefox applies :hover after pointerover dispatch. Read the settled
+      // selector state next frame, for both pointer and keyboard boundaries.
+      if (boundaries.has(control)) cancelAnimationFrame(boundaries.get(control));
+      boundaries.set(control, requestAnimationFrame(() => {
+        boundaries.delete(control);
+        refresh(control);
+      }));
     }, { passive: true });
   }
   function suspend(value) {
