@@ -196,10 +196,11 @@
   }
 
   function preferredTheme() {
-    return "dark";
+    return window.BrowseRPStaffAppearance?.get() || "dark";
   }
 
-  function applyTheme() {
+  function applyTheme(theme) {
+    if (window.BrowseRPStaffAppearance) return window.BrowseRPStaffAppearance.apply(theme);
     document.documentElement.dataset.theme = "dark";
   }
 
@@ -251,13 +252,36 @@
   }
 
   async function api(path, options = {}) {
-    const method = String(options.method || "GET").toUpperCase();
+    const { optionalOverviewCapabilities, ...fetchOptions } = options;
+    const method = String(fetchOptions.method || "GET").toUpperCase();
     const generation = state.generation;
+    const accountId = state.session?.user?.id;
     const staffRequest = path.startsWith("/api/admin/");
     if (staffRequest && !state.authorized) throw Object.assign(new Error("Your staff access must be checked again."), { status: 403 });
-    const response = await fetch(path, { ...options, method, cache: "no-store", credentials: "same-origin", headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}), ...(!["GET","HEAD"].includes(method) && state.csrf ? { "X-BrowseRP-CSRF": state.csrf } : {}), ...(options.headers || {}) } });
+    const response = await fetch(path, { ...fetchOptions, method, cache: "no-store", credentials: "same-origin", headers: { Accept: "application/json", ...(fetchOptions.body ? { "Content-Type": "application/json" } : {}), ...(!["GET","HEAD"].includes(method) && state.csrf ? { "X-BrowseRP-CSRF": state.csrf } : {}), ...(fetchOptions.headers || {}) } });
     const payload = await response.json().catch(() => ({}));
     if (generation !== state.generation || state.pageSuspended) throw Object.assign(new Error("This staff view is no longer active."), { status: 401 });
+    // Only Overview's optional capability read may lack section access while
+    // the same account still has verified staff access. Other denials stay fatal.
+    if (response.status === 403 && optionalOverviewCapabilities === true && method === "GET" && !fetchOptions.body
+        && path === "/api/admin/moderation?view=summary" && document.body.dataset.staffPage === "overview"
+        && typeof accountId === "string" && accountId) {
+      let fresh;
+      try { fresh = await api("/api/auth/session"); }
+      catch (error) {
+        if (generation === state.generation && !state.pageSuspended && state.authorized) {
+          if (error.status === 401) showLogin();
+          else if (error.status === 403) showDenied();
+          else showSessionUnavailable(error);
+        }
+        throw error;
+      }
+      if (generation !== state.generation || state.pageSuspended || !state.authorized) throw Object.assign(new Error("This staff view is no longer active."), { status: 401 });
+      if (fresh?.authenticated === true && fresh.staff === true && fresh.user?.id === accountId && state.session?.user?.id === accountId) {
+        state.session = fresh; state.csrf = fresh.csrfToken || "";
+        throw Object.assign(new Error(payload.error || "The staff request failed."), { status: 403, sectionUnavailable: true });
+      }
+    }
     if (staffRequest && [401, 403].includes(response.status)) {
       if (response.status === 401) showLogin(); else showDenied();
     }
@@ -281,7 +305,7 @@
     void touchPresence();
     presenceTimer = window.setInterval(() => { void touchPresence(); }, 30_000);
   }
-  function status(message, error = false) { const el = $("#staff-status-v3"); if (!el) return; el.textContent = message; el.style.color = error ? "#ff8192" : "#57d7a2"; }
+  function status(message, error = false) { const el = $("#staff-status-v3"); if (!el) return; el.textContent = message; el.style.color = error ? "var(--danger)" : "var(--success)"; }
   function date(value) { const d = new Date(value); return Number.isNaN(d.getTime()) ? "—" : new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(d); }
   function row(cells) { const tr = make("tr"); cells.forEach((cell) => { const td = make("td"); if (cell instanceof Node) td.append(cell); else td.textContent = String(cell ?? "—"); tr.append(td); }); return tr; }
   function tableRows(target, rows) { target?.replaceChildren(...rows); }
@@ -681,12 +705,13 @@
 
   function wireForms(){ $("#permission-form-v3")?.addEventListener("submit",savePermission); $("#mfa-activate-form-v3")?.addEventListener("submit",async(event)=>{event.preventDefault();try{await api("/api/admin/security",{method:"POST",body:JSON.stringify({action:"activate_mfa",reason:new FormData(event.currentTarget).get("reason")})});location.reload();}catch(error){status(error.message,true);}}); }
   function mobile(){
+    window.BrowseRPStaffAppearance?.mount();
     const main=$(".staff-main-v3")||$(".staff-login-v3");
     if(main){if(!main.id)main.id="staff-main-content";main.tabIndex=-1;const skip=make("a","Skip to staff content","skip-link");skip.href="#staff-app-v3";skip.addEventListener("click",event=>{event.preventDefault();const target=$(".staff-login-card-v3")||$(".staff-main-v3")||main;target.focus();});document.body.prepend(skip);}
     const button=$("#staff-menu-v3"); const sidebar=$(".staff-sidebar-v3");
     if(!button||!sidebar)return;
     const compact=window.matchMedia?.("(max-width: 760px)")||{matches:false};
-    button.type="button";button.classList.add("staff-navigation-toggle");
+    button.type="button";button.classList.add("staff-navigation-toggle", "ds-menu-button");
     const icon=document.createElementNS("http://www.w3.org/2000/svg","svg");
     for(const [name,value] of Object.entries({viewBox:"0 0 24 24",fill:"none",stroke:"currentColor","stroke-width":"1.7","stroke-linecap":"round","stroke-linejoin":"round","aria-hidden":"true",focusable:"false"}))icon.setAttribute(name,value);
     const path=document.createElementNS(icon.namespaceURI,"path");icon.append(path);

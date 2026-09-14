@@ -1,0 +1,350 @@
+/* BrowseRP public/member composition. Load after legacy page CSS and
+   design-system.css. Shared tokens and control behaviour belong to that system;
+   this sheet owns content layout only. No private staff selectors or data. */
+body:not(.staff-v3):not([data-staff-page]) {
+  --public-card-inset: 24px;
+  --public-section-gap: clamp(32px, 4vw, 56px);
+}
+
+/* Directory: one working surface, full-width search and balanced controls. */
+body[data-page="servers"] .directory-toolbar-v3 { align-items: center; margin-bottom: 24px; }
+body[data-page="servers"] .directory-toolbar-v3 h2 { font-size: clamp(26px, 2.4vw, 34px); letter-spacing: -.025em; }
+body[data-page="servers"] .directory-toolbar-v3 p { margin-bottom: 0; font-size: 15px; }
+body[data-page="servers"] .discovery-tools-v9 { gap: 8px; margin: 0; }
+body[data-page="servers"] .directory-main-v3 { min-width: 0; }
+body[data-page="servers"] .directory-discovery.smart-discovery {
+  padding: var(--public-card-inset);
+  border: 1px solid var(--line);
+  border-radius: var(--panel-radius, 20px);
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+}
+body[data-page="servers"] .directory-discovery .smart-search-row { max-width: none; margin: 0 0 20px; }
+body[data-page="servers"] .directory-discovery .field-search-v3 { margin: 0; }
+body[data-page="servers"] .directory-discovery .field-search-v3 > span { color: var(--copy); font-size: 14px; }
+body[data-page="servers"] .directory-control-row { max-width: none; gap: 8px; margin: 0; }
+body[data-page="servers"] .directory-control-row button { min-height: 56px; padding: 8px; font-size: 14px; border-radius: var(--control-radius, 12px); }
+body[data-page="servers"] .directory-game-choice img { width: 40px; height: 28px; border-radius: 6px; }
+body[data-page="servers"] .directory-filter-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+  padding: 24px 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+/* These are non-semantic wrappers. Fields keep their labels, DOM/tab order,
+   hidden attributes and original events. Only the existing layout is flattened. */
+body[data-page="servers"] .directory-filter-panel :is(.smart-primary-filters, .smart-refinements) { display: contents; }
+body[data-page="servers"] .directory-filter-panel .field-v3 { margin: 0; grid-column: auto; }
+body[data-page="servers"] .directory-filter-panel :is(.smart-checks, .smart-access-filters, .directory-game-hint) { grid-column: 1 / -1; }
+body[data-page="servers"] .directory-filter-panel .smart-checks { display: flex; flex-direction: row; gap: 8px 20px; margin: 0; padding-top: 4px; }
+body[data-page="servers"] .directory-filter-panel .check-v3 { min-height: 44px; margin: 0; font-size: 14px; }
+body[data-page="servers"] #clear-filters { margin-left: auto; }
+body[data-page="servers"] .directory-filter-panel .smart-access-filters { margin: 0; padding-top: 16px; border-top: 1px solid var(--line); }
+body[data-page="servers"] .directory-filter-panel .smart-access-help { color: var(--muted); font-size: 13px; line-height: 1.6; }
+body[data-page="servers"] .directory-game-hint { margin: 0; font-size: 14px; }
+body[data-page="servers"] .smart-filter-feedback:not(:empty) { margin-bottom: 0; padding-top: 12px; font-size: 14px; }
+body[data-page="servers"] .smart-filter-chips:not(:empty) { margin-top: 20px; }
+body[data-page="servers"] .result-bar-v3 { margin-block: 24px 16px; gap: 8px 20px; align-items: baseline; }
+body[data-page="servers"] #result-count { color: var(--text); font-size: 15px; font-weight: 650; font-variant-numeric: tabular-nums; }
+body[data-page="servers"] .result-bar-v3 > span { color: var(--muted); font-size: 13px; }
+
+/* Community rows: an uninterrupted identity/content surface, then a compact
+   separate action group. The whole-card link never contains Save or Compare. */
+:where(body:not(.staff-v3):not([data-staff-page])) .server-list { gap: 16px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .server-shortlist-card {
+  border: 1px solid var(--line);
+  border-radius: var(--card-radius, 16px);
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+}
+:where(body:not(.staff-v3):not([data-staff-page])) .server-shortlist-card > .server-card {
+  border: 0;
+  border-radius: var(--card-radius, 16px) var(--card-radius, 16px) 0 0;
+  box-shadow: none;
+}
+:where(body:not(.staff-v3):not([data-staff-page])) .server-card:not(.server-card-skeleton) {
+  grid-template-columns: 88px minmax(0, 1fr) minmax(120px, 152px);
+  gap: 8px 24px;
+  padding: var(--public-card-inset);
+  min-height: 0;
+  border-radius: var(--card-radius, 16px);
+  background: var(--panel);
+}
+:where(body:not(.staff-v3):not([data-staff-page])) .server-shortlist-card > .server-card:not(.server-card-skeleton) { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+:where(body:not(.staff-v3):not([data-staff-page])) .server-card:not(.server-card-skeleton)::before { width: 2px; opacity: .55; }
+:where(body:not(.staff-v3):not([data-staff-page])) .server-card:not(.server-card-skeleton)::after { content: none; }
+:where(body:not(.staff-v3):not([data-staff-page])) .server-card:not(.server-card-skeleton) .server-card-media {
+  width: 88px;
+  height: 88px;
+  border-radius: var(--control-radius, 12px);
+  border-color: var(--line);
+  background: var(--panel-2);
+}
+:where(body:not(.staff-v3):not([data-staff-page])) .server-card .server-card-media > .server-card-media-image { object-fit: contain; padding: 8px; transform: none; }
+:where(body:not(.staff-v3):not([data-staff-page])) .server-card:not(.server-card-skeleton) > h3 { font-size: clamp(20px, 1.6vw, 24px); font-weight: 700; letter-spacing: -.02em; }
+:where(body:not(.staff-v3):not([data-staff-page])) .server-card > .server-description { color: var(--copy); font-size: 15px; line-height: 1.65; }
+:where(body:not(.staff-v3):not([data-staff-page])) .server-card > .server-meta { font-size: 13px; line-height: 1.6; }
+:where(body:not(.staff-v3):not([data-staff-page])) .server-card:not(.server-card-skeleton) > .server-card-bottom {
+  align-self: stretch;
+  align-content: center;
+  gap: 16px;
+  padding: 12px 0 12px 20px;
+  border: 0;
+  border-left: 1px solid var(--line);
+}
+:where(body:not(.staff-v3):not([data-staff-page])) .server-card-bottom > strong { font-size: 14px; font-weight: 650; line-height: 1.55; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+:where(body:not(.staff-v3):not([data-staff-page])) .server-card-bottom .server-card-action { color: var(--cyan); font-size: 14px; transform: none; }
+:where(body:not(.staff-v3):not([data-staff-page])) .server-shortlist-actions {
+  min-width: 0;
+  gap: 4px 8px;
+  padding: 4px 16px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 var(--card-radius, 16px) var(--card-radius, 16px);
+  background: var(--panel);
+}
+:where(body:not(.staff-v3):not([data-staff-page])) .shortlist-open-v9 { font-size: 13px; color: var(--cyan); overflow-wrap: anywhere; }
+:where(body:not(.staff-v3):not([data-staff-page])) .shortlist-detail-v9 { border: 0; background: transparent; padding: 8px 0 0; }
+:where(body:not(.staff-v3):not([data-staff-page])) .shortlist-status-v9 { background: var(--panel-2); color: var(--text); border-color: var(--line); box-shadow: var(--shadow-md); }
+/* Recommendation cards retain their compact grid role, not the directory row. */
+:where(body:not(.staff-v3):not([data-staff-page])) .recommendation-results .server-card:not(.server-card-skeleton) { display: flex; gap: 12px; padding: 20px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .recommendation-results .server-card .server-card-media { width: 64px; height: 64px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .recommendation-results .server-card:not(.server-card-skeleton) > .server-card-bottom { border: 0; border-top: 1px solid var(--line); padding: 12px 0 0; align-self: auto; }
+
+/* Public section rhythm. Pattern geometry and shared header are Main's lane. */
+:where(body:not(.staff-v3):not([data-staff-page])) .section-head-v3 { gap: 24px; margin-bottom: 24px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .section-head-v3 h2 { font-size: clamp(28px, 2.6vw, 36px); line-height: 1.18; letter-spacing: -.025em; }
+:where(body:not(.staff-v3):not([data-staff-page])) .section-head-v3 p { font-size: 16px; line-height: 1.65; }
+:where(body:not(.staff-v3):not([data-staff-page])) .game-showcase-v3 { padding: 20px; border-radius: var(--panel-radius, 20px); background: var(--panel); box-shadow: var(--shadow-sm); }
+:where(body:not(.staff-v3):not([data-staff-page])) .game-grid-v3 > a { padding: 12px; gap: 8px; border-radius: var(--card-radius, 16px); }
+:where(body:not(.staff-v3):not([data-staff-page])) .game-grid-v3 .game-art-v3 { border-radius: 10px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .game-grid-v3 strong { font-size: 18px; line-height: 1.35; }
+:where(body:not(.staff-v3):not([data-staff-page])) .game-grid-v3 small { font-size: 14px; line-height: 1.5; color: var(--muted); }
+:where(body:not(.staff-v3):not([data-staff-page])) .game-official-card-v6 { background: var(--panel); border-color: var(--line); border-radius: var(--card-radius, 16px); box-shadow: var(--shadow-sm); }
+:where(body:not(.staff-v3):not([data-staff-page])) .game-official-card-v6 .game-hub-copy-v4 strong { font-size: 21px; line-height: 1.3; }
+:where(body:not(.staff-v3):not([data-staff-page])) .game-official-card-v6 .game-hub-copy-v4 small { font-size: 14px; color: var(--muted); }
+:where(body:not(.staff-v3):not([data-staff-page])) .game-future-combined-v7 { background: var(--panel); border-radius: var(--panel-radius, 20px); }
+:where(body:not(.staff-v3):not([data-staff-page])) .game-future-combined-copy-v7 { padding: clamp(24px, 3vw, 40px); }
+:where(body:not(.staff-v3):not([data-staff-page])) .game-page-mark-v4 { box-shadow: var(--shadow-sm); }
+
+/* Details: a clear identity lead, readable community copy and quieter facts. */
+#server-detail-v3.server-page-v7 .detail-banner-v3 { border-radius: var(--panel-radius, 20px); background: var(--panel-2); }
+#server-detail-v3.server-page-v7 .detail-title-v3 { padding: clamp(24px, 3vw, 40px); gap: 24px; background: linear-gradient(180deg, transparent, var(--panel)); }
+#server-detail-v3.server-page-v7 .detail-title-v3 h1 { font-weight: 750; line-height: 1.12; }
+#server-detail-v3.server-page-v7 .detail-logo-v3 { width: 96px; height: 96px; border-radius: var(--card-radius, 16px); background: var(--panel-2); border-color: var(--line); box-shadow: var(--shadow-sm); }
+#server-detail-v3.server-page-v7 .panel-v3 { padding: 24px; border-radius: var(--card-radius, 16px); background: var(--panel); box-shadow: var(--shadow-sm); }
+#server-detail-v3.server-page-v7 .server-community-v7 p { max-width: 72ch; line-height: 1.75; }
+#server-detail-v3.server-page-v7 .server-info-card-v5 { padding-block: 14px; gap: 16px; }
+#server-detail-v3.server-page-v7 .server-info-card-v5 dt { font-size: 14px; color: var(--muted); }
+#server-detail-v3.server-page-v7 .server-info-card-v5 dd { font-size: 15px; color: var(--text); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+#server-detail-v3.server-page-v7 .server-facts-v3 > p { font-size: 13px; }
+#server-detail-v3.server-page-v7 .server-report-v7 { border-radius: var(--card-radius, 16px); }
+#server-detail-v3.server-page-v7 .server-report-v7 > .panel-v3 { box-shadow: none; }
+#server-detail-v3 .comment-v3 { padding: 20px; border: 0; border-radius: var(--card-radius, 16px); background: var(--panel); }
+#server-detail-v3 .comment-heading-v3 { align-items: flex-start; gap: 12px; }
+#server-detail-v3 .comment-author-line-v3 { gap: 8px; }
+#server-detail-v3 .comment-v3 :is(time, .comment-dates-v3) { font-size: 13px; }
+#server-detail-v3 .comment-parent-v3 { border-left-width: 2px; background: var(--panel-2); }
+#server-detail-v3 .comment-actions-v3 { margin-top: 12px; }
+#server-detail-v3 .recommendations-v7 { padding-block: 32px; }
+
+/* Comparison remains a real table with its existing contained scroll region. */
+body[data-page="compare"] .compare-heading { margin-bottom: 24px; }
+body[data-page="compare"] .compare-heading p { font-size: 16px; max-width: 64ch; }
+body[data-page="compare"] .compare-toolbar { padding: 16px 20px; border: 1px solid var(--line); border-radius: var(--card-radius, 16px); background: var(--panel); }
+body[data-page="compare"] .compare-toolbar > strong { color: var(--text); font-size: 15px; font-variant-numeric: tabular-nums; }
+body[data-page="compare"] .compare-results { border-color: var(--line); border-radius: var(--panel-radius, 20px); box-shadow: var(--shadow-sm); }
+body[data-page="compare"] .compare-table :is(th, td) { padding: 20px; }
+body[data-page="compare"] .compare-table th.compare-row-heading { background: var(--panel-2); color: var(--copy); font-size: 14px; }
+body[data-page="compare"] .compare-table td { font-size: 15px; font-variant-numeric: tabular-nums; }
+body[data-page="compare"] .compare-server-media { width: 76px; height: 76px; border-color: var(--line); border-radius: var(--card-radius, 16px); }
+body[data-page="compare"] .compare-server-media img { object-fit: contain; padding: 8px; }
+body[data-page="compare"] .compare-server-name { font-size: 21px; }
+body[data-page="compare"] .compare-tags li { border: 0; border-radius: 6px; font-size: 13px; }
+body[data-page="compare"] :is(.compare-status, .compare-footnote, .compare-scroll-hint, .compare-server-error) { font-size: 14px; }
+body[data-page="compare"] .compare-empty { max-width: 760px; padding-block: 40px; }
+
+/* Member areas: summary values lead; settings stay grouped with their actions.
+   Body scope excludes both private workspaces even though they reuse classes. */
+body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage { padding-block: 32px 64px; }
+body:is([data-page="profile"], [data-page="dashboard"]) .dashboard-view .portal-head { gap: 24px; margin-bottom: 24px; }
+body:is([data-page="profile"], [data-page="dashboard"]) .dashboard-view .portal-head h1 { font-size: clamp(32px, 3.4vw, 48px); letter-spacing: -.035em; }
+body:is([data-page="profile"], [data-page="dashboard"]) .dashboard-view .portal-head p { font-size: 16px; color: var(--copy); }
+body:is([data-page="profile"], [data-page="dashboard"]) .dashboard-view .portal-head .portal-avatar { width: 80px; height: 80px; box-shadow: 0 0 0 5px var(--panel-2); }
+body:is([data-page="profile"], [data-page="dashboard"]) .metric-grid-v2 { gap: 16px; margin-bottom: 24px; }
+body:is([data-page="profile"], [data-page="dashboard"]) .dashboard-view .metric-v2 { min-height: 0; padding: 24px; border-radius: var(--card-radius, 16px); background: var(--panel); border-color: var(--line); box-shadow: var(--shadow-sm); }
+body:is([data-page="profile"], [data-page="dashboard"]) .metric-v2 strong { color: var(--text); font-size: 36px; line-height: 1.15; font-variant-numeric: tabular-nums; }
+body:is([data-page="profile"], [data-page="dashboard"]) .metric-v2 small { margin-top: 12px; font-size: 14px; line-height: 1.5; }
+body:is([data-page="profile"], [data-page="dashboard"]) .dashboard-view .portal-panel-v2 { padding: clamp(20px, 2.8vw, 32px); border-radius: var(--panel-radius, 20px); background: var(--panel); border-color: var(--line); box-shadow: var(--shadow-sm); }
+body:is([data-page="profile"], [data-page="dashboard"]) .dashboard-view .portal-panel-head { margin-bottom: 24px; padding-bottom: 20px; gap: 16px; }
+body:is([data-page="profile"], [data-page="dashboard"]) .dashboard-view .portal-panel-head h2 { font-size: clamp(24px, 2.4vw, 30px); line-height: 1.2; }
+body:is([data-page="profile"], [data-page="dashboard"]) .dashboard-view .portal-panel-head p { font-size: 15px; color: var(--copy); }
+body:is([data-page="profile"], [data-page="dashboard"]) .portal-item { gap: 16px; padding-block: 20px; }
+body:is([data-page="profile"], [data-page="dashboard"]) .portal-item-main strong { color: var(--text); font-size: 18px; line-height: 1.4; overflow-wrap: anywhere; }
+body:is([data-page="profile"], [data-page="dashboard"]) .portal-item-actions { gap: 8px; }
+body:is([data-page="profile"], [data-page="dashboard"]) .profile-settings-layout-v7 { grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: 32px; }
+body:is([data-page="profile"], [data-page="dashboard"]) .profile-settings-layout-v7 > .member-connections { padding: 24px; border: 0; border-radius: var(--card-radius, 16px); background: var(--panel-2); }
+body:is([data-page="profile"], [data-page="dashboard"]) .profile-settings-layout-v7 .member-connection { padding: 16px; border: 0; background: var(--panel); border-radius: var(--control-radius, 12px); }
+body:is([data-page="profile"], [data-page="dashboard"]) .profile-settings-layout-v7 .member-connection-title strong { font-size: 16px; }
+body:is([data-page="profile"], [data-page="dashboard"]) .profile-settings-layout-v7 .member-connection-unavailable { font-size: 13px; }
+body:is([data-page="profile"], [data-page="dashboard"]) .profile-picture-editor-v3 { padding: 16px; border-radius: var(--card-radius, 16px); background: var(--panel-2); }
+body:is([data-page="profile"], [data-page="dashboard"]) .profile-picture-editor-v3 .portal-help { font-size: 14px; }
+body:is([data-page="profile"], [data-page="dashboard"]) .dashboard-view .portal-empty-v2 { padding: 32px 24px; background: var(--panel-2); border: 0; }
+body:is([data-page="profile"], [data-page="dashboard"]) :is(.member-moderation-card-v3, .privacy-request-card, .recommendation-settings) { padding: 20px; background: var(--panel-2); border-color: var(--line); border-radius: var(--card-radius, 16px); }
+body:is([data-page="profile"], [data-page="dashboard"]) .privacy-requests [data-privacy-requests-content] { padding-inline: 0; }
+body:is([data-page="profile"], [data-page="dashboard"]) .privacy-request-badge { color: var(--copy); background: var(--panel); border-color: var(--line); }
+body:is([data-page="profile"], [data-page="dashboard"]) .privacy-request-copy { background: var(--panel); border-color: var(--line); }
+body:is([data-page="profile"], [data-page="dashboard"]) .member-moderation-evidence-v3 { background: var(--panel); border-left-color: var(--violet); }
+body:is([data-page="profile"], [data-page="dashboard"]) .access-gate-v2 { padding: clamp(24px, 4vw, 48px); border-color: var(--line); border-radius: var(--panel-radius, 20px); background: var(--panel); box-shadow: var(--shadow-md); }
+body:is([data-page="profile"], [data-page="dashboard"]) .access-gate-v2 h1 { font-size: clamp(30px, 4vw, 44px); line-height: 1.15; }
+
+/* Editorial and quieter routes keep their existing section order and wording. */
+:where(body:not(.staff-v3):not([data-staff-page])) .journal-heading-v6 { gap: 16px; align-items: baseline; margin-bottom: 24px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .journal-grid-v6 { gap: 24px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .journal-card-v6 { padding: 24px; border-radius: var(--card-radius, 16px); background: var(--panel); border-color: var(--line); box-shadow: var(--shadow-sm); }
+:where(body:not(.staff-v3):not([data-staff-page])) .journal-card-featured-v6 { background: linear-gradient(140deg, color-mix(in srgb, var(--violet) 8%, var(--panel)), var(--panel) 70%); }
+:where(body:not(.staff-v3):not([data-staff-page])) .journal-card-v6 h3 { margin-block: 20px 12px; line-height: 1.2; }
+:where(body:not(.staff-v3):not([data-staff-page])) .journal-card-v6 p { font-size: 16px; line-height: 1.7; }
+:where(body:not(.staff-v3):not([data-staff-page])) :is(.journal-card-meta-v6, .journal-article-meta-v6) { font-size: 13px; gap: 12px 20px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .journal-card-meta-v6 > span { color: var(--pink); }
+:where(body:not(.staff-v3):not([data-staff-page])) .journal-read-v6 { min-height: 44px; padding-top: 16px; color: var(--cyan); }
+:where(body:not(.staff-v3):not([data-staff-page])) .journal-prose-v6 { max-width: 72ch; font-size: 18px; line-height: 1.8; color: var(--copy); }
+:where(body:not(.staff-v3):not([data-staff-page])) .journal-prose-v6 :is(h2, h3) { color: var(--text); }
+:where(body:not(.staff-v3):not([data-staff-page])) .journal-article-head-v6 { margin-bottom: 32px; padding-bottom: 24px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .journal-article-head-v6 > p { font-size: 19px; line-height: 1.65; }
+:where(body:not(.staff-v3):not([data-staff-page])) :is(.journal-prose-v6, .legal-v3) a:not(.button-v3) { color: var(--cyan); text-decoration: underline; text-underline-offset: 3px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .legal-v3 { max-width: 960px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .legal-v3 :is(p, li) { max-width: 72ch; font-size: 16px; line-height: 1.75; }
+:where(body:not(.staff-v3):not([data-staff-page])) .legal-v3 section { padding-block: 28px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .legal-v3 h2 { font-size: clamp(24px, 2.5vw, 30px); line-height: 1.25; }
+:where(body:not(.staff-v3):not([data-staff-page])) .legal-v3 li + li { margin-top: 8px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .listing-form-v3 { gap: 24px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .listing-form-v3 fieldset { padding: 20px; border-radius: var(--card-radius, 16px); background: var(--panel-2); }
+:where(body:not(.staff-v3):not([data-staff-page])) :is(.listing-form-v3, #appeal-form-v3, #advertising-enquiry-form) .field-v3 { gap: 8px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .finder-form { padding: clamp(20px, 3vw, 32px); border-radius: var(--panel-radius, 20px); box-shadow: var(--shadow-sm); }
+:where(body:not(.staff-v3):not([data-staff-page])) .finder-summary { padding: 24px; background: var(--panel-2); border-radius: var(--card-radius, 16px); }
+:where(body:not(.staff-v3):not([data-staff-page])) .finder-summary dd { color: var(--text); font-size: 16px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .finder-help { font-size: 16px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .finder-choice-copy strong { font-size: 16px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .finder-game-art { border-radius: 8px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .staff-public-card { padding: 24px; background: var(--panel); border-radius: var(--card-radius, 16px); box-shadow: var(--shadow-sm); }
+:where(body:not(.staff-v3):not([data-staff-page])) .staff-public-hero { padding-block: 48px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .staff-public-hero h1 { font-size: clamp(36px, 4.5vw, 60px); }
+:where(body:not(.staff-v3):not([data-staff-page])) .staff-public-section { min-height: 0; }
+:where(body:not(.staff-v3):not([data-staff-page])) :is(.empty-v3, .journal-empty-v6) { padding: 32px 24px; border-radius: var(--panel-radius, 20px); background: var(--panel); border-color: var(--line); }
+:where(body:not(.staff-v3):not([data-staff-page])) .footer-v3 { margin-top: 0; }
+:where(body:not(.staff-v3):not([data-staff-page])) .footer-grid-v3 { gap: 24px 32px; padding-block: 40px 24px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .footer-column-v3 a { min-height: 44px; padding-block: 8px; font-size: 14px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .footer-bottom-v3 { padding-block: 20px; gap: 12px 24px; }
+
+/* Existing chart geometry, gaps and real observations remain unchanged. */
+#server-detail-v3 .player-history { margin-block: 8px 24px; padding: 24px; border: 1px solid var(--line); border-radius: var(--card-radius, 16px); background: var(--panel); }
+#server-detail-v3 .player-history-heading { gap: 16px; }
+#server-detail-v3 .player-history-chart { padding: 12px 8px 4px; border-radius: var(--control-radius, 12px); background: var(--panel-2); }
+#server-detail-v3 .player-history-point { fill: var(--cyan); opacity: 1; }
+#server-detail-v3 .player-history-axis { fill: var(--copy); }
+#server-detail-v3 .player-history :is(p, summary, table, .field-v3 > span) { font-size: 14px; }
+#server-detail-v3 .player-history summary { min-height: 44px; }
+#server-detail-v3 .player-history [data-history-table] { border-radius: 8px; background: var(--panel-2); padding: 8px 12px; }
+
+/* Ad dimensions/placement and scripts are unchanged. Controls stay outside
+   the copy and the disclosure remains distinct from organic community cards. */
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-label-v3 { font-size: 12px; letter-spacing: .06em; color: var(--muted); }
+#server-detail-v3.server-page-v7 .server-ad-rail-v7 .ad-label-v3 { font-size: 12px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .banner-ad-v7.side-ad-v3 { border-radius: var(--card-radius, 16px); border-color: var(--line); background: var(--panel); box-shadow: var(--shadow-sm); }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-controls-v3 { padding: 8px 12px; background: var(--panel); gap: 4px 12px; flex-wrap: wrap; align-items: center; }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-controls-v3 .ad-dots-v3 { display: flex; flex: 1 1 132px; min-width: 44px; flex-wrap: wrap; gap: 0; }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-dot-v3 { flex: 0 0 44px; width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
+/* The targets were already 44px. Fill their existing footprint, without moving
+   arrows into the artwork copy or adding a backdrop-filter layer. */
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-arrow-v3 { border-radius: var(--control-radius, 12px); }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-arrow-v3::before { inset: 0; border-radius: inherit; background: #121c2df2; border-color: #ffffff40; backdrop-filter: none; transition: background-color 160ms ease, border-color 160ms ease; }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-arrow-v3:is(:hover, :focus-visible)::before { background: #1a2840; border-color: #ffffff80; }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-arrow-v3:active::before { background: #243650; transform: none; }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3.artwork-unavailable .ad-arrow-v3 { color: var(--text); }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3.artwork-unavailable .ad-arrow-v3::before { background: var(--control-bg, var(--panel)); border-color: var(--interactive-edge, var(--line)); }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-controls-v3 .ad-pause-v7 { display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: 0 1 auto; min-height: 44px; max-width: 100%; margin: 0; padding: 8px 12px; border: 1px solid var(--interactive-edge, var(--line)); border-radius: var(--control-radius, 12px); background: var(--control-bg, var(--panel-2)); font-size: 13px; line-height: 1.4; color: var(--copy); }
+/* Empty decorative geometry follows the existing action label/pressed state.
+   It does not claim autoplay is running while offscreen or reduced-motion. */
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-pause-v7::before { content: ""; display: block; flex: none; box-sizing: border-box; width: 12px; height: 12px; border-left: 4px solid currentColor; border-right: 4px solid currentColor; pointer-events: none; }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-pause-v7[aria-pressed="true"]::before { border-left-width: 10px; border-right: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-controls-v3 .ad-pause-v7:hover { background: var(--surface-hover, var(--panel-2)); color: var(--text); }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 :is(.ad-arrow-v3, .ad-dot-v3, .ad-pause-v7):focus-visible { outline: 2px solid var(--focus, var(--pink-strong)); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  :where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-arrow-v3::before { transition: none; }
+}
+@media (forced-colors: active) {
+  :where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-arrow-v3 { color: ButtonText; }
+  :where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 .ad-arrow-v3::before { background: ButtonFace; border-color: ButtonText; }
+  :where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3 :is(.ad-arrow-v3, .ad-dot-v3, .ad-pause-v7):focus-visible { outline-color: Highlight; }
+}
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3.artwork-unavailable .side-ad-stage-v3 { background: var(--panel-2); }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3.artwork-unavailable .side-ad-copy-v3 :is(strong, span) { color: var(--text); }
+:where(body:not(.staff-v3):not([data-staff-page])) .side-ad-v3.artwork-unavailable .side-ad-copy-v3 a { color: var(--cyan); }
+
+/* Light has its own depth and artwork treatment. It is not a neon inversion.
+   Main/Task3 remove the pattern and veil themselves; no duplicate motion code. */
+:root[data-theme="light"] :is(.server-shortlist-card, .journal-card-v6, .game-official-card-v6) { background: var(--panel); box-shadow: var(--shadow-sm); }
+:root[data-theme="light"] .server-card:not(.server-card-skeleton) { background: var(--panel); }
+:root[data-theme="light"] .server-card:not(.server-card-skeleton)::before { opacity: .8; }
+:root[data-theme="light"] .server-card .server-card-media { background: var(--panel-2); box-shadow: inset 0 0 0 1px var(--line); }
+:root[data-theme="light"] .journal-card-featured-v6 { background: var(--panel); border-top-color: var(--violet); }
+:root[data-theme="light"] #server-detail-v3.server-page-v7 .detail-title-v3 { color: var(--text); background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 92%, transparent), var(--panel)); }
+:root[data-theme="light"] .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 :is(strong, span, a) { color: #fff; }
+:root[data-theme="light"] .side-ad-v3.artwork-unavailable .side-ad-copy-v3 :is(strong, span) { color: var(--text); }
+:root[data-theme="light"] .side-ad-v3.artwork-unavailable .side-ad-copy-v3 a { color: var(--cyan); }
+:root[data-theme="light"] .staff-public-hero { background: var(--panel-2); }
+:root[data-theme="light"] .staff-public-hero::after { content: none; }
+
+@media (hover: hover) and (pointer: fine) {
+  :where(body:not(.staff-v3):not([data-staff-page])) .server-card:not(.server-card-skeleton):hover { transform: none; background: var(--surface-hover); box-shadow: none; border-color: var(--line); }
+  :where(body:not(.staff-v3):not([data-staff-page])) .server-shortlist-card:hover { border-color: var(--interactive-edge); }
+  :root[data-theme="light"] .server-card:not(.server-card-skeleton):hover { background: var(--surface-hover); box-shadow: none; }
+  :where(body:not(.staff-v3):not([data-staff-page])) :is(.game-official-card-v6, .journal-card-v6):hover { transform: none; background: var(--surface-hover); border-color: var(--interactive-edge); box-shadow: var(--shadow-sm); }
+}
+@media (max-width: 1040px) {
+  body:is([data-page="profile"], [data-page="dashboard"]) .profile-settings-layout-v7 { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+}
+@media (max-width: 1100px) {
+  body[data-page="servers"] .directory-game-choice { flex-direction: column; gap: 4px; }
+}
+@media (max-width: 760px) {
+  body:not(.staff-v3):not([data-staff-page]) { --public-card-inset: 16px; }
+  body[data-page="servers"] .directory-toolbar-v3 { align-items: flex-start; gap: 16px; }
+  body[data-page="servers"] .directory-control-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  body[data-page="servers"] .directory-control-row .smart-filter-toggle { grid-column: 1 / -1; min-height: 44px; }
+  body[data-page="servers"] .directory-control-row button { min-height: 68px; padding: 8px 4px; font-size: 13px; }
+  body[data-page="servers"] .directory-filter-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
+  body[data-page="servers"] .result-bar-v3 { flex-wrap: wrap; }
+  :where(body:not(.staff-v3):not([data-staff-page])) .server-card:not(.server-card-skeleton) { grid-template-columns: 64px minmax(0, 1fr); gap: 10px 16px; }
+  :where(body:not(.staff-v3):not([data-staff-page])) .server-card:not(.server-card-skeleton) .server-card-media { width: 64px; height: 64px; }
+  :where(body:not(.staff-v3):not([data-staff-page])) .server-card:not(.server-card-skeleton) > .server-card-bottom { padding: 12px 0 0; border: 0; border-top: 1px solid var(--line); gap: 12px; }
+  :where(body:not(.staff-v3):not([data-staff-page])) .server-shortlist-actions { padding-inline: 8px; }
+  #server-detail-v3.server-page-v7 .detail-title-v3 { padding: 24px 16px; gap: 16px; }
+  #server-detail-v3.server-page-v7 .detail-logo-v3 { width: 72px; height: 72px; }
+  #server-detail-v3.server-page-v7 .panel-v3 { padding: 20px 16px; }
+  #server-detail-v3 .player-history { padding: 20px 12px; }
+  body[data-page="compare"] .compare-toolbar { padding: 16px; }
+  body[data-page="compare"] .compare-table :is(th, td) { padding: 16px; }
+  body:is([data-page="profile"], [data-page="dashboard"]) .dashboard-view .portal-head .portal-avatar { width: 64px; height: 64px; }
+  body:is([data-page="profile"], [data-page="dashboard"]) .dashboard-view .metric-v2 { padding: 20px 16px; }
+  body:is([data-page="profile"], [data-page="dashboard"]) .profile-settings-layout-v7 > .member-connections { padding: 16px; }
+  body:is([data-page="profile"], [data-page="dashboard"]) .portal-item { grid-template-columns: minmax(0, 1fr); }
+  body:is([data-page="profile"], [data-page="dashboard"]) .portal-item-actions { justify-content: flex-start; }
+  :where(body:not(.staff-v3):not([data-staff-page])) .journal-card-v6 { padding: 20px; }
+  :where(body:not(.staff-v3):not([data-staff-page])) .journal-prose-v6 { font-size: 17px; }
+  :where(body:not(.staff-v3):not([data-staff-page])) .footer-grid-v3 { gap: 24px; padding-block: 32px 16px; }
+  :where(body:not(.staff-v3):not([data-staff-page])) .ad-controls-v3 { flex-wrap: wrap; }
+}
+@media (max-width: 420px) {
+  body[data-page="servers"] .directory-filter-panel { grid-template-columns: minmax(0, 1fr); }
+  body[data-page="servers"] .directory-control-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  body[data-page="servers"] .directory-game-choice { flex-direction: row; }
+  body[data-page="servers"] #clear-filters { margin-left: 0; }
+  :where(body:not(.staff-v3):not([data-staff-page])) .shortlist-open-v9 { margin-left: 0; }
+}

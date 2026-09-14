@@ -1,0 +1,59 @@
+(() => {
+  "use strict";
+  // Appearance only: no session, account, consent or private-data requests.
+  const KEY = "browserp-theme";
+  const read = () => {
+    try { const value = localStorage.getItem(KEY); if (value === "light" || value === "dark") return value; } catch { /* Keep the established dark default. */ }
+    return "dark";
+  };
+  function apply(theme, persist = false) {
+    const value = theme === "light" ? "light" : "dark";
+    document.documentElement.dataset.theme = value;
+    document.documentElement.style.colorScheme = value;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = value === "light" ? "#f3f6fb" : "#080d18";
+    if (persist) { try { localStorage.setItem(KEY, value); } catch { /* The current page still changes. */ } }
+    document.querySelectorAll("[data-staff-theme]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.staffTheme === value)));
+    window.dispatchEvent(new CustomEvent("browserp:theme-changed", { detail: { theme: value } }));
+    return value;
+  }
+  const make = (tag, text, className) => {
+    const node = document.createElement(tag);
+    if (text) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  };
+  function mount() {
+    const sidebar = document.querySelector(".staff-sidebar-v3");
+    const nav = sidebar?.querySelector(".staff-nav-v3");
+    if (!nav || sidebar.dataset.staffAppearance) return;
+    sidebar.dataset.staffAppearance = "ready";
+    const mark = make("span", "Staff workspace", "staff-workspace-label");
+    sidebar.querySelector(".logo-v3")?.after(mark);
+    const tools = make("nav", undefined, "staff-local-nav"); tools.setAttribute("aria-label", "Website tools");
+    const groups = [
+      ["Publishing", [["Adverts", "overview-adverts"], ["Blog posts", "overview-publishing"], ["Announcements", "overview-announcements"]]],
+      ["Your team", [["Duty & availability", "overview-duty"], ["Your sign-in security", "overview-authenticators"]]]
+    ];
+    for (const [label, links] of groups) {
+      tools.append(make("span", label, "staff-nav-group-v3"));
+      for (const [text, hash] of links) {
+        const link = make("a", text); link.href = `/staffpanel/overview#${hash}`; tools.append(link);
+      }
+    }
+    sidebar.append(tools);
+    const appearance = make("div", undefined, "staff-appearance");
+    appearance.append(make("span", "Appearance", "staff-appearance-label"));
+    const options = make("div", undefined, "staff-theme-options ds-tabs"); options.setAttribute("role", "group"); options.setAttribute("aria-label", "Colour theme");
+    for (const theme of ["dark", "light"]) {
+      const button = make("button", theme === "dark" ? "Dark" : "Light");
+      button.type = "button"; button.dataset.staffTheme = theme;
+      button.setAttribute("aria-pressed", String(document.documentElement.dataset.theme === theme));
+      button.addEventListener("click", () => apply(theme, true)); options.append(button);
+    }
+    appearance.append(options, make("small", "Saved on this device")); sidebar.append(appearance);
+  }
+  window.BrowseRPStaffAppearance = Object.freeze({ get: read, apply, mount });
+  window.addEventListener("storage", event => { if (event.key === KEY && ["light", "dark"].includes(event.newValue)) apply(event.newValue); });
+  apply(read());
+})();

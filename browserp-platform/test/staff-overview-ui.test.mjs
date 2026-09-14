@@ -4,10 +4,16 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
 function fixture(range = "30d", total = 42) {
-  return { overview: { metrics: { pendingSubmissions: 3 }, website: { generatedAt: "2026-09-03T12:15:00Z", metrics: { totalUsers: total, publishedServers: 9, publishedBlogs: 2, activeStaff: 4 }, permissions: { manageRoles: true, manageBlogs: true, manageAnnouncements: true }, users: { range, startDate: "2026-09-02", endDate: "2026-09-03", granularity: "day", bucketDays: 1, total, newUsers: 2, series: [{ date: "2026-09-02", endDate: "2026-09-02", newUsers: 1, totalUsers: total - 1 }, { date: "2026-09-03", endDate: "2026-09-03", newUsers: 1, totalUsers: total }] } } } };
+  return { overview: { website: { generatedAt: "2026-09-03T12:15:00Z", metrics: { totalUsers: total, publishedServers: 9, publishedBlogs: 2, activeStaff: 4 }, permissions: { manageRoles: true, manageBlogs: true, manageAnnouncements: true }, users: { range, startDate: "2026-09-02", endDate: "2026-09-03", granularity: "day", bucketDays: 1, total, newUsers: 2, series: [{ date: "2026-09-02", endDate: "2026-09-02", newUsers: 1, totalUsers: total - 1 }, { date: "2026-09-03", endDate: "2026-09-03", newUsers: 1, totalUsers: total }] } } } };
 }
 
-function harness(api) {
+function dashboardFixture() {
+  return { overview: { role: { key: "owner", name: "Owner" }, permissions: [], pendingSubmissions: 3, openReports: 7, securityAlerts: 0, listingQueue: [], reportQueue: [], recentAudit: [] } };
+}
+const accessFixture = () => ({ summary: { capabilities: { readListings: true, readReports: true, readSecurity: true, readAudit: true } } });
+
+function harness(websiteApi, { dashboard = dashboardFixture, access = accessFixture } = {}) {
+  const api = path => path === "/api/admin/overview" ? Promise.resolve().then(dashboard) : path === "/api/admin/moderation?view=summary" ? Promise.resolve().then(access) : websiteApi(path);
   let document;
   class Element {
     constructor(tag = "div") { this.tagName = tag; this.children = []; this.attributes = {}; this.dataset = {}; this.style = {}; this.events = new Map(); this.hidden = false; this.textContent = ""; }
@@ -39,18 +45,15 @@ function harness(api) {
 const flush = async () => { for (let index = 0; index < 8; index += 1) await Promise.resolve(); };
 const allText = (element) => [element.textContent, ...element.children.map(allText)].join(" ");
 
-test("overview updates every queue badge, including reports, zero counts and expired access", async () => {
-  let data = fixture(); data.overview.metrics.openReports = 7;
-  let expired = false;
-  const app = harness(async () => { if (expired) throw Object.assign(new Error("Staff access denied"), { status: 403 }); return data; });
+test("dashboard endpoint updates queue badges with real zero counts and clears them on expired access", async () => {
+  let data = dashboardFixture(); let expired = false;
+  const app = harness(async () => fixture(), { dashboard: () => { if (expired) throw Object.assign(new Error("Staff access denied"), { status: 403 }); return data; } });
   const controller = await app.init({ onAuthFailure() {} });
   assert.deepEqual(app.queues.map(queue => queue.textContent), ["3 pending", "7 open", "7 open"]);
-  data = fixture(); data.overview.metrics.openReports = 0;
+  data.overview.openReports = 0;
   await controller.refresh(); assert.deepEqual(app.queues.map(queue => queue.textContent), ["3 pending", "0 open", "0 open"]);
-  delete data.overview.metrics.openReports;
-  await controller.refresh(); assert.deepEqual(app.queues.map(queue => queue.textContent), ["3 pending", "", ""]);
-  data.overview.openReports = 2;
-  await controller.refresh(); assert.deepEqual(app.queues.map(queue => queue.textContent), ["3 pending", "2 open", "2 open"]);
+  delete data.overview.openReports;
+  await controller.refresh(); assert.deepEqual(app.queues.map(queue => queue.textContent), ["", "", ""]);
   expired = true; await controller.refresh(); assert.deepEqual(app.queues.map(queue => queue.textContent), ["", "", ""]);
   controller.destroy();
 });

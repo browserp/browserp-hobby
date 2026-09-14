@@ -19,7 +19,6 @@
   }
 
   function preferredTheme() {
-    if (!isPublicPage()) return "dark";
     try {
       const saved = localStorage.getItem(PUBLIC_THEME_KEY);
       if (saved === "light" || saved === "dark") return saved;
@@ -28,12 +27,12 @@
   }
 
   function applyTheme(theme, { persist = false } = {}) {
-    const selected = isPublicPage() && theme === "light" ? "light" : "dark";
+    const selected = theme === "light" ? "light" : "dark";
     document.documentElement.dataset.theme = selected;
     document.documentElement.style.colorScheme = selected;
     const colour = document.querySelector('meta[name="theme-color"]');
-    if (colour) colour.content = selected === "light" ? "#f8f5f8" : "#050507";
-    if (persist && isPublicPage()) {
+    if (colour) colour.content = selected === "light" ? "#f3f6fb" : "#080d18";
+    if (persist) {
       try { localStorage.setItem(PUBLIC_THEME_KEY, selected); } catch { /* The visible choice still applies for this page. */ }
     }
     $$('[data-theme-choice-v6]').forEach(button => button.setAttribute("aria-pressed", String(button.dataset.themeChoiceV6 === selected)));
@@ -44,7 +43,7 @@
   if (isPublicPage() && !document.querySelector('link[data-public-theme],link[href^="/theme.css"]')) {
     const themeStyles = document.createElement("link");
     themeStyles.rel = "stylesheet";
-    themeStyles.href = "/theme.css?v=2.23.3";
+    themeStyles.href = "/theme.css?v=20260914-ui2";
     themeStyles.dataset.publicTheme = "";
     document.head.append(themeStyles);
   }
@@ -142,7 +141,7 @@
       sync();
     };
     size();
-    import("./wordmark-canvas.js?v=20260908").then(({ createWordmarkCanvas }) => {
+    import("./wordmark-canvas.js?v=20260914-ui2").then(({ createWordmarkCanvas }) => {
       if (disposed) return;
       canvasRenderer = createWordmarkCanvas(pattern, plane);
       sync();

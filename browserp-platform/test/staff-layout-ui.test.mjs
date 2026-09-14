@@ -53,7 +53,7 @@ test("staff finishing styles load last on every private staff entry point and st
   for (const file of files) {
     const html = read(file); const links = [...html.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/g)].map(match => match[1]);
     const staffWorkspace = /<body\b[^>]*\bdata-staff-page=/.test(html) || file.startsWith("staffpanel");
-    if (staffWorkspace) assert.equal(new URL(links.at(-1), "https://browserp.com").pathname, "/staff-layout.css", file);
+    if (staffWorkspace) assert.equal(new URL(links.at(-1), "https://browserp.com").pathname, "/staff-design.css", file);
     else assert.equal(links.some(link => link.startsWith("/staff-layout.css")), false, file);
   }
 });

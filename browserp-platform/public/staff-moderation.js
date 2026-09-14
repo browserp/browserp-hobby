@@ -8,7 +8,7 @@
   const human = (value) => String(value ?? "").replace(/[_-]/g, " ");
   const hasCount = (value) => typeof value === "number" && Number.isFinite(value) && value >= 0;
   const META = {
-    summary: ["Summary", "An overview of the records and decisions available to your role.", null, null],
+    summary: ["Control panel", "Current review queues and the tools available to your role.", null, null],
     members: ["Members", "Find registered accounts, inspect their profile and update approved account details.", "readMembers", "members"],
     servers: ["Servers", "Find and manage listings using their game, location, language and community features.", "readServers", "servers"],
     claims: ["Server claims", "Review ownership requests and filter verified Discord community owners.", "reviewClaims", null],
@@ -61,24 +61,59 @@
     const empty = (title, description) => { const box = make("div", undefined, "moderation-empty"); box.append(make("h3", title), make("p", description)); return box; };
     function updateUrl(replace = true) { const hash = F.serialize(state.view, state.filters); if (replace) history.replaceState(null, "", `${location.pathname}${location.search}${hash}`); else location.hash = hash; }
     function renderTabs() {
-      $("#moderation-tabs").replaceChildren(...Object.keys(META).filter(allowed).map((view) => {
+      const groups = [[null, ["summary"]], ["Review work", ["reports", "queue", "content", "profiles", "claims", "appeals"]], ["Community", ["members", "servers", "staff"]], ["Safety & records", ["bans", "security", "activity", "data-requests", "logs"]]];
+      const items = [];
+      for (const [label, views] of groups) {
+        const visible = views.filter(allowed);
+        if (!visible.length) continue;
+        if (label) items.push(make("span", label, "staff-nav-group-v3"));
+        items.push(...visible.map((view) => {
         const item = make("a", META[view][0]); item.href = F.serialize(view); if (view === state.view) item.setAttribute("aria-current", "page");
         const count = state.summary?.counts?.[META[view][3]]; if (hasCount(count)) item.append(make("span", number.format(count), "moderation-tab-count")); return item;
-      }));
+        }));
+      }
+      $("#moderation-tabs").replaceChildren(...items);
     }
     function heading(view) { const header = make("div", undefined, "moderation-section-head"); const copy = make("div"); copy.append(make("h2", META[view][0]), make("p", META[view][1])); header.append(copy); return header; }
     function summary() {
       root.replaceChildren(heading("summary"));
-      const cards = make("div", undefined, "moderation-summary-grid");
-      for (const view of ["reports", "members", "servers", "claims", "queue", "content", "profiles", "activity", "staff", "appeals", "data-requests", "logs"].filter(allowed)) {
-        const card = make("a", undefined, "moderation-summary-card"); card.href = F.serialize(view); const count = state.summary?.counts?.[META[view][3]];
-        card.append(make("span", META[view][0]), make("strong", hasCount(count) ? number.format(count) : ["claims", "data-requests"].includes(view) ? "Review" : "—"), make("p", META[view][1])); cards.append(card);
+      const priority = make("div", undefined, "staff-priorities"); priority.setAttribute("aria-label", "Current review priorities");
+      const queueNotes = { reports: "Open or triaged reports", queue: "Pending or awaiting changes", profiles: "Profile bios awaiting review", appeals: "Submitted or under review" };
+      const reviewViews = ["reports", "queue", "appeals", "profiles"].filter(allowed);
+      for (const view of reviewViews.slice(0, 3)) {
+        const card = make("a", undefined, "staff-priority"); card.href = F.serialize(view); const count = state.summary?.counts?.[META[view][3]];
+        card.append(make("span", META[view][0]), make("strong", hasCount(count) ? number.format(count) : "Unavailable"), make("small", queueNotes[view])); priority.append(card);
       }
-      if (cards.childElementCount) root.append(cards); else root.append(empty("No moderation access assigned", "Your account can open this workspace, but has not been assigned any record permissions."));
+      if (priority.childElementCount) root.append(priority);
+      const layout = make("div", undefined, "moderation-control-grid");
+      const work = make("section", undefined, "staff-work-panel");
+      const workHeading = make("div", undefined, "staff-panel-heading"); workHeading.append(make("h3", "Work queue")); work.append(workHeading, make("p", "Open a queue to inspect evidence and record a decision.", "staff-panel-note"));
+      const views = ["reports", "queue", "content", "profiles", "claims", "appeals", "data-requests"].filter(allowed);
+      for (const view of views) {
+        const link = make("a", undefined, "staff-work-row"); link.href = F.serialize(view);
+        const copy = make("div", undefined, "staff-work-copy"); copy.append(make("strong", META[view][0]), make("span", queueNotes[view] || META[view][1]));
+        const count = state.summary?.counts?.[META[view][3]];
+        link.append(copy, make("span", hasCount(count) ? number.format(count) : "Open", "staff-state-v3"), make("span", "→", "staff-row-arrow")); work.append(link);
+      }
+      if (!views.length) work.append(empty("No review queues assigned", "Use the available community and record sections for your current role."));
+      layout.append(work);
+      const supporting = make("div", undefined, "moderation-supporting");
+      const community = make("section", undefined, "staff-work-panel"); const communityHeading = make("div", undefined, "staff-panel-heading"); communityHeading.append(make("h3", "Community & records")); community.append(communityHeading);
+      for (const view of ["members", "servers", "staff", "activity", "logs"].filter(allowed)) {
+        const link = make("a", undefined, "staff-work-row"); link.href = F.serialize(view);
+        const copy = make("div", undefined, "staff-work-copy"); copy.append(make("strong", META[view][0]));
+        const count = state.summary?.counts?.[META[view][3]];
+        const scope = { members: "Current registered accounts", servers: "Listings across all statuses", staff: "Active staff memberships", activity: "Recorded account events", logs: "Recorded staff audit events" }[view];
+        copy.append(make("span", scope)); link.append(copy, make("span", hasCount(count) ? number.format(count) : "Open", "staff-state-v3")); community.append(link);
+      }
+      if (["members", "servers", "staff", "activity", "logs"].some(allowed)) supporting.append(community);
       if (allowed("security") || allowed("bans")) {
         const risks = make("section", undefined, "moderation-risk-panel"); risks.append(make("h3", "Website safety"), make("p", "Security signals and access restrictions are separate. Investigate website risks, review a restriction, or handle an appeal from the appropriate section.")); const links = make("div", undefined, "moderation-risk-links");
-        for (const view of ["security", "bans", "appeals"].filter(allowed)) { const link = make("a", META[view][0], "button-v3 button-secondary-v3"); link.href = F.serialize(view); links.append(link); } risks.append(links); root.append(risks);
+        for (const view of ["security", "bans", "appeals"].filter(allowed)) { const link = make("a", META[view][0], "button-v3 button-secondary-v3"); link.href = F.serialize(view); links.append(link); } risks.append(links); supporting.append(risks);
       }
+      if (supporting.childElementCount) layout.append(supporting);
+      root.append(layout);
+      root.append(make("p", `Current authorised snapshot · ${date(state.summary.generatedAt)}. Queue counts describe the statuses shown; they are not historical trends.`, "staff-panel-note moderation-snapshot-note"));
     }
     function facetOptions(name, includeAll = true) {
       const list = state.workspace?.facets?.[name] || [];

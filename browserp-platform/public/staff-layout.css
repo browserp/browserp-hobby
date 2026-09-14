@@ -75,7 +75,7 @@ body.staff-v3 {
 .staff-v3 .staff-danger-v3:hover:not(:disabled) { background: #702c42; border-color: #d27387; }
 .staff-v3 :is(.field-v3, .moderation-search-label) { min-width: 0; }
 .staff-v3 :is(.field-v3, .moderation-search-label) > span { color: var(--copy); font-size: 13px; font-weight: 650; }
-.staff-v3 :is(input:where(:not([type="checkbox"]):not([type="radio"]):not([type="range"])), textarea, select) {
+.staff-v3 :is(input, textarea, select):where(:not([type="checkbox"]):not([type="radio"]):not([type="range"])) {
   min-width: 0; min-height: 46px; border: 1px solid #47344e; border-radius: var(--radius-sm);
   background-color: #0b080f; color: var(--text); font-size: 14px; line-height: 1.5;
   padding: 11px 13px;
@@ -249,7 +249,7 @@ body.staff-v3 {
   .staff-v3 .moderation-tabs { padding: 12px; gap: 8px; }
   .staff-v3 .moderation-tabs a { font-size: 12px; padding-inline: 11px; }
   .staff-v3 :is(.moderation-record, .moderation-filter, .staff-claim, .fivem-fetch) { padding: 18px; }
-  .staff-v3 :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select) { font-size: 16px; }
+  .staff-v3 :is(input, textarea, select):where(:not([type="checkbox"]):not([type="radio"]):not([type="range"])) { font-size: 16px; }
   .staff-v3 :is(.staff-claims-filters, .publishing-panel-v6) { padding: 16px; }
   .staff-v3 .publishing-panel-v6 { margin: 16px; }
   .staff-v3 .staff-dialog-card-v3 { padding: 22px; }

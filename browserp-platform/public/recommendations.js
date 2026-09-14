@@ -287,7 +287,7 @@
   function appearanceChoice() {
     if (!document.querySelector("link[data-first-visit-appearance]")) {
       const styles = el("link", ""); styles.rel = "stylesheet";
-      styles.href = "/first-visit-appearance.css?v=20260908"; styles.dataset.firstVisitAppearance = "";
+      styles.href = "/first-visit-appearance.css?v=20260914-ui2"; styles.dataset.firstVisitAppearance = "";
       document.head.append(styles);
     }
     const group = el("div", "first-visit-appearance");

@@ -116,7 +116,7 @@ export function createWordmarkCanvas(pattern, plane) {
       pitch: height + (parseFloat(style.getPropertyValue('--wordmark-gap')) || 16),
       planeHeight: parseFloat(planeStyle.height), rows: plane.children.length,
       tempo: parseFloat(style.getPropertyValue('--wordmark-tempo')) || 1.3333333333,
-      period: parseFloat(style.getPropertyValue('--wordmark-period')) || 36.8,
+      period: parseFloat(style.getPropertyValue('--wordmark-period')) || 18.4,
       baseOpacity: parseFloat(style.getPropertyValue('--wordmark-base-opacity')) || .07,
       waveOpacity: parseFloat(style.getPropertyValue('--wordmark-wave-opacity')) || .24,
       waveScale: parseFloat(style.getPropertyValue('--wordmark-wave-scale')) || 1.03,

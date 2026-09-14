@@ -2,18 +2,18 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { wordmarkMotion } from '../public/wordmark-canvas.js';
 
-const geometry = { rows: 43, width: 92, period: 36.8, waveOpacity: .24, waveScale: 1.03, tempo: 1.3333333333, waveStart: 5, waveDuration: 13.6 };
+const geometry = { rows: 43, width: 92, period: 18.4, waveOpacity: .24, waveScale: 1.03, tempo: 1.3333333333, waveStart: 5, waveDuration: 13.6 };
 const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < .00001, `${actual} differs from ${expected}`);
 
 test('every row moves right at one constant speed and wraps at the actual artwork repeat', () => {
   const start = wordmarkMotion(geometry, 16000), later = wordmarkMotion(geometry, 18000);
   assert.equal(start.planeX, 0, 'no global drift cancels the row travel');
   for (let i = 0; i < geometry.rows; i += 1) {
-    near(start.rows[i].x, 40);
-    near(later.rows[i].x - start.rows[i].x, 5);
+    near(start.rows[i].x, 80);
+    near(later.rows[i].x - start.rows[i].x, 10);
   }
   near(wordmarkMotion(geometry, geometry.period * 1000).rows[0].x, 0);
-  near(wordmarkMotion(geometry, geometry.period * 1000 - 1).rows[0].x, geometry.width - .0025);
+  near(wordmarkMotion(geometry, geometry.period * 1000 - 1).rows[0].x, geometry.width - .005);
   // Different repeat widths must loop on their own edge, without a fixed 120px jump.
   const small = { ...geometry, width: 84, period: 33.6 };
   near(wordmarkMotion(small, small.period * 1000).rows[0].x, 0);

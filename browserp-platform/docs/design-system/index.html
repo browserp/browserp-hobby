@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BrowseRP component reference</title>
+<link rel="stylesheet" href="../../public/design-system.css"><link rel="stylesheet" href="reference.css">
+<script src="reference.js" defer></script></head>
+<body><main class="reference">
+<header><p class="ds-eyebrow">BrowseRP · developer reference</p><h1 class="ds-title">Shared components</h1>
+<p class="ds-subtitle">Inspect the maintained recipes in both themes. These examples have no live account or staff data.</p>
+<div class="reference-toolbar"><div class="ds-tabs" role="group" aria-label="Reference theme"><button type="button" data-theme-choice="dark" aria-pressed="true">Dark</button><button type="button" data-theme-choice="light" aria-pressed="false">Light</button></div>
+<label class="ds-choice"><input type="checkbox" id="compact">44px staff density</label></div></header>
+<section class="ds-panel"><div class="ds-panel-heading"><h2>Actions and states</h2><span class="ds-status" data-tone="info">Shared recipe</span></div>
+<div class="reference-grid">
+<div><p>Ordinary</p><button type="button" class="ds-button">Save changes</button></div>
+<div><p>Primary</p><button type="button" class="ds-button ds-button-primary">Save changes</button></div>
+<div><p>Quiet</p><button type="button" class="ds-button ds-button-quiet">Cancel</button></div>
+<div><p>Destructive</p><button type="button" class="ds-button ds-button-danger">Remove item</button></div>
+<div><p>Selected</p><button type="button" class="ds-button" aria-pressed="true" data-toggle>Selected</button></div>
+<div><p>Loading</p><button type="button" class="ds-button" aria-busy="true" aria-disabled="true">Save changes <span aria-hidden="true">…</span></button></div>
+<div><p>Disabled</p><button type="button" class="ds-button" disabled>Save changes</button></div>
+<div><p>Hover preview</p><button type="button" class="ds-button reference-hover">Save changes</button></div>
+<div><p>Keyboard-focus preview</p><button type="button" class="ds-button reference-focus">Save changes</button></div>
+</div><p class="reference-note">Hover and focus previews are labelled, reference-only simulations. Tab through the controls to inspect real keyboard focus. Buttons here do not perform writes.</p></section>
+<section class="ds-panel"><div class="ds-panel-heading"><h2>Fields and choices</h2></div>
+<div class="reference-grid"><label class="ds-field"><span>Community name</span><input placeholder="Enter a name" value="Example community"><small>Ordinary field</small></label>
+<label class="ds-field"><span>Region</span><select><option>Any region</option><option>Europe</option><option>North America</option></select><small>Native select retains its browser behaviour.</small></label>
+<label class="ds-field"><span>Invalid name</span><input aria-invalid="true" aria-describedby="name-error" value=""><small id="name-error" class="reference-error">Enter a community name.</small></label>
+<label class="ds-field"><span>Unavailable field</span><input disabled value="Unavailable"></label>
+<label class="ds-field"><span>Image upload</span><input type="file" accept="image/*"><small>Local chooser only; no upload is sent.</small></label>
+<label class="ds-field"><span>Description</span><textarea placeholder="Describe your community"></textarea></label></div>
+<div class="reference-toolbar"><label class="ds-choice"><input type="checkbox" checked>Checkbox selected</label><label class="ds-choice"><input type="checkbox">Checkbox ordinary</label><label class="ds-choice"><input type="radio" name="demo-choice" checked>First choice</label><label class="ds-choice"><input type="radio" name="demo-choice">Second choice</label></div></section>
+<section class="ds-panel"><div class="ds-panel-heading"><h2>Feedback and surfaces</h2></div>
+<div class="reference-toolbar"><span class="ds-status" data-tone="success">Completed</span><span class="ds-status" data-tone="warning">Needs review</span><span class="ds-status" data-tone="danger">Failed</span><span class="ds-status" data-tone="info">Pending</span></div>
+<p class="ds-feedback" data-tone="danger">The example action failed. Your changes are still here.</p>
+<div class="ds-chart-frame"><strong>History unavailable</strong><p>No historical data is supplied to this reference. Real charts must identify their source, scope and period.</p></div>
+<div class="reference-toolbar"><button type="button" class="ds-button" id="open-dialog">Open example dialog</button></div></section>
+<dialog id="example-dialog" aria-labelledby="dialog-title"><h2 id="dialog-title">Shared dialog surface</h2><p>Native Escape dismissal and focus return remain available.</p><form method="dialog"><button class="ds-button" autofocus>Close</button></form></dialog>
+<footer><p>Product controllers own menu disclosure, tabs, enhanced dropdowns, validation and request state. See README for integration and acceptance boundaries.</p></footer>
+</main></body></html>

@@ -38,7 +38,7 @@ body:is([data-page="dashboard"], [data-page="profile"]) .dashboard-view > .porta
   --wordmark-height: calc(var(--wordmark-width) * var(--wordmark-aspect));
   --wordmark-gap: 16px;
   --wordmark-tempo: 1.3333333333;
-  --wordmark-period: 36.8s; /* One 92px repeat at a steady 2.5px per second. */
+  --wordmark-period: 18.4s; /* One 92px repeat at a visible, steady 5px per second. */
   --wordmark-base-opacity: .07;
   --wordmark-wave-opacity: .24;
   --wordmark-wave-scale: 1.03;
@@ -110,7 +110,9 @@ body:is([data-page="dashboard"], [data-page="profile"]) .dashboard-view > .porta
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: linear-gradient(90deg, rgb(5 5 7 / .65), rgb(5 5 7 / .45) 60%, rgb(5 5 7 / .08));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--bg) 65%, transparent), color-mix(in srgb, var(--bg) 45%, transparent) 60%, color-mix(in srgb, var(--bg) 8%, transparent));
+  mask-image: linear-gradient(#000 0%, #000 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(#000 0%, #000 80%, transparent 100%);
 }
 @media (forced-colors: active) {
   .home-hero-pattern, [data-wordmark-surface]::after { display: none; }

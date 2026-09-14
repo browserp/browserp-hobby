@@ -30,11 +30,20 @@
     if (!$("#website-overview")) return null;
     active?.destroy();
     const authenticators = window.BrowseRPStaffAuthenticators?.init({ api });
-    const state = { range: "30d", website: null, busy: false, destroyed: false, request: 0, selectedDate: null, interval: null, observer: null, lastWidth: 0, duty: null };
+    const state = { range: "30d", website: null, busy: false, websiteBusy: false, workBusy: false, workRequest: 0, workReceivedAt: null, destroyed: false, request: 0, selectedDate: null, interval: null, observer: null, lastWidth: 0, duty: null };
     const cleanup = [];
     const listen = (element, event, callback) => { if (!element) return; element.addEventListener(event, callback); cleanup.push(() => element.removeEventListener(event, callback)); };
     const status = (text, mode = "loading") => { const element = $("#overview-live-status"); if (element) { element.textContent = text; element.dataset.state = mode; } };
-    const busy = (value) => { state.busy = value; $("#overview-refresh").disabled = value; $("#overview-chart-figure").setAttribute("aria-busy", String(value)); $("#staff-metrics-v3").setAttribute("aria-busy", String(value)); };
+    const busy = (part, value) => {
+      state[part === "website" ? "websiteBusy" : "workBusy"] = value;
+      state.busy = state.websiteBusy || state.workBusy;
+      $("#overview-refresh").disabled = state.busy;
+      const selectors = part === "website" ? ["#overview-chart-figure", "#staff-metrics-v3"] : ["#overview-work-queue", "#overview-audit-list", "#overview-priorities"];
+      selectors.forEach(selector => $(selector)?.setAttribute("aria-busy", String(value)));
+    };
+    const workStatus = make("p", "Loading review data…", "staff-panel-note");
+    workStatus.id = "overview-work-status"; workStatus.setAttribute("role", "status");
+    const workStatusText = (text, mode = "loading") => { workStatus.textContent = text; workStatus.dataset.state = mode; };
     const empty = (message) => { $("#overview-chart").replaceChildren(make("p", message, "overview-chart-empty")); $("#overview-user-data").replaceChildren(); };
     const selectRange = (range) => {
       if (!RANGE_LABELS[range] || range === state.range) return;
@@ -45,7 +54,7 @@
       $("#overview-range summary").focus();
       $("#overview-users-new").textContent = `Loading ${RANGE_LABELS[range].toLowerCase()} of signup history…`;
       empty("Loading this time frame…");
-      void refresh();
+      void refreshWebsite();
     };
 
     function drawChart(users) {
@@ -74,7 +83,7 @@
       const graph = svg("svg", { viewBox: `0 0 ${width} ${height}`, "aria-hidden": "true", focusable: "false" });
       const defs = svg("defs");
       const gradient = svg("linearGradient", { id: "overview-chart-gradient", x1: "0", y1: "0", x2: "0", y2: "1" });
-      gradient.append(svg("stop", { offset: "0%", "stop-color": "#ec4fa6", "stop-opacity": ".3" }), svg("stop", { offset: "100%", "stop-color": "#9b6cff", "stop-opacity": ".015" }));
+      gradient.append(svg("stop", { offset: "0%", "stop-color": "var(--cyan)", "stop-opacity": ".22" }), svg("stop", { offset: "100%", "stop-color": "var(--cyan)", "stop-opacity": ".015" }));
       defs.append(gradient); graph.append(defs);
       for (let index = 0; index <= 4; index += 1) {
         const y = pad.top + plotHeight * index / 4;
@@ -131,13 +140,55 @@
       if (hadFocus) surface.focus({ preventScroll: true });
     }
 
-    function render(payload, website) {
-      $$("[data-overview-metric]").forEach((element) => { const value = website.metrics?.[element.dataset.overviewMetric]; element.textContent = count(value) ? number.format(value) : "Unavailable"; });
-      $$("[data-overview-queue]").forEach((element) => {
-        const key = element.dataset.overviewQueue;
-        const value = payload.overview?.metrics?.[key] ?? payload.overview?.[key];
-        element.textContent = count(value) ? `${number.format(value)} ${key === "openReports" ? "open" : "pending"}` : "";
+    function renderWork(overview, capabilities) {
+      // Dashboard permissions are role defaults. These booleans reflect effective grants/denials.
+      const permissionKeys = { "servers.review": "readListings", "reports.read": "readReports", "security.read": "readSecurity", "audit.read": "readAudit" };
+      const permissions = Object.keys(permissionKeys).filter(key => capabilities[permissionKeys[key]] === true);
+      $$("[data-overview-priority-card]").forEach(card => { card.hidden = !permissions.includes(card.dataset.overviewPriorityCard); });
+      const priorities = $("#overview-priorities");
+      if (priorities) priorities.hidden = !$$("[data-overview-priority-card]").some(card => !card.hidden);
+      $$("[data-overview-priority]").forEach(element => {
+        const value = overview[element.dataset.overviewPriority];
+        const capability = { pendingSubmissions: "readListings", openReports: "readReports", securityAlerts: "readSecurity" }[element.dataset.overviewPriority];
+        element.textContent = capabilities[capability] === true ? count(value) ? number.format(value) : "Unavailable" : "—";
       });
+      const groups = [
+        ["servers.review", "listingQueue", "Listing", "queue"],
+        ["reports.read", "reportQueue", "Report", "reports"]
+      ].filter(([permission]) => permissions.includes(permission));
+      const records = groups.flatMap(([, key, label, view]) => (Array.isArray(overview[key]) ? overview[key] : []).map(record => ({ record, label, view })));
+      records.sort((a, b) => (Date.parse(b.record.created_at || b.record.createdAt) || 0) - (Date.parse(a.record.created_at || a.record.createdAt) || 0));
+      const rows = records.slice(0, 6).map(({ record, label, view }) => {
+        const row = make("a", undefined, "staff-work-row"); row.href = `/staffpanel/moderation#${view}`;
+        const copy = make("div", undefined, "staff-work-copy");
+        copy.append(make("strong", record.name || record.category || String(record.target_type || record.targetType || label).replace(/_/g, " ")));
+        const created = record.created_at || record.createdAt;
+        copy.append(make("span", `${label} · ${date(created) ? day.format(new Date(created)) : "Date not recorded"}`));
+        const badge = make("span", String(record.status || "Review").replace(/_/g, " "), "staff-state-v3");
+        row.append(copy, badge, make("span", "→", "staff-row-arrow"));
+        row.setAttribute("aria-label", `Open ${label.toLowerCase()} queue: ${record.name || record.category || label}`);
+        return row;
+      });
+      const missing = groups.some(([, key]) => !Array.isArray(overview[key]));
+      $("#overview-work-queue")?.replaceChildren(workStatus, ...(rows.length ? rows : [make("p", !groups.length ? "Open Moderation to see the sections available to your role." : missing ? "Queue previews are unavailable. Open the relevant queue to check current work." : "No recent items in your available review queues.", "staff-panel-note")]));
+      const audit = permissions.includes("audit.read") && Array.isArray(overview.recentAudit) ? overview.recentAudit : null;
+      $("#overview-audit-list")?.replaceChildren(...(audit?.length ? audit.slice(0, 5).map(record => {
+        const item = make("div", undefined, "staff-activity-row");
+        item.append(make("strong", String(record.action || "Staff event").replace(/[._]/g, " ")));
+        const created = record.created_at || record.createdAt;
+        item.append(make("span", date(created) ? timestamp.format(new Date(created)) + " UTC" : "Date not recorded"));
+        return item;
+      }) : [make("p", audit ? "No recent audit events." : "Open audit logs to check the activity available to your role.", "staff-panel-note")]));
+      $$("[data-overview-queue]").forEach(element => {
+        const key = element.dataset.overviewQueue;
+        const permission = key === "openReports" ? "reports.read" : "servers.review";
+        const value = overview[key];
+        element.textContent = permissions.includes(permission) && count(value) ? `${number.format(value)} ${key === "openReports" ? "open" : "pending"}` : "";
+      });
+    }
+
+    function renderWebsite(website) {
+      $$("[data-overview-metric]").forEach((element) => { const value = website.metrics?.[element.dataset.overviewMetric]; element.textContent = count(value) ? number.format(value) : "Unavailable"; });
       $("#overview-users-total").textContent = number.format(website.users.total);
       const period = state.range === "max" ? "since the first signup" : `in the selected ${RANGE_LABELS[state.range].toLowerCase()}`;
       $("#overview-users-new").textContent = `${number.format(website.users.newUsers)} current accounts joined ${period}`;
@@ -146,36 +197,25 @@
       if (!rows.length) { const row = make("tr"); const cell = make("td", "No signup records in this time frame."); cell.colSpan = 3; row.append(cell); rows.push(row); }
       $("#overview-user-data").replaceChildren(...rows);
       $("#overview-chart-caption").textContent = `${website.users.granularity === "day" ? "Daily" : website.users.granularity === "week" ? "Weekly" : `${website.users.bucketDays || "Multiple"}-day`} counts in UTC. Hover or tap for an exact date and count. Focus the chart and use the arrow keys to explore. Deleted accounts are excluded.`;
-      status(`Updated ${timestamp.format(new Date(website.generatedAt))} UTC · Refreshes every 30 seconds`, "live");
+      status(`Website totals updated ${timestamp.format(new Date(website.generatedAt))} UTC · Refreshes every 30 seconds`, "live");
     }
 
-    async function refresh() {
+    async function refreshWebsite() {
       if (state.destroyed) return null;
       const request = ++state.request;
       const requestedRange = state.range;
-      busy(true);
+      busy("website", true);
       try {
         const payload = await api(`/api/admin/overview?range=${encodeURIComponent(requestedRange)}`);
         if (state.destroyed || request !== state.request) return null;
         const website = validateWebsite(payload, requestedRange);
         state.website = website;
-        render(payload, website);
+        renderWebsite(website);
         if (onLoad) await onLoad(website);
         return website;
       } catch (error) {
         if (state.destroyed || request !== state.request) return null;
-        if (error.status === 401 || error.status === 403) {
-          controller.destroy();
-          empty("Your staff session has ended. Sign in again to view current data.");
-          $$("[data-overview-metric]").forEach((element) => { element.textContent = "—"; });
-          $$("[data-overview-queue]").forEach((element) => { element.textContent = ""; });
-          $("#overview-users-total").textContent = "—";
-          $("#overview-users-new").textContent = "Staff access is required.";
-          status("Staff access needs to be verified again.", "error");
-          if (onAuthFailure) onAuthFailure(error);
-          else throw error;
-          return null;
-        }
+        if (error.status === 401 || error.status === 403) { endAccess(error); return null; }
         const lastUpdate = state.website ? ` Last successful update: ${timestamp.format(new Date(state.website.generatedAt))} UTC.` : "";
         status(`Could not refresh website data.${lastUpdate} Retry with Refresh now.`, "error");
         if (!state.website || state.website.users.range !== state.range) {
@@ -183,10 +223,71 @@
           $("#overview-users-new").textContent = "Signup history is temporarily unavailable.";
         }
         return null;
-      } finally { if (!state.destroyed && request === state.request) busy(false); }
+      } finally { if (!state.destroyed && request === state.request) busy("website", false); }
     }
 
-    const controller = { refresh, get website() { return state.website; }, destroy() { state.destroyed = true; state.request += 1; clearInterval(state.interval); state.observer?.disconnect(); authenticators?.destroy(); state.duty?.destroy(); cleanup.forEach((remove) => remove()); if (active === controller) active = null; } };
+    function clearWork(message) {
+      $$("[data-overview-queue]").forEach(element => { element.textContent = ""; });
+      $$("[data-overview-priority]").forEach(element => { element.textContent = "—"; });
+      $$("[data-overview-priority-card]").forEach(card => { card.hidden = true; });
+      if ($("#overview-priorities")) $("#overview-priorities").hidden = true;
+      $("#overview-work-queue")?.replaceChildren(workStatus);
+      $("#overview-audit-list")?.replaceChildren(make("p", message, "staff-panel-note"));
+    }
+
+    function endAccess(error) {
+      controller.destroy();
+      empty("Your staff session has ended. Sign in again to view current data.");
+      $$("[data-overview-metric]").forEach(element => { element.textContent = "—"; });
+      clearWork("Staff access is required.");
+      workStatusText("Staff access needs to be verified again.", "error");
+      $("#overview-users-total").textContent = "—";
+      $("#overview-users-new").textContent = "Staff access is required.";
+      status("Staff access needs to be verified again.", "error");
+      if (onAuthFailure) onAuthFailure(error);
+    }
+
+    async function refreshWork() {
+      if (state.destroyed) return null;
+      const request = ++state.workRequest;
+      busy("work", true);
+      workStatusText("Refreshing review queues and audit activity…");
+      if (!state.workReceivedAt) $("#overview-work-queue")?.replaceChildren(workStatus);
+      try {
+        // The ranged overview endpoint returns website data ONLY. Keep the real dashboard separate.
+        const [dashboard, access] = await Promise.allSettled([
+          api("/api/admin/overview"),
+          api("/api/admin/moderation?view=summary", { optionalOverviewCapabilities: true })
+        ]);
+        if (state.destroyed || request !== state.workRequest) return null;
+        if (dashboard.status === "rejected" && [401, 403].includes(dashboard.reason?.status)) { endAccess(dashboard.reason); return null; }
+        if (access.status === "rejected" && (access.reason?.status === 401 || (access.reason?.status === 403 && access.reason?.sectionUnavailable !== true))) { endAccess(access.reason); return null; }
+        if (dashboard.status === "rejected") throw dashboard.reason;
+        if (access.status === "rejected") throw access.reason;
+        const overview = dashboard.value?.overview;
+        const capabilities = access.value?.summary?.capabilities;
+        if (!overview || !["pendingSubmissions", "openReports", "securityAlerts"].every(key => count(overview[key])) || !["listingQueue", "reportQueue", "recentAudit"].every(key => Array.isArray(overview[key]))) throw new Error("The review dashboard response is incomplete.");
+        if (!capabilities || !["readListings", "readReports", "readSecurity", "readAudit"].every(key => typeof capabilities[key] === "boolean")) throw new Error("Effective review permissions are unavailable.");
+        renderWork(overview, capabilities);
+        state.workReceivedAt = new Date().toISOString();
+        workStatusText(`Review queues and audit received ${timestamp.format(new Date(state.workReceivedAt))} UTC · Current snapshot`, "live");
+        return overview;
+      } catch (error) {
+        if (state.destroyed || request !== state.workRequest) return null;
+        clearWork("Audit activity is unavailable. Use Refresh now to try again.");
+        const lastUpdate = state.workReceivedAt ? ` Last successfully received: ${timestamp.format(new Date(state.workReceivedAt))} UTC.` : "";
+        workStatusText(error.status === 403 ? "Review data is unavailable for your current permissions. Open Moderation to check available sections." : `Review data could not refresh.${lastUpdate} Use Refresh now to try again.`, "error");
+        return null;
+      } finally { if (!state.destroyed && request === state.workRequest) busy("work", false); }
+    }
+
+    async function refresh() {
+      if (state.destroyed) return null;
+      const [website] = await Promise.all([refreshWebsite(), refreshWork()]);
+      return website;
+    }
+
+    const controller = { refresh, get website() { return state.website; }, destroy() { state.destroyed = true; state.request += 1; state.workRequest += 1; clearInterval(state.interval); state.observer?.disconnect(); authenticators?.destroy(); state.duty?.destroy(); cleanup.forEach((remove) => remove()); if (active === controller) active = null; } };
     active = controller;
     $$("[data-overview-range]").forEach((button) => listen(button, "click", () => selectRange(button.dataset.overviewRange)));
     listen($("#overview-refresh"), "click", () => { void refresh(); });
