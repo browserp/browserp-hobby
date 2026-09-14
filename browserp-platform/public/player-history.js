@@ -9,10 +9,15 @@
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "medium" });
   const clock = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
   const day = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" });
-  let controller = null, generation = 0, current = null, closed = false, inspection = null, observer = null;
+  let controller = null, generation = 0, current = null, closed = false, inspection = null, observer = null, resizeFrame = null;
   const make = (tag, text) => { const element = document.createElement(tag); if (text !== undefined) element.textContent = text; return element; };
   const svgNode = (tag, attrs = {}) => { const element = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const [key, value] of Object.entries(attrs)) element.setAttribute(key, value); return element; };
   const count = value => Number.isInteger(value) && value >= 0 && value <= 100000;
+
+  function cancelResize() {
+    if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+    resizeFrame = null;
+  }
 
   function inspect(data, svg, geometry, previous) {
     const { width, height, left, right, plotWidth, baseline, plotHeight, top, start, end } = geometry;
@@ -111,7 +116,10 @@
       release();
     });
     on("pointercancel", () => { release(); hide(); });
-    on("lostpointercapture", () => { gesture = null; });
+    on("lostpointercapture", event => {
+      // Transferring implicit capture from the SVG child bubbles its loss here.
+      if (event.target === surface && event.pointerId === gesture?.id) gesture = null;
+    });
     on("pointerleave", () => {
       if (gesture && !surface.hasPointerCapture?.(gesture.id)) release();
       if (!gesture && document.activeElement !== surface) hide();
@@ -190,6 +198,7 @@
 
   async function load() {
     if (closed) return;
+    cancelResize();
     controller?.abort();
     controller = new AbortController();
     const active = controller, turn = ++generation, range = select.value;
@@ -236,10 +245,20 @@
   retry.addEventListener("click", load);
   if (typeof ResizeObserver === "function") {
     let lastWidth = 0;
-    observer = new ResizeObserver(() => { const width = chart.clientWidth; if (!closed && width && width !== lastWidth) { lastWidth = width; if (current) render(current); } });
+    observer = new ResizeObserver(() => {
+      const width = chart.clientWidth;
+      if (closed || !width || width === lastWidth) return;
+      lastWidth = width;
+      if (!current || resizeFrame !== null) return;
+      const turn = generation;
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = null;
+        if (!closed && turn === generation && current) render(current);
+      });
+    });
     observer.observe(chart);
   }
-  window.addEventListener("pagehide", () => { closed = true; generation++; controller?.abort(); inspection?.destroy(); inspection = null; observer?.disconnect(); });
+  window.addEventListener("pagehide", () => { closed = true; generation++; cancelResize(); controller?.abort(); inspection?.destroy(); inspection = null; observer?.disconnect(); });
   window.addEventListener("pageshow", event => { if (event.persisted) { closed = false; observer?.observe(chart); load(); } });
   load();
 })();

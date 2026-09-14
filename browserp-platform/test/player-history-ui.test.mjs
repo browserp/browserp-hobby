@@ -14,11 +14,18 @@ function setup(fetch) {
   const dom = new JSDOM(read("public/server.html"), { url: "https://www.browserp.com/server/county-rp", runScripts: "outside-only" });
   dom.window.fetch = fetch;
   const root = dom.window.document.getElementById("player-history");
-  let width = 320, resize, disconnected = 0;
+  let width = 320, resize, disconnected = 0, nextFrame = 0;
+  const frames = new Map();
+  dom.window.requestAnimationFrame = callback => { frames.set(++nextFrame, callback); return nextFrame; };
+  dom.window.cancelAnimationFrame = id => frames.delete(id);
   Object.defineProperty(root.querySelector("[data-history-chart]"), "clientWidth", { get: () => width });
   dom.window.ResizeObserver = class { constructor(callback) { resize = callback; } observe() {} disconnect() { disconnected++; } };
   dom.window.eval(read("public/player-history.js"));
-  return { dom, root, select: root.querySelector("select"), resize: next => { width = next; resize(); }, disconnected: () => disconnected };
+  return {
+    dom, root, select: root.querySelector("select"), resize: next => { width = next; resize(); }, disconnected: () => disconnected,
+    pendingFrames: () => frames.size,
+    flushFrame: () => { const callbacks = [...frames.values()]; frames.clear(); for (const callback of callbacks) callback(); }
+  };
 }
 
 test("default 8h preserves same-origin preview access and measured responsive dots with accessible observations", async () => {
@@ -80,9 +87,9 @@ test("request failure/malformed observations clear stale chart data and expose a
   } finally { dom.window.close(); }
 });
 
-function pointer(dom, target, type, x, y = 100, pointerType = "mouse") {
+function pointer(dom, target, type, x, y = 100, pointerType = "mouse", pointerId = 1) {
   const event = new dom.window.Event(type, { bubbles: true, cancelable: true });
-  for (const [key, value] of Object.entries({ clientX: x, clientY: y, pointerType, pointerId: 1, button: 0, isPrimary: true })) Object.defineProperty(event, key, { value });
+  for (const [key, value] of Object.entries({ clientX: x, clientY: y, pointerType, pointerId, button: 0, isPrimary: true })) Object.defineProperty(event, key, { value });
   target.dispatchEvent(event); return event;
 }
 function surfaceFor(root, width = 320, height = 240) {
@@ -169,27 +176,64 @@ test("horizontal finger scrubbing captures only after intent, suppresses its cli
   } finally { dom.window.close(); }
 });
 
-test("resize retains the selected observation/focus, range replacement and pagehide tear down old inspection listeners", async () => {
+test("touch scrubbing survives bubbled child capture loss and stops only when its own pointer loses capture", async () => {
+  const { dom, root } = setup(async () => answer(payload()));
+  try {
+    await settle(); const { surface, svg, captured } = surfaceFor(root);
+    const [first, last] = [...svg.querySelectorAll(".player-history-point")].map(point => Number(point.getAttribute("cx")));
+    pointer(dom, svg, "pointerdown", first - 10, 100, "touch");
+    pointer(dom, svg, "pointermove", first, 101, "touch");
+    assert.equal(captured(), true);
+    assert.equal(root.querySelector(".player-history-tooltip strong").textContent, "0 players");
+    pointer(dom, svg, "lostpointercapture", first, 101, "touch");
+    const gapMove = pointer(dom, surface, "pointermove", 179, 101, "touch");
+    assert.equal(gapMove.defaultPrevented, true);
+    assert.equal(root.querySelector(".player-history-tooltip strong").textContent, "No reading to show here");
+    pointer(dom, surface, "lostpointercapture", 179, 101, "touch", 2);
+    pointer(dom, surface, "pointermove", last, 101, "touch");
+    assert.equal(root.querySelector(".player-history-tooltip strong").textContent, "30 players");
+    surface.releasePointerCapture(1);
+    pointer(dom, surface, "lostpointercapture", last, 101, "touch");
+    const afterLoss = pointer(dom, surface, "pointermove", first, 101, "touch");
+    assert.equal(afterLoss.defaultPrevented, false);
+    assert.equal(root.querySelector(".player-history-tooltip strong").textContent, "30 players");
+  } finally { dom.window.close(); }
+});
+
+test("deferred resize coalesces widths and preserves latest selection/focus; range changes and pagehide cancel redraws", async () => {
   const h = setup(async url => answer(payload(new URL(url, "https://example.invalid").searchParams.get("history"))));
   const { dom, root, select } = h;
   try {
     await settle(); const original = surfaceFor(root).surface;
-    original.focus(); original.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "End", bubbles: true }));
+    original.focus();
     h.resize(600);
+    h.resize(640);
+    assert.equal(root.querySelector(".player-history-inspector"), original, "ResizeObserver must not rebuild synchronously");
+    assert.equal(h.pendingFrames(), 1, "Width changes share one scheduled redraw");
+    original.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "End", bubbles: true }));
+    h.flushFrame();
     const resized = root.querySelector(".player-history-inspector");
     assert.notEqual(resized, original); assert.equal(dom.window.document.activeElement, resized);
+    assert.equal(resized.querySelector("svg").getAttribute("viewBox"), "0 0 640 240");
     assert.equal(resized.getAttribute("aria-valuenow"), "2");
     assert.equal(root.querySelector(".player-history-tooltip time").dateTime, payload().lastAt);
     original.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Home", bubbles: true }));
     assert.equal(original.getAttribute("aria-valuenow"), "2", "Detached inspector no longer handles keys");
     assert.equal(resized.getAttribute("aria-valuenow"), "2");
-    select.value = "24h"; select.dispatchEvent(new dom.window.Event("change")); await settle();
+    h.resize(700); assert.equal(h.pendingFrames(), 1);
+    select.value = "24h"; select.dispatchEvent(new dom.window.Event("change"));
+    assert.equal(h.pendingFrames(), 0, "New loads cancel a pending redraw of the old range");
+    await settle();
     const replacement = root.querySelector(".player-history-inspector"); assert.notEqual(replacement, resized);
+    h.flushFrame(); assert.equal(root.querySelector(".player-history-inspector"), replacement);
     resized.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Home", bubbles: true }));
     assert.equal(resized.getAttribute("aria-valuenow"), "2", "Old range listeners are removed");
     assert.equal(replacement.getAttribute("aria-valuenow"), "1");
     replacement.focus(); assert.match(root.querySelector(".player-history-tooltip time").textContent, /·.*·/);
+    h.resize(720); assert.equal(h.pendingFrames(), 1);
     dom.window.dispatchEvent(new dom.window.Event("pagehide")); assert.equal(h.disconnected(), 1);
+    assert.equal(h.pendingFrames(), 0, "Page exit cancels its scheduled redraw");
+    h.resize(740); assert.equal(h.pendingFrames(), 0, "Late observer callbacks cannot schedule a closed page");
     replacement.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "End", bubbles: true }));
     assert.equal(replacement.getAttribute("aria-valuenow"), "1");
     assert.equal(root.querySelector(".player-history-tooltip").hidden, true);
