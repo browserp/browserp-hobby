@@ -81,3 +81,14 @@ The optional offscreen directory rendering optimisation improved the paired norm
 baa0008 integrates Task3's narrow focus correction from 5a0897f: the directory listing link draws its existing 2px keyboard outline inward, avoiding the parent's clipping boundary. It changes no dimensions, colours, data or actions. Task5 owns only the remaining affected browser checks; no full matrix restart is required.
 
 Main will record the final source, affected result, source archive and exact deployment in a release receipt. Production promotion and canonical readback follow the final gate. Staging uses --prod --skip-domain to retain production environment semantics while leaving the canonical domain unchanged until promotion. No production promotion has yet occurred as of this checkpoint.
+
+
+## Post-release advert and accent refinement
+
+The core redesign ac3bf0e is live as dpl_2Jgvj15oCjnG1gX6ygpgCgo74fEs, verified by canonical deployment and stylesheet readback. Its release receipt is Documents/Codex/2026-09-14/BrowseRP-Redesign-Release.md.
+
+User feedback then authorised improving every advert placement using the praised Games banner as a quality benchmark, while preserving different creatives and suitable compositions. The integrated refinement removes legacy home split and clipping rules, uses stable slot-based wide/phone/portrait geometry, preserves the three current creatives and all existing carousel behaviour, and frames the low car subjects individually. Main personally reviewed home wide/phone, Games and true narrow detail rails. This changes presentation only, including the previously preserved obsolete home-split source assertion.
+
+The shared button gradient now originates at the border box, removing coloured repeat seams. Existing decorative headline accents use restrained 12-second brand-colour movement with static reduced-motion and solid forced-colour/print fallbacks. No ordinary status colours, wordmark behaviour, access control, data or navigation behaviour changed.
+
+Changed asset identities are advanced together. The combined source is awaiting bounded affected browser checks and the required staged build before publication. Do not claim these refinements live from the core release receipt. The prior core deployment is the immediate rollback target; gm9926 remains the historical source master.

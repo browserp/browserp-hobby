@@ -327,10 +327,50 @@ body:is([data-page="profile"], [data-page="dashboard"]) .access-gate-v2 h1 { fon
 }
 
 
-/* Ad dimensions/placement and scripts are unchanged. Controls stay outside
+/* Ad placements and scripts are unchanged. Controls stay outside
    the copy and the disclosure remains distinct from organic community cards. */
 :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .ad-label-v3 { padding: 0 2px 8px; border: 0; border-radius: 0; background: transparent; box-shadow: none; font-size: 12px; font-weight: 500; letter-spacing: .06em; color: var(--muted); }
-#server-detail-v3.server-page-v7 .server-ad-rail-v7 .ad-label-v3 { font-size: 12px; }
+/* One artwork/overlay family for every slot. Layout follows slot width, not
+   page name. Content sizes the stage so long copy and CTAs cannot be clipped. */
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 { container-type: inline-size; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .side-ad-stage-v3 { border: 0; border-radius: 12px; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 8px; height: auto; min-height: 190px; max-height: none; aspect-ratio: auto; padding: 12px; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-image-v3 { position: absolute; inset: 0; display: block; width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; object-position: center 45%; }
+/* First-party portrait artwork has different subjects, not interchangeable
+   centre crops. Focal points change with the image, never stage geometry. */
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-image-v3[src$="/serious-roleplay.jpg"] { object-position: center 88%; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-image-v3[src$="/custom-cars.jpg"] { object-position: center 76%; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-shade-v3 { display: block; background: linear-gradient(90deg, #090911ee, #09091188 65%, #09091144); }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .side-ad-copy-v3 { min-width: 0; gap: 8px; overflow-wrap: anywhere; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { position: relative; inset: auto; grid-area: 1 / 2 / 2 / 3; width: 100%; max-width: 680px; min-height: 0; margin: 0; padding: 13px 0; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .side-ad-copy-v3 strong { max-width: none; font-size: clamp(22px, 2vw, 28px); line-height: 1.2; letter-spacing: -.025em; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .side-ad-copy-v3 span { font-size: 13px; line-height: 1.6; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .side-ad-copy-v3 a { max-width: 100%; min-height: 44px; margin-top: 0; font-size: 13px; line-height: 1.5; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 strong { color: #fff; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 span { color: #e0dce6; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 a { color: #68dafa; border-bottom-color: #68dafa; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .ad-arrow-v3 { position: relative; inset: auto; grid-row: 1; margin: 0; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .ad-arrow-previous-v3 { grid-column: 1; }
+:root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .ad-arrow-next-v3 { grid-column: 3; justify-self: end; }
+@container (min-width: 481px) {
+  :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 { min-height: clamp(280px, 35cqi, 560px); }
+}
+@container (max-width: 480px) {
+  :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 280px; align-content: end; }
+  :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { grid-area: 1 / 1 / 2 / -1; padding: 12px 4px 0; }
+  :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-shade-v3 { background: linear-gradient(180deg, #09091133, #09091188 35%, #090911aa); }
+  :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .side-ad-copy-v3 strong { font-size: 22px; }
+  :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .ad-arrow-v3 { grid-row: 2; }
+  :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .ad-arrow-next-v3 { grid-column: 2; }
+}
+/* At genuine 160–240px rail widths, show the whole portrait above the copy,
+   blending into the same dark stage instead of slicing off the vehicle. */
+@container (max-width: 240px) {
+  :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 { min-height: calc(125cqi + 360px); }
+  :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-image-v3 { height: auto; object-fit: contain; }
+  :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { padding-top: 125cqi; }
+  :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-shade-v3 { background: linear-gradient(180deg, transparent calc(125cqi - 32px), #0c0e13 125cqi); }
+}
 :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3,
 :root body:not(.staff-v3):not([data-staff-page]) .banner-ad-v7.side-ad-v3 { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .ad-controls-v3 { padding: 8px 12px; border: 0; background: transparent; box-shadow: none; gap: 4px 12px; flex-wrap: wrap; align-items: center; }
@@ -490,17 +530,6 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
    beat the legacy rail chrome, without changing its campaign or controls. */
 :root body[data-page="servers"] #directory-advert { position: static; inset: auto; width: 100%; max-width: none; margin: 24px 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 :root body[data-page="servers"] #server-list:not(:has(.server-card:not(.server-card-skeleton))) > #directory-advert { display: none; }
-:root body[data-page="servers"] #directory-advert .ad-label-v3 { padding: 0 0 8px; border: 0; border-radius: 0; background: transparent; box-shadow: none; font-size: 11px; font-weight: 500; }
-:root body[data-page="servers"] #directory-advert .side-ad-stage-v3 { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 8px; height: auto; min-height: 180px; max-height: none; aspect-ratio: auto; padding: 12px; border: 0; border-radius: 10px; }
-:root body[data-page="servers"] #directory-advert .side-ad-copy-v3 { position: relative; grid-column: 2; grid-row: 1; max-width: 720px; padding: 20px 12px; margin: 0; }
-:root body[data-page="servers"] #directory-advert .side-ad-copy-v3 strong { font-size: clamp(20px, 2vw, 26px); }
-:root body[data-page="servers"] #directory-advert .ad-arrow-v3 { position: relative; inset: auto; margin: 0; grid-row: 1; }
-:root body[data-page="servers"] #directory-advert .ad-arrow-previous-v3 { grid-column: 1; }
-:root body[data-page="servers"] #directory-advert .ad-arrow-next-v3 { grid-column: 3; }
-:root body[data-page="servers"] #directory-advert .ad-controls-v3 { padding: 4px 0; border: 0; background: transparent; box-shadow: none; }
-:root body[data-page="servers"] #directory-advert.artwork-unavailable .side-ad-stage-v3 { min-height: 0; background: var(--panel); }
-:root body[data-page="servers"] #directory-advert.artwork-unavailable .side-ad-image-notice-v3 { grid-area: 1 / 2 / 2 / 3; }
-:root body[data-page="servers"] #directory-advert.artwork-unavailable .side-ad-copy-v3 { grid-area: 2 / 1 / 3 / -1; }
 @media (max-width: 1100px) {
   body[data-page="servers"] .directory-intro-v3 { align-items: flex-start; flex-direction: column; gap: 4px; padding-block: 24px 16px; }
   body[data-page="servers"] .directory-toolbar-v3 { justify-content: flex-start; margin-left: -12px; }
@@ -534,12 +563,6 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
   :root body[data-page="servers"] #server-list .server-card > .server-tags { grid-area: 5 / 1 / 6 / -1; }
   :root body[data-page="servers"] #server-list .server-card > .server-card-bottom { grid-area: 6 / 1 / 7 / -1; flex-direction: row; align-items: center; justify-content: space-between; text-align: left; }
   :root body[data-page="servers"] #server-list .server-shortlist-actions { justify-content: flex-start; padding: 0 0 12px; }
-  :root body[data-page="servers"] #directory-advert .side-ad-stage-v3 { min-height: 0; grid-template-columns: 44px minmax(0, 1fr) 44px; padding: 12px; }
-  :root body[data-page="servers"] #directory-advert .side-ad-copy-v3 { grid-area: 1 / 1 / 2 / -1; padding: 12px 4px; }
-  :root body[data-page="servers"] #directory-advert .ad-arrow-v3 { grid-row: 2; }
-  :root body[data-page="servers"] #directory-advert.artwork-unavailable .side-ad-image-notice-v3 { grid-area: 1 / 1 / 2 / -1; }
-  :root body[data-page="servers"] #directory-advert.artwork-unavailable .side-ad-copy-v3 { grid-area: 2 / 1 / 3 / -1; }
-  :root body[data-page="servers"] #directory-advert.artwork-unavailable .ad-arrow-v3 { grid-row: 3; }
 }
 @media (max-width: 420px) {
   body[data-page="servers"] .result-bar-v3 { min-height: 73px; }

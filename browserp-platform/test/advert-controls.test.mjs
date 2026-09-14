@@ -157,18 +157,32 @@ test("page banners clear the sticky rail offset and reserve mobile copy and cont
   }
 });
 
-test("Home retains its separate artwork and copy columns instead of the page banner repair", t => {
-  for (const width of [390, 1280]) {
-    const h = harness(t, { width, page: "home" });
-    const banner = h.doc.querySelector("#banner-ad"), stage = banner.querySelector(".side-ad-stage-v3");
-    const copy = banner.querySelector(".side-ad-copy-v3"), image = banner.querySelector(".side-ad-image-v3");
-    assert.equal(h.css(stage).gridTemplateColumns, width <= 760 ? "minmax(0, 1fr) minmax(0, 1.5fr)" : "180px minmax(0, 1fr)");
-    assert.equal(h.css(stage).minHeight, "0px");
-    assert.equal(h.css(copy).position, "static");
-    assert.notEqual(h.css(copy).gridColumn, "1 / -1");
-    assert.notEqual(h.css(image).position, "absolute");
-    for (const button of banner.querySelectorAll(".ad-arrow-v3")) assert.notEqual(h.css(button).gridRow, "2");
+test("Home no longer forks the shared advert into a clipped portrait/copy split", () => {
+  // Source contract only: actual container layout, image framing and bounding
+  // boxes must be checked in a browser, not inferred from jsdom's layout.
+  assert.doesNotMatch(read("homepage.css"), /\.side-ad-(?:image|shade|copy|stage)-v3/);
+  assert.doesNotMatch(read("server-detail.css"), /\.side-ad-(?:image|shade|copy|stage)-v3/);
+  const shared = read("public-design.css");
+  assert.match(shared, /container-type: inline-size/);
+  assert.match(shared, /@container \(max-width: 480px\)/);
+  assert.match(shared, /grid-area: 1 \/ 1 \/ 2 \/ -1/);
+  assert.match(shared, /height: auto; min-height: 190px; max-height: none/);
+  assert.match(shared, /grid-row: 2/);
+});
+
+test("creative framing never selects stage geometry or disables the existing image animation", () => {
+  const shared = read("public-design.css");
+  const imageRules = [...shared.matchAll(/([^{}]*\[src\$=[^{}]*)\{([^{}]*)\}/g)];
+  assert.equal(imageRules.length, 2, "Only the two low car focal points need artwork-specific overrides");
+  for (const [, selector, declarations] of imageRules) {
+    assert.match(selector, /\.side-ad-image-v3/);
+    assert.doesNotMatch(selector, /:has\(|\.side-ad-stage-v3/);
+    assert.match(declarations, /^\s*object-position: center (?:88|76)%;\s*$/);
   }
+  assert.match(shared, /min-height: clamp\(280px, 35cqi, 560px\)/);
+  assert.match(shared, /min-height: calc\(125cqi \+ 360px\)/);
+  assert.match(read("browserp-v3.css"), /transition: opacity \.35s ease, transform 7s ease/);
+  assert.doesNotMatch(shared, /\.side-ad-image-v3[^{}]*\{[^{}]*transition:\s*none/);
 });
 
 test("keyboard focus is visible and reduced motion stops press scaling without hiding chevrons", t => {

@@ -33,33 +33,7 @@
 .home-game-filter-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .home-game-discovery .home-game-filter-status { font-size: 14px; line-height: 1.5; margin: 12px 0 0; color: var(--muted); }
 .home-game-filter-status:empty { display: none; }
-/* Show the full portrait creative and keep copy outside its artwork. */
-body[data-page="home"] .content-with-rail-v3 > .side-ad-v3 {
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: var(--panel);
-}
-body[data-page="home"] .content-with-rail-v3 > .side-ad-v3 .ad-label-v3 { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); }
-body[data-page="home"] .content-with-rail-v3 > .side-ad-v3 .side-ad-stage-v3 { border: 0; border-radius: 0; }
-body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 { min-height: 0; }
-body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-image-v3 {
-  position: static;
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 4 / 5;
-  object-fit: contain;
-  transform: none;
-}
-body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-shade-v3 { display: none; }
-body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { position: static; max-width: none; padding: 20px 18px; }
-body[data-page="home"] .content-with-rail-v3 > .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { min-height: 260px; align-content: center; }
-body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) { max-width: 900px; }
-body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .side-ad-stage-v3 { display: grid; grid-template-columns: 180px minmax(0, 1fr); align-items: center; }
-body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .side-ad-copy-v3 { padding: 24px 64px 24px 28px; }
-body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .ad-dots-v3 { position: static; }
-body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .ad-arrow-previous-v3 { left: 10px; }
+/* Advertisement presentation is shared in public-design.css. */
 @media (max-width: 760px) {
   .home-game-discovery .game-grid-v3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .home-game-discovery .game-grid-v3 .game-all-v3 { width: 100%; grid-template-columns: 110px minmax(0, 1fr); column-gap: 16px; }
@@ -67,11 +41,6 @@ body[data-page="home"] .banner-ad-v7:not(.artwork-unavailable) .ad-arrow-previou
   .home-game-discovery .game-grid-v3 a:not(.game-all-v3) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; gap: 4px; }
   .home-game-discovery .game-grid-v3 a:not(.game-all-v3) .game-art-v3 { grid-row: auto; width: 100%; height: auto; aspect-ratio: 460 / 215; }
   .home-game-discovery .smart-home-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); align-items: center; }
-  body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { min-height: 260px; padding: 18px 14px; align-content: center; }
-  body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 strong { font-size: 20px; }
-  body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 .ad-arrow-v3 { position: relative; top: auto; left: auto; right: auto; margin: 0 12px 12px; }
-  body[data-page="home"] .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 .ad-arrow-next-v3 { justify-self: end; }
 }
 @media (max-width: 440px) {
   .home-game-discovery .smart-home-filters { grid-template-columns: minmax(0, 1fr); }

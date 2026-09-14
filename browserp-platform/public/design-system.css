@@ -64,6 +64,37 @@ body:is(.staff-v3,[data-staff-page]), .ds-density-compact { --control-height: 44
   font-size: clamp(38px, 4.7vw, 64px); line-height: 1.08; text-wrap: balance;
 }
 
+/* Decorative headline accents only; keep plain text as the clipping fallback. */
+:root body:not(.staff-v3):not([data-staff-page]) :is(h1,h2,h3,h4,h5,h6) .gradient-text-v3,
+:root body:not(.staff-v3):not([data-staff-page]) .journal-hero-v6 h1 > span {
+  color: var(--pink); background: none; -webkit-text-fill-color: currentColor;
+}
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  :root body:not(.staff-v3):not([data-staff-page]) :is(h1,h2,h3,h4,h5,h6) .gradient-text-v3,
+  :root body:not(.staff-v3):not([data-staff-page]) .journal-hero-v6 h1 > span {
+    background-image: var(--brand-gradient); background-repeat: no-repeat;
+    background-clip: text; -webkit-background-clip: text;
+    color: transparent; -webkit-text-fill-color: transparent;
+  }
+  @media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+    :root body:not(.staff-v3):not([data-staff-page]) :is(h1,h2,h3,h4,h5,h6) .gradient-text-v3,
+    :root body:not(.staff-v3):not([data-staff-page]) .journal-hero-v6 h1 > span {
+      background-size: 160% 100%;
+      animation: headline-gradient-v3 12s ease-in-out infinite alternate;
+    }
+  }
+}
+@keyframes headline-gradient-v3 {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+@media (forced-colors: active), print {
+  :root body:not(.staff-v3):not([data-staff-page]) :is(h1,h2,h3,h4,h5,h6) .gradient-text-v3,
+  :root body:not(.staff-v3):not([data-staff-page]) .journal-hero-v6 h1 > span {
+    color: CanvasText; background: none; -webkit-text-fill-color: currentColor;
+  }
+}
+
 /* Ordinary actions use tone, with violet marking keyboard focus/selection.
    Field boundaries stay explicit; raised depth belongs to floating surfaces. */
 /* One button recipe, retaining the existing public and portal class names. */
@@ -84,6 +115,8 @@ body:is(.staff-v3,[data-staff-page]), .ds-density-compact { --control-height: 44
 :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary),
 :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary):hover:not(:disabled):not([aria-disabled="true"]) {
   color: #fff; background: var(--brand-action-gradient); border-color: transparent;
+  /* Size the gradient through the transparent border to avoid repeated edge seams. */
+  background-origin: border-box;
   box-shadow: 0 2px 5px rgb(0 0 0 / .12);
 }
 :root body :is(.small-button-success,.ds-button-success) { color: var(--success); border-color: var(--success); }
