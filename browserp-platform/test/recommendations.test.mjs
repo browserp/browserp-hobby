@@ -135,7 +135,7 @@ test("clearing enabled history invalidates any outstanding recommendation respon
   h.w.BrowseRPRecommendations.clear(); h.w.dispatchEvent(new h.w.Event("browserp:recommendations-changed"));
   finish(response([server("late-old-history")])); await tick();
   assert.equal(h.$(".recommendation-results").childElementCount, 0);
-  assert.match(h.$(".recommendation-message").textContent, /explore a few server pages/);
+  assert.match(h.$(".recommendation-message").textContent, /Explore a few servers/);
 });
 
 test("staff pages never activate browsing history or issue recommendation requests", async t => {

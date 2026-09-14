@@ -1,40 +1,64 @@
-# BrowseRP complete visual refresh — implementation checkpoint
+# BrowseRP redesign — integration checkpoint
 
-User GO: 14 September 2026 after final review of BRP-DESIGN-20260914-v1.2.
-Specification: /Users/georgemacdonald/Documents/Codex/2026-09-14/BrowseRP-Visual-Design-Specification-v1.txt.
+## Current authority and scope
 
-## Baseline verified before editing
+14 September 2026: user explicitly permits reorganising, redesigning and finalising the website while preserving every existing capability, particularly staff access. The latest clarification requires a complete design plan and implementation for ONE staff area as well as the website. Overview, Moderation and Scrapers are sections of that area, not separate products.
 
-- Local source: 6552414074a3d0b7d90518772e183b52a9658f77.
-- Remote release/website-ready-20260909: 6448b2b414ca4580e5c5c0d339baefecf6025de1.
-- Both trees: 6c612768eaa42f9d5ab92b4c998e039c6b38626f.
-- Canonical www.browserp.com deployment lookup: dpl_7hiQu8TQw7Dydq6XJx2CF2Mm2fFz, READY, browserp-hobby-el7pjndwy-browserp.vercel.app.
-- New isolated integration branch: design/complete-ui-20260914. Existing checkouts and gm9926 remain untouched.
-- Usage observed: 2% consumed, 98% remaining. Avoid filler and repeated broad tests.
+The operative internal brief is [DESIGN_AND_PRESERVATION_PLAN_20260914.md](DESIGN_AND_PRESERVATION_PLAN_20260914.md). It supersedes the earlier prohibition on reordering sections and the narrower staff-colour-parity interpretation. No further plan approval is pending. Public communities and staff work must lead the interface. Dark/light surfaces are neutral; magenta, cyan and purple support BrowseRP's own identity.
 
-## Ownership
+## Source and recovery baseline
 
-- Main / task1: integration copy browserp-visual-refresh-20260914; public HTML and asset wiring; browserp-v3.js, wordmark-canvas.js and wordmark-pattern.css; final visual review and functional/build/release decisions. No database/provider/role changes.
-- Task2: browserp-refresh-staff-20260914 / design/staff-20260914. Staff HTML, staffpanel controller and shared staff presentation, overview/moderation/layout CSS/JS, staff-design.css. Both control panels and retained staff entry points, existing capabilities preserved.
-- Task3: browserp-refresh-foundations-20260914 / design/foundations-20260914. design-system.css, theme.css, navigation.css, modern-select.css, first-visit-appearance.css and developer component reference. Shared dark/light tokens and component appearances; no public/staff data-controller mixing.
-- Task4: browserp-refresh-public-20260914 / design/public-20260914. public-design.css and explicitly assigned public/member presentation CSS; directory/compare markup only if needed. Public section order, all destinations and functions remain.
-- Task5: separate QA harness. Baseline capture, final browser/device/lag/functional matrix on stable integrated candidate. One heavy browser batch at a time; synthetic private fixtures, no production member mutations.
-- Task6: separate preservation review. Role/capability/action-target/unsaved-work baseline; final security review after frozen candidate.
+- Working repository: browserp-visual-refresh-20260914; branch design/complete-ui-20260914.
+- Original local source 6552414074a3d0b7d90518772e183b52a9658f77 and remote release/website-ready-20260909 at6448b2b414ca4580e5c5c0d339baefecf6025de1 share tree6c612768eaa42f9d5ab92b4c998e039c6b38626f.
+- Last verified canonical production deployment before redesign: dpl_7hiQu8TQw7Dydq6XJx2CF2Mm2fFz, browserp-hobby-el7pjndwy-browserp.vercel.app. Revalidate before making a current live claim.
+- gm9926 source archive remains /Users/georgemacdonald/BrowseRP Backups/gm9926.zip, SHA256 3eb74551140b24eaaea6723d2b8e9387b53d52cb4487fd78e26de6bf511cdcda. This is the historical source master, not a fresh database/media recovery proof.
+- Synced sources/ and other checkouts remain untouched. AI moderation, Gemini, bot hosting and billing remain deferred.
 
-## Integration contract
+## Current implementation
 
-Existing CSS variables and aliases remain supported. design-system.css loads after legacy styles. public-design.css follows it on public/member pages; staff-design.css follows it on staff pages. Workers commit only owned files, Main merges in dependency order. Worker claims and early slices are not live completion.
+The rejected blue visual checkpoint was3e329470a554910e54ce10d7ac89a273b9d5b116. It must not be promoted. Its source-identical GitHub checkpoint df325587ebf58763a31f82cbd0ccfe5ddcfcc8d3 on design/complete-ui-20260914 is historical, not this final design.
 
-Light mode is a full theme everywhere, with no BrowseRP pattern or veil. Dark pattern travels RIGHT along the established diagonal rows, together with a subtle pulse; test travel separately from pulse and keep full-width edges without horizontal overflow. Main will reproduce the reported regression before claiming a cause.
+Reorganisation starts from4793c8c8c781c7bcaaac679c6365b44a72ccd14b. Main has integrated:
 
-No API, database, provider, payment, Discord bot or role-policy scope. AI remains deferred. Staff light appearance is deliberately added; old forced-dark assertions must not prevent that accepted change.
+- 3dc943b (Task4 b4f8632): compact directory, search/game/filter/result toolbar, visible sort, authentic logo-led rows, same advertisement after six organic results with preserved lifecycle, quiet controls and recommendations below the directory.
+- 5b05740 (Task3 f8f6e3b): purpose-specific home/games/detail/editorial/member composition, real banner above detail identity, open sections, account summary strip and connections as rows.
+- 6c19518 (Task2 c473025): review-first staff Overview, duty then website tools/reporting, quieter queues/records/dialogs, responsive actions and grouped staff navigation. JS changes are restricted to navigation constants and a display label.
+- 11c41c8 (Task2 receipt25583d8): source-grounded staff architecture and preservation evidence in CHAT2_STATUS.md.
+- Main is synchronising changed asset versions, the shared component reference and the full design/preservation brief before the combined freeze.
 
-## Release gates
+No current production promotion has occurred. Main's visible local preview is http://127.0.0.1:4172/servers. Its anonymous public data passthrough does not provide private account/staff authentication; use controlled local fixtures for private testing. HTML templates are cached by the preview process, so restart after HTML integration.
 
-Prepare route/capability inventory and paired baseline early. Final tests run from one stable integrated commit, using controlled fixture details and an exact preview. Cover required repository checks, real shared-component reuse, both themes and staff panels, changed journeys, browser engines, representative widths and paired slowdown. Record physical-device and native-browser limitations honestly.
+## Ownership and next gate
 
-Main personally compares finished screens for substantial visual improvement and usefulness. Preserve all legitimate staff powers, unsaved forms, pending/error states and action targets. Fix observed material regressions. A build or preview alone is not a live-delivery claim.
+Tasks2/3/4 completed and stopped their bounded slices. Main owns combined visual acceptance, stable source freeze, release and verified delivery. Task5 resumes the final browser/device/lag/changed-journey matrix only on that stable source. Task6 receives a bounded preservation review of the changed staff presentation/navigation and retained capability fixes. Reuse existing task IDs; no duplicate workers or idle test loops.
 
-## Current status
+Current visual checks must include directory with actual results and inline advert, detail with/without artwork, home/games/blog, account/profile forms, staff Overview/Moderation/Scrapers, dark/light, narrow/short/wide windows and keyboard operation. Graphs must use real source semantics; no invented activity/backlog metrics.
 
-Implementation started. Tasks2/3/4 building independent presentation slices; Task5 preparing/capturing baseline; Task6 reviewing preservation contracts. No redesigned website deployment yet.
+## Evidence already available — scope matters
+
+- Rejected3e32947 passed1455 application tests and57 database checks; this is historical evidence, not a current combined pass. /Users/georgemacdonald/Documents/Codex/2026-09-14/ui-refresh-final-verify.log.
+- Retained optional Overview capability helper:50 focused helper/auth checks,15 Overview checks and9 actual-controller scenarios passed. Optional moderation-summary403 only preserves fresh same-account authorised Overview; normal denial/revocation/session clearing remain. Receipts: Documents/Codex/2026-09-08/browserp-security-audit/outputs/CHAT6-OVERVIEW-*20260914*.
+- New Task4 slice reports78 focused passes including real-carousel redraw, zero/short/full results, pause/focus and sort/filter state. Task3 reports19 existing profile/history/compare passes. Task2 reports38 existing staff passes and preservation of82 IDs,30 control contracts and existing links across9 private entries. These are slice receipts, not combined browser acceptance.
+- Main's achromatic interim check4793c8c had21 focused passes and no overflow at1400/960/390. Final redesigned composition still requires new visual acceptance.
+- Task5 stopped old matrix at two passing cells; retained its evidence in Documents/Codex/2026-09-14/ui-refresh-final-3e32947/QA-STOP-HANDOFF.md. Do not claim all engines/performance complete.
+- Main's in-app combined directory review now shows compact search, visible sort, neutral background, logo-led rows and original ad placed after sixth result. This one visual observation does not cover all routes or prove continuous live API availability.
+
+## External data and release limitations
+
+Canonical public reads previously returned intermittent401/500/502/504 errors. Replayed successful anonymous data is labelled as replay, not live proof. Recent in-app directory reload returned content; final release still needs bounded current health verification. Do not change credentials or claim the entire service fixed from one response.
+
+An earlier preview upload omitted tracked .gitignore required by repository checks. The corrected export transport includes !browserp-platform/.gitignore while preserving default secret ignores. Old previews are obsolete and must not be promoted. The accidental empty temporary Vercel project ui-refresh-release-3e32947 was deleted and confirmed; the production project was unchanged.
+
+## Completion rule
+
+Finish with one stable combined source, relevant functional/preservation checks, personally reviewed visual evidence and honest browser/performance coverage. Distinguish source built, preview available, verified and live. Existing API/DB/permissions, legal content, drafts and legitimate staff controls must survive the redesign. Keep owner input only for actual authentication/approval boundaries, not routine reversible implementation.
+
+## Final verification continuation
+
+The combined aa1c9f83f20580ad41f1587c52ac93ab8756a9ef app passed 12 browser journey cells across Chromium, Firefox and WebKit. Task6 completed its bounded preservation review with no new finding: 82 private IDs, 15 capability-gated destinations, existing links and controls retained; 19 supporting scripts unchanged. The review is source/local-DOM evidence, not live production proof.
+
+The first aa1c9f8 Vercel build failed two stale exact-palette assertions (1455 other application tests passed). fe4c38a updates only those assertions and includes violet in the actual contrast matrix; the focused dark/light tests pass. It does not alter application behaviour.
+
+Final visual review found two missing full-width pattern selectors on article and Advertise; 21d3021 adds only the matching main/header selectors. Main also found shared advert unboxing lost to higher-specificity theme/homepage rules; 550165b strengthens seven existing selectors without changing declarations, placement or carousel logic. Only affected visual checks are repeated. The stylesheet URLs are advanced to layout2 for these two CSS files; all other cache identities remain.
+
+Task5 is completing the paired baseline/candidate lag check and targeted final visual corrections. Final full build, source publication, staging health, promotion and canonical verification remain Main's responsibility. Use a staged production deployment (--prod --skip-domain), then promote only after verification; this preserves production environment semantics without changing the live domain during validation.

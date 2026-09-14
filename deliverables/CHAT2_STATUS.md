@@ -1,138 +1,70 @@
-# Chat 2 — staff control-panel refresh, 14 September 2026
+# Chat 2 — one staff area, task-led design, 14 September 2026
 
-## Handoff state
+## Current handoff
 
-Local implementation is ready for Main's integrated visual review. This is not a production, authenticated browser or cross-browser completion claim. Main owns integration, final review and release; QA5 owns the heavy browser matrix.
+Local implementation is committed and ready for Main's integrated visual acceptance. No authenticated browser inspection, cross-browser acceptance, remote publication or deployment was performed in this slice. Main owns integration and release; Task 5 owns the combined browser and interaction checks.
 
-- Worktree: `/Users/georgemacdonald/.codex/.chatgpt-projects/g-p-6a84fe2ac40c81919083d96dbb368185/browserp-refresh-staff-20260914`
-- Branch: `design/staff-20260914`
-- Base: `6552414074a3d0b7d90518772e183b52a9658f77`; clean when assigned. Main confirmed this baseline matches canonical live and remote. Chat 2 independently confirmed the local branch/base/clean state, not that live equivalence.
-- First implementation commit: `c3b0cb34871068f56f61ec1b8b28dacf287afaa9`
-- Feature-state palette commit: `934d27a4df2d9245843d6bcdccc4ec3c28929b2e`.
-- Source head: `7bfd739ca0bb4b32aec52fac7ca46cde507c6b22` (final shared field validation/focus specificity).
-- Receipt commit follows the source head and contains this status only.
 - Coordinator: `01a0692d-f550-7660-85e8-1bab80c5c774`.
-- Scope: BRP-DESIGN-20260914-v1.2, particularly staff composition, shared controls, both appearances and preservation of behaviour.
+- Worktree: `/Users/georgemacdonald/.codex/.chatgpt-projects/g-p-6a84fe2ac40c81919083d96dbb368185/browserp-refresh-staff-20260914`.
+- Fresh branch: `design/staff-quality-parity-20260914`.
+- Exact Main base: `4793c8c8c781c7bcaaac679c6365b44a72ccd14b`.
+- Implementation head: `c4730256a6c49415f59d97a8833b6e2dc280e661`.
+- A following documentation commit contains this receipt only.
+- The previous staff branch and newer Main/PC work were preserved. The existing untracked dependency link was reused and not committed.
 
-## Delivered source
+This receipt supersedes the older design wording and historical baseline. There is ONE staff panel. Overview, Moderation and Scrapers are sections within it. The accepted brief requires the same design quality as the public website or better, with a deliberate information hierarchy and every existing legitimate tool and permission retained.
 
-Overview now starts with role-scoped priority summaries, a recent listing/report queue and recent audit activity already returned by the existing overview request. Its real signup-history chart, exact UTC table, period controls, all four website metrics and every operational feature mount remain. A returned recent-record sample is never used as an aggregate queue count. The legacy moderation-queue count is not attached to the newer content-moderation queue.
+## Working brief and implemented hierarchy
 
-Moderation now has a grouped sidebar containing every permitted section, a compact control-panel summary, work queues and a supporting community/records section. The existing search, dependent facets, chips, full record detail, editors, actions and pagination remain in the working section. Record renderers and mutation handlers retain their original targets and version contracts.
+1. **Review first.** Overview starts with current permission-scoped priorities, recent review work and recent staff audit activity. Recent-record samples remain labelled as recent work; they are not represented as whole queues or oldest-first backlogs. One composed working surface replaces repeated card frames.
+2. **Duty before reporting.** Existing clocking, availability, confirmed session records, review warnings, manager corrections and team information appear before registration reporting. Availability and recorded work time retain their separate meanings and controls.
+3. **Website management within the same area.** Live listing checks, adverts and enquiries, article publishing and announcements remain available with existing forms and previews. Sidebar groups provide personal work links and website tools, including existing listing checks and registrations. Forms remain in place; nothing was moved into a new modal or hidden behind a new workflow.
+4. **Moderation by task.** Existing destinations are grouped into Review work, Community, Team, and Safety & records. The summary label is now Review overview. Queue-wide search and filters stay above the records; each record retains its context, details, actions and audit-related information. Groups with no allowed destinations remain absent through the unchanged permission filter.
+5. **Supporting reporting.** The existing current-account signup history, UTC range controls, interactive chart, exact-count table and four website totals follow the operational tools. No new graph, trend, workload calculation, badge or management feature was introduced.
+6. **Consistent presentation.** Neutral shared charcoal/white surfaces, readable labels and table cells, controlled spacing, quieter lists, contextual action groups, form surfaces and decision dialogs apply throughout the existing staff area. Mobile rules wrap actions and retain every table column through local scrolling. Shared semantic colours still distinguish real errors, warnings and approved states.
 
-Both panels keep one actual Menu implementation, `mobile()` in `staffpanel-v3.js`, including its icon/state/focus/inert/Escape/resize behaviour. It uses Task3's `.ds-menu-button` style contract. `staff-workspace.js` adds shared staff-only appearance controls and publishing/team links. It never fetches data, mounts public navigation or changes consent/session state. It reads `browserp-theme`, retains dark as the default, only saves explicit user choices, accepts valid cross-tab choices and changes the root appearance without remounting forms. Existing visibility gates remain authoritative.
+This hierarchy applies the intake-before-decision pattern described in [Linear's Triage documentation](https://linear.app/docs/triage). Search and filtering remain at collection level while decision controls remain with their records, following [Carbon's data-table guidance](https://carbondesignsystem.com/components/data-table/usage/). Stable navigation within a complex work area is consistent with [Atlassian's account of its navigation redesign](https://www.atlassian.com/blog/how-we-build/designing-atlassians-new-navigation). These are design principles applied to existing BrowseRP capabilities, not imported product features or automation.
 
-## Capability and location map
+## Changed files and exact boundaries
 
-| Existing surface / behaviour | New visible location / retained contract |
+- `browserp-platform/public/staff-design.css`: staff-only layout and presentation. Shared `design-system.css`, `theme.css`, the actual Menu component and all public styles remain unchanged.
+- `browserp-platform/public/staffpanel-overview.html`: existing section order, introductory labels, a registrations anchor and changed-asset references.
+- `browserp-platform/public/staffpanel-moderation.html` and `staffpanel-scrapers.html`: consistent staff-area framing and changed-asset references.
+- Other private entry HTML (`staffpanel.html`, `staffpanel-accounts.html`, `staffpanel-content.html`, `staffpanel-profiles.html`, `staffpanel-security.html`, `staffpanel-staff.html`): changed staff asset references only.
+- `browserp-platform/public/staff-workspace.js`: ONLY the navigation `groups` constant in `mount()` changes labels/order and adds links to the existing listing-checks and registration sections. Theme read/apply/storage logic, events, authentication and session code are byte-identical to the base.
+- `browserp-platform/public/staff-moderation.js`: ONLY `META.summary[0]` and the `renderTabs()` group definition change. All view IDs, hash serialization, allowed-view checks, effective permission logic, filters, requests, lifecycle, drafts, renderers, decision handlers, dialogs and conflict handling are byte-identical to the base.
+- `deliverables/CHAT2_STATUS.md`: this current receipt.
+
+## Preserved routes and capabilities
+
+| Existing area | Preserved destinations and operations |
 | --- | --- |
-| Overview, Moderation, public-site destinations and Scrapers menu | Existing shared sidebar; the scraper feature continues inserting its own authorised menu beside Moderation. |
-| Listing/report queue counts | First overview summaries and queue links; authoritative outer overview counts, never returned-array lengths. Permission-scoped recent rows open their original moderation destination. |
-| Registered users, published servers/blogs, active staff | Compact website metric row below the retained chart. Every `data-overview-metric` and `staff-metrics-v3` hook is preserved. |
-| Signup chart ranges, keyboard/pointer inspection, exact data | Existing registration-history panel: 30d/90d/180d/1y/max, UTC buckets, current registered accounts only, excludes deleted/anonymous accounts. Not visitors or historical total population. |
-| Recent audit trail | Overview supporting activity panel using only returned audit rows; complete Logs destination remains. |
-| Duty/availability, clock actions, corrections, team history | Unchanged `overview-duty` mount and existing feature controller; sidebar shortcut. Availability stays separate from clocked-in status. |
-| Refresh health, adverts/uploads/enquiries, blogs/announcements, authenticators | Original mount IDs and controllers remain; contextual publishing/team sidebar links replace the large shortcut-card grid. Tools still mount once through `website.permissions`. |
-| Moderation summary/reports/queue/content/profiles/claims/appeals | Sidebar Review work group plus prominent summary work queue; each existing view/hash and permitted action remains. Unknown content/claim/request totals display Open rather than fabricated counts. |
-| Members/servers/staff roles | Sidebar Community group and supporting links; readStaff/manageStaff/manageRoles/isOwner remain distinct. Role readers retain catalogue/request paths. |
-| Bans/website risks/account activity/privacy requests/logs | Sidebar Safety & records; separate scopes, confirmation and reauthentication paths preserved. Privacy retains its independent access check/account binding and erasure capability. |
-| Search, status/history/deleted choices, platform/region/mode, advanced filters, chips, pagination | Existing section toolbar/filters and previous/next controls. Hash/filter/cursor, latest-request wins and in-progress edit handling are unchanged. |
-| Review, edit, approve/block/appeal, delete/restore, restriction/revoke, reveal, role/override operations | Existing record/feature actions stay bound to their original kind/id/version and confirmation. No bulk or whole-queue authority was added. Override batches still chain each returned version. |
-| Loading, failed save, conflict, native disabled/hidden controls and session expiry | Existing live status, record/feature feedback, dialogs and gate. Appearance changes preserve the DOM and input values. No optimistic success was added. |
+| Staff entry | `/staffpanel` retains its sign-in and access gate and authorised redirect to `/staffpanel/overview`. |
+| Overview | `/staffpanel/overview`; review queues and activity; `#overview-duty`, `#overview-refresh-health`, `#overview-adverts`, `#overview-publishing`, runtime `#overview-announcements`, `#overview-authenticators`; current registration chart and exact table at the added `#overview-users` anchor. |
+| Review work | `/staffpanel/moderation#reports`, `#queue`, `#content`, `#profiles`, `#claims`, `#appeals`. Active/history/deleted reports, audited restore, listing decisions, private content evidence, claims and appeals retain their actual actions and versions. |
+| Community | `#members`, `#servers`; existing filters, full record context and authorised editors. |
+| Team | `#staff`; role catalogue/responsibilities, requests and escalations; granular staff management and permission overrides when allowed. Reader, manager and owner distinctions remain. |
+| Safety & records | `#bans`, `#security`, `#activity`, `#data-requests`, `#logs`; existing restrictions, risks/MFA/evidence controls, private requests and audit operations. Privacy read and erasure authority remain independent. |
+| Scrapers | `/staffpanel/scrapers#fivem`, `#redm`, `#minecraft`, `#roblox`; source references, imports, preview/review, pending edits, game switching, confirmations and actual Roblox application routing. |
+| Compatibility routes | Existing profiles→moderation#profiles, accounts→moderation#activity, staff→moderation#staff, security→moderation#bans, content→overview#overview-adverts redirects remain; overview#overview-roles→moderation#staff remains. They are compatibility paths within one staff area. |
 
-## Changed files
+The current Overview response split is retained: ranged website reporting and the separate dashboard request are independent. Effective review capabilities still come from the moderation summary and the existing narrowly scoped optional-capability helper. Raw role defaults are not substituted for effective permissions. Expiry, revocation, changed identity, stale response guards and denial clearing remain intact. Native hidden/inert controls and access-pending UI remain authoritative.
 
-- `browserp-platform/public/staff-design.css` — new staff composition and semantic feature-state layer using Task3 tokens; both appearances.
-- `browserp-platform/public/staff-workspace.js` — new appearance-only bootstrap/shared staff navigation and theme control source.
-- `browserp-platform/public/staffpanel-v3.js` — appearance delegation, shared Menu class and semantic status colours only; auth/action logic unchanged.
-- `browserp-platform/public/staff-overview.js` — queue/audit presentation from existing payload and blue chart treatment.
-- `browserp-platform/public/staff-moderation.js` — grouped navigation and purposeful summary composition; action/renderRecords logic unchanged.
-- `browserp-platform/public/staff-layout.css` — normalises the compound input selector with low specificity so shared validation/focus states can win.
-- `browserp-platform/public/staffpanel-overview.html`, `staffpanel-moderation.html` — retained IDs/mounts, new composition and staff-specific asset wiring.
-- Remaining staff HTML asset wiring: `staffpanel.html`, `staffpanel-accounts.html`, `staffpanel-content.html`, `staffpanel-profiles.html`, `staffpanel-scrapers.html`, `staffpanel-security.html`, `staffpanel-staff.html`.
-- `browserp-platform/test/staff-design-ui.test.mjs` — focused appearance, unsaved-form, shared Menu, selector parser and hidden-control checks.
-- `browserp-platform/test/staff-layout-ui.test.mjs` — updates the finishing stylesheet expectation to the authorised new last layer.
-- `deliverables/CHAT2_STATUS.md` — this receipt, with historical material retained below.
+## Verification
 
-## Verification and dependencies
+**38 affected existing checks passed, zero failures**, run once with one test process at a time:
 
-- Bundled Node `v24.19.0` used. Reused existing dependencies via an untracked `node_modules` symlink; it is not committed.
-- 20 overview/moderation tests passed: role and erasure capability separation, records only after authorised init, filter/hash and stale response handling, current-version edits, report conflicts, private content decisions and chart/range/refresh/error lifecycle.
-- 23 appearance/layout/auth tests passed: dark default and saved choices without requests/reset; both pages preserve pending form values/checked/disabled/busy states; one Menu source contains focus including appearance controls; sign-in/MFA/denial/revocation/history restore and native hidden/inert gates remain intact.
-- The final four appearance/parser tests were rerun after adding actual native-hidden display assertions. CSS-tree parses both staff-design and staff-layout selectors; final semantic-state additions separately parsed without errors. JavaScript syntax and whitespace checks passed.
-- Final foundation follow-up: Task3 `b2ddac7` was compared with the staff layers. A specificity conflict was fixed in `7bfd739`. An isolated Chromium CSS fixture using actual base + final foundation + staff CSS passed: invalid border `rgb(175, 39, 65)`, focus border `rgb(8, 100, 155)`, textarea minimum height `132px`, native hidden input display `none`, and the complete input selector accepted by `CSS.supports`. No website/network/session data was loaded. This is a focused CSS check, not a browser matrix or staff visual approval.
-- Correction to the earlier coordination wording: the original baseline compound selector parses in CSS-tree; the material issue was specificity after normalisation, not invalid baseline CSS.
-- These are 43 distinct focused checks, not a full suite or visual approval. No browser matrix, live account changes, provider/bot/role/configuration/database changes, push or deploy.
-- Main must wire Task3's `design-system.css` after old page layers and before `staff-design.css`, with the new staff layer last. This branch intentionally does not duplicate Main's global asset wiring or Task3's palette.
-- Main coordinates `browserp-v3.js` appearance restrictions. Staff controller already delegates to the shared appearance-only bootstrap.
-- Task3 supplies light/dark core and functional tokens; status colours were adapted in the owned staff layer so old fixed dark colours do not remain on feature controls.
-- QA5/Main still need rendered desktop/phone, both-theme, long-label/zoom, focus/dialog and real working-queue visual review on the integrated candidate. No current missing backend data is needed for this slice; additional historical staff analytics remain outside this design scope.
+- `staff-design-ui.test.mjs`: appearance persistence and form retention, shared Menu/focus containment, CSS selector parsing and native hidden controls.
+- `staff-layout-ui.test.mjs`: mobile focus, Escape, resizing, skip navigation and private-only stylesheet loading.
+- `staff-overview-dashboard-ui.test.mjs`: real split response shapes, effective overrides, independent freshness/errors, confirmed zero counts, expired/denied access and stale-response protection.
+- `staff-moderation-ui.test.mjs`: effective permission distinctions, private content actions, filters, versioned edits, unknown values, deleted-report restore and conflict draft retention.
+- `staff-publishing-navigation.test.mjs`: blog, announcement and advert drafts across save failures, success and discard.
+- `staff-scraper-navigation.test.mjs`: game paths, Roblox application routing, unsaved drafts, Back/hash navigation and active imports.
 
----
+A separate source comparison against the exact base passed across all **9 private entry pages**: **82 existing ID contracts**, **30 native/control contracts**, every existing HTML link destination, and stylesheet/script asset paths and order were preserved. New registration and listing-check navigation destinations resolve to existing mounted sections; the existing announcement anchor remains supplied by publishing. **19 referenced supporting scripts are byte-identical**. Reversing only the declared navigation constants and summary label makes both edited scripts exactly match the base.
 
-Historical receipt follows; it is not the current branch or release state.
+Both edited scripts pass syntax checking. `git diff --check` passes. No tests, dependencies, API/database code, migrations or permission contracts were changed. The tiny added registration anchor was checked in the final source comparison after the focused suite; no repeat full-suite run was needed.
 
-# Chat 2 status — 9 September 2026
+## Integration dependencies
 
-## Source and ownership
-
-- Worktree: `browserp-chat2-sol`
-- Branch: `work/chat2-public-fix-20260909`
-- Frozen base commit: `075c6fe887f9708e1f7c221ddd4a6539f7bd2ba6`
-- Frozen base tree: `c3beaf35afb7fad63b091b258a3a479604336bd8`
-- Public repair commit: `1081f9958087cd929484f50181a6068541c83469`
-- Public repair tree: `416f82a3432354059d6c498933865388eecbf9f2`
-- Coordinator: task `01a0692d-f550-7660-85e8-1bab80c5c774` (`Redesign BrowseRP platform themes`)
-- QA task: `01a08093-5490-7631-a707-4583c1df6383` (`Verify BrowseRP across browsers and…`)
-
-## Completed public repair
-
-- Removed the inherited sticky rail offset from full-width advert banners, limited healthy banner artwork to a compact 190px desktop / 210px narrow frame, and made the blocked-artwork banner fallback compact and responsive.
-- Added a dedicated wrapper for automatically inserted bottom banners so they sit in normal flow with a controlled gap and cannot paint across the footer.
-- Preserved the existing legitimate advert artwork, labelled carousel, seven-second rotation, pause, dots, keyboard behavior, sponsored-link handling and browser-blocked artwork safeguards.
-- Reused the approved wordmark pattern on the Discover introduction, advertising introduction and public article header. Existing Home, Games, About and Journal introductions remain patterned. No animation timing, speed, opacity or renderer parameter changed.
-- Kept the pattern inside top introduction surfaces only. Listing content, cards, filters, forms, footers, profiles and staff panels remain undecorated.
-- Replaced the separate GTA 6 Roleplay and 6M future cards with one coherent future panel. `/games/gta6` and `/games/6m` remain separate working routes. The copy explicitly says that 6M is a community term and no platform or launch is confirmed.
-- Added fresh versions to the affected public JS/CSS references so old cached advert geometry cannot recreate the reported overlap.
-
-## Changed files
-
-- `browserp-platform/public/about.html`
-- `browserp-platform/public/advertise.html`
-- `browserp-platform/public/blog-post.html`
-- `browserp-platform/public/blog.html`
-- `browserp-platform/public/browserp-games.js`
-- `browserp-platform/public/browserp-v3.js`
-- `browserp-platform/public/game-artwork.css`
-- `browserp-platform/public/game.html`
-- `browserp-platform/public/index.html`
-- `browserp-platform/public/product-polish.css`
-- `browserp-platform/public/servers.html`
-- `browserp-platform/public/wordmark-pattern.css`
-- `browserp-platform/test/advert-controls.test.mjs`
-- `browserp-platform/test/games-launch.test.mjs`
-- `browserp-platform/test/home-hero-motion.test.mjs`
-
-## Checks
-
-- `node --check public/browserp-v3.js` — passed.
-- `node --check public/browserp-games.js` — passed.
-- Focused advert carousel, advert layout, future-game and wordmark tests — 21 passed.
-- Focused server-rendered directory/game/article and crawlability checks — 8 passed.
-- `git diff --check` — passed before commit.
-- QA reproduced the production defect before this patch: the full-width banner was `position: relative` but retained the side rail's `top: 96px`, causing the footer collision. QA received `1081f99` for one bounded post-fix Chromium readback; final visual receipt is pending.
-
-## Dependencies and boundaries
-
-- Main owns cherry-pick/integration, the new dated release package, deployment and final production verification.
-- The management email is not present because no approved address has been confirmed. Useful public placements are the Help & contact section, advertising enquiries and the footer contact entry after Main supplies the exact address.
-- The separate player-history task owns its server-page work. This branch did not edit `server.html`.
-- No backend, database, authentication, session, consent, staff eligibility, private data, provider, Discord, migration, role-sync or deployment behavior changed.
-- Yesterday's sealed ZIP and package directory were not opened or modified.
-
-## State distinction
-
-- Local source: complete in `1081f99`.
-- Mechanic and server-rendered checks: passed locally.
-- Actual Chromium: delegated to the existing QA task and pending its readback.
-- Live production: unchanged by Chat 2.
+Main should integrate the implementation commit over the declared base, reconcile changed-asset versions with the combined site, and conduct visual acceptance against the final shared design. Task 5's final combined pass should cover desktop/mobile, light/dark, current navigation, queue context/actions, dialogs, drafts and scoped denial/session paths. This slice claims source and focused-flow verification only; visual quality and live completion remain unverified until those combined checks. No independent merge, deployment, migration or role-sync activation occurred.

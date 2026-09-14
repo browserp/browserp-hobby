@@ -32,8 +32,8 @@
     sidebar.querySelector(".logo-v3")?.after(mark);
     const tools = make("nav", undefined, "staff-local-nav"); tools.setAttribute("aria-label", "Website tools");
     const groups = [
-      ["Publishing", [["Adverts", "overview-adverts"], ["Blog posts", "overview-publishing"], ["Announcements", "overview-announcements"]]],
-      ["Your team", [["Duty & availability", "overview-duty"], ["Your sign-in security", "overview-authenticators"]]]
+      ["Your work", [["Duty & availability", "overview-duty"], ["Your sign-in security", "overview-authenticators"]]],
+      ["Website tools", [["Blog posts", "overview-publishing"], ["Announcements", "overview-announcements"], ["Adverts & enquiries", "overview-adverts"], ["Listing checks", "overview-refresh-health"], ["Registrations", "overview-users"]]]
     ];
     for (const [label, links] of groups) {
       tools.append(make("span", label, "staff-nav-group-v3"));

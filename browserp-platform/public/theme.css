@@ -2,20 +2,20 @@
    themes; these fallback values also support pages before final wiring. */
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f3f6fb; --bg-soft: #e9eff7; --panel: #ffffff; --panel-2: #edf2f9;
-  --text: #162238; --copy: #43536b; --muted: #586a82;
-  --line: #d1dbe8; --line-soft: #e0e7f0; --line-strong: #a1aec1;
-  --pink: #b02068; --pink-strong: #971b59; --cyan: #08649b; --violet: #6943b0;
-  --info: #08649b; --success: #147044; --warning: #8a510c; --danger: #af2741;
-  --control-bg: #ffffff; --control-border: #7e8ba1;
-  --surface-hover: #e6edf7; --selection-surface: #e5eefb; --interactive-edge: #427bae;
-  --surface-raised: #ffffff; --surface-inset: #e9eff7;
-  --edge-highlight: rgb(255 255 255 / .95);
-  --shadow-sm: 0 2px 4px rgb(21 43 75 / .03), 0 8px 24px rgb(21 43 75 / .06);
-  --shadow-md: 0 4px 10px rgb(21 43 75 / .06), 0 20px 50px rgb(21 43 75 / .12);
-  --shadow-lg: 0 8px 24px rgb(21 43 75 / .09), 0 32px 80px rgb(21 43 75 / .17);
-  --overlay-scrim: rgb(20 32 51 / .46);
-  --focus: var(--cyan); --ink: var(--text); --quiet: var(--muted); --canvas: var(--bg);
+  --bg: #f7f7f7; --bg-soft: #eeeeee; --panel: #ffffff; --panel-2: #eeeeee;
+  --text: #1c1c1c; --copy: #494949; --muted: #626262;
+  --line: #d8d8d8; --line-soft: #e6e6e6; --line-strong: #aaaaaa;
+  --pink: #a90868; --pink-strong: #900457; --cyan: #006d84; --violet: #6e33b9;
+  --info: #006d84; --success: #147044; --warning: #8a510c; --danger: #af2741;
+  --control-bg: #ffffff; --control-border: #838383;
+  --surface-hover: #e9e9e9; --selection-surface: #e8e8e8; --interactive-edge: #6e33b9;
+  --surface-raised: #ffffff; --surface-inset: #eeeeee;
+  --edge-highlight: rgb(255 255 255 / .3);
+  --shadow-sm: 0 2px 6px rgb(0 0 0 / .06);
+  --shadow-md: 0 4px 10px rgb(0 0 0 / .06), 0 20px 50px rgb(0 0 0 / .12);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / .09), 0 32px 80px rgb(0 0 0 / .17);
+  --overlay-scrim: rgb(0 0 0 / .46);
+  --focus: var(--violet); --ink: var(--text); --quiet: var(--muted); --canvas: var(--bg);
   --surface: var(--panel); --surface-2: var(--panel-2); --accent: var(--pink); --accent-strong: var(--pink-strong);
   --accent-ink: #fff; --shadow: var(--shadow-md);
 }
@@ -25,7 +25,7 @@
 :root[data-theme="light"] body {
   background-image: none;
 }
-:root[data-theme="light"] ::selection { color: #fff; background: rgb(156 21 95 / .65); }
+:root[data-theme="light"] ::selection { color: var(--text); background: var(--selection-surface); }
 :root[data-theme="light"] .header-v3,
 :root[data-theme="light"] .public-header-v6 { background: rgb(255 255 255 / .96); border-color: var(--line-soft); }
 :root[data-theme="light"] .navigation-dialog-v6 { box-shadow: var(--shadow-lg); }
@@ -85,10 +85,10 @@
 :root[data-theme="light"] body:not([data-staff-page]):not(.staff-v3) .navigation-game-v6[data-platform="roblox"] { --platform-accent: #394052; --game-colour: #394052; color: #394052; }
 
 :root[data-theme="light"] :is(input,select,textarea,.control-v3) { color-scheme: light; }
-:root[data-theme="light"] :is(.field-v3 input,.field-v3 select,.field-v3 textarea,.control-v3) { color: var(--text); background: var(--panel); border-color: var(--line-strong); }
+:root[data-theme="light"] :is(.field-v3 input,.field-v3 select,.field-v3 textarea,.control-v3) { color: var(--text); background: var(--control-bg); border-color: var(--control-border); }
 :root[data-theme="light"] :is(input,textarea)::placeholder { color: var(--muted); opacity: 1; }
-:root[data-theme="light"] .button-secondary-v3 { color: var(--text); background: var(--panel); border-color: var(--line-strong); }
-:root[data-theme="light"] .button-quiet-v3 { color: var(--copy); border-color: var(--line); }
+:root[data-theme="light"] .button-secondary-v3 { color: var(--text); background: var(--panel-2); border-color: transparent; box-shadow: none; }
+:root[data-theme="light"] .button-quiet-v3 { color: var(--copy); border-color: transparent; }
 :root[data-theme="light"] .empty-v3 { border-color: var(--line-strong); }
 
 /* Labels change immediately with the theme. Switch their surfaces at the same
@@ -96,7 +96,7 @@
 :root[data-theme] .button-secondary-v3 { transition-property: border-color, transform, box-shadow; }
 :root[data-theme] :is(.navigation-toggle-v6,.navigation-close-v6) { transition-property: border-color; }
 
-:root[data-theme="light"] .hero-v3 { background: linear-gradient(180deg,rgb(185 31 114 / .055),transparent 48%); }
+:root[data-theme="light"] .hero-v3 { background: transparent; }
 :root[data-theme="light"] [data-wordmark-surface]::after { background: linear-gradient(90deg,rgb(248 245 248 / .9),rgb(248 245 248 / .75) 60%,rgb(248 245 248 / .2)); }
 :root[data-theme="light"] :is(.section-v3,.footer-v3,.page-body,.platform-band,.discover-section,.category-section,.credits-section,.tools-section,.staff-section,.foundation-section) { background-color: var(--bg); border-color: var(--line-soft); }
 :root[data-theme="light"] :is(.discover-section,.tools-section,.foundation-section) { background-color: var(--panel); }
@@ -107,12 +107,12 @@
 :root[data-theme="light"] .side-ad-stage-v3 { --copy: #e0dce6; --cyan: #68dafa; border-color: var(--line); }
 :root[data-theme="light"] .ad-label-v3,
 :root[data-theme="light"] .ad-pause-v7 { color: var(--muted); }
-:root[data-theme="light"] .ad-pause-v7:hover { color: var(--text); background: rgb(185 31 114 / .07); }
+:root[data-theme="light"] .ad-pause-v7:hover { color: var(--text); background: var(--surface-hover); }
 :root[data-theme="light"] .ad-dot-v3::after { background: #9a879c; }
 :root[data-theme="light"] .ad-dot-v3[aria-current="true"]::after { background: var(--pink); }
 :root[data-theme="light"] .ad-arrow-v3 { color: #fff; }
 
-:root[data-theme="light"] .detail-banner-v3 { background: linear-gradient(120deg,#dce6f3,#cbd9eb); }
+:root[data-theme="light"] .detail-banner-v3 { background: linear-gradient(120deg,#eeeeee,#d8d8d8); }
 :root[data-theme="light"] .detail-title-v3 { color: #fff; background: linear-gradient(transparent,rgb(31 22 32 / .88)); }
 :root[data-theme="light"] .detail-title-v3 :is(h1,.detail-meta-v3) { color: #fff; }
 :root[data-theme="light"] .detail-logo-v3 { background: #fff; }

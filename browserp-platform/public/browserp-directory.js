@@ -80,7 +80,7 @@
     }));
   }
 
-  function serverCard(server) {
+  function serverCard(server, directoryPreview = false) {
     const slug = String(server.slug || "").trim();
     const card = element("a", "server-card");
     window.BrowseRPPlatforms.theme(card, window.BrowseRPPlatforms.idFor(server));
@@ -112,10 +112,18 @@
 
     card.append(element("h3", "", server.name || "Roleplay server"));
     card.append(element("p", "server-description", server.description || "Open the listing to learn more about this community."));
-    card.append(window.BrowseRPPlatforms.metadata(server));
+    // Preview-only omission of optional unknowns. Do not change the source
+    // record, joining requirements, status, or detail/compare disclosures.
+    const preview = directoryPreview ? { ...server } : server;
+    if (directoryPreview) {
+      for (const key of ["region", "language", "framework"]) {
+        if (/^(?:unknown|not confirmed|not specified|unspecified|unavailable|n\/a)$/i.test(String(preview[key] || "").trim())) preview[key] = "";
+      }
+    }
+    card.append(window.BrowseRPPlatforms.metadata(preview));
 
     const tags = element("div", "server-tags");
-    (Array.isArray(server.tags) ? server.tags : []).slice(0, 3).forEach((tag) => tags.append(element("span", "", tag)));
+    (Array.isArray(server.tags) ? server.tags : []).slice(0, directoryPreview ? 2 : 3).forEach((tag) => tags.append(element("span", "", tag)));
     card.append(tags);
 
     const bottom = element("div", "server-card-bottom");
@@ -127,20 +135,43 @@
     return window.BrowseRPShortlist?.wrap(card, server) || card;
   }
 
+  function directoryAdvert(list) {
+    if (page !== "servers" || list.id !== "server-list") return null;
+    return document.getElementById("directory-advert");
+  }
+
+  function placeDirectoryAdvert(list) {
+    if (!list) return;
+    const advert = directoryAdvert(list);
+    if (!advert) return;
+    advert.setAttribute("aria-live", "off");
+    const rows = [...list.children].filter(item => item.matches(".server-card, .server-shortlist-card"));
+    const sixth = rows[Math.min(6, rows.length) - 1];
+    if (sixth) sixth.after(advert);
+    else list.append(advert);
+  }
+
   function renderServers(list, servers) {
     if (!list) return;
-    list.replaceChildren();
+    const advert = directoryAdvert(list);
+    // Keep the mounted advert connected and untouched: its creative, pause
+    // state, focus, image handlers and visibility observer survive redraws.
+    if (advert) {
+      if (advert.parentElement !== list) list.append(advert);
+      [...list.childNodes].forEach(child => { if (child !== advert) child.remove(); });
+    } else list.replaceChildren();
     if (!servers.length) {
       list.setAttribute("aria-busy", "false");
       return;
     }
     servers.forEach((server, index) => {
-      const item = serverCard(server);
+      const item = serverCard(server, page === "servers" && list.id === "server-list");
       window.__browserpReveal?.register?.(item, Math.min(index, 8) * 12, true);
       if (!item.classList.contains("reveal-v3")) {
         item.classList.add("reveal-v3");
       }
-      list.append(item);
+      if (advert && index < 6) list.insertBefore(item, advert);
+      else list.append(item);
     });
     list.setAttribute("aria-busy", "false");
   }
@@ -223,6 +254,8 @@
   }
 
   function directory() {
+    select("[data-directory-loading-controls]")?.remove();
+    placeDirectoryAdvert(select("#server-list"));
     window.BrowseRPSearch.mount({ root: select("#discovery-controls"), list: select("#server-list"), empty: select("#directory-empty"), count: select("#result-count"), render: renderServers });
   }
 

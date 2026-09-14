@@ -287,7 +287,7 @@
   function appearanceChoice() {
     if (!document.querySelector("link[data-first-visit-appearance]")) {
       const styles = el("link", ""); styles.rel = "stylesheet";
-      styles.href = "/first-visit-appearance.css?v=20260914-ui2"; styles.dataset.firstVisitAppearance = "";
+      styles.href = "/first-visit-appearance.css?v=20260914-layout1"; styles.dataset.firstVisitAppearance = "";
       document.head.append(styles);
     }
     const group = el("div", "first-visit-appearance");
@@ -381,7 +381,7 @@
     const area = model.preferred(routeGame);
     section.querySelector("[data-enable-recommendations]").hidden = enabled;
     section.querySelector("[data-reset-recommendations]").hidden = !enabled;
-    message.textContent = !enabled ? consent.getState().phase !== "ready" ? consentStatus() : "Discover more communities in the regions you enjoy. Turn on optional recommendations; viewing history stays on this browser." : !area ? "As you explore a few server pages, communities from your favourite regions will appear here." : `More ${area} communities, based on the servers you viewed on BrowseRP.`;
+    message.textContent = !enabled ? consent.getState().phase !== "ready" ? consentStatus() : "Optional recommendations. Viewing history stays on this browser." : !area ? "Explore a few servers to get recommendations here." : `More ${area} communities, based on the servers you viewed on BrowseRP.`;
     if (!enabled || !area) return;
     controller = new AbortController();
     const currentController = controller;
@@ -410,7 +410,7 @@
     section = el("section", "recommendations-v7"); section.setAttribute("aria-label", "Personalised discovery");
     const inner = el("div", page === "home" ? "shell-v3" : "");
     const head = el("div", "recommendation-heading"); const copy = el("div", "");
-    copy.append(el("span", "eyebrow-v3", "Your discovery"), el("h2", "", "For you"));
+    copy.append(el("h2", "", "For you"));
     message = el("p", "recommendation-message"); copy.append(message);
     const actions = el("div", "recommendation-actions");
     const enable = el("button", "button-v3 button-secondary-v3", "Enable recommendations"); enable.type = "button"; enable.dataset.enableRecommendations = "";
@@ -418,7 +418,10 @@
     const reset = el("button", "button-v3 button-quiet-v3", "Turn off & clear"); reset.type = "button"; reset.dataset.resetRecommendations = "";
     reset.addEventListener("click", () => { const okay = chooseRecommendations(false); changed(); if (!okay) message.textContent = "Your browser could not clear this preference. Please clear BrowseRP site data in browser settings."; });
     actions.append(enable, reset); head.append(copy, actions);
-    results = el("div", "recommendation-results"); results.hidden = true; inner.append(head, results); section.append(inner); anchor.before(section);
+    results = el("div", "recommendation-results"); results.hidden = true; inner.append(head, results); section.append(inner);
+    const directory = page === "servers" ? document.querySelector(".directory-layout-v3") : null;
+    if (directory) directory.after(section);
+    else anchor.before(section);
     refresh();
   }
   window.addEventListener("browserp:recommendations-changed", refresh);

@@ -73,7 +73,7 @@ test("theme selection uses the app controller and changes no consent, account, c
   assert.equal(w.document.cookie, cookies);
   assert.equal(w.document.documentElement.dataset.theme, "light");
   assert.equal(w.document.documentElement.style.colorScheme, "light");
-  assert.equal(w.document.querySelector('meta[name="theme-color"]').content, "#f3f6fb");
+  assert.equal(w.document.querySelector('meta[name="theme-color"]').content, "#f7f7f7");
   assert.equal(w.document.querySelector('[data-theme-choice-v6="light"]').getAttribute("aria-pressed"), "true");
   assert.equal(choice("light").getAttribute("aria-pressed"), "true");
   assert.equal(w.document.activeElement, choice("light"));

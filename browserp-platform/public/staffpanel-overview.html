@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en-GB">
 <head>
-  <script src="/staff-workspace.js?v=20260914-ui2"></script>
+  <script src="/staff-workspace.js?v=20260914-layout1"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#07080b">
@@ -35,16 +35,16 @@
   <link rel="stylesheet" href="/staff-publishing.css?v=1">
   <script src="/publishing-content.js?v=2.18.0" defer></script>
   <script src="/staff-duty.js?v=1" defer></script>
-  <script src="/staff-overview.js?v=20260914-ui2" defer></script>
+  <script src="/staff-overview.js?v=20260914-layout1" defer></script>
   <script src="/staff-adverts.js?v=2.17.0" defer></script>
   <link rel="stylesheet" href="/advertising-enquiries.css?v=2.17.0">
   <script src="/advertising-enquiries.js?v=2.17.0" defer></script>
   <script src="/staff-publishing.js?v=2.10.3" defer></script>
-  <script src="/staff-scrapers.js?v=2.20.4" defer></script><script src="/touch-feedback.js?v=2.18.0" defer></script><script src="/staffpanel-v3.js?v=20260914-ui2" defer></script>
+  <script src="/staff-scrapers.js?v=2.20.4" defer></script><script src="/touch-feedback.js?v=2.18.0" defer></script><script src="/staffpanel-v3.js?v=20260914-layout1" defer></script>
   <link rel="stylesheet" href="/staff-scrapers.css?v=2.9.0">
-  <link rel="stylesheet" href="/staff-layout.css?v=20260914-ui2">
-  <link rel="stylesheet" href="/design-system.css?v=20260914-ui2">
-  <link rel="stylesheet" href="/staff-design.css?v=20260914-ui2">
+  <link rel="stylesheet" href="/staff-layout.css?v=20260914-layout1">
+  <link rel="stylesheet" href="/design-system.css?v=20260914-layout1">
+  <link rel="stylesheet" href="/staff-design.css?v=20260914-overview-stable1">
 </head>
 <body class="staff-v3" data-staff-page="overview"><div id="staff-access-pending" class="staff-login-v3" role="status"><p>Checking your staff access…</p><noscript>JavaScript is required to sign in to the staff panel.</noscript></div>
   <div class="staff-mobile-bar-v3" hidden inert>
@@ -57,36 +57,46 @@
       <nav class="staff-nav-v3" aria-label="Staff navigation">
         <a href="/staffpanel/overview" aria-current="page">Overview</a>
         <a href="/staffpanel/moderation">Moderation</a>
-        <a href="/">Public site</a>
+        <a href="/">View website ↗</a>
       </nav>
     </aside>
     <main class="staff-main-v3 overview-main" id="website-overview">
       <header class="staff-top-v3">
-        <div><span class="eyebrow-v3">BrowseRP staff workspace</span><h1>Website overview</h1><p>Review priorities, check your team and manage the website.</p></div>
+        <div><span class="eyebrow-v3">Staff panel</span><h1>Overview</h1><p>Your review work, team availability and website tools.</p></div>
         <a class="button-v3 button-secondary-v3" href="/">View website <span aria-hidden="true">↗</span></a>
       </header>
       <div class="overview-livebar"><p class="overview-live-state" id="overview-live-status" role="status">Loading website data…</p><button class="button-v3 button-quiet-v3" id="overview-refresh" type="button">Refresh now</button></div>
+      <div class="overview-priority-space">
+        <p class="overview-priority-placeholder">Your available review priorities appear here.</p>
       <section class="staff-priorities" aria-label="Review priorities" id="overview-priorities" hidden>
         <a class="staff-priority" href="/staffpanel/moderation#queue" data-overview-priority-card="servers.review" hidden><span>Listing reviews</span><strong data-overview-priority="pendingSubmissions">—</strong><small>Awaiting a decision</small></a>
         <a class="staff-priority" href="/staffpanel/moderation#reports" data-overview-priority-card="reports.read" hidden><span>Open reports</span><strong data-overview-priority="openReports">—</strong><small>Open or triaged</small></a>
         <a class="staff-priority" href="/staffpanel/moderation#security" data-overview-priority-card="security.read" hidden><span>Priority risks</span><strong data-overview-priority="securityAlerts">—</strong><small>High or critical, unresolved</small></a>
       </section>
+      </div>
       <div class="overview-work-grid">
         <section class="staff-work-panel" aria-labelledby="overview-work-title">
-          <div class="staff-panel-heading"><div><span class="eyebrow-v3">Review priorities</span><h2 id="overview-work-title">Work queue</h2></div><a class="button-v3 button-secondary-v3" href="/staffpanel/moderation">Open moderation</a></div>
+          <div class="staff-panel-heading"><div><h2 id="overview-work-title">Recent review work</h2></div><a class="button-v3 button-secondary-v3" href="/staffpanel/moderation">Open moderation</a></div>
           <p class="staff-panel-note">Recent items from your available review queues.</p>
           <div id="overview-work-queue" class="staff-work-list" aria-live="polite"><p class="staff-panel-note">Loading your review queues…</p></div>
           <nav class="staff-panel-links" aria-label="Review queues"><a href="/staffpanel/moderation#queue">Listing reviews <span data-overview-queue="pendingSubmissions"></span></a><a href="/staffpanel/moderation#reports">Reports <span data-overview-queue="openReports"></span></a></nav>
         </section>
         <section class="staff-work-panel" aria-labelledby="overview-audit-title">
-          <div class="staff-panel-heading"><div><span class="eyebrow-v3">Recorded decisions</span><h2 id="overview-audit-title">Recent staff activity</h2></div></div>
+          <div class="staff-panel-heading"><div><h2 id="overview-audit-title">Recent staff activity</h2></div></div>
           <div id="overview-audit-list" class="staff-activity-list"><p class="staff-panel-note">Loading recorded activity…</p></div>
           <a class="staff-text-link" href="/staffpanel/moderation#logs">Open audit logs →</a>
         </section>
       </div>
       <nav class="staff-management-links" aria-label="Website management"><a href="/staffpanel/moderation#members">Members</a><a href="/staffpanel/moderation#servers">Servers</a><a href="/staffpanel/moderation#staff">Staff &amp; roles</a></nav>
-      <section class="overview-users ds-chart-frame" aria-labelledby="overview-users-title">
-        <div class="overview-section-heading"><div><span class="eyebrow-v3">Registration history</span><h2 id="overview-users-title">Registered users</h2><p>Current accounts by signup date · UTC</p></div>
+      <section id="overview-duty" class="overview-module staff-duty" aria-labelledby="staff-duty-title" aria-busy="true">
+        <div class="overview-section-heading staff-duty-heading"><div><span class="eyebrow-v3">Staff operations</span><h2 id="staff-duty-title">Duty &amp; availability</h2><p>Record confirmed work sessions and tell the team when you are available.</p></div><p class="staff-duty-live" data-duty-live role="status">Loading duty information…</p></div>
+        <div class="staff-duty-content" data-duty-content><p class="staff-duty-empty">Checking your current duty state…</p></div>
+      </section>
+      <section id="overview-refresh-health" data-refresh-health aria-label="Live listing checks"></section>
+      <section id="overview-adverts" class="overview-module" aria-label="Advertisements"><div data-advert-campaigns><div class="overview-section-heading"><div><span class="eyebrow-v3">Website placements</span><h2>Advertisements</h2><p>Loading advertisements…</p></div></div></div><section id="advertising-enquiries" aria-label="Advertising enquiries"><h3>Advertising enquiries</h3><p>Checking enquiry access…</p></section></section>
+      <section id="overview-publishing" class="overview-module" aria-label="Blog publishing"><div class="overview-section-heading"><div><span class="eyebrow-v3">Community updates</span><h2>Blog posts</h2><p>Loading publishing tools…</p></div><a class="button-v3 button-secondary-v3" href="/blog">View blog</a></div></section>
+      <section class="overview-users ds-chart-frame" id="overview-users" aria-labelledby="overview-users-title">
+        <div class="overview-section-heading"><div><span class="eyebrow-v3">Website reporting</span><h2 id="overview-users-title">Registrations</h2><p>Current accounts by signup date · UTC</p></div>
           <details class="overview-range" id="overview-range"><summary>Time frame <strong id="overview-range-label">30 days</strong><span aria-hidden="true">⌄</span></summary><div class="overview-range-options" role="group" aria-label="User chart time frame"><button type="button" data-overview-range="30d" aria-pressed="true">30 days</button><button type="button" data-overview-range="90d" aria-pressed="false">90 days</button><button type="button" data-overview-range="180d" aria-pressed="false">180 days</button><button type="button" data-overview-range="1y" aria-pressed="false">1 year</button><button type="button" data-overview-range="max" aria-pressed="false">Max</button></div></details>
         </div>
         <div class="overview-chart-summary"><div><strong id="overview-users-total">—</strong><span>registered users</span></div><p id="overview-users-new">Loading signup history…</p></div>
@@ -102,13 +112,6 @@
         <article class="overview-metric"><span>Published blog posts</span><strong data-overview-metric="publishedBlogs">—</strong><small>Live on the blog</small></article>
         <article class="overview-metric"><span>Active staff</span><strong data-overview-metric="activeStaff">—</strong><small>Your staff team</small></article>
       </section>
-      <section id="overview-duty" class="overview-module staff-duty" aria-labelledby="staff-duty-title" aria-busy="true">
-        <div class="overview-section-heading staff-duty-heading"><div><span class="eyebrow-v3">Staff operations</span><h2 id="staff-duty-title">Duty &amp; availability</h2><p>Record confirmed work sessions and tell the team when you are available.</p></div><p class="staff-duty-live" data-duty-live role="status">Loading duty information…</p></div>
-        <div class="staff-duty-content" data-duty-content><p class="staff-duty-empty">Checking your current duty state…</p></div>
-      </section>
-      <section id="overview-refresh-health" data-refresh-health aria-label="Live listing checks"></section>
-      <section id="overview-adverts" class="overview-module" aria-label="Advertisements"><div data-advert-campaigns><div class="overview-section-heading"><div><span class="eyebrow-v3">Website placements</span><h2>Advertisements</h2><p>Loading advertisements…</p></div></div></div><section id="advertising-enquiries" aria-label="Advertising enquiries"><h3>Advertising enquiries</h3><p>Checking enquiry access…</p></section></section>
-      <section id="overview-publishing" class="overview-module" aria-label="Blog publishing"><div class="overview-section-heading"><div><span class="eyebrow-v3">Community updates</span><h2>Blog posts</h2><p>Loading publishing tools…</p></div><a class="button-v3 button-secondary-v3" href="/blog">View blog</a></div></section>
       <details id="overview-authenticators" class="overview-module staff-authenticators"><summary>Your sign-in security</summary><div data-authenticators-content></div></details>
       <p id="staff-status-v3" role="status"></p>
     </main>

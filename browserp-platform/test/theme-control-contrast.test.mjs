@@ -28,16 +28,16 @@ for (const theme of ["dark", "light"]) test(`${theme} theme switches control sur
   const root = style(document.documentElement);
   const token = name => root.getPropertyValue(name).trim();
   for (const surface of ["--bg", "--panel", "--panel-2", "--control-bg", "--surface-hover", "--selection-surface"]) {
-    for (const label of ["--text", "--copy", "--muted", "--cyan", "--pink", "--danger", "--success", "--warning"]) {
+    for (const label of ["--text", "--copy", "--muted", "--cyan", "--pink", "--violet", "--danger", "--success", "--warning"]) {
       assert.ok(contrast(token(label), token(surface)) >= 4.5, `${label} on ${surface} has readable text contrast`);
     }
   }
   assert.ok(contrast(token("--control-border"), token("--control-bg")) >= 3, "field boundary remains visible");
-  assert.ok(contrast(token("--cyan"), token("--selection-surface")) >= 4.5, "selected controls retain readable labels");
+  assert.ok(contrast(token("--violet"), token("--selection-surface")) >= 4.5, "selected controls retain readable labels");
   assert.equal(token("--brand-action-gradient").match(/#[a-f0-9]{6}/gi)?.length, 3, "action gradient exposes its three tested colour stops");
   for (const stop of token("--brand-action-gradient").match(/#[a-f0-9]{6}/gi) || []) assert.ok(contrast("#ffffff", stop) >= 4.5, "primary gradient supports white labels");
-  assert.equal(root.getPropertyValue("--panel").trim(), theme === "light" ? "#ffffff" : "#121c2d", "shared surface palette is applied");
-  assert.equal(root.getPropertyValue("--text").trim(), theme === "light" ? "#162238" : "#f3f6fc", "shared label palette is applied");
+  assert.equal(root.getPropertyValue("--panel").trim(), theme === "light" ? "#ffffff" : "#171717", "neutral surface palette is applied");
+  assert.equal(root.getPropertyValue("--text").trim(), theme === "light" ? "#1c1c1c" : "#f5f5f5", "neutral label palette is applied");
 });
 
 function contrast(a, b) {

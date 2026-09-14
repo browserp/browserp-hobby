@@ -10,7 +10,6 @@
     row.setAttribute("aria-label", "Directory filters and games");
     toggle.textContent = "Filters";
     toggle.setAttribute("aria-controls", "directory-filter-panel");
-    row.append(toggle);
     const buttons = [];
     for (const [id, name] of Object.entries(window.BrowseRPDiscovery.games)) {
       const button = document.createElement("button");
@@ -32,6 +31,7 @@
       });
       row.append(button); buttons.push(button);
     }
+    row.append(toggle);
     const panel = document.createElement("div");
     panel.id = "directory-filter-panel";
     panel.className = "directory-filter-panel";
@@ -46,6 +46,15 @@
     hint.textContent = "Choose a game to see its modes and features.";
     panel.append(hint);
     searchRow.after(row, panel);
+    // Move the existing controls, including their listeners, rather than
+    // introducing a second sort or a separate filter state.
+    const resultBar = document.querySelector(".result-bar-v3");
+    if (resultBar) {
+      const sort = primary.querySelector("#sort-filter")?.parentElement;
+      if (sort) { sort.classList.add("directory-sort"); resultBar.append(sort); }
+      const chips = root.querySelector(".smart-filter-chips");
+      if (chips) resultBar.append(chips);
+    }
     let previousGame = getFilters().platform;
     function setOpen(open) {
       panel.hidden = !open;
@@ -53,6 +62,8 @@
       toggle.setAttribute("aria-expanded", String(open));
     }
     function sync(filters) {
+      const applied = Object.keys(window.BrowseRPDiscovery.labels).filter(key => filters[key] !== window.BrowseRPDiscovery.defaults[key]).length;
+      toggle.textContent = applied ? `Filters (${applied})` : "Filters";
       if (filters.platform !== previousGame && filters.platform !== "all") setOpen(true);
       previousGame = filters.platform;
       for (const button of buttons) {

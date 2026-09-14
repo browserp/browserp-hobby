@@ -6,11 +6,17 @@
 /* Page and member introductions keep their content columns, while their decorative
    introductions use the full page width (excluding the scrollbar). */
 body:is([data-page="about"], [data-page="servers"]) > main.section-v3,
+body[data-blog-page="article"] > main.journal-article-page-v6,
+body > main.section-v3:has(> .legal-v3 > #advertising-enquiries),
 body:is([data-page="dashboard"], [data-page="profile"]) > main.portal-stage { container-type: inline-size; }
 body[data-page="about"] .public-intro-surface-v7 > .home-hero-pattern,
 body[data-page="about"] .public-intro-surface-v7::after,
 body[data-page="servers"] .directory-intro-v3 > .home-hero-pattern,
 body[data-page="servers"] .directory-intro-v3::after,
+body[data-blog-page="article"] .journal-article-head-v6 > .home-hero-pattern,
+body[data-blog-page="article"] .journal-article-head-v6::after,
+main.section-v3:has(> .legal-v3 > #advertising-enquiries) .public-intro-surface-v7 > .home-hero-pattern,
+main.section-v3:has(> .legal-v3 > #advertising-enquiries) .public-intro-surface-v7::after,
 body:is([data-page="dashboard"], [data-page="profile"]) .dashboard-view > .portal-head > .home-hero-pattern,
 body:is([data-page="dashboard"], [data-page="profile"]) .dashboard-view > .portal-head::after {
   left: calc(50% - 50cqw);

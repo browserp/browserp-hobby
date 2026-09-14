@@ -8,7 +8,7 @@
   const human = (value) => String(value ?? "").replace(/[_-]/g, " ");
   const hasCount = (value) => typeof value === "number" && Number.isFinite(value) && value >= 0;
   const META = {
-    summary: ["Control panel", "Current review queues and the tools available to your role.", null, null],
+    summary: ["Review overview", "Current review queues and the tools available to your role.", null, null],
     members: ["Members", "Find registered accounts, inspect their profile and update approved account details.", "readMembers", "members"],
     servers: ["Servers", "Find and manage listings using their game, location, language and community features.", "readServers", "servers"],
     claims: ["Server claims", "Review ownership requests and filter verified Discord community owners.", "reviewClaims", null],
@@ -61,7 +61,7 @@
     const empty = (title, description) => { const box = make("div", undefined, "moderation-empty"); box.append(make("h3", title), make("p", description)); return box; };
     function updateUrl(replace = true) { const hash = F.serialize(state.view, state.filters); if (replace) history.replaceState(null, "", `${location.pathname}${location.search}${hash}`); else location.hash = hash; }
     function renderTabs() {
-      const groups = [[null, ["summary"]], ["Review work", ["reports", "queue", "content", "profiles", "claims", "appeals"]], ["Community", ["members", "servers", "staff"]], ["Safety & records", ["bans", "security", "activity", "data-requests", "logs"]]];
+      const groups = [[null, ["summary"]], ["Review work", ["reports", "queue", "content", "profiles", "claims", "appeals"]], ["Community", ["members", "servers"]], ["Team", ["staff"]], ["Safety & records", ["bans", "security", "activity", "data-requests", "logs"]]];
       const items = [];
       for (const [label, views] of groups) {
         const visible = views.filter(allowed);

@@ -31,7 +31,7 @@
     document.documentElement.dataset.theme = selected;
     document.documentElement.style.colorScheme = selected;
     const colour = document.querySelector('meta[name="theme-color"]');
-    if (colour) colour.content = selected === "light" ? "#f3f6fb" : "#080d18";
+    if (colour) colour.content = selected === "light" ? "#f7f7f7" : "#0a0a0a";
     if (persist) {
       try { localStorage.setItem(PUBLIC_THEME_KEY, selected); } catch { /* The visible choice still applies for this page. */ }
     }
@@ -43,7 +43,7 @@
   if (isPublicPage() && !document.querySelector('link[data-public-theme],link[href^="/theme.css"]')) {
     const themeStyles = document.createElement("link");
     themeStyles.rel = "stylesheet";
-    themeStyles.href = "/theme.css?v=20260914-ui2";
+    themeStyles.href = "/theme.css?v=20260914-layout1";
     themeStyles.dataset.publicTheme = "";
     document.head.append(themeStyles);
   }
@@ -141,7 +141,7 @@
       sync();
     };
     size();
-    import("./wordmark-canvas.js?v=20260914-ui2").then(({ createWordmarkCanvas }) => {
+    import("./wordmark-canvas.js?v=20260914-layout1").then(({ createWordmarkCanvas }) => {
       if (disposed) return;
       canvasRenderer = createWordmarkCanvas(pattern, plane);
       sync();
