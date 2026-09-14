@@ -92,3 +92,12 @@ User feedback then authorised improving every advert placement using the praised
 The shared button gradient now originates at the border box, removing coloured repeat seams. Existing decorative headline accents use restrained 12-second brand-colour movement with static reduced-motion and solid forced-colour/print fallbacks. No ordinary status colours, wordmark behaviour, access control, data or navigation behaviour changed.
 
 Changed asset identities are advanced together. The combined source is awaiting bounded affected browser checks and the required staged build before publication. Do not claim these refinements live from the core release receipt. The prior core deployment is the immediate rollback target; gm9926 remains the historical source master.
+
+
+## Final advert, hover and history refinement
+
+The follow-up source now combines the refined advert layouts and accent motion with enabled primary-button gradient hover (1.6 seconds, scale 1.018, brightness 1.05, no generated sweep); protected touch/reduced-motion/forced-colour states remain static. Light artwork-unavailable links inherit the readable light-theme cyan. Firefox's transient image decode rejection no longer creates a permanent failure entry, and stale load/error callbacks cannot change a newer creative's state. Genuine blocked images retain the no-retry fallback.
+
+Player history supports mouse and horizontal finger/pointer inspection of actual recorded samples with a vertical guide, count and local timestamp; keyboard arrows/Home/End remain available. Missing displayed samples show a plain no-reading message, and sampling/truncation context remains honest. The lengthy observations paragraph moved to the existing expandable data section. Uncaptured abandoned gestures release cleanly; horizontal pointer capture, normal vertical scrolling, rerender cleanup and cancelled/out-of-order requests are preserved. No API, database, moderation, staff access or permission semantics changed.
+
+Task5 owns the final emulated-touch chart checks and remaining Firefox/WebKit advert, motion and control checks. The existing passing Chromium layouts and b27 light fallback/button evidence remain valid. A combined required build, final exact-tree publication, promotion and canonical readback remain Main's release gate. Previous core production is the rollback target. See the external release receipt for the final identities and outcome.

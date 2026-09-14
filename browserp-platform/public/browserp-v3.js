@@ -43,7 +43,7 @@
   if (isPublicPage() && !document.querySelector('link[data-public-theme],link[href^="/theme.css"]')) {
     const themeStyles = document.createElement("link");
     themeStyles.rel = "stylesheet";
-    themeStyles.href = "/theme.css?v=20260914-layout1";
+    themeStyles.href = "/theme.css?v=20260914-layout2";
     themeStyles.dataset.publicTheme = "";
     document.head.append(themeStyles);
   }
@@ -414,6 +414,7 @@
     let dots;
     let controls;
     let markArtworkUnavailable;
+    let markArtworkAvailable;
     let imageSource = "";
     let imageRequest = 0;
     const failedImages = new Set();
@@ -450,14 +451,7 @@
       // Keep the advert readable when a browser blocks its artwork. Do not
       // retry blocked addresses or override a content blocker's image styles.
       markArtworkUnavailable = () => { failedImages.add(imageSource); finishImage(true); };
-      image.onerror = () => {
-        if (image.getAttribute("src") === imageSource) markArtworkUnavailable();
-      };
-      image.onload = () => {
-        if (image.getAttribute("src") !== imageSource) return;
-        if (!image.naturalWidth || getComputedStyle(image).display === "none") markArtworkUnavailable();
-        else finishImage(false);
-      };
+      markArtworkAvailable = () => { failedImages.delete(imageSource); finishImage(false); };
       const shade = node("div", "side-ad-shade-v3");
       copy = node("div", "side-ad-copy-v3");
       copy.dataset.adCopy = "";
@@ -489,20 +483,38 @@
       if (image) {
         const request = ++imageRequest;
         imageSource = safeAdvertImage(advert.imageUrl, index);
+        const source = imageSource;
+        const ownsRequest = () => !disposed && request === imageRequest && image.getAttribute("src") === source;
+        const loaded = () => {
+          if (!ownsRequest() || !image.complete) return;
+          // During a source change Firefox can retain the previous image's
+          // dimensions/currentSrc. Only the requested image can claim success.
+          if (image.currentSrc && image.currentSrc !== new URL(source, document.baseURI).href) return;
+          if (!image.naturalWidth || getComputedStyle(image).display === "none") markArtworkUnavailable();
+          else markArtworkAvailable();
+        };
+        const failed = () => {
+          if (ownsRequest() && image.complete && !image.naturalWidth) markArtworkUnavailable();
+        };
+        image.onload = loaded;
+        image.onerror = failed;
         if (failedImages.has(imageSource)) markArtworkUnavailable();
         else {
           image.classList.add("is-changing");
           image.src = imageSource;
           if (image.complete) {
-            if (image.naturalWidth) image.onload();
-            else image.onerror();
+            if (image.naturalWidth) loaded();
+            else failed();
           } else if (typeof image.decode === "function") {
             // WebKit can finish a blocked image without delivering its error event.
             // Decode observes the same request; it does not retry the blocked URL.
-            image.decode().then(() => {
-              if (request === imageRequest) image.onload?.();
-            }, () => {
-              if (request === imageRequest) markArtworkUnavailable();
+            image.decode().then(loaded, () => {
+              // decode() can reject transiently while a valid request is still
+              // loading, or even after it has succeeded. Await load/error when
+              // pending; only a completed failure enters the no-retry cache.
+              if (!ownsRequest() || !image.complete) return;
+              if (image.naturalWidth) loaded();
+              else failed();
             });
           }
         }

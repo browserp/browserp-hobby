@@ -116,11 +116,23 @@ body:is(.staff-v3,[data-staff-page]), .ds-density-compact { --control-height: 44
 :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary):hover:not(:disabled):not([aria-disabled="true"]) {
   color: #fff; background: var(--brand-action-gradient); border-color: transparent;
   /* Size the gradient through the transparent border to avoid repeated edge seams. */
-  background-origin: border-box;
+  background-origin: border-box; background-repeat: no-repeat;
+  animation: none;
+  transition: border-color var(--motion-fast),transform var(--motion-fast),filter var(--motion-fast),box-shadow var(--motion-fast);
   box-shadow: 0 2px 5px rgb(0 0 0 / .12);
 }
+/* Primary feedback moves the gradient itself, never the legacy shine overlay. */
+:root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary)::after { content: none; display: none; animation: none !important; }
+@media screen and (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary):is(:hover,:focus-visible):not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]) { filter: brightness(1.05); }
+  @media (prefers-reduced-motion: no-preference) {
+    :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary):is(:hover,:focus-visible):not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]) {
+      background-size: 160% 100%; transform: scale(1.018);
+      animation: primary-gradient-v3 1.6s ease-in-out infinite alternate;
+    }
+  }
+}
 :root body :is(.small-button-success,.ds-button-success) { color: var(--success); border-color: var(--success); }
-:root[data-theme="light"] body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary) { animation: none; }
 :root body :is(.button-quiet-v3,.button-ghost,.small-button-quiet,.ds-button-quiet) {
   color: var(--copy); background: transparent; border-color: transparent; box-shadow: none;
 }
@@ -230,9 +242,13 @@ body:is(.staff-v3,[data-staff-page]), .ds-density-compact { --control-height: 44
 @media (max-width: 600px) { .ds-panel { padding: 16px; } .ds-chart-frame { padding: 16px; } }
 @media (prefers-reduced-motion: reduce) {
   :root body :is(.button-v3,.button,.small-button,.ds-button,.ds-menu-button,.control-v3) { transition: none; }
+  :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary) { animation: none; transform: none; }
 }
 @media (forced-colors: active) {
   :root :focus-visible { outline-color: Highlight; }
   :root body :is(.button-v3,.button,.small-button,.ds-button,.ds-menu-button,.ds-status) { border: 1px solid ButtonText; box-shadow: none; }
-  :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary) { color: ButtonText; background: ButtonFace; }
+  :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary),
+  :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary):is(:hover,:focus-visible):not(:disabled):not([aria-disabled="true"]) {
+    color: ButtonText; background: ButtonFace; animation: none; transform: none; filter: none; transition: none;
+  }
 }

@@ -9,6 +9,21 @@
 .player-history-grid { stroke: var(--line); stroke-width: 1; }
 .player-history-axis { fill: var(--copy); font: 13px system-ui, sans-serif; }
 .player-history-point { fill: var(--pink-strong, #dc3997); opacity: .85; }
+.player-history-inspector { position: relative; min-width: 0; touch-action: pan-y pinch-zoom; cursor: crosshair; border-radius: 8px; }
+.player-history-inspector:focus-visible { outline: 2px solid var(--focus, var(--pink-strong)); outline-offset: 4px; }
+.player-history-guide { stroke: var(--text); stroke-width: 1; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
+.player-history-selected-point { fill: var(--pink-strong, #dc3997); stroke: var(--bg); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.player-history-selection { pointer-events: none; }
+.player-history-tooltip { position: absolute; z-index: 1; top: 4px; right: 8px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 6px; max-width: calc(100% - 16px); padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--text); box-shadow: 0 4px 16px #0002; pointer-events: none; overflow-wrap: anywhere; font-size: 12px; line-height: 1.45; font-variant-numeric: tabular-nums; }
+.player-history-tooltip strong { font-size: 14px; }
+.player-history-tooltip time { color: var(--copy); }
+.player-history-keyboard-help { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); }
+.player-history-inspector:focus-visible + p .player-history-keyboard-help { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+@media (forced-colors: active) {
+  .player-history-guide { stroke: CanvasText; }
+  .player-history-selected-point { fill: Highlight; stroke: Canvas; }
+  .player-history-tooltip { background: Canvas; color: CanvasText; border-color: CanvasText; }
+}
 #server-detail-v3 .player-history p { color: var(--copy); font-size: 13px; line-height: 1.65; margin: 12px 0 0; }
 #server-detail-v3 .player-history [data-history-scope] { color: var(--muted); }
 .player-history details { margin-top: 16px; }

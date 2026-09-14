@@ -104,7 +104,7 @@
 
 :root[data-theme="light"] .side-ad-v3 { background: var(--panel); border-color: var(--line); }
 /* Artwork and fallback advert stages retain a dark canvas in either theme. */
-:root[data-theme="light"] .side-ad-stage-v3 { --copy: #e0dce6; --cyan: #68dafa; border-color: var(--line); }
+:root[data-theme="light"] .side-ad-v3:not(.artwork-unavailable) .side-ad-stage-v3 { --copy: #e0dce6; --cyan: #68dafa; border-color: var(--line); }
 :root[data-theme="light"] .ad-label-v3,
 :root[data-theme="light"] .ad-pause-v7 { color: var(--muted); }
 :root[data-theme="light"] .ad-pause-v7:hover { color: var(--text); background: var(--surface-hover); }

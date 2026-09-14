@@ -31,16 +31,22 @@ async function harness(t, { outcomes = {}, reduced = false, decoding = false, vi
   w.setInterval = (callback, delay) => { timers.set(++timerId, { callback, delay }); return timerId; };
   w.clearInterval = id => timers.delete(id);
   w.Image = function () {
-    const image = w.document.createElement("img"); let complete = false, width = 0;
-    image.finishPendingLoad = () => { complete = true; width = 800; image.dispatchEvent(new w.Event("load")); };
+    const image = w.document.createElement("img"); let complete = false, width = 0, currentSource = "";
+    image.finishPendingLoad = (source = image.getAttribute("src")) => { complete = true; width = 800; currentSource = new URL(source, w.document.baseURI).href; image.dispatchEvent(new w.Event("load")); };
     if (decoding) image.decode = () => new Promise((resolve, reject) => {
-      decodes.push({ image, fail() { complete = true; width = 0; reject(new w.DOMException("Image request failed", "EncodingError")); }, succeed() { complete = true; width = 800; resolve(); } });
+      decodes.push({ image,
+        fail() { complete = true; width = 0; reject(new w.DOMException("Image request failed", "EncodingError")); },
+        rejectPending() { reject(new w.DOMException("Invalid image request", "EncodingError")); },
+        rejectLoaded() { complete = true; width = 800; currentSource = new URL(image.getAttribute("src"), w.document.baseURI).href; reject(new w.DOMException("Invalid image request", "EncodingError")); },
+        succeed() { complete = true; width = 800; currentSource = new URL(image.getAttribute("src"), w.document.baseURI).href; resolve(); }
+      });
     });
     Object.defineProperties(image, {
-      complete: { get: () => complete }, naturalWidth: { get: () => width },
+      complete: { get: () => complete }, naturalWidth: { get: () => width }, currentSrc: { get: () => currentSource },
       src: { get: () => image.getAttribute("src") || "", set(value) {
         image.setAttribute("src", value); const outcome = outcomes[value] || "load";
         complete = outcome !== "pending"; width = ["load", "cached", "hidden"].includes(outcome) ? 800 : 0;
+        if (complete) currentSource = new URL(value, w.document.baseURI).href;
         if (!image.classList.contains("side-ad-image-v3")) return;
         requests.push({ image, src: value });
         if (outcome === "hidden") image.style.display = "none";
@@ -245,6 +251,58 @@ test("late image decoding cannot change a newer slide or a replacement carousel"
   assert.equal(h.root.classList.contains("artwork-unavailable"), false);
   assert.equal(h.$(".side-ad-image-notice-v3").hidden, true);
   assert.equal(h.$("[data-ad-copy] strong").textContent, "Reviewed advert 2");
+});
+
+test("Firefox decode rejection with valid completed pixels never poisons a later artwork visit", async t => {
+  const h = await harness(t, { decoding: true, outcomes: { [artwork[0]]: "pending" } }); await h.hydrate();
+  const image = h.$("img");
+  h.decodes.findLast(item => item.image === image).rejectLoaded(); await tick();
+  assert.equal(image.complete, true); assert.equal(image.naturalWidth, 800);
+  assert.equal(h.root.classList.contains("artwork-unavailable"), false);
+  image.finishPendingLoad();
+  h.$('[data-ad-direction="next"]').click();
+  const before = h.requests.length;
+  h.$('[data-ad-direction="previous"]').click();
+  assert.equal(h.requests.length, before + 1, "A valid source must not be skipped as a cached failure");
+  image.finishPendingLoad();
+  assert.equal(h.root.classList.contains("artwork-unavailable"), false);
+  assert.equal(image.classList.contains("is-changing"), false);
+});
+
+test("a pending decode rejection waits for the final load and a later valid load clears failure state", async t => {
+  for (const initialResult of ["rejectPending", "fail"]) {
+    const h = await harness(t, { decoding: true, outcomes: { [artwork[0]]: "pending" } }); await h.hydrate();
+    const image = h.$("img");
+    h.decodes.findLast(item => item.image === image)[initialResult](); await tick();
+    assert.equal(h.root.classList.contains("artwork-unavailable"), initialResult === "fail");
+    image.finishPendingLoad();
+    assert.equal(h.root.classList.contains("artwork-unavailable"), false);
+    h.$('[data-ad-direction="next"]').click();
+    const before = h.requests.length;
+    h.$('[data-ad-direction="previous"]').click();
+    assert.equal(h.requests.length, before + 1, "Authoritative load success removes any previous failed cache entry");
+    image.finishPendingLoad();
+    assert.equal(h.root.classList.contains("artwork-unavailable"), false);
+  }
+});
+
+test("saved load/error callbacks cannot change a newer request, including a return to the same URL", async t => {
+  const h = await harness(t, { decoding: true, outcomes: { [artwork[0]]: "pending" } }); await h.hydrate();
+  const image = h.$("img"), oldLoad = image.onload, oldError = image.onerror;
+  h.$('[data-ad-direction="next"]').click();
+  oldError();
+  assert.equal(h.root.classList.contains("artwork-unavailable"), false, "Old error cannot hide a healthy new creative");
+  h.$('[data-ad-direction="previous"]').click();
+  oldLoad(); oldError();
+  assert.equal(h.root.classList.contains("artwork-unavailable"), false, "Same source is still a different owned request");
+  image.finishPendingLoad(artwork[1]);
+  assert.equal(image.classList.contains("is-changing"), true, "Retained pixels from the previous URL cannot complete the new request");
+  image.finishPendingLoad();
+  assert.equal(h.root.classList.contains("artwork-unavailable"), false);
+  const currentLoad = image.onload, currentError = image.onerror;
+  h.root._browserpAdvertCleanup();
+  currentError(); currentLoad();
+  assert.equal(image.onload, null); assert.equal(image.onerror, null);
 });
 
 test("a late load from another slide cannot reveal old artwork over a failed current slide", async t => {
