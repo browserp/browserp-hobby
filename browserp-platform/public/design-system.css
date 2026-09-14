@@ -117,20 +117,39 @@ body:is(.staff-v3,[data-staff-page]), .ds-density-compact { --control-height: 44
   color: #fff; background: var(--brand-action-gradient); border-color: transparent;
   /* Size the gradient through the transparent border to avoid repeated edge seams. */
   background-origin: border-box; background-repeat: no-repeat;
-  animation: none;
-  transition: border-color var(--motion-fast),transform var(--motion-fast),filter var(--motion-fast),box-shadow var(--motion-fast);
+  background-size: 160% 100%; background-position: 50% 50%;
+  animation: none; transform: none; filter: none; --primary-emphasis: 0;
+  transition: border-color var(--motion-fast),--primary-emphasis 480ms ease,box-shadow var(--motion-fast);
   box-shadow: 0 2px 5px rgb(0 0 0 / .12);
 }
-/* Primary feedback moves the gradient itself, never the legacy shine overlay. */
+/* One colour drift continues through hover; only its speed and light change. */
+@property --primary-emphasis { syntax: "<number>"; inherits: false; initial-value: 0; }
 :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary)::after { content: none; display: none; animation: none !important; }
+:root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary):is(:hover,:active,:focus,:focus-visible,:disabled,[aria-disabled="true"],[aria-pressed="true"],[aria-busy="true"]) { transform: none; }
 @media screen and (hover: hover) and (pointer: fine) and (forced-colors: none) {
-  :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary):is(:hover,:focus-visible):not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]) { filter: brightness(1.05); }
   @media (prefers-reduced-motion: no-preference) {
-    :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary):is(:hover,:focus-visible):not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]) {
-      background-size: 160% 100%; transform: scale(1.018);
-      animation: primary-gradient-v3 1.6s ease-in-out infinite alternate;
+    :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary):not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]):not([aria-busy="true"]) {
+      animation: primary-colour-drift 8s ease-in-out infinite alternate, primary-light-pulse 2.8s ease-in-out infinite;
+    }
+    :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary):is(:hover,:focus-visible):not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]):not([aria-busy="true"]) {
+      --primary-emphasis: 1;
     }
   }
+  @media (prefers-reduced-motion: reduce) {
+    :root body :is(.button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary):is(:hover,:focus-visible):not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]):not([aria-busy="true"]) { filter: brightness(1.04); }
+  }
+}
+@keyframes primary-colour-drift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+@keyframes primary-light-pulse {
+  0%, 100% { filter: brightness(calc(1 + var(--primary-emphasis) * .04)); }
+  50% { filter: brightness(calc(1 + var(--primary-emphasis) * .075)); }
+}
+:root body [data-primary-motion="paused"],
+:root[data-primary-motion="paused"] body [data-primary-motion] {
+  animation-play-state: paused !important;
 }
 :root body :is(.small-button-success,.ds-button-success) { color: var(--success); border-color: var(--success); }
 :root body :is(.button-quiet-v3,.button-ghost,.small-button-quiet,.ds-button-quiet) {
