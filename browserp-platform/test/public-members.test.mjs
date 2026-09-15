@@ -20,7 +20,8 @@ test("public member pages show only approved presentation, real badge explanatio
   assert.equal(page.statusCode, 200);
   assert.equal(page.document.querySelector("h1").textContent, member.displayName);
   assert.equal(page.document.querySelector("#member-banner-v7").dataset.banner, "afterglow");
-  assert.equal(page.document.querySelector('a[href="/server/moon-city"]').textContent.includes("Moon City"), true);
+  assert.equal(page.document.querySelector('.server-card h3').textContent.includes("Moon City"), true);
+  assert.equal(page.document.querySelector('.server-card-cover-v10').getAttribute('href'), '/server/moon-city');
   assert.equal(page.document.querySelectorAll(".member-badge-v7").length, 2);
   assert.match(page.document.querySelector('.member-badge-v7[data-kind="staff_role"]').getAttribute("aria-label"), /Admin: Active BrowseRP staff role/);
   assert.match(page.document.querySelector('.member-badge-v7[data-kind="new_joiner"]').getAttribute("data-description"), /five days/);

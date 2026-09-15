@@ -56,10 +56,10 @@ body[data-page="servers"] .recommendation-message { font-size: 13px; }
 :root body[data-page="servers"] .recommendation-actions button:hover { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
 
 /* A community is one coherent card, with independent Save/Compare controls.
-   Identity and readable content lead; metadata and tags no longer get boxes. */
+   Identity and readable content lead; linked facts use quiet, useful chips. */
 :where(body:not(.staff-v3):not([data-staff-page])) .server-list { gap: 16px; }
 :root body:not(.staff-v3):not([data-staff-page]) .server-shortlist-card { border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); box-shadow: none; overflow: hidden; }
-:root body:not(.staff-v3):not([data-staff-page]) .server-card:not(.server-card-skeleton) { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 8px 20px; padding: 24px 24px 4px; min-height: 0; border: 0; border-radius: 14px; background: transparent; box-shadow: none; transform: none; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card:not(.server-card-skeleton) { position: relative; display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 8px 20px; padding: 24px 24px 4px; min-height: 0; border: 0; border-radius: 14px; background: transparent; box-shadow: none; transform: none; }
 :root body:not(.staff-v3):not([data-staff-page]) .server-card:not(.server-card-skeleton)::before,
 :root body:not(.staff-v3):not([data-staff-page]) .server-card:not(.server-card-skeleton)::after { content: none; }
 :root body:not(.staff-v3):not([data-staff-page]) .server-card .server-card-top { display: contents; }
@@ -72,8 +72,27 @@ body[data-page="servers"] .recommendation-message { font-size: 13px; }
 :root body:not(.staff-v3):not([data-staff-page]) .server-card > .server-tags { grid-column: 2 / 4; grid-row: 4; gap: 6px 12px; }
 :root body:not(.staff-v3):not([data-staff-page]) .server-card .server-tags span { border: 0; background: transparent; box-shadow: none; padding: 0; font-size: 12px; font-weight: 400; color: var(--muted); }
 :root body:not(.staff-v3):not([data-staff-page]) .server-card .server-meta .platform-badge { border: 0; background: transparent; padding: 0; }
-:root body:not(.staff-v3):not([data-staff-page]) .server-card > .server-card-bottom { grid-column: 2 / 4; grid-row: 5; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; margin: 0; padding: 4px 0 0; border: 0; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card > .server-card-bottom { grid-column: 2 / 4; grid-row: 6; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; margin: 0; padding: 4px 0 0; border: 0; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card:not(:has(> .server-age-notice-v10)) > .server-card-bottom { grid-row: 5; }
 :root body:not(.staff-v3):not([data-staff-page]) .server-card-bottom > strong { font-size: 12px; font-weight: 500; color: var(--muted); line-height: 1.5; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card > .server-age-notice-v10 { grid-column: 2 / 4; grid-row: 5; justify-self: stretch; margin-top: 5px; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card-cover-v10 { position: absolute; inset: 0; z-index: 1; display: block; border-radius: inherit; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card-cover-v10:focus-visible { outline: 2px solid var(--focus, var(--pink-strong)); outline-offset: -2px; }
+:root body:not(.staff-v3):not([data-staff-page]) :is(.server-filter-chip-v10, .server-tag-chip-v10) { position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: center; max-width: 100%; min-height: 30px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 8px; background: color-mix(in srgb,var(--panel-2) 58%,var(--panel)); color: var(--copy); font-size: 12px; font-weight: 650; line-height: 1.35; overflow-wrap: anywhere; text-decoration: none; transition: color .16s ease, border-color .16s ease, background-color .16s ease; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card .server-meta { gap: 7px; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card .server-meta .server-filter-chip-v10:has(.platform-badge-v5) { border-color: var(--line-strong); background: color-mix(in srgb,var(--panel-2) 72%,var(--panel)); }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card .server-meta .server-filter-chip-v10 .platform-badge-v5 { border: 0; background: transparent; padding: 0; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card .server-meta .metadata-value-v5::before { content: none; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card .server-tags { gap: 7px; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card .server-tags .server-tag-chip-v10 { min-height: 28px; padding: 4px 9px; border-color: var(--line-soft); background: var(--panel); color: var(--muted); font-size: 11.5px; font-weight: 600; }
+:root body:not(.staff-v3):not([data-staff-page]) :is(.server-filter-chip-v10, .server-tag-chip-v10):is(:hover, :focus-visible) { color: var(--text); border-color: var(--interactive-edge, var(--line-strong)); background: var(--surface-hover); transform: none; }
+:root body:not(.staff-v3):not([data-staff-page]) :is(.server-filter-chip-v10, .server-tag-chip-v10):focus-visible { outline: 2px solid var(--focus, var(--pink-strong)); outline-offset: 2px; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-age-notice-v10 { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 10px; min-height: 44px; padding: 10px 14px; border: 1px solid #d76c7e; border-radius: 10px; background: #82243a; color: #fff; font-size: 13px; font-weight: 650; line-height: 1.45; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-age-notice-v10 :is(strong, b) { color: inherit; font-size: 14px; font-weight: 750; }
+:root[data-theme="light"] body:not(.staff-v3):not([data-staff-page]) .server-age-notice-v10 { border-color: #8d1930; background: #af2741; color: #fff; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-card-bottom > .server-player-v10 { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+:root body:not(.staff-v3):not([data-staff-page]) .server-player-dot-v10 { display: inline-block; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px color-mix(in srgb,var(--success) 16%,transparent); }
+:root body:not(.staff-v3):not([data-staff-page]) .server-player-v10.is-live-v10 .server-player-dot-v10 { animation: browse-live 2.6s ease-in-out infinite; }
 :root body:not(.staff-v3):not([data-staff-page]) .server-card-bottom .server-card-action { color: var(--cyan); font-size: 13px; font-weight: 600; transform: none; }
 :root body:not(.staff-v3):not([data-staff-page]) .server-card-action::after { content: " ↗"; }
 :root body:not(.staff-v3):not([data-staff-page]) .server-shortlist-actions { gap: 4px 8px; padding: 0 16px 8px 108px; border: 0; background: transparent; }
@@ -488,8 +507,8 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
 :root body[data-page="servers"] .directory-layout-v3 { display: block; }
 :root body[data-page="servers"] #server-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
 :root body[data-page="servers"] #server-list > .server-shortlist-card { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
-/* Keep the shared 2px focus outline inside the row's clipping boundary. */
-:root body[data-page="servers"] #server-list > .server-shortlist-card > .server-card:focus-visible { outline-offset: -2px; }
+/* Keep the listing cover link's focus outline inside the row boundary. */
+:root body[data-page="servers"] #server-list > .server-shortlist-card > .server-card .server-card-cover-v10:focus-visible { outline-offset: -2px; }
 /* Skip offscreen listing layout during document-wide modal updates. Keep
    Save/Compare siblings, adverts and overlays outside containment. Auto keeps
    listing text searchable/focusable; remembered sizes replace these estimates.
@@ -520,6 +539,7 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
 :root body[data-page="servers"] #server-list .server-card > .server-meta { grid-area: 3 / 2 / 4 / 3; gap: 4px 10px; }
 :root body[data-page="servers"] #server-list .server-card > .server-tags { grid-area: 4 / 2 / 5 / 3; }
 :root body[data-page="servers"] #server-list .server-card > .server-tags:empty { display: none; }
+:root body[data-page="servers"] #server-list .server-card > .server-age-notice-v10 { grid-area: 5 / 1 / 6 / -1; margin-top: 10px; }
 :root body[data-page="servers"] #server-list .server-card > .server-card-bottom { grid-area: 2 / 3 / 5 / 4; flex-direction: column; align-items: flex-end; justify-content: flex-start; text-align: right; padding: 0; gap: 8px; }
 :root body[data-page="servers"] #server-list .server-card-action { display: inline-flex; align-items: center; min-height: 44px; }
 :root body[data-page="servers"] #server-list .server-shortlist-actions { justify-content: flex-end; padding: 0 4px 12px; gap: 0 4px; }
@@ -552,7 +572,9 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
   :root body:not(.staff-v3):not([data-staff-page]) .server-card > .server-description { grid-column: 1 / -1; grid-row: 3; margin-top: 4px; }
   :root body:not(.staff-v3):not([data-staff-page]) .server-card > .server-meta { grid-column: 1 / -1; grid-row: 4; }
   :root body:not(.staff-v3):not([data-staff-page]) .server-card > .server-tags { grid-column: 1 / -1; grid-row: 5; }
-  :root body:not(.staff-v3):not([data-staff-page]) .server-card > .server-card-bottom { grid-column: 1 / -1; grid-row: 6; }
+  :root body:not(.staff-v3):not([data-staff-page]) .server-card > .server-age-notice-v10 { grid-column: 1 / -1; grid-row: 6; }
+  :root body:not(.staff-v3):not([data-staff-page]) .server-card > .server-card-bottom { grid-column: 1 / -1; grid-row: 7; }
+  :root body:not(.staff-v3):not([data-staff-page]) .server-card:not(:has(> .server-age-notice-v10)) > .server-card-bottom { grid-row: 6; }
   :root body:not(.staff-v3):not([data-staff-page]) .server-shortlist-actions { padding-left: 8px; }
   :root body[data-page="servers"] #server-list .server-card:not(.server-card-skeleton) { grid-template-columns: 64px minmax(0, 1fr); gap: 6px 14px; padding: 20px 0 0; }
   :root body[data-page="servers"] #server-list .server-card .server-card-media { grid-area: 1 / 1 / 3 / 2; width: 64px; height: 64px; }
@@ -561,7 +583,9 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
   :root body[data-page="servers"] #server-list .server-card > .server-description { grid-area: 3 / 1 / 4 / -1; }
   :root body[data-page="servers"] #server-list .server-card > .server-meta { grid-area: 4 / 1 / 5 / -1; }
   :root body[data-page="servers"] #server-list .server-card > .server-tags { grid-area: 5 / 1 / 6 / -1; }
-  :root body[data-page="servers"] #server-list .server-card > .server-card-bottom { grid-area: 6 / 1 / 7 / -1; flex-direction: row; align-items: center; justify-content: space-between; text-align: left; }
+  :root body[data-page="servers"] #server-list .server-card > .server-age-notice-v10 { grid-area: 6 / 1 / 7 / -1; margin-top: 6px; }
+  :root body[data-page="servers"] #server-list .server-card > .server-card-bottom { grid-area: 7 / 1 / 8 / -1; flex-direction: row; align-items: center; justify-content: space-between; text-align: left; }
+  :root body[data-page="servers"] #server-list .server-card:not(:has(> .server-age-notice-v10)) > .server-card-bottom { grid-area: 6 / 1 / 7 / -1; }
   :root body[data-page="servers"] #server-list .server-shortlist-actions { justify-content: flex-start; padding: 0 0 12px; }
 }
 @media (max-width: 420px) {
@@ -631,13 +655,17 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .side-ad-copy-v3.ad-copy-enter-v3 { animation: none; }
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .side-ad-image-v3 { transition: none; }
   :root #server-detail-v3 #server-status-v3.is-live-v3::before,
-  :root #server-detail-v3 .server-info-card-v5.is-live-v3 dd::before { animation: none; }
+  :root #server-detail-v3 .server-info-card-v5.is-live-v3 dd::before,
+  :root body:not(.staff-v3):not([data-staff-page]) .server-player-v10.is-live-v10 .server-player-dot-v10 { animation: none; }
 }
 @media (forced-colors: active) {
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .ad-dot-v3::after { background: ButtonText; }
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .ad-dot-v3[aria-current="true"]::before { background: Highlight; }
   :root #server-detail-v3.server-page-v7 .server-info-card-v5,
   :root #server-detail-v3 .detail-meta-v3 .metadata-value-v5 { border-color: ButtonText; }
+  :root body:not(.staff-v3):not([data-staff-page]) .server-age-notice-v10 { color: ButtonText; background: ButtonFace; border-color: ButtonText; }
+  :root body:not(.staff-v3):not([data-staff-page]) .server-player-dot-v10 { background: Highlight; box-shadow: none; }
+  :root body:not(.staff-v3):not([data-staff-page]) :is(.server-filter-chip-v10, .server-tag-chip-v10) { color: LinkText; border-color: LinkText; background: ButtonFace; }
 }
 .server-listed-by-v7 { display: flex; align-items: center; gap: 10px; margin: 16px 0 0; color: var(--muted); font-size: 13px; }
 .server-listed-by-v7[hidden] { display: none; }

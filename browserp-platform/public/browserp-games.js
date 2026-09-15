@@ -68,8 +68,8 @@
   }
 
   function serverCard(server) {
-    const link = node("a", "server-card"); link.href = `/server/${encodeURIComponent(server.slug || "")}`;
-    window.BrowseRPPlatforms.theme(link, window.BrowseRPPlatforms.idFor(server));
+    const card = node("article", "server-card");
+    window.BrowseRPPlatforms.theme(card, window.BrowseRPPlatforms.idFor(server));
     const media = node("div", "server-card-media");
     const initial = node("span", "server-initials", String(server.name || "RP").trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase());
     const artwork = [...new Set([server.logo_url, server.banner_url].map(value => String(value || "").trim()))]
@@ -85,12 +85,36 @@
     } else media.append(initial);
     const applicationOnly = server.applicationOnly === true;
     const top = node("div", "server-card-top"); top.append(media, node("span", `status${!applicationOnly && server.online ? " online" : ""}`, applicationOnly ? "Community listing" : server.online ? "Online now" : "Status unavailable"));
-    link.append(top, node("h3", "", server.name || "Roleplay server"), node("p", "server-description", server.description || "Open the listing to learn more."), window.BrowseRPPlatforms.metadata(server));
+    card.append(top, node("h3", "", server.name || "Roleplay server"), node("p", "server-description", server.description || "Open the listing to learn more."), window.BrowseRPPlatforms.metadata(server));
     const tags = node("div", "server-tags");
-    (Array.isArray(server.tags) ? server.tags : []).slice(0, 3).forEach(tag => tags.append(node("span", "", tag)));
-    link.append(tags);
-    const bottom = node("div", "server-card-bottom"); bottom.append(node("strong", "", applicationOnly ? "Live player count not provided" : server.online ? `${Number(server.players || 0).toLocaleString()} players${server.count_scope === "network" ? " across the network" : ""}` : "Player count unavailable"), node("span", "server-card-action", "View listing")); link.append(bottom);
-    return window.BrowseRPShortlist?.wrap(link, server) || link;
+    const allTags = Array.isArray(server.tags) ? server.tags : [];
+    allTags.filter(tag => String(tag).trim() && String(tag).trim() !== "18+").slice(0, 3).forEach(tag => {
+      const chip = node("a", "server-tag-chip-v10", tag);
+      chip.href = window.BrowseRPPlatforms.filterHref("feature", tag, server.platform_id);
+      tags.append(chip);
+    });
+    card.append(tags);
+    if (allTags.some(tag => String(tag).trim() === "18+")) card.append(node("div", "server-age-notice-v10", "18+ community · Players must be 18 or older"));
+    const bottom = node("div", "server-card-bottom");
+    const count = node("strong", "server-player-v10", applicationOnly ? "Live player count not provided" : server.online ? `${Number(server.players || 0).toLocaleString()} players${server.count_scope === "network" ? " across the network" : ""}` : "Player count unavailable");
+    const observedAt = Date.parse(server.checked_at || "");
+    const age = Date.now() - observedAt;
+    const validCapacity = server.capacity === null || server.capacity === undefined || server.capacity === ""
+      || (Number.isInteger(Number(server.capacity)) && Number(server.capacity) > 0 && Number(server.players) <= Number(server.capacity));
+    const isLive = !applicationOnly && server.online === true && server.players !== null && server.players !== undefined && server.players !== "" && Number.isInteger(Number(server.players))
+      && Number(server.players) >= 0 && validCapacity && Number.isFinite(observedAt) && age >= -60_000 && age <= 300_000;
+    if (isLive) {
+      count.classList.add("is-live-v10");
+      const dot = node("span", "server-player-dot-v10"); dot.setAttribute("aria-hidden", "true");
+      count.prepend(dot);
+    }
+    bottom.append(count, node("span", "server-card-action", "View listing"));
+    card.append(bottom);
+    const cover = node("a", "server-card-cover-v10");
+    cover.href = `/server/${encodeURIComponent(server.slug || "")}`;
+    cover.setAttribute("aria-label", `View ${String(server.name || "server")} listing`);
+    card.append(cover);
+    return window.BrowseRPShortlist?.wrap(card, server) || card;
   }
 
   function render() {

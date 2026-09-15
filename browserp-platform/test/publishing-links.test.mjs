@@ -75,8 +75,10 @@ test("initial directory cards use logo first, three existing features and honest
     try {
       assert.equal(output.statusCode, 200);
       const card = dom.window.document.querySelector(".server-card");
-      assert.deepEqual([...card.querySelectorAll(".server-tags span")].map(span => span.textContent), row.tags.slice(0, 3));
-      assert.deepEqual([...card.children].map(node => node.matches("h3") ? "title" : node.className), ["server-card-top", "title", "server-description", "server-meta platform-meta-v5", "server-tags", "server-card-bottom"]);
+      assert.deepEqual([...card.querySelectorAll(".server-tags a")].map(link => link.textContent), row.tags.slice(0, 3));
+      assert.deepEqual([...card.children].map(node => node.matches("h3") ? "title" : node.className), ["server-card-top", "title", "server-description", "server-meta platform-meta-v5", "server-tags", "server-card-bottom", "server-card-cover-v10"]);
+      assert.equal(card.querySelector('.server-card-cover-v10').getAttribute('href'), '/server/community');
+      assert.equal(new URL(card.querySelector('.server-meta a[aria-label^="Access:"]').getAttribute('href'), 'https://www.browserp.com').searchParams.get('access'), 'unknown');
       assert.equal(card.querySelector(".server-description").nextElementSibling.className, "server-meta platform-meta-v5");
       assert.equal(card.querySelector(".server-tags").nextElementSibling.className, "server-card-bottom");
       assert.equal(card.querySelector(".status").textContent, "Community listing");
@@ -87,6 +89,21 @@ test("initial directory cards use logo first, three existing features and honest
       if (!row.logo_url && !row.banner_url) assert.equal(card.querySelector(".server-initials").textContent, "AC");
     } finally { dom.window.close(); }
   }
+});
+test('initial directory HTML links metadata to filters and labels an exact 18+ community', async () => {
+  const row = { name: 'Age Restricted RP', slug: 'age-restricted-rp', platform_id: 'fivem', description: 'Character-led play.', region: 'United States', language: 'English', framework: 'Custom framework', access_type: 'allowlisted', tags: ['18+', 'roleplay'] };
+  const output = { setHeader() {}, end(value) { this.body = value; } };
+  await createPublicPageHandler({ data: { directory: async () => ({ servers: [row], total: 1 }) } })({ url: '/servers', method: 'GET', headers: {} }, output);
+  const dom = new JSDOM(output.body);
+  try {
+    const card = dom.window.document.querySelector('.server-card');
+    assert.equal(card.tagName, 'ARTICLE');
+    assert.equal(card.querySelector('.server-age-notice-v10').textContent, '18+ community · Players must be 18 or older');
+    assert.equal(card.querySelector('.server-tags').textContent, 'roleplay');
+    assert.deepEqual([...card.querySelectorAll('.server-meta a')].map(link => new URL(link.getAttribute('href'), 'https://www.browserp.com').searchParams.toString()), [
+      'platform=fivem', 'region=United+States', 'language=English', 'platform=fivem&mode=Custom+framework', 'platform=fivem&access=allowlisted'
+    ]);
+  } finally { dom.window.close(); }
 });
 test("homepage declares BrowseRP once with its canonical publisher identity and loads coordinated touch feedback once", () => {
   const dom = new JSDOM(read("public/index.html"));

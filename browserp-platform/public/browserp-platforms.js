@@ -37,11 +37,21 @@
       ["Access", accessLabel]
     ];
   }
+  function filterHref(key, value, platform = "") {
+    const query = new URLSearchParams();
+    if (platform && key !== "platform" && key !== "region" && key !== "language") query.set("platform", resolve(platform));
+    query.set(key, String(value));
+    return `/servers?${query}`;
+  }
   function metadata(server, engagement = {}) {
     const row = node("div", "server-meta platform-meta-v5");
     entries(server, engagement).forEach(([label, value], index) => {
       if (!value) return;
-      const item = index === 0 ? badge(idFor(server), value) : node("span", "metadata-value-v5", value);
+      const key = index === 0 ? "platform" : ["", "region", "language", "mode", "access"][index];
+      const filterValue = index === 0 ? idFor(server) : index === 4 ? (engagement.accessType || server.access_type) : value;
+      const item = node("a", `server-filter-chip-v10${index ? " metadata-value-v5" : ""}`);
+      item.href = filterHref(key, filterValue, idFor(server));
+      item.append(index === 0 ? badge(idFor(server), value) : document.createTextNode(String(value)));
       item.setAttribute("aria-label", `${label}: ${value}`);
       row.append(item);
     });
@@ -60,5 +70,5 @@
     });
     return list;
   }
-  window.BrowseRPPlatforms = Object.freeze({ names, resolve, idFor, theme, badge, entries, metadata, facts });
+  window.BrowseRPPlatforms = Object.freeze({ names, resolve, idFor, theme, badge, entries, metadata, facts, filterHref });
 })();

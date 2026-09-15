@@ -53,7 +53,9 @@ test("live server refresh preserves clickable tag filters and directory cards co
   const directory = new JSDOM(await page("/servers"));
   try {
     const card = directory.window.document.querySelector(".server-card");
-    assert.equal(card.querySelectorAll(".server-tags span").length, 3);
-    assert.equal(card.querySelectorAll("a").length, 0);
+    assert.equal(card.querySelectorAll(".server-tags a").length, 3);
+    assert.equal(card.tagName, "ARTICLE");
+    assert.equal(card.querySelector('.server-card-cover-v10').getAttribute('href'), '/server/county-rp');
+    assert.equal([...card.querySelectorAll('a')].some(link => link.querySelector('a')), false);
   } finally { directory.window.close(); }
 });

@@ -81,6 +81,16 @@ test("SSR cards remain navigable and comparable without inventing a saveable UUI
   assert.equal(escaped.querySelector("img"), null);
   assert.equal(h.calls.length, 0);
 });
+test("SSR cards with independent filter links still mount Save and Compare once", t => {
+  const h = fixture(t, undefined, { html: '<main><article class="server-card"><h3>Rendered community</h3><div class="server-meta"><a href="/servers?region=United+Kingdom">United Kingdom</a></div><a class="server-card-cover-v10" href="/server/rendered-community" aria-label="View Rendered community listing"></a></article></main>' });
+  h.w.document.dispatchEvent(new h.w.Event('DOMContentLoaded'));
+  const wrapper = h.w.document.querySelector('.server-shortlist-card');
+  assert.equal(h.w.document.querySelectorAll('.server-shortlist-card').length, 1);
+  assert.equal(wrapper.querySelector('.server-card-cover-v10').getAttribute('href'), '/server/rendered-community');
+  assert.equal(wrapper.querySelector('.server-meta a').getAttribute('href'), '/servers?region=United+Kingdom');
+  assert.equal(wrapper.querySelector('.server-shortlist-actions [data-shortlist-compare]').disabled, false);
+  assert.equal(wrapper.querySelector('.server-shortlist-actions [data-shortlist-save]').disabled, true);
+});
 
 test("compare enforces three selections and repaints every duplicate card on model and cross-tab events", async t => {
   const h = fixture(t), cards = [h.add(), h.add(), ...["second", "third", "fourth"].map(slug => h.add({ ...server, slug, name: slug }))];

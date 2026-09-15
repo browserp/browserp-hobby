@@ -114,12 +114,27 @@ function badge(server) { return `<span class="platform-badge-v5" data-platform="
 function entries(server) {
   return [["Game", server.platform_name], ["Region", server.region], ["Language", server.language], [server.platform_id === "roblox" ? "Roblox experience" : "Server setup", server.framework], ["Access", ({ public: "Open to everyone", allowlisted: "Approval required", application: "Application required", whitelisted: "Whitelisted", unknown: "Not confirmed" })[server.access_type] || server.access_type || "Not confirmed"]];
 }
-function metadata(server) { return `<div class="server-meta platform-meta-v5">${entries(server).filter(([, value]) => value).map(([label, value], i) => i ? `<span class="metadata-value-v5" aria-label="${escapeHTML(`${label}: ${value}`)}">${escapeHTML(value)}</span>` : badge(server)).join("")}${server.verified ? '<span class="metadata-value-v5">Owner verified</span>' : ""}</div>`; }
+function cardFilterHref(key, value, platform = "") {
+  const query = new URLSearchParams();
+  if (platform && !["platform", "region", "language"].includes(key)) query.set("platform", platform);
+  query.set(key, String(value));
+  return `/servers?${query}`;
+}
+function metadata(server) {
+  return `<div class="server-meta platform-meta-v5">${entries(server).map(([label, value], index) => {
+    if (!value) return "";
+    const key = ["platform", "region", "language", "mode", "access"][index];
+    const filterValue = index === 0 ? server.platform_id : index === 4 ? (server.access_type || "unknown") : value;
+    return `<a class="server-filter-chip-v10${index ? " metadata-value-v5" : ""}" href="${escapeHTML(cardFilterHref(key, filterValue, server.platform_id))}" aria-label="${escapeHTML(`${label}: ${value}`)}">${index ? escapeHTML(value) : badge(server)}</a>`;
+  }).join("")}${server.verified ? '<span class="metadata-value-v5">Owner verified</span>' : ""}</div>`;
+}
 function facts(server) { return `<dl class="server-info-grid-v5" data-platform="${server.platform_id}">${[...entries(server), ["Player status", server.applicationOnly ? "Live player count not provided" : "Check live status on this page"]].map(([label, value], i) => `<div class="server-info-card-v5${i >= 4 ? " server-info-wide-v5" : ""}"><dt>${label}</dt><dd>${i ? escapeHTML(value || "Not specified") : badge(server)}</dd></div>`).join("")}</dl>`; }
 function initials(server) { return escapeHTML(server.name.split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase() || "RP"); }
 function card(server) {
   const image = server.logo_url || server.banner_url;
-  return `<a class="server-card" href="/server/${server.slug}" data-platform="${server.platform_id}"><div class="server-card-top"><div class="server-card-media">${image ? `<img class="server-card-media-image" src="${escapeHTML(image)}" alt="" loading="lazy" width="96" height="96">` : `<span class="server-initials">${initials(server)}</span>`}</div><span class="status">${server.applicationOnly ? "Community listing" : "Reviewed listing"}</span></div><h3>${escapeHTML(server.name)}</h3><p class="server-description">${escapeHTML(server.description)}</p>${metadata(server)}<div class="server-tags">${server.tags.slice(0, 3).map(tag => `<span>${escapeHTML(tag)}</span>`).join("")}</div><div class="server-card-bottom"><strong>${server.applicationOnly ? "Live player count not provided" : "Check live status"}</strong><span class="server-card-action">View listing</span></div></a>`;
+  const ageRestricted = server.tags.some(tag => tag.trim() === "18+");
+  const tags = server.tags.filter(tag => tag.trim() && tag.trim() !== "18+").slice(0, 3);
+  return `<article class="server-card" data-platform="${server.platform_id}"><div class="server-card-top"><div class="server-card-media">${image ? `<img class="server-card-media-image" src="${escapeHTML(image)}" alt="" loading="lazy" width="96" height="96">` : `<span class="server-initials">${initials(server)}</span>`}</div><span class="status">${server.applicationOnly ? "Community listing" : "Reviewed listing"}</span></div><h3>${escapeHTML(server.name)}</h3><p class="server-description">${escapeHTML(server.description)}</p>${metadata(server)}<div class="server-tags">${tags.map(tag => `<a class="server-tag-chip-v10" href="${escapeHTML(cardFilterHref("feature", tag, server.platform_id))}">${escapeHTML(tag)}</a>`).join("")}</div>${ageRestricted ? '<div class="server-age-notice-v10">18+ community · Players must be 18 or older</div>' : ""}<div class="server-card-bottom"><strong class="server-player-v10">${server.applicationOnly ? "Live player count not provided" : "Check live status"}</strong><span class="server-card-action">View listing</span></div><a class="server-card-cover-v10" href="/server/${server.slug}" aria-label="View ${escapeHTML(server.name)} listing"></a></article>`;
 }
 function gameCard(id) { const [name, line] = games[id]; return `<a class="game-hub-card-v4 game-official-card-v6" data-platform="${id}" href="/games/${id}"><span class="game-hub-mark-v4"><img src="${gameArtwork(id)}" alt="" width="460" height="215" class="game-artwork-v5 game-card-artwork-v5 game-official-artwork-v6"></span><span class="game-hub-copy-v4"><strong>${name}</strong><small>${line}</small></span><b>Explore servers</b></a>`; }
 function navGames(current) { return Object.entries(games).map(([id, [name]]) => `<a class="game-nav-chip-v4${id === current ? " is-selected" : ""}" data-platform="${id}" data-game="${id}" href="/games/${id}"${id === current ? ' aria-current="page"' : ""}><img class="game-artwork-v5 game-nav-mark-v4 game-official-artwork-v6" src="${gameArtwork(id)}" alt="" width="160" height="80">${name}</a>`).join(""); }

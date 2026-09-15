@@ -27,10 +27,8 @@
     } catch { return ""; }
   }
   function card(server) {
-    const link = item("a", "server-card");
-    link.href = `/server/${encodeURIComponent(server.slug)}`;
-    link.setAttribute("aria-label", `View ${server.name || "community"}`);
-    window.BrowseRPPlatforms?.theme?.(link, window.BrowseRPPlatforms.idFor(server));
+    const card = item("article", "server-card");
+    window.BrowseRPPlatforms?.theme?.(card, window.BrowseRPPlatforms.idFor(server));
     const media = item("div", "server-card-media");
     const fallback = item("span", "server-initials", initials(server.name));
     const source = safeImage(server.logo_url) || safeImage(server.banner_url);
@@ -45,17 +43,29 @@
     } else media.append(fallback);
     const top = item("div", "server-card-top");
     top.append(media, item("span", "status", "Reviewed listing"));
-    link.append(top, item("h3", "", server.name || "Roleplay community"));
-    link.append(item("p", "server-description", server.description || "Open the listing to learn more about this community."));
-    if (window.BrowseRPPlatforms?.metadata) link.append(window.BrowseRPPlatforms.metadata(server));
-    else link.append(item("p", "server-meta", [server.platform_name, server.region, server.language].filter(Boolean).join(" · ")));
+    card.append(top, item("h3", "", server.name || "Roleplay community"));
+    card.append(item("p", "server-description", server.description || "Open the listing to learn more about this community."));
+    if (window.BrowseRPPlatforms?.metadata) card.append(window.BrowseRPPlatforms.metadata(server));
+    else card.append(item("p", "server-meta", [server.platform_name, server.region, server.language].filter(Boolean).join(" · ")));
     const serverTags = item("div", "server-tags");
-    (Array.isArray(server.tags) ? server.tags : []).slice(0, 3).forEach(tag => serverTags.append(item("span", "", tag)));
-    link.append(serverTags);
+    const tags = (Array.isArray(server.tags) ? server.tags : []).map(tag => String(tag || "").trim()).filter(Boolean);
+    tags.filter(tag => tag !== "18+").slice(0, 3).forEach(tag => {
+      const query = new URLSearchParams({ feature: tag });
+      const chip = item("a", "server-tag-chip-v10", tag);
+      chip.href = `/servers?${query}`;
+      chip.setAttribute("aria-label", `Browse communities with ${tag}`);
+      serverTags.append(chip);
+    });
+    card.append(serverTags);
+    if (tags.includes("18+")) card.append(item("div", "server-age-notice-v10", "18+ community · Players must be 18 or older"));
     const bottom = item("div", "server-card-bottom");
     bottom.append(item("strong", "", server.region || "View community details"), item("span", "server-card-action", "View listing"));
-    link.append(bottom);
-    return window.BrowseRPShortlist?.wrap?.(link, server) || link;
+    card.append(bottom);
+    const cover = item("a", "server-card-cover-v10");
+    cover.href = `/server/${encodeURIComponent(server.slug)}`;
+    cover.setAttribute("aria-label", `View ${server.name || "community"}`);
+    card.append(cover);
+    return window.BrowseRPShortlist?.wrap?.(card, server) || card;
   }
   function show(mode, message) {
     section.hidden = false;

@@ -28,9 +28,15 @@ for (const kind of ['directory', 'game']) {
   });
   test(`${kind} card keeps the first three feature cues and metadata order without feature counts`, t => {
     const h = fixture(t, kind), card = h.render();
-    assert.deepEqual([...card.querySelectorAll('.server-tags > span')].map(n => n.textContent), server.tags.slice(0, 3));
+    assert.deepEqual([...card.querySelectorAll('.server-tags > a')].map(n => n.textContent), server.tags.slice(0, 3));
     assert.equal(card.querySelector('.server-tags').nextElementSibling.className, 'server-card-bottom');
     assert.deepEqual([...card.querySelector('.platform-meta-v5').children].map(n => n.getAttribute('aria-label')), ['Game: FiveM', 'Region: United Kingdom', 'Language: French', 'Server setup: QBCore', 'Access: Approval required']);
+    const filters = [...card.querySelector('.platform-meta-v5').children].map(n => new URL(n.href).searchParams);
+    assert.deepEqual(filters.map(params => [...params]), [
+      [['platform', 'fivem']], [['region', 'United Kingdom']], [['language', 'French']],
+      [['platform', 'fivem'], ['mode', 'QBCore']], [['platform', 'fivem'], ['access', 'allowlisted']]
+    ]);
+    assert.deepEqual([...card.querySelectorAll('.server-tags > a')].map(n => new URL(n.href).searchParams.get('feature')), server.tags.slice(0, 3));
     const escaped = h.render({ ...server, tags: ['<img src=x onerror=bad()>'], logo_url: 'javascript:bad()', banner_url: '//untrusted.example/image.png' });
     assert.equal(escaped.querySelector('.server-tags img'), null); assert.equal(escaped.querySelector('.server-tags').textContent, '<img src=x onerror=bad()>'); assert.equal(escaped.querySelector('.server-card-media img'), null);
     assert.equal(h.render({ ...server, tags: null }).querySelector('.server-tags').children.length, 0);
@@ -39,6 +45,23 @@ for (const kind of ['directory', 'game']) {
     const card = fixture(t, kind).render({ ...server, platform_id: 'roblox', framework: 'Emergency experience', applicationOnly: true });
     assert.equal(card.querySelector('.status').textContent, 'Community listing'); assert.equal(card.querySelector('.status').classList.contains('online'), false);
     assert.equal(card.querySelector('.server-card-bottom strong').textContent, 'Live player count not provided');
+    assert.equal(card.querySelector('.server-player-dot-v10'), null);
+  });
+  test(`${kind} card makes exact 18+ eligibility clear without treating other age text as a restriction`, t => {
+    const h = fixture(t, kind);
+    const restricted = h.render({ ...server, tags: ['18+', 'roleplay', 'custom cars'] });
+    assert.equal(restricted.querySelector('.server-age-notice-v10').textContent, '18+ community · Players must be 18 or older');
+    assert.deepEqual([...restricted.querySelectorAll('.server-tags > a')].map(n => n.textContent), ['roleplay', 'custom cars']);
+    assert.equal(restricted.querySelector('.server-tags').nextElementSibling.className, 'server-age-notice-v10');
+    assert.equal(h.render({ ...server, tags: ['18+ friendly stories'] }).querySelector('.server-age-notice-v10'), null);
+  });
+  test(`${kind} card pulses a player count only when the observation is fresh`, t => {
+    const h = fixture(t, kind);
+    assert.equal(h.render({ ...server, checked_at: new Date().toISOString() }).querySelectorAll('.server-player-dot-v10').length, 1);
+    assert.equal(h.render({ ...server, checked_at: new Date(Date.now() - 10 * 60_000).toISOString() }).querySelector('.server-player-dot-v10'), null);
+    assert.equal(h.render({ ...server, checked_at: null }).querySelector('.server-player-dot-v10'), null);
+    assert.equal(h.render({ ...server, checked_at: new Date().toISOString(), players: null }).querySelector('.server-player-dot-v10'), null);
+    assert.equal(h.render({ ...server, checked_at: new Date().toISOString(), players: 101 }).querySelector('.server-player-dot-v10'), null);
   });
 }
 for (const [kind, playerText] of [['directory', '41 / 100 players'], ['game', '41 players']]) {
@@ -50,8 +73,12 @@ for (const [kind, playerText] of [['directory', '41 / 100 players'], ['game', '4
       'server-description',
       'server-meta platform-meta-v5',
       'server-tags',
-      'server-card-bottom'
+      'server-card-bottom',
+      'server-card-cover-v10'
     ]);
+    assert.equal(card.tagName, 'ARTICLE');
+    assert.equal(card.querySelector('.server-card-cover-v10').getAttribute('href'), '/server/community-test');
+    assert.equal([...card.querySelectorAll('a')].some(link => link.querySelector('a')), false);
     assert.equal(card.querySelector('.server-description').textContent, server.description);
     assert.equal(card.querySelector('.server-meta').nextElementSibling, card.querySelector('.server-tags'));
     assert.equal(card.querySelector('.server-card-bottom strong').textContent, playerText);

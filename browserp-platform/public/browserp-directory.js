@@ -82,10 +82,8 @@
 
   function serverCard(server, directoryPreview = false) {
     const slug = String(server.slug || "").trim();
-    const card = element("a", "server-card");
+    const card = element("article", "server-card");
     window.BrowseRPPlatforms.theme(card, window.BrowseRPPlatforms.idFor(server));
-    card.href = `/server/${encodeURIComponent(slug)}`;
-    card.setAttribute("aria-label", `View ${String(server.name || "server")}`);
     const media = element("div", "server-card-media");
     const initial = element("span", "server-initials", initials(server.name));
     const artwork = [...new Set([server.logo_url, server.banner_url].map(value => String(value || "").trim()))]
@@ -122,16 +120,38 @@
     }
     card.append(window.BrowseRPPlatforms.metadata(preview));
 
+    const allTags = Array.isArray(server.tags) ? server.tags : [];
     const tags = element("div", "server-tags");
-    (Array.isArray(server.tags) ? server.tags : []).slice(0, directoryPreview ? 2 : 3).forEach((tag) => tags.append(element("span", "", tag)));
+    allTags.filter(tag => String(tag).trim() && String(tag).trim() !== "18+").slice(0, directoryPreview ? 2 : 3).forEach((tag) => {
+      const chip = element("a", "server-tag-chip-v10", tag);
+      chip.href = window.BrowseRPPlatforms.filterHref("feature", tag, server.platform_id);
+      tags.append(chip);
+    });
     card.append(tags);
+    if (allTags.some(tag => String(tag).trim() === "18+")) card.append(element("div", "server-age-notice-v10", "18+ community · Players must be 18 or older"));
 
     const bottom = element("div", "server-card-bottom");
     const playerText = server.applicationOnly ? "Live player count not provided" : server.online
       ? `${Number(server.players || 0).toLocaleString()}${server.capacity ? ` / ${Number(server.capacity).toLocaleString()}` : ""} players${server.count_scope === "network" ? " across the network" : ""}`
       : "Player count unavailable";
-    bottom.append(element("strong", "", playerText), element("span", "server-card-action", "View listing"));
+    const count = element("strong", "server-player-v10", playerText);
+    const observedAt = Date.parse(server.checked_at || "");
+    const age = Date.now() - observedAt;
+    const validCapacity = server.capacity === null || server.capacity === undefined || server.capacity === ""
+      || (Number.isInteger(Number(server.capacity)) && Number(server.capacity) > 0 && Number(server.players) <= Number(server.capacity));
+    const isLive = !server.applicationOnly && server.online === true && server.players !== null && server.players !== undefined && server.players !== "" && Number.isInteger(Number(server.players))
+      && Number(server.players) >= 0 && validCapacity && Number.isFinite(observedAt) && age >= -60_000 && age <= 300_000;
+    if (isLive) {
+      count.classList.add("is-live-v10");
+      const dot = element("span", "server-player-dot-v10"); dot.setAttribute("aria-hidden", "true");
+      count.prepend(dot);
+    }
+    bottom.append(count, element("span", "server-card-action", "View listing"));
     card.append(bottom);
+    const cover = element("a", "server-card-cover-v10");
+    cover.href = `/server/${encodeURIComponent(slug)}`;
+    cover.setAttribute("aria-label", `View ${String(server.name || "server")} listing`);
+    card.append(cover);
     return window.BrowseRPShortlist?.wrap(card, server) || card;
   }
 
