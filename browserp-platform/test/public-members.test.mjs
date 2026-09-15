@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 import { createPublicPageHandler, handlesPublicPage } from "../lib/public-pages.js";
-import { memberProfileVisible, publicMemberView } from "../lib/public-members.js";
+import { memberProfileVisible, publicMemberContents, publicMemberView } from "../lib/public-members.js";
 
 const alice = "01234567-1234-4234-8234-0123456789ab";
 const bob = "11234567-1234-4234-8234-0123456789ab";
@@ -52,6 +52,29 @@ test("approved profile fields and published safe listings survive projection whi
   const view = publicMemberView(profile, { badges: [{ kind: "new_joiner", label: "New Joiner", description: "Joined recently" }], staffRole: null }, [server, { ...server, slug: "adult", age_rating: "adult" }, { ...server, slug: "draft", status: "draft" }]);
   assert.equal(view.bio, ""); assert.equal(view.avatarUrl, null); assert.equal(view.bannerStyle, "aurora");
   assert.deepEqual(view.servers.map(item => item.slug), ["moon-city"]);
+});
+
+test("an account with an archived submission still loads its profile without querying nonexistent server fields", async () => {
+  const profile = { id: alice, username: "gamer_one", display_name: "Gamer One", profile_visibility: "public", joined_at: "2026-09-01T10:00:00Z" };
+  const databaseColumns = new Set(["slug", "name", "description", "region", "language", "framework", "access_type", "platform_id", "status", "age_rating", "verified"]);
+  let queriedServers = false;
+  const restClient = async path => {
+    if (path.startsWith("server_submissions?")) return [{ id: bob }];
+    if (!path.startsWith("servers?")) throw new Error(`Unexpected query: ${path}`);
+    queriedServers = true;
+    const params = new URL(path, "https://database.example").searchParams;
+    for (const field of params.get("select").split(",")) {
+      if (!databaseColumns.has(field)) throw new Error(`Missing database column: ${field}`);
+    }
+    assert.equal(params.get("source_submission_id"), `in.(${bob})`);
+    assert.equal(params.get("status"), "eq.published");
+    assert.equal(params.get("age_rating"), "neq.adult");
+    return [];
+  };
+  const view = await publicMemberContents(profile, { restClient, rpcClient: async () => ({ badges: [], staffRole: "" }) });
+  assert.equal(queriedServers, true);
+  assert.equal(view.username, "gamer_one");
+  assert.deepEqual(view.servers, []);
 });
 
 test("a submitted listing links to its public member while imported listings keep no invented creator", async () => {

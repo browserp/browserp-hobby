@@ -553,7 +553,7 @@
     void window.BrowseRPMemberConnections?.init({ api, root: connections });
     const bannerPicker = make("section", "profile-banner-picker-v7");
     const bannerHeading = make("div", "profile-banner-heading-v7");
-    bannerHeading.append(make("h3", "", "Profile banner"), make("p", "", "Choose a BrowseRP design for your public member page."));
+    bannerHeading.append(make("h3", "", "Profile banner"), make("p", "", "Choose a BrowseRP design for your profile."));
     const bannerPreview = make("div", "member-banner-v7 profile-banner-preview-v7"); bannerPreview.dataset.banner = "aurora"; bannerPreview.setAttribute("aria-hidden", "true");
     const bannerChoices = make("div", "profile-banner-choices-v7");
     [["Aurora", "aurora"], ["Afterglow", "afterglow"], ["Midnight", "midnight"], ["Daybreak", "daybreak"]].forEach(([label, style]) => {
@@ -570,7 +570,7 @@
       });
       bannerChoices.append(choice);
     });
-    const publicLink = link("/profile", "button-v3 button-quiet-v3", "View my member page"); publicLink.hidden = true;
+    const publicLink = link("/profile", "button-v3 button-quiet-v3", "My profile"); publicLink.hidden = true;
     bannerPicker.append(bannerHeading, bannerPreview, bannerChoices, publicLink); section.append(bannerPicker);
     void api("/api/me/banner").then(result => {
       const style = ["aurora", "afterglow", "midnight", "daybreak"].includes(result.bannerStyle) ? result.bannerStyle : "aurora";
