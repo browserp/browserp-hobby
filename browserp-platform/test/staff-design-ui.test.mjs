@@ -97,3 +97,24 @@ test("staff CSS parses complete selectors and preserves native hidden control di
     } });
   }
 });
+
+test("staff text-fit rules keep long operational copy readable and full tables scrollable", t => {
+  const css = read("staff-design.css");
+  const ast = csstree.parse(css);
+  const media = [];
+  csstree.walk(ast, { visit: "Atrule", enter(rule) {
+    if (rule.name === "media") media.push(csstree.generate(rule.prelude));
+  } });
+  assert.ok(media.some(query => query.includes("max-width:920px") && query.includes("min-width:761px")), "tablet composition rule");
+  for (const width of [760, 460, 360]) {
+    assert.ok(media.some(query => query.includes(`max-width:${width}px`)), `${width}px fit rule`);
+  }
+  const dom = new JSDOM(`<style>${css}</style><body class="staff-v3"><nav class="staff-nav-v3"><a href="/staffpanel/overview">A very long workspace label</a></nav><div class="staff-work-copy"><strong>A long review title withoutspaces0123456789</strong></div><div class="staff-table-wrap-v3"><table class="staff-table-v3"><tbody><tr><td>A long member ID withoutspaces0123456789</td></tr></tbody></table></div>`);
+  t.after(() => dom.window.close());
+  const { document } = dom.window;
+  const style = selector => dom.window.getComputedStyle(document.querySelector(selector));
+  assert.equal(style(".staff-nav-v3 a").whiteSpace, "normal");
+  assert.equal(style(".staff-work-copy strong").overflowWrap, "anywhere");
+  assert.equal(style(".staff-table-wrap-v3").overflowX, "auto");
+  assert.equal(style(".staff-table-v3 td").overflowWrap, "anywhere");
+});

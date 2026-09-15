@@ -365,14 +365,10 @@ body.staff-v3 {
 
 /* Attention pass: a purposeful console silhouette, not another stack of boxes. */
 body.staff-v3 {
-  --staff-hero-start: color-mix(in srgb, var(--pink) 15%, var(--panel));
-  --staff-hero-end: color-mix(in srgb, var(--cyan) 8%, var(--panel));
-  background:
-    radial-gradient(ellipse 700px 480px at 100% -120px, color-mix(in srgb, var(--pink) 12%, transparent), transparent 75%),
-    var(--bg);
+  background: var(--bg);
 }
 .staff-v3 .staff-sidebar-v3 {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--pink) 4%, var(--bg-soft)), var(--bg-soft) 220px);
+  background: var(--bg-soft);
   border-right: 1px solid var(--line);
   box-shadow: 8px 0 32px rgb(0 0 0 / .035);
 }
@@ -408,23 +404,11 @@ body.staff-v3 {
   min-height: 170px;
   padding: clamp(26px, 3vw, 42px);
   border-color: color-mix(in srgb, var(--pink) 25%, var(--line));
-  background: linear-gradient(115deg, var(--staff-hero-start), var(--panel) 57%, var(--staff-hero-end));
-  box-shadow: var(--shadow-md);
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
 }
 .staff-v3 .staff-top-v3::before { width: 5px; background: var(--pink); }
-.staff-v3 .staff-top-v3::after {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  z-index: -1;
-  width: clamp(200px, 23vw, 330px);
-  aspect-ratio: 1;
-  right: -48px;
-  top: -155px;
-  border: 1px solid color-mix(in srgb, var(--pink) 34%, transparent);
-  border-radius: 50%;
-  box-shadow: 0 0 0 34px color-mix(in srgb, var(--pink) 5%, transparent), 0 0 0 84px color-mix(in srgb, var(--cyan) 3%, transparent);
-}
+.staff-v3 .staff-top-v3::after { display: none; }
 .staff-v3 .staff-top-v3 h1 {
   font-size: clamp(36px, 3.35vw, 50px);
   line-height: 1.03;
@@ -440,10 +424,10 @@ body.staff-v3 {
   min-height: 132px;
   padding: 19px 21px;
   border-top-width: 4px;
-  background: linear-gradient(125deg, var(--panel), color-mix(in srgb, var(--pink) 5%, var(--panel)));
+  background: var(--panel);
 }
-.staff-v3 .staff-priority:nth-child(2) { background: linear-gradient(125deg, var(--panel), color-mix(in srgb, var(--cyan) 6%, var(--panel))); }
-.staff-v3 .staff-priority:nth-child(3) { background: linear-gradient(125deg, var(--panel), color-mix(in srgb, var(--violet) 7%, var(--panel))); }
+.staff-v3 .staff-priority:nth-child(2),
+.staff-v3 .staff-priority:nth-child(3) { background: var(--panel); }
 .staff-v3 .staff-priority > span { font-size: 12px; letter-spacing: .015em; }
 .staff-v3 .staff-priority strong { font-size: clamp(34px, 3.4vw, 44px); line-height: 1; }
 .staff-v3 .overview-work-grid,
@@ -485,24 +469,15 @@ body.staff-v3 {
 /* The signed-out / MFA surface is intentionally welcoming but unmistakably staff-only. */
 .staff-v3 .staff-login-v3 {
   min-height: 100dvh;
-  background:
-    radial-gradient(ellipse 660px 480px at 50% -12%, color-mix(in srgb, var(--pink) 14%, transparent), transparent 75%),
-    radial-gradient(ellipse 700px 550px at 100% 100%, color-mix(in srgb, var(--cyan) 8%, transparent), transparent 75%),
-    var(--bg);
+  background: var(--bg);
 }
-.staff-v3 .staff-shell-v3:has(> .staff-login-card-v3) {
-  background:
-    radial-gradient(ellipse 700px 500px at 50% -15%, color-mix(in srgb, var(--pink) 12%, transparent), transparent 78%),
-    var(--bg);
-}
+.staff-v3 .staff-shell-v3:has(> .staff-login-card-v3) { background: var(--bg); }
 .staff-v3 .staff-login-card-v3 {
   width: min(100%, 600px);
   padding: clamp(26px, 4.5vw, 46px);
   border: 1px solid color-mix(in srgb, var(--pink) 26%, var(--line));
   border-radius: 20px;
-  background:
-    radial-gradient(circle 250px at 100% -20%, color-mix(in srgb, var(--pink) 13%, transparent), transparent),
-    linear-gradient(150deg, var(--panel), color-mix(in srgb, var(--cyan) 3%, var(--panel)));
+  background: var(--panel);
   box-shadow: var(--shadow-lg);
 }
 .staff-v3 .staff-login-card-v3::before { height: 5px; background: var(--pink); }
@@ -516,16 +491,120 @@ body.staff-v3 {
 .staff-v3 .staff-access-actions-v3 .button-v3 { min-height: 48px; }
 .staff-v3 #staff-access-pending { color: var(--copy); font-size: 14px; }
 
+/* Dense operational copy stays readable, with natural wrapping before long IDs break. */
+.staff-v3 :is(.staff-main-v3, .staff-top-v3, .staff-panel-heading, .staff-section-head-v3, .overview-section-heading,
+  .moderation-section-head, .moderation-record-title, .staff-work-copy, .staff-claim-heading,
+  .staff-role-catalogue-v3, .staff-role-request-v3, .overview-role-grid, .overview-role-card,
+  .staff-duty-primary, .staff-duty-block, .staff-duty-card, .staff-table-wrap-v3) { min-width: 0; }
+.staff-v3 :is(.staff-nav-v3, .staff-local-nav, .staff-section-nav) a,
+.staff-v3 .staff-scrapers-menu > summary {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+  line-height: 1.35;
+}
+.staff-v3 :is(.staff-nav-group-v3, .staff-workspace-label, .staff-appearance-label) {
+  overflow-wrap: break-word;
+  line-height: 1.4;
+}
+.staff-v3 :is(.staff-top-v3, .staff-panel-heading, .staff-section-head-v3, .overview-section-heading,
+  .moderation-section-head) :is(h1, h2, h3, p) { overflow-wrap: break-word; }
+.staff-v3 :is(.staff-priority > span, .staff-priority small, .overview-metric span, .overview-metric small,
+  .moderation-summary-card span, .moderation-summary-card p) {
+  line-height: 1.45;
+  overflow-wrap: break-word;
+}
+.staff-v3 :is(.staff-work-copy strong, .staff-work-copy > span, .staff-activity-row strong,
+  .staff-activity-row span, .moderation-record h3, .moderation-record-meta,
+  .moderation-record-copy, .staff-claim-heading h3, .staff-claims-copy,
+  .fivem-item > div:first-child, .staff-role-request-v3 h4,
+  .staff-role-request-meta-v3, .overview-role-card h3, .overview-role-card p,
+  .overview-role-permission, .permission-item-v3 span) { overflow-wrap: anywhere; }
+.staff-v3 .staff-work-row { align-items: flex-start; }
+.staff-v3 .staff-work-copy { flex: 1 1 220px; }
+.staff-v3 .staff-work-row .staff-state-v3 { flex: 0 1 auto; white-space: normal; overflow-wrap: anywhere; }
+.staff-v3 .staff-row-arrow { align-self: center; }
+.staff-v3 :is(.staff-panel-heading, .staff-section-head-v3, .overview-section-heading) > div:first-child {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.staff-v3 .staff-section-head-v3 { flex-wrap: wrap; gap: 12px 20px; }
+.staff-v3 .staff-section-head-v3 .button-v3 { max-width: 100%; }
+.staff-v3 :is(.staff-panel-links, .staff-management-links) a { overflow-wrap: break-word; }
+.staff-v3 :is(.staff-row-actions-v3, .staff-claims-actions, .moderation-record-actions,
+  .staff-role-request-actions-v3, .fivem-actions) { min-width: 0; }
+.staff-v3 :is(.staff-row-actions-v3, .staff-claims-actions, .moderation-record-actions,
+  .staff-role-request-actions-v3, .fivem-actions) .button-v3 {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-align: center;
+}
+.staff-v3 :is(.staff-form-v3, .adverts-form, .publishing-form-v6, .staff-role-request-form-v3,
+  .moderation-editor-fields, .staff-claims-filters) { min-width: 0; }
+.staff-v3 :is(.field-v3, .moderation-search-label, .staff-duty-field,
+  .permission-item-v3) { min-width: 0; }
+.staff-v3 :is(.field-v3, .moderation-search-label, .staff-duty-field,
+  .permission-item-v3) > :is(span, label) { overflow-wrap: break-word; }
+.staff-v3 :is(input, textarea, select):where(:not([type="checkbox"]):not([type="radio"]):not([type="range"])) {
+  max-width: 100%;
+}
+.staff-v3 .staff-table-wrap-v3 {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.staff-v3 .staff-table-v3 th { white-space: nowrap; letter-spacing: .04em; }
+.staff-v3 .staff-table-v3 td { overflow-wrap: anywhere; }
+.staff-v3 .staff-table-v3 td :is(a, span, strong, small) { overflow-wrap: anywhere; }
+.staff-v3 :is(.staff-state-v3, .moderation-state, .staff-duty-pill,
+  .staff-duty-availability) { max-width: 100%; }
+.staff-v3 .staff-duty-people li > div { flex: 1 1 170px; }
+.staff-v3 .staff-duty-people li :is(strong, small) { overflow-wrap: anywhere; }
+
+@media (max-width: 920px) and (min-width: 761px) {
+  .staff-v3 :is(.overview-role-grid, .staff-form-grid-v3) { grid-template-columns: minmax(0, 1fr); }
+  .staff-v3 .overview-role-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .staff-v3 .staff-top-v3 { min-height: 0; }
+}
+
 @media (max-width: 760px) {
   .staff-v3 .staff-sidebar-v3 { box-shadow: none; }
   .staff-v3 .staff-top-v3 { min-height: 0; padding: 23px 20px; box-shadow: var(--shadow-sm); }
-  .staff-v3 .staff-top-v3::after { width: 210px; right: -95px; top: -110px; }
+  .staff-v3 .staff-top-v3::after { display: none; }
   .staff-v3 .staff-top-v3 h1 { font-size: clamp(31px, 8vw, 40px); }
   .staff-v3 .staff-top-v3 p { font-size: 14px; }
   .staff-v3 .staff-priority { min-height: 118px; padding: 15px 14px; }
   .staff-v3 .staff-priority strong { font-size: 31px; }
   .staff-v3 .staff-work-row { min-height: 58px; }
   .staff-v3 .staff-login-card-v3 { border-radius: 16px; }
+  .staff-v3 .staff-mobile-bar-v3 .logo-lockup-v3 { min-width: 0; flex: 0 1 160px; }
+  .staff-v3 .staff-mobile-bar-v3 .logo-full-v5 { max-width: 100%; height: auto; }
+  .staff-v3 :is(.staff-panel-heading, .staff-section-head-v3, .overview-section-heading) { gap: 12px; }
+  .staff-v3 :is(.staff-panel-heading, .staff-section-head-v3, .overview-section-heading) > .button-v3 { margin: 0; }
+  .staff-v3 .staff-work-copy { flex-basis: 100%; }
+  .staff-v3 .staff-work-row .staff-state-v3 { margin-left: 0; }
+  .staff-v3 .staff-duty-people li { flex-wrap: wrap; }
+}
+@media (max-width: 460px) {
+  .staff-v3 .staff-main-v3 { padding-inline: 14px; }
+  .staff-v3 .staff-top-v3 { padding: 21px 17px; }
+  .staff-v3 :is(.overview-livebar, .moderation-livebar) { flex-wrap: wrap; gap: 8px 12px; }
+  .staff-v3 :is(.overview-live-state, .moderation-livebar p) { flex: 1 1 100%; min-width: 0; }
+  .staff-v3 :is(.overview-work-grid, .moderation-control-grid, .overview-module,
+    .overview-users, .staff-section-v3, .staff-fivem, .staff-claims, .refresh-health) { max-width: 100%; }
+  .staff-v3 .staff-priorities { gap: 9px; }
+  .staff-v3 .staff-priority { padding: 14px 12px; }
+  .staff-v3 .staff-priority strong { font-size: 30px; }
+  .staff-v3 :is(.staff-claims-actions, .moderation-record-actions, .fivem-actions) .button-v3 { flex: 1 1 130px; }
+  .staff-v3 .staff-role-request-actions-v3 .button-v3 { flex: 1 1 150px; }
+}
+@media (max-width: 360px) {
+  .staff-v3 .staff-mobile-bar-v3 .logo-lockup-v3 { flex-basis: 144px; }
+  .staff-v3 #staff-menu-v3 { min-width: 94px; width: 94px; }
+  .staff-v3 .staff-priorities { grid-template-columns: minmax(0, 1fr); }
+  .staff-v3 .staff-priority { min-height: 100px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .staff-v3 .staff-work-row { transition: none; }

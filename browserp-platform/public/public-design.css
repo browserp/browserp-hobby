@@ -940,3 +940,44 @@ body:not(.staff-v3):not([data-staff-page]) {
 @media (forced-colors: active), print {
   :root body:not(.staff-v3):not([data-staff-page]) main :is(.public-intro-surface-v7, .finder-heading, .journal-article-head-v6)::after { content: none; }
 }
+
+/* First-visit choices remain complete, but sit beside the page rather than
+   covering the headline and search that a new visitor came to use. */
+:root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-v3 {
+  left: auto; right: 20px; bottom: 20px; width: min(460px, calc(100% - 40px));
+  max-height: min(72dvh, 620px); margin: 0; padding: 22px;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px;
+  align-items: start; border: 1px solid var(--line-strong); border-top: 4px solid var(--pink);
+  border-radius: 18px; background: var(--surface-raised); box-shadow: var(--shadow-lg);
+  scrollbar-width: thin;
+}
+:root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-v3[hidden] { display: none; }
+:root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-v3 h2 {
+  font-size: 21px; letter-spacing: -.03em;
+}
+:root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-actions-v3 {
+  position: sticky; bottom: -22px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px; padding: 14px 0 0; border-top: 1px solid var(--line-soft);
+  background: var(--surface-raised);
+}
+:root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-actions-v3 > :last-child {
+  grid-column: 1 / -1;
+}
+:root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-actions-v3 .button-v3 {
+  min-height: 44px; padding-inline: 10px; font-size: 13px; line-height: 1.35;
+}
+@media (max-width: 640px) {
+  :root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-v3 {
+    left: 12px; right: 12px; bottom: 12px; width: calc(100% - 24px);
+    max-height: 58dvh; padding: 16px; gap: 10px;
+  }
+  :root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-actions-v3 {
+    bottom: -16px; padding-top: 10px;
+  }
+}
+@media (forced-colors: active) {
+  :root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-v3,
+  :root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-actions-v3 {
+    background: Canvas; border-color: CanvasText; box-shadow: none;
+  }
+}
