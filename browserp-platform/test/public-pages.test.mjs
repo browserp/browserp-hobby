@@ -323,7 +323,7 @@ test("real public data reader uses anonymous published RPCs and never forwards m
   globalThis.fetch = async (url, options) => {
     calls.push({ url: String(url), options });
     const name = String(url).split("/").at(-1);
-    const values = { search_server_directory: [server], public_server_import_details: [], public_server_engagement: { accessType: "public", cfxJoinUrl: "https://cfx.re/join/abcdef", comments: [], secret: "PRIVATE_ENGAGEMENT" }, search_public_directory: { total: 1, servers: [server] }, public_blog_index: [post] };
+    const values = { search_server_directory: [server], public_server_import_details: [], public_server_engagement: { accessType: "public", cfxJoinUrl: "https://cfx.re/join/abcdef", comments: [], secret: "PRIVATE_ENGAGEMENT" }, public_server_creator: null, search_public_directory: { total: 1, servers: [server] }, public_blog_index: [post] };
     assert.ok(Object.hasOwn(values, name), `Unexpected source request: ${name}`);
     return new Response(JSON.stringify(values[name]), { status: 200, headers: { "Content-Type": "application/json" } });
   };

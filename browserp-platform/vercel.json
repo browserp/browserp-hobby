@@ -11,7 +11,7 @@
   "functions": {
     "api/router.js": {
       "maxDuration": 60,
-      "includeFiles": "{docs/launch-curation/*-candidates.json,public/{server,servers,game,blog,blog-post,404,staffpanel,staffpanel-*}.html}"
+      "includeFiles": "{docs/launch-curation/*-candidates.json,public/{server,servers,game,blog,blog-post,user,404,staffpanel,staffpanel-*}.html}"
     },
     "api/servers.js": {
       "maxDuration": 30
@@ -36,6 +36,10 @@
     {
       "source": "/api/public/profile-avatar",
       "destination": "/api/router?_route=public/profile-avatar"
+    },
+    {
+      "source": "/api/public/profile-report",
+      "destination": "/api/router?_route=public/profile-report"
     },
     {
       "source": "/api/health",
@@ -188,6 +192,10 @@
     {
       "source": "/api/me/profile",
       "destination": "/api/router?_route=me/profile"
+    },
+    {
+      "source": "/api/me/banner",
+      "destination": "/api/router?_route=me/banner"
     },
     {
       "source": "/api/me/avatar",
@@ -364,6 +372,10 @@
     {
       "source": "/server/:slug",
       "destination": "/api/router?_route=public/document&_path=/server/:slug"
+    },
+    {
+      "source": "/user/:username",
+      "destination": "/api/router?_route=public/document&_path=/user/:username"
     },
     {
       "source": "/game",

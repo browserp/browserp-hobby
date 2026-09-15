@@ -639,3 +639,8 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
   :root #server-detail-v3.server-page-v7 .server-info-card-v5,
   :root #server-detail-v3 .detail-meta-v3 .metadata-value-v5 { border-color: ButtonText; }
 }
+.server-listed-by-v7 { display: flex; align-items: center; gap: 10px; margin: 16px 0 0; color: var(--muted); font-size: 13px; }
+.server-listed-by-v7[hidden] { display: none; }
+.server-listed-by-v7 a { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; color: var(--text); }
+.server-listed-by-v7 a:hover strong { color: var(--pink-strong); text-decoration: underline; text-underline-offset: 3px; }
+.server-listed-by-v7 a img,.server-listed-by-v7 a span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; object-fit: cover; background: var(--panel-2); color: var(--pink-strong); font-size: 12px; font-weight: 750; }

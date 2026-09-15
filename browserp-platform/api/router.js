@@ -223,6 +223,37 @@ function providerRoute(provider) {
 
 const routes = {
   "public/document": publicPage,
+  "public/profile-report": endpoint("POST", async (req, res) => {
+    assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true });
+    await rateLimit(req, "profile-report", 5, 900);
+    const body = await readBody(req, 8 * 1024);
+    const username = String(body.username || "").trim().toLowerCase();
+    const category = String(body.category || "").trim();
+    const details = sanitizePlainText(body.details, 2000);
+    if (!/^[a-z0-9_]{3,30}$/.test(username)
+      || !["impersonation", "harassment", "unsafe-content", "misleading"].includes(category)
+      || details.length < 20) throw Object.assign(new Error("Check the report details."), { status: 400 });
+    const result = await rpc("member_report_profile", {
+      p_username: username, p_category: category, p_details: details
+    }, session.accessToken);
+    return ok(res, { result }, 201);
+  }),
+  "me/banner": endpoint(["GET", "POST"], async (req, res) => {
+    if (req.method === "POST" && contentWritePaused(res)) return;
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true });
+    if (!await currentAccountSession(session)) throw Object.assign(new Error("Your sign-in expired. Sign in again to continue."), { status: 401 });
+    if (req.method === "GET") {
+      const profile = (await rest(`profiles?select=username,banner_style,profile_visibility&id=eq.${session.user.id}&limit=1`, { useSecret: true }))?.[0];
+      return ok(res, { username: profile?.username || "", bannerStyle: profile?.banner_style || "aurora", visibility: profile?.profile_visibility || "private" });
+    }
+    await rateLimit(req, "profile-banner", 12, 900);
+    const body = await readBody(req, 2048);
+    const style = String(body.style || "").trim();
+    if (!["aurora", "afterglow", "midnight", "daybreak"].includes(style)) throw Object.assign(new Error("Choose a BrowseRP banner style."), { status: 400 });
+    return ok(res, await rpc("member_set_banner_style", { p_style: style }, session.accessToken));
+  }),
   "staff/document": staffDocument,
   health,
   "auth/providers": endpoint("GET", async (_req, res) => {

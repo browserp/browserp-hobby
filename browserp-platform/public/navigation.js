@@ -10,6 +10,28 @@
     if (savedTheme === "light" || savedTheme === "dark") initialTheme = savedTheme;
   } catch { /* Dark remains the public default. */ }
   document.documentElement.dataset.theme = initialTheme;
+  const motionKey = "browserp-brand-motion";
+  let motionEnabled = true;
+  try { motionEnabled = localStorage.getItem(motionKey) !== "off"; } catch { /* Motion stays optional for this visit. */ }
+  function setBrandMotion(enabled) {
+    motionEnabled = Boolean(enabled);
+    document.documentElement.dataset.brandMotion = motionEnabled ? "on" : "off";
+    try { localStorage.setItem(motionKey, motionEnabled ? "on" : "off"); } catch { /* This visit still respects the choice. */ }
+    window.dispatchEvent(new CustomEvent("browserp:brand-motion-changed", { detail: { enabled: motionEnabled } }));
+    return motionEnabled;
+  }
+  document.documentElement.dataset.brandMotion = motionEnabled ? "on" : "off";
+  window.BrowseRPBrandMotion = Object.freeze({ get: () => motionEnabled, set: setBrandMotion, mountSettings(root) {
+    if (!root || root.dataset.brandMotionMounted) return;
+    root.dataset.brandMotionMounted = "true";
+    const label = document.createElement("label"); label.className = "brand-motion-setting-v7";
+    const input = document.createElement("input"); input.type = "checkbox"; input.checked = motionEnabled;
+    const copy = document.createElement("span"); copy.textContent = "Animated BrowseRP branding";
+    const hint = document.createElement("small"); hint.textContent = "Moves the dark-mode banner pattern and logo. Your device's reduced-motion setting always takes priority.";
+    label.append(input, copy, hint); root.append(label);
+    input.addEventListener("change", () => setBrandMotion(input.checked));
+    window.addEventListener("browserp:brand-motion-changed", () => { input.checked = motionEnabled; });
+  } });
   const header = document.querySelector(".header-v3, [data-site-header]");
   const nav = header?.querySelector("nav");
   if (!nav || header.dataset.publicNavigation) return;
@@ -91,8 +113,15 @@
   toggle.append(icon("menu"), make("span", "", "Menu"));
   nav.replaceChildren(brand(), inlineLinks, inlineActions, toggle);
   let brandParked = false;
-  const syncBrandMotion = () => { nav.dataset.brandMotion = document.hidden || brandParked ? "paused" : "running"; };
+  const syncBrandMotion = () => {
+    const pattern = document.querySelector(".home-hero-pattern");
+    nav.dataset.brandMotion = document.hidden || brandParked || !motionEnabled || document.documentElement.dataset.theme === "light"
+      || pattern?.dataset.motion === "paused" ? "paused" : "running";
+  };
   document.addEventListener("visibilitychange", syncBrandMotion);
+  window.addEventListener("browserp:brand-motion-changed", syncBrandMotion);
+  window.addEventListener("browserp:wordmark-motion", syncBrandMotion);
+  window.addEventListener("browserp:theme-changed", syncBrandMotion);
   window.addEventListener("pagehide", () => { brandParked = true; syncBrandMotion(); });
   window.addEventListener("pageshow", () => { brandParked = false; syncBrandMotion(); });
   syncBrandMotion();
@@ -183,6 +212,12 @@
     themeChoices.append(button);
   });
   appearance.append(appearanceHeading, themeChoices);
+  const motionChoice = make("label", "navigation-motion-choice-v7");
+  const motionInput = make("input"); motionInput.type = "checkbox"; motionInput.checked = motionEnabled;
+  motionChoice.append(motionInput, make("span", "", "Animated branding"));
+  motionInput.addEventListener("change", () => setBrandMotion(motionInput.checked));
+  window.addEventListener("browserp:brand-motion-changed", () => { motionInput.checked = motionEnabled; });
+  appearance.append(motionChoice);
   window.addEventListener("browserp:theme-changed", event => {
     themeChoices.querySelectorAll("[data-theme-choice-v6]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.themeChoiceV6 === event.detail?.theme)));
   });

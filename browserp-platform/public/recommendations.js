@@ -225,6 +225,15 @@
   }
   model.mountSettings = root => root?.querySelectorAll("[data-recommendation-settings]").forEach(controls);
   let preferenceDialog, preferenceStatus, preferenceTrigger;
+  function brandingChoice() {
+    const label = el("label", "brand-motion-setting-v7");
+    const input = document.createElement("input"); input.type = "checkbox";
+    input.checked = window.BrowseRPBrandMotion?.get() !== false;
+    label.append(input, el("span", "", "Animated BrowseRP branding"));
+    input.addEventListener("change", () => window.BrowseRPBrandMotion?.set(input.checked));
+    window.addEventListener("browserp:brand-motion-changed", () => { input.checked = window.BrowseRPBrandMotion?.get() !== false; });
+    return label;
+  }
   function preferenceState() {
     if (preferenceStatus) preferenceStatus.textContent = consentStatus();
   }
@@ -268,7 +277,7 @@
         if (preferenceTrigger?.isConnected && !preferenceTrigger.closest("[hidden]")) preferenceTrigger.focus();
         else document.querySelector("[data-cookie-preferences]")?.focus({ preventScroll: true });
       });
-      preferenceDialog.append(heading, intro, detail, scope, preferenceStatus, choices, links, close);
+      preferenceDialog.append(heading, intro, detail, scope, preferenceStatus, choices, brandingChoice(), links, close);
       document.body.append(preferenceDialog);
     }
     preferenceTrigger = trigger;
@@ -325,7 +334,7 @@
     window.addEventListener("browserp:theme-changed", event => {
       if (event.detail?.theme === "light" || event.detail?.theme === "dark") update(event.detail.theme);
     });
-    group.append(title, choices, hint);
+    group.append(title, choices, brandingChoice(), hint);
     return group;
   }
   function cookiePrompt() {
@@ -379,10 +388,9 @@
     const id = ++request; controller?.abort(); results.replaceChildren(); results.hidden = true;
     const enabled = model.read().enabled;
     const area = model.preferred(routeGame);
-    section.querySelector("[data-enable-recommendations]").hidden = enabled;
-    section.querySelector("[data-reset-recommendations]").hidden = !enabled;
-    message.textContent = !enabled ? consent.getState().phase !== "ready" ? consentStatus() : "Optional recommendations. Viewing history stays on this browser." : !area ? "Explore a few servers to get recommendations here." : `More ${area} communities, based on the servers you viewed on BrowseRP.`;
+    section.hidden = true;
     if (!enabled || !area) return;
+    message.textContent = `More ${area} communities, based on the servers you viewed on BrowseRP.`;
     controller = new AbortController();
     const currentController = controller;
     const timeout = setTimeout(() => currentController.abort(), 10000);
@@ -394,6 +402,7 @@
       if (id !== request || !model.read().enabled) return;
       const servers = (Array.isArray(data.servers) ? data.servers : []).filter(server => region(server.region) === area && (!routeGame || server.platform_id === routeGame)).slice(0, 3);
       window.BrowseRPDirectory?.render(results, servers); results.hidden = !servers.length;
+      section.hidden = !servers.length;
       results.querySelectorAll(".reveal-v3").forEach(card => card.classList.add("is-revealed"));
       if (!servers.length) message.textContent = `No published ${area} communities are available right now. Your usual directory is unchanged.`;
     } catch { if (id === request) message.textContent = "Recommendations are taking a moment. You can still browse the full directory below."; }
@@ -412,13 +421,8 @@
     const head = el("div", "recommendation-heading"); const copy = el("div", "");
     copy.append(el("h2", "", "For you"));
     message = el("p", "recommendation-message"); copy.append(message);
-    const actions = el("div", "recommendation-actions");
-    const enable = el("button", "button-v3 button-secondary-v3", "Enable recommendations"); enable.type = "button"; enable.dataset.enableRecommendations = "";
-    enable.addEventListener("click", () => { const okay = chooseRecommendations(true); changed(); if (!okay) message.textContent = "Your browser could not save this preference. Check your discovery preferences before continuing."; });
-    const reset = el("button", "button-v3 button-quiet-v3", "Turn off & clear"); reset.type = "button"; reset.dataset.resetRecommendations = "";
-    reset.addEventListener("click", () => { const okay = chooseRecommendations(false); changed(); if (!okay) message.textContent = "Your browser could not clear this preference. Please clear BrowseRP site data in browser settings."; });
-    actions.append(enable, reset); head.append(copy, actions);
-    results = el("div", "recommendation-results"); results.hidden = true; inner.append(head, results); section.append(inner);
+    head.append(copy);
+    results = el("div", "recommendation-results"); results.hidden = true; inner.append(head, results); section.append(inner); section.hidden = true;
     const directory = page === "servers" ? document.querySelector(".directory-layout-v3") : null;
     if (directory) directory.after(section);
     else anchor.before(section);

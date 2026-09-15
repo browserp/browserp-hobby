@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { pathToFileURL } from "node:url";
 import { createBrowseRPServer } from "./dev-server.mjs";
 import { createPublicPageHandler, handlesPublicPage } from "./lib/public-pages.js";
+import { publicMemberByUsername, publicCreatorForServer } from "./lib/public-members.js";
 
 const ORIGIN = "https://www.browserp.com";
 const PUBLIC_READS = new Set([
@@ -36,8 +37,12 @@ export function createPublicPreviewHandler({ fetchPublic = fetch, localHandler =
       const server = data.servers.find(item => item.slug === slug);
       if (!server) return null;
       const connect = data.engagement?.cfxJoinUrl || "";
-      return { server: { ...server, access_type: data.engagement?.accessType || server.access_type }, connect: /^https:\/\/cfx\.re\/join\/[a-z0-9]{6,12}\/?$/i.test(connect) ? connect : "" };
+      const creator = process.env.SUPABASE_PUBLISHABLE_KEY ? await publicCreatorForServer(slug).catch(() => null) : null;
+      return { server: { ...server, access_type: data.engagement?.accessType || server.access_type }, creator, connect: /^https:\/\/cfx\.re\/join\/[a-z0-9]{6,12}\/?$/i.test(connect) ? connect : "" };
     },
+    // A profile needs the server-only approved-field projection. An unconfigured
+    // read-only preview gives a safe 404 until the hosted runtime is available.
+    member: process.env.SUPABASE_SECRET_KEY ? publicMemberByUsername : async () => null,
     async posts(slug) {
       let data;
       try { data = await json(`/api/public/blogs${slug ? `?${new URLSearchParams({ slug })}` : ""}`); }

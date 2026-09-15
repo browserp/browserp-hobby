@@ -11,15 +11,15 @@
 /* Two prepainted halos crossfade around the crisp original artwork. */
 .public-nav-v6 > .navigation-brand-v6::before,
 .public-nav-v6 > .navigation-brand-v6::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url("/assets/browserp-logo-v5.png?v=20260908") center / contain no-repeat; transform-origin: left center; opacity: .03; }
-.public-nav-v6 > .navigation-brand-v6::before { filter: drop-shadow(0 0 3px rgb(236 79 166 / .6)) drop-shadow(0 0 9px rgb(236 79 166 / .36)); animation: navigation-brand-glow 12s ease-in-out infinite; }
-.public-nav-v6 > .navigation-brand-v6::after { filter: drop-shadow(0 0 3px rgb(89 205 224 / .55)) drop-shadow(0 0 9px rgb(89 205 224 / .32)); animation: navigation-brand-glow-cyan 12s ease-in-out infinite; }
-.public-nav-v6 > .navigation-brand-v6 img { transform-origin: left center; animation: navigation-brand-breathe 12s ease-in-out infinite; }
+.public-nav-v6 > .navigation-brand-v6::before { filter: drop-shadow(0 0 3px rgb(236 79 166 / .6)) drop-shadow(0 0 9px rgb(236 79 166 / .36)); animation: navigation-brand-glow 18.4s ease-in-out infinite; }
+.public-nav-v6 > .navigation-brand-v6::after { z-index: 1; background: linear-gradient(100deg,transparent 28%,rgb(236 79 166 / .18) 43%,rgb(155 108 255 / .24) 51%,rgb(89 205 224 / .19) 59%,transparent 74%) 0 0 / 260% 100%; mask: url("/assets/browserp-logo-v5.png?v=20260908") center / contain no-repeat; -webkit-mask: url("/assets/browserp-logo-v5.png?v=20260908") center / contain no-repeat; animation: navigation-brand-wave 18.4s linear infinite; }
+.public-nav-v6 > .navigation-brand-v6 img { transform-origin: left center; animation: navigation-brand-breathe 18.4s ease-in-out infinite; }
 .public-nav-v6[data-brand-motion="paused"] > .navigation-brand-v6 img,
 .public-nav-v6[data-brand-motion="paused"] > .navigation-brand-v6::before,
 .public-nav-v6[data-brand-motion="paused"] > .navigation-brand-v6::after { animation-play-state: paused; }
 @keyframes navigation-brand-breathe { 0%, 50%, 100% { transform: scale(1); opacity: .96; } 25%, 75% { transform: scale(1.018); opacity: 1; } }
 @keyframes navigation-brand-glow { 0%, 50%, 100% { transform: scale(1); opacity: .03; } 25% { transform: scale(1.018); opacity: .6; } 75% { transform: scale(1.018); opacity: .03; } }
-@keyframes navigation-brand-glow-cyan { 0%, 50%, 100% { transform: scale(1); opacity: .03; } 25% { transform: scale(1.018); opacity: .03; } 75% { transform: scale(1.018); opacity: .5; } }
+@keyframes navigation-brand-wave { 0%, 10%, 75%, 100% { background-position: 100% 0; opacity: 0; } 23% { opacity: .65; } 42% { background-position: 0 0; opacity: .5; } 55% { opacity: 0; } }
 .public-nav-links-v6 { display: flex; align-items: center; gap: 3px; margin-right: auto; }
 .public-nav-links-v6 > a { position: relative; padding: 12px; color: var(--copy); font-size: 14px; font-weight: 650; transition: color .2s ease; }
 .public-nav-links-v6 > a::after { content: ""; position: absolute; height: 2px; bottom: 5px; inset-inline: 12px; background: var(--pink); border-radius: 2px; transform: scaleX(0); transition: transform .2s ease; }
@@ -86,6 +86,13 @@
 .navigation-theme-choice-v6 { min-height: 44px; padding: 8px 12px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 700; cursor: pointer; }
 .navigation-theme-choice-v6:hover { color: var(--text); background: var(--panel-2); }
 .navigation-theme-choice-v6[aria-pressed="true"] { color: var(--cyan); border-color: var(--interactive-edge); background: var(--selection-surface); box-shadow: inset 0 1px rgb(255 255 255 / .08); }
+.navigation-motion-choice-v7,.brand-motion-setting-v7 { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-height: 44px; color: var(--copy); font-size: 13px; font-weight: 650; cursor: pointer; }
+.navigation-motion-choice-v7 input,.brand-motion-setting-v7 input { width: 18px; height: 18px; accent-color: var(--pink); }
+.brand-motion-setting-v7 { padding: 16px 0; }
+.brand-motion-setting-v7 small { width: 100%; padding-left: 28px; color: var(--muted); font-size: 12px; font-weight: 450; line-height: 1.5; }
+:root[data-brand-motion="off"] .public-nav-v6 > .navigation-brand-v6 img,
+:root[data-brand-motion="off"] .public-nav-v6 > .navigation-brand-v6::before,
+:root[data-brand-motion="off"] .public-nav-v6 > .navigation-brand-v6::after { animation: none !important; }
 .navigation-account-v6 { border-top: 1px solid var(--line-soft); padding-top: 18px; }
 .navigation-account-v6 > .button-v3 { width: 100%; border-radius: var(--radius-sm); }
 .navigation-account-v6 .account-trigger-v3 { width: 100%; padding: 9px 12px; border-radius: var(--radius-sm); text-align: left; }

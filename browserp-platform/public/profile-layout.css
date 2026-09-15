@@ -77,3 +77,13 @@ body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage > .shell {
   .profile-picture-editor-v3 .portal-help { grid-column: 1 / -1; }
   .profile-picture-editor-v3 .button { padding-inline: 12px; font-size: 13px; }
 }
+.profile-banner-picker-v7 { margin-top: 32px; padding-top: 30px; border-top: 1px solid var(--line); }
+.profile-banner-heading-v7 h3 { margin: 0 0 5px; font-size: 20px; }
+.profile-banner-heading-v7 p { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
+.profile-banner-preview-v7 { width: 100%; height: clamp(110px,18vw,170px); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.profile-banner-choices-v7 { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 18px; }
+.profile-banner-choice-v7 { min-height: 44px; padding: 8px 16px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--panel); color: var(--copy); font-size: 13px; font-weight: 650; cursor: pointer; }
+.profile-banner-choice-v7:hover { border-color: var(--pink); color: var(--text); }
+.profile-banner-choice-v7[aria-pressed="true"] { border-color: var(--pink); color: var(--text); background: color-mix(in srgb,var(--pink) 10%,var(--panel)); }
+.profile-banner-choice-v7:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+.profile-brand-motion-v7 { margin-top: 12px; border-top: 1px solid var(--line); }

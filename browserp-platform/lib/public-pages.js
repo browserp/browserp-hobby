@@ -7,6 +7,7 @@ import { enrichImportedServers } from "./fivem-workflow.js";
 import { enrichMinecraftServers } from "./minecraft-workflow.js";
 import { enrichRobloxApplications, publicRobloxDetails } from "./roblox-listings.js";
 import { documentSecurityHeaders } from "./document-policy.js";
+import { publicMemberByUsername, publicCreatorForServer, publicUsernamePattern } from "./public-members.js";
 
 const ORIGIN = "https://www.browserp.com";
 const model = globalThis.BrowseRPDiscovery;
@@ -129,6 +130,12 @@ function pagination(path, filters, total) {
 export function articleBody(body) { return globalThis.BrowseRPContent.articleHTML(body); }
 function date(value) { return value ? new Intl.DateTimeFormat("en-GB", { dateStyle: "long", timeZone: "UTC" }).format(new Date(value)) : ""; }
 function postCard(post, featured) { return `<article class="journal-card-v6${featured ? " journal-card-featured-v6" : ""}"><div class="journal-card-meta-v6"><span>${featured ? "Latest story" : "BrowseRP journal"}</span><time datetime="${escapeHTML(post.publishedAt)}">${escapeHTML(date(post.publishedAt))}</time></div><h3><a href="/blog/${post.slug}">${escapeHTML(post.title)}</a></h3><p>${escapeHTML(post.excerpt)}</p><a href="/blog/${post.slug}" class="journal-read-v6" aria-label="Read ${escapeHTML(post.title)}">Read article<span>↗</span></a></article>`; }
+function memberBadge(item) { return `<span class="member-badge-v7" tabindex="0" data-kind="${escapeHTML(item.kind)}" data-description="${escapeHTML(item.description)}" aria-label="${escapeHTML(`${item.label}: ${item.description}`)}">${escapeHTML(item.label)}</span>`; }
+function listedBy(creator) {
+  if (!creator || !publicUsernamePattern.test(creator.username || "")) return "";
+  const avatar = creator.avatarUrl ? `<img src="${escapeHTML(creator.avatarUrl)}" alt="" width="28" height="28">` : `<span aria-hidden="true">${escapeHTML(creator.displayName.slice(0, 1).toUpperCase())}</span>`;
+  return `<span>Listed by</span><a href="/user/${creator.username}">${avatar}<strong>${escapeHTML(creator.displayName)}</strong></a>`;
+}
 const notFound = () => Object.assign(new Error("Public page not found"), { status: 404, code: "PUBLIC_PAGE_NOT_FOUND" });
 
 const source = {
@@ -143,8 +150,10 @@ const source = {
     if (!row) return null;
     const [enriched, engagement] = await Promise.all([enrichRobloxApplications(await enrichMinecraftServers(await enrichImportedServers([row], { refresh: false }), { refresh: false })), rpc("public_server_engagement", { p_slug: slug })]);
     const server = publicServer({ ...enriched[0], access_type: engagement?.accessType || row.access_type });
-    return { server, connect: /^https:\/\/cfx\.re\/join\/[a-z0-9]{6,12}\/?$/i.test(engagement?.cfxJoinUrl || "") ? engagement.cfxJoinUrl : "" };
+    const creator = await publicCreatorForServer(slug).catch(() => null);
+    return { server, creator, connect: /^https:\/\/cfx\.re\/join\/[a-z0-9]{6,12}\/?$/i.test(engagement?.cfxJoinUrl || "") ? engagement.cfxJoinUrl : "" };
   },
+  member: publicMemberByUsername,
   async posts(slug) {
     try {
       const data = await rpc(slug ? "public_blog_post" : "public_blog_index", slug ? { p_slug: slug } : {});
@@ -158,7 +167,7 @@ export function publicPagePath(url) {
   if (url.pathname === "/api/router") { const path = url.searchParams.get("_path"); return typeof path === "string" && path.startsWith("/") ? path : ""; }
   return url.pathname;
 }
-export function handlesPublicPage(path) { return ["/servers", "/games", "/game", "/server", "/blog", "/blog-post", "/sitemap.xml"].includes(path) || /^\/(?:games|server|blog)\/[^/]+$/.test(path); }
+export function handlesPublicPage(path) { return ["/servers", "/games", "/game", "/server", "/blog", "/blog-post", "/sitemap.xml"].includes(path) || /^\/(?:games|server|blog|user)\/[^/]+$/.test(path); }
 
 export function createPublicPageHandler({ data = source, readTemplate = template } = {}) {
   return async function publicPage(req, res) {
@@ -259,6 +268,25 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         const trail = game ? [["Games", "/games"], [pageName, canonicalPath]] : [[pageName, canonicalPath]];
         return send(200, head(html, { title, description, path: canonicalPath, noindex, ...(game ? { image: gameImage(id) } : {}), ...(!coming ? { structured: { "@context": "https://schema.org", "@type": "CollectionPage", name: pageName, url: ORIGIN + canonicalPath, isPartOf: website, breadcrumb: breadcrumbs(trail) } } : {}) }));
       }
+      if (path.startsWith("/user/")) {
+        const username = path.slice(6); if (!publicUsernamePattern.test(username)) throw notFound();
+        const member = await data.member(username, req, res);
+        if (!member || member.username !== username) throw notFound();
+        res.setHeader("Cache-Control", "private, no-store");
+        let html = await readTemplate("user");
+        const avatar = member.avatarUrl ? `<img src="${escapeHTML(member.avatarUrl)}" alt="" width="98" height="98">`
+          : escapeHTML(member.displayName.slice(0, 2).toUpperCase());
+        const posted = (member.servers || []).map(publicServer).filter(Boolean);
+        const joined = member.joinedAt ? `Joined ${new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(member.joinedAt))}` : "";
+        const badges = [...(member.staffRole ? [{ kind: "staff_role", label: member.staffRole, description: `Active BrowseRP staff role: ${member.staffRole}.` }] : []), ...(member.badges || [])];
+        for (const [id, value] of [["member-name-v7", escapeHTML(member.displayName)], ["member-handle-v7", `@${escapeHTML(username)}`], ["member-joined-v7", escapeHTML(joined)], ["member-avatar-v7", avatar], ["member-bio-v7", escapeHTML(member.bio || "No bio yet.")], ["member-badges-v7", badges.map(memberBadge).join("")], ["member-server-grid-v7", posted.map(card).join("")]]) html = slot(html, id, value);
+        html = attribute(html, "member-banner-v7", { "data-banner": member.bannerStyle });
+        html = attribute(html, "member-empty-v7", { hidden: posted.length ? "" : false });
+        html = attribute(html, "member-report-form-v7", { "data-username": username });
+        const publiclyVisible = member.visibility === "public";
+        return send(200, head(html, { title: `${member.displayName} (@${username}) — BrowseRP`, description: `${member.displayName}'s BrowseRP member profile and posted roleplay communities.`, path: publiclyVisible ? path : null, noindex: !publiclyVisible,
+          ...(publiclyVisible ? { structured: { "@context": "https://schema.org", "@type": "ProfilePage", name: `${member.displayName} on BrowseRP`, url: ORIGIN + path, mainEntity: { "@type": "Person", name: member.displayName, identifier: username }, isPartOf: website } } : {}) }));
+      }
       if (path.startsWith("/server/")) {
         const slug = path.slice(8); if (!validSlug(slug)) throw notFound();
         const result = await data.server(slug); const server = publicServer(result?.server); if (!server || server.slug !== slug) throw notFound();
@@ -270,6 +298,8 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         const joining = server.roblox ? `<section class="server-community-joining" id="server-roblox-joining"><h2>How to join</h2><p>${escapeHTML(server.roblox.joiningInstructions)}</p><a class="button-v3 button-secondary-v3" href="${escapeHTML(server.roblox.experienceUrl)}" target="_blank" rel="noopener noreferrer">View Roblox experience</a></section>` : server.minecraft_address ? `<div class="server-minecraft-address" id="server-minecraft-address"><strong>Minecraft ${server.minecraft_edition === "bedrock" ? "Bedrock" : "Java"} address</strong><code>${escapeHTML(server.minecraft_address)}</code></div>` : "";
         if (server.banner_url) html = html.replace('class="detail-banner-v3">', `class="detail-banner-v3 has-server-artwork-v3"><img class="server-import-banner-v3" src="${escapeHTML(server.banner_url)}" alt="">`);
         if (joining) html = slot(html, "server-joining-v7", joining);
+        const creator = listedBy(result.creator);
+        if (creator) { html = slot(html, "server-listed-by-v7", creator); html = attribute(html, "server-listed-by-v7", { hidden: false }); }
         const image = serverImage(server);
         return send(200, head(html, { title: `${server.name} — ${server.platform_name} roleplay — BrowseRP`, description: `${server.name}: ${server.description}`.slice(0, 180), path, image, structured: { "@context": "https://schema.org", "@type": "WebPage", name: server.name, url: ORIGIN + path, description: server.description.slice(0, 500), isPartOf: website, primaryImageOfPage: { "@type": "ImageObject", url: image.url }, breadcrumb: breadcrumbs([["Games", "/games"], [server.platform_name, `/games/${server.platform_id}`], [server.name, path]]) } }));
       }

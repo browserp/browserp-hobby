@@ -121,11 +121,12 @@ test("turning recommendations off clears visible results and rejects an in-fligh
   let finish; const calls = [];
   const h = await browser(t, (url, options) => { calls.push({ url, options }); return new Promise(resolve => { finish = resolve; }); });
   assert.equal(calls.length, 1); assert.match(calls[0].url, /region=United\+Kingdom/);
-  h.$("[data-reset-recommendations]").click();
+  h.w.BrowseRPRecommendations.enable(false); h.w.dispatchEvent(new h.w.Event("browserp:recommendations-changed"));
   assert.equal(h.w.localStorage.getItem(key), null);
   assert.equal(calls[0].options.signal.aborted, true);
   finish(response([server("late-private-preference")])); await tick();
   assert.equal(h.$(".recommendation-results").hidden, true);
+  assert.equal(h.$(".recommendations-v7").hidden, true);
   assert.doesNotMatch(h.$(".recommendations-v7").textContent, /late-private-preference/);
 });
 
@@ -135,7 +136,7 @@ test("clearing enabled history invalidates any outstanding recommendation respon
   h.w.BrowseRPRecommendations.clear(); h.w.dispatchEvent(new h.w.Event("browserp:recommendations-changed"));
   finish(response([server("late-old-history")])); await tick();
   assert.equal(h.$(".recommendation-results").childElementCount, 0);
-  assert.match(h.$(".recommendation-message").textContent, /Explore a few servers/);
+  assert.equal(h.$(".recommendations-v7").hidden, true);
 });
 
 test("staff pages never activate browsing history or issue recommendation requests", async t => {
@@ -153,7 +154,8 @@ test("clearing all site storage in another tab immediately removes displayed rec
   await tick();
   assert.equal(h.$(".recommendation-results").hidden, true);
   assert.equal(h.$(".recommendation-results").childElementCount, 0);
-  assert.equal(h.$("[data-enable-recommendations]").hidden, false);
+  assert.equal(h.$(".recommendations-v7").hidden, true);
+  assert.equal(h.$("[data-enable-recommendations]"), null);
 });
 
 test("settings mount after asynchronous profile rendering and stay operable without duplicate controls", async t => {
@@ -173,8 +175,11 @@ test("settings mount after asynchronous profile rendering and stay operable with
 
 test("a storage failure during opt-out is explained rather than claiming history was cleared", async t => {
   const h = await browser(t, async () => response([]));
+  const settings = h.w.document.createElement("div"); settings.dataset.recommendationSettings = ""; h.w.document.body.append(settings);
+  h.w.BrowseRPRecommendations.mountSettings(h.w.document.body);
   h.w.Storage.prototype.removeItem = () => { throw Error("Storage is unavailable"); };
-  h.$("[data-reset-recommendations]").click();
-  assert.match(h.$(".recommendation-message").textContent, /could not clear/);
+  const input = settings.querySelector("input[type=checkbox]"); input.checked = false; input.dispatchEvent(new h.w.Event("change"));
+  assert.match(settings.querySelector("[role=status]").textContent, /could not save this choice or clear its history/);
+  assert.equal(h.$(".recommendations-v7").hidden, true);
   assert.equal(h.w.BrowseRPRecommendations.read().enabled, false);
 });

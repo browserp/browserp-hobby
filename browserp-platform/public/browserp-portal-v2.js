@@ -551,8 +551,37 @@
     const settings = make("div", "profile-settings-layout-v7");
     const connections = make("section"); connections.setAttribute("aria-label", "Connected accounts"); settings.append(form, connections); section.append(settings);
     void window.BrowseRPMemberConnections?.init({ api, root: connections });
+    const bannerPicker = make("section", "profile-banner-picker-v7");
+    const bannerHeading = make("div", "profile-banner-heading-v7");
+    bannerHeading.append(make("h3", "", "Profile banner"), make("p", "", "Choose a BrowseRP design for your public member page."));
+    const bannerPreview = make("div", "member-banner-v7 profile-banner-preview-v7"); bannerPreview.dataset.banner = "aurora"; bannerPreview.setAttribute("aria-hidden", "true");
+    const bannerChoices = make("div", "profile-banner-choices-v7");
+    [["Aurora", "aurora"], ["Afterglow", "afterglow"], ["Midnight", "midnight"], ["Daybreak", "daybreak"]].forEach(([label, style]) => {
+      const choice = button("profile-banner-choice-v7", label); choice.type = "button"; choice.dataset.bannerChoice = style;
+      choice.addEventListener("click", async () => {
+        bannerChoices.querySelectorAll("button").forEach(item => { item.disabled = true; });
+        try {
+          await api("/api/me/banner", { method: "POST", body: JSON.stringify({ style }) });
+          bannerPreview.dataset.banner = style;
+          bannerChoices.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item.dataset.bannerChoice === style)));
+          toast("Profile banner updated.");
+        } catch (error) { toast(error.message, "error"); }
+        finally { bannerChoices.querySelectorAll("button").forEach(item => { item.disabled = false; }); }
+      });
+      bannerChoices.append(choice);
+    });
+    const publicLink = link("/profile", "button-v3 button-quiet-v3", "View my member page"); publicLink.hidden = true;
+    bannerPicker.append(bannerHeading, bannerPreview, bannerChoices, publicLink); section.append(bannerPicker);
+    void api("/api/me/banner").then(result => {
+      const style = ["aurora", "afterglow", "midnight", "daybreak"].includes(result.bannerStyle) ? result.bannerStyle : "aurora";
+      bannerPreview.dataset.banner = style;
+      bannerChoices.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item.dataset.bannerChoice === style)));
+      if (/^[a-z0-9_]{3,30}$/.test(result.username || "")) { publicLink.href = `/user/${result.username}`; publicLink.hidden = false; }
+    }).catch(() => { bannerHeading.lastElementChild.textContent = "Banner choices are unavailable right now. Try again in a moment."; });
     const recommendations = make("div"); recommendations.dataset.recommendationSettings = ""; section.append(recommendations);
     window.BrowseRPRecommendations?.mountSettings(section);
+    const brandMotion = make("div"); brandMotion.className = "profile-brand-motion-v7"; section.append(brandMotion);
+    window.BrowseRPBrandMotion?.mountSettings(brandMotion);
     return section;
   }
 

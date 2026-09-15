@@ -115,8 +115,11 @@
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     let inView = false, parked = false, canvasRenderer = null, disposed = false;
     const sync = () => {
-      pattern.dataset.motion = document.documentElement.dataset.theme !== "light" && inView && !parked && !document.hidden && !reduced.matches ? "running" : "paused";
+      const previous = pattern.dataset.motion;
+      pattern.dataset.motion = document.documentElement.dataset.theme !== "light" && window.BrowseRPBrandMotion?.get() !== false
+        && inView && !parked && !document.hidden && !reduced.matches ? "running" : "paused";
       canvasRenderer?.setMotion(pattern.dataset.motion === "running", reduced.matches);
+      if (previous !== pattern.dataset.motion) window.dispatchEvent(new Event("browserp:wordmark-motion"));
     };
     const size = () => {
       const rect = pattern.getBoundingClientRect();
@@ -156,6 +159,7 @@
     document.addEventListener("visibilitychange", sync);
     // Light mode hides the pattern; remeasure when returning to dark before resuming.
     window.addEventListener("browserp:theme-changed", size);
+    window.addEventListener("browserp:brand-motion-changed", sync);
     reduced.addEventListener?.("change", sync);
     const hide = () => { parked = true; sync(); };
     const show = () => { parked = false; size(); };
@@ -169,6 +173,7 @@
       window.removeEventListener("resize", size);
       document.removeEventListener("visibilitychange", sync);
       window.removeEventListener("browserp:theme-changed", size);
+      window.removeEventListener("browserp:brand-motion-changed", sync);
       reduced.removeEventListener?.("change", sync);
       window.removeEventListener("pagehide", hide); window.removeEventListener("pageshow", show);
       clearWordmarks = () => {};
