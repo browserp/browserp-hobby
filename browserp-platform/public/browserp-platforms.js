@@ -37,12 +37,32 @@
       ["Access", accessLabel]
     ];
   }
-  function metadata(server, engagement = {}) {
+  const categoryKeys = ["platform", "region", "language", "mode", "access"];
+  function categoryHref(server, engagement, index) {
+    const platform = idFor(server);
+    const raw = index === 0 ? platform : index === 4 ? (engagement.accessType || server.access_type) : entries(server, engagement)[index][1];
+    if (!raw || String(raw).trim().toLowerCase() === "unknown" || (index === 0 && platform === "other")) return "";
+    const query = new URLSearchParams();
+    if (index > 2 && platform !== "other") query.set("platform", platform);
+    query.set(categoryKeys[index], String(raw));
+    return `/servers?${query}`;
+  }
+  function categoryLink(server, engagement, index, label, value, className) {
+    const href = categoryHref(server, engagement, index);
+    if (!href) return null;
+    const link = node("a", className);
+    link.href = href;
+    link.setAttribute("aria-label", `Browse servers filtered by ${label}: ${value}`);
+    link.append(index === 0 ? badge(idFor(server), value) : document.createTextNode(String(value)));
+    return link;
+  }
+  function metadata(server, engagement = {}, linked = false) {
     const row = node("div", "server-meta platform-meta-v5");
     entries(server, engagement).forEach(([label, value], index) => {
       if (!value) return;
-      const item = index === 0 ? badge(idFor(server), value) : node("span", "metadata-value-v5", value);
-      item.setAttribute("aria-label", `${label}: ${value}`);
+      const item = (linked && categoryLink(server, engagement, index, label, value, `server-category-link-v10${index ? " metadata-value-v5" : " game-category-link-v10"}`))
+        || (index === 0 ? badge(idFor(server), value) : node("span", "metadata-value-v5", value));
+      if (!item.href) item.setAttribute("aria-label", `${label}: ${value}`);
       row.append(item);
     });
     if (server.verified) row.append(node("span", "metadata-value-v5", "Owner verified"));
@@ -54,7 +74,8 @@
     rows.forEach(([label, value], index) => {
       const card = node("div", `server-info-card-v5${index >= 4 ? " server-info-wide-v5" : ""}`);
       const detail = node("dd", "");
-      detail.append(index === 0 ? badge(idFor(server), value) : document.createTextNode(String(value || "Not specified")));
+      detail.append(index < 5 && value && categoryLink(server, engagement, index, label, value, "server-fact-link-v10")
+        || (index === 0 ? badge(idFor(server), value) : document.createTextNode(String(value || "Not specified"))));
       card.append(node("dt", "", label), detail);
       list.append(card);
     });

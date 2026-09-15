@@ -620,8 +620,20 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
 :root #server-detail-v3 .detail-heading-copy-launch-v6 { display: grid; gap: 14px; }
 :root #server-detail-v3 .detail-title-launch-v6 .eyebrow-v3 { margin: 0; }
 :root #server-detail-v3 .detail-meta-v3 .platform-meta-v5 { gap: 8px; }
-:root #server-detail-v3 .detail-meta-v3 .metadata-value-v5 { display: inline-flex; align-items: center; max-width: 100%; min-height: 31px; padding: 5px 10px; border: 1px solid rgb(255 255 255 / .23); border-radius: 8px; background: rgb(13 10 20 / .38); color: #fff; font-size: 12px; font-weight: 650; line-height: 1.25; }
+:root #server-detail-v3 .detail-meta-v3 .metadata-value-v5 { display: inline-flex; align-items: center; max-width: 100%; min-height: 32px; padding: 6px 11px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--panel-2); color: var(--copy); font-size: 12px; font-weight: 650; line-height: 1.25; }
 :root #server-detail-v3 .detail-meta-v3 .metadata-value-v5::before { content: none; }
+:root body #server-detail-v3.server-page-v7 .detail-title-v3.detail-title-launch-v6,
+:root body #server-detail-v3.server-page-v7 .detail-title-v3.detail-title-launch-v6 :is(h1,.detail-meta-v3) { color: var(--text); }
+:root #server-detail-v3 .detail-meta-v3 .server-category-link-v10 { text-decoration: none; cursor: pointer; touch-action: manipulation; transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease; }
+:root #server-detail-v3 .detail-meta-v3 .server-category-link-v10.metadata-value-v5:is(:hover,:focus-visible) { border-color: var(--pink); background: color-mix(in srgb,var(--pink) 10%,var(--panel-2)); color: var(--text); box-shadow: 0 3px 12px rgb(0 0 0 / .12); }
+:root #server-detail-v3 .detail-meta-v3 .game-category-link-v10 { display: inline-flex; border-radius: 8px; }
+:root #server-detail-v3 .detail-meta-v3 .game-category-link-v10:is(:hover,:focus-visible) .platform-badge-v5 { border-color: var(--platform-accent); background: color-mix(in srgb,var(--platform-accent) 16%,var(--panel)); box-shadow: 0 3px 12px rgb(0 0 0 / .12); }
+:root #server-detail-v3 .detail-meta-v3 .server-category-link-v10:focus-visible,
+:root #server-detail-v3 .server-info-card-v5 .server-fact-link-v10:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+:root #server-detail-v3 .server-info-card-v5 .server-fact-link-v10 { display: inline-flex; align-items: center; gap: 7px; max-width: 100%; color: var(--text); border-bottom: 1px solid transparent; text-decoration: none; cursor: pointer; transition: color 160ms ease, border-color 160ms ease; }
+:root #server-detail-v3 .server-info-card-v5 .server-fact-link-v10::after { content: "↗"; color: var(--pink); font-size: 12px; }
+:root #server-detail-v3 .server-info-card-v5 .server-fact-link-v10:is(:hover,:focus-visible) { color: var(--pink-strong); border-color: currentColor; }
+:root #server-detail-v3 .server-info-card-v5:has(.server-fact-link-v10):hover { border-color: var(--pink); }
 :root #server-detail-v3.server-page-v7 .server-info-grid-v5 { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin: 16px 0 0; }
 :root #server-detail-v3.server-page-v7 .server-info-card-v5 { min-height: 80px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 7px; padding: 12px; border: 1px solid var(--line-soft); border-radius: 10px; background: color-mix(in srgb,var(--panel-2) 42%,var(--panel)); box-shadow: none; }
 :root #server-detail-v3.server-page-v7 .server-info-card-v5:last-child { border-bottom: 1px solid var(--line-soft); }
@@ -637,6 +649,8 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
 
 @media (max-width: 520px) {
   :root #server-detail-v3 .detail-heading-copy-launch-v6 { gap: 11px; }
+  :root #server-detail-v3.server-page-v7 .server-info-grid-v5 { grid-template-columns: minmax(0,1fr); }
+  :root #server-detail-v3.server-page-v7 .server-info-wide-v5 { grid-column: 1; }
   :root body[data-page="servers"] .directory-discovery .smart-filter-toggle { min-width: 104px; padding: 0 12px; }
 }
 @media (prefers-reduced-motion: reduce) {

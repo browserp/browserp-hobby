@@ -9,7 +9,7 @@ class Element {
   append(...children) { this.children.push(...children); }
   setAttribute(key, value) { this.attributes[key] = value; }
 }
-const context = { window: {}, document: { createElement: (tag) => new Element(tag), createElementNS: (_, tag) => new Element(tag), createTextNode: (text) => ({ textContent: text }) } };
+const context = { window: {}, URLSearchParams, document: { createElement: (tag) => new Element(tag), createElementNS: (_, tag) => new Element(tag), createTextNode: (text) => ({ textContent: text }) } };
 vm.runInNewContext(read("public/browserp-platforms.js"), context);
 const platforms = context.window.BrowseRPPlatforms;
 const text = (node) => node.textContent + (node.children || []).map(text).join("");

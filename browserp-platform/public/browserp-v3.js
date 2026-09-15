@@ -889,7 +889,7 @@
       $("#server-description-v3").textContent = server.description;
       $("#server-platform-v3").textContent = `${platform} roleplay listing`;
       window.BrowseRPPlatforms.theme(root, window.BrowseRPPlatforms.idFor(server));
-      $("#server-meta-v3").replaceChildren(window.BrowseRPPlatforms.metadata(server, engagement));
+      $("#server-meta-v3").replaceChildren(window.BrowseRPPlatforms.metadata(server, engagement, true));
       $("#server-info-v5").replaceChildren(window.BrowseRPPlatforms.facts(server, engagement));
       $("#server-votes-v3").textContent = `${Number(engagement.voteCount || 0).toLocaleString()} votes`;
       $("#server-initials-v3").textContent = String(server.name || "RP").split(/\s+/).slice(0,2).map((part) => part[0]).join("").toUpperCase();
