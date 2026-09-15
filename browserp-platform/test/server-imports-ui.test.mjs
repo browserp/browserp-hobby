@@ -2,12 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { JSDOM } from "jsdom";
+import { createPublicPageHandler } from "../lib/public-pages.js";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const fixture = () => ({ id: "fixture-server", slug: "fixture-city", name: "Fixture City", platform_id: "fivem", platform_name: "FiveM", description: "A synthetic roleplay community used to verify server details.", region: "United Kingdom", language: "French", framework: "QBCore", access_type: "allowlisted", imported: true, claimable: true, players: 0, max_players: 64, online: true, checked_at: new Date().toISOString(), tags: ["roleplay"], community_url: null, cfx_join_url: "https://cfx.re/join/abc123", logo_url: "https://frontend.cfx-services.net/api/servers/icon/abc123/42.png", banner_url: "https://i.imgur.com/fixture.png" });
 const tick = async () => { for (let n = 0; n < 4; n++) await new Promise((resolve) => setImmediate(resolve)); };
-async function harness(records) {
-  const dom = new JSDOM(read("public/server.html"), { url: "https://browserp.test/server/fixture-city", runScripts: "outside-only", pretendToBeVisual: true });
+async function harness(records, { html = read("public/server.html"), beforeInit = () => {} } = {}) {
+  const dom = new JSDOM(html, { url: "https://browserp.test/server/fixture-city", runScripts: "outside-only", pretendToBeVisual: true });
   const { window: w } = dom;
   const timers = [], requests = [], claims = [];
   let visibility = "visible", serverRequest = 0;
@@ -25,9 +26,50 @@ async function harness(records) {
     return { ok: true, json: async () => ({}) };
   };
   w.BrowseRPServerClaims = { init({ server, root }) { claims.push(server); root.hidden = false; const input = w.document.createElement("textarea"); input.id = "claim-draft"; input.value = "Keep this unfinished claim"; root.append(input); } };
+  beforeInit(w);
   w.eval(read("public/browserp-platforms.js")); w.eval(read("public/browserp-v3.js")); await tick();
   return { dom, w, timers, requests, claims, $: (selector) => w.document.querySelector(selector), visibility(value) { visibility = value; } };
 }
+
+const storedBannerFixture = () => ({ ...fixture(), banner_url: "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/server-media/fixture/banner.png" });
+async function renderedServerHTML() {
+  const response = { setHeader() {}, end(body) { this.body = body; } };
+  await createPublicPageHandler({ data: { server: async () => ({ server: storedBannerFixture() }) } })({ url: "/server/fixture-city", method: "GET", headers: {} }, response);
+  assert.equal(response.statusCode, 200);
+  return response.body;
+}
+
+test("A server-rendered banner stays a single image when the interactive listing loads", async () => {
+  let original;
+  const h = await harness([storedBannerFixture()], { html: await renderedServerHTML(), beforeInit(w) { original = w.document.querySelector(".server-import-banner-v3"); assert.ok(original); } });
+  try {
+    const images = h.w.document.querySelectorAll(".detail-banner-v3 > .server-import-banner-v3");
+    assert.equal(images.length, 1, "Hydration must not add a second banner below the first");
+    assert.equal(images[0], original, "Keep the already-rendered artwork instead of replacing it");
+    assert.equal(images[0].referrerPolicy, "no-referrer");
+    assert.equal(h.$("#server-name-v3").textContent, fixture().name);
+    assert.equal(h.$("#server-connect-v3").href, fixture().cfx_join_url);
+    images[0].dispatchEvent(new h.w.Event("error"));
+    assert.equal(h.$(".server-import-banner-v3"), null);
+    assert.equal(h.$(".detail-banner-v3").classList.contains("has-server-artwork-v3"), false);
+    assert.ok(h.$(".detail-title-v3"));
+  } finally { h.dom.window.close(); }
+});
+
+test("A changed or removed banner replaces stale server-rendered artwork without duplication", async () => {
+  const html = await renderedServerHTML();
+  for (const banner_url of ["https://i.imgur.com/replacement.png", null, "https://evil.example/track.png"]) {
+    const h = await harness([{ ...fixture(), banner_url }], { html });
+    try {
+      const images = h.w.document.querySelectorAll(".detail-banner-v3 > .server-import-banner-v3");
+      const valid = banner_url === "https://i.imgur.com/replacement.png";
+      assert.equal(images.length, valid ? 1 : 0);
+      assert.equal(h.$(".detail-banner-v3").classList.contains("has-server-artwork-v3"), valid);
+      if (valid) assert.equal(images[0].getAttribute("src"), "/api/public/server-image?url=https%3A%2F%2Fi.imgur.com%2Freplacement.png");
+      assert.ok(h.$(".detail-title-v3"));
+    } finally { h.dom.window.close(); }
+  }
+});
 
 test("Imported server details keep metadata order, display real zero and isolate media behind reviewed sources", async () => {
   const h = await harness([fixture()]);

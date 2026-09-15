@@ -712,11 +712,18 @@
     const logo = $("#server-initials-v3");
     const logoUrl = serverImageSource(server.logo_url);
     const bannerUrl = serverImageSource(server.banner_url);
+    // The public HTML may already contain this artwork. Reuse it on hydration.
+    const existing = $$(":scope > .server-import-banner-v3", banner);
+    const current = bannerUrl && existing.find(image => serverImageSource(image.getAttribute("src")) === bannerUrl);
+    for (const image of existing) if (image !== current) image.remove();
+    banner.classList.toggle("has-server-artwork-v3", Boolean(bannerUrl));
     if (bannerUrl) {
-      const image = node("img", "server-import-banner-v3");
+      const image = current || node("img", "server-import-banner-v3");
       image.alt = ""; image.decoding = "async"; image.referrerPolicy = "no-referrer";
-      image.addEventListener("error", () => { image.remove(); banner.classList.remove("has-server-artwork-v3"); }, { once: true });
-      image.src = bannerUrl; banner.prepend(image); banner.classList.add("has-server-artwork-v3");
+      const failed = () => { image.remove(); banner.classList.remove("has-server-artwork-v3"); };
+      image.addEventListener("error", failed, { once: true });
+      if (!current) { image.src = bannerUrl; banner.prepend(image); }
+      else if (image.complete && !image.naturalWidth) failed();
     }
     if (logoUrl) {
       const image = node("img", "server-import-logo-v3");
