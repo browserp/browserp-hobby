@@ -2,7 +2,7 @@
    This file is loaded after the shared public design and only touches public
    editorial, game, help, and member presentation. */
 :root {
-  --premium-serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --premium-display: var(--font-display, Inter, ui-sans-serif, system-ui, sans-serif);
 }
 
 /* Game hubs let the real publisher artwork and the world name do the work. */
@@ -83,16 +83,16 @@
 }
 :root body[data-blog-page="index"] .journal-hero-v6 h1,
 :root body[data-blog-page="article"] .journal-article-head-v6 h1 {
-  font-family: var(--premium-serif);
-  font-weight: 700;
-  letter-spacing: -.055em;
+  font-family: var(--premium-display);
+  font-weight: 800;
+  letter-spacing: -.045em;
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
 :root body[data-blog-page="index"] .journal-hero-v6 h1 {
   max-width: 18ch;
-  font-size: clamp(52px, 7vw, 100px);
-  line-height: .99;
+  font-size: clamp(48px, 6.5vw, 88px);
+  line-height: 1.04;
 }
 /* Override the authored hard break with a flexible word space. */
 :root body[data-blog-page="index"] .journal-hero-v6 h1 br {
@@ -139,7 +139,8 @@
 }
 :root body[data-blog-page="index"] main .journal-card-featured-v6 h3 {
   margin: 14px 0 0;
-  font-family: var(--premium-serif);
+  font-family: var(--premium-display);
+  font-weight: 800;
   font-size: clamp(32px, 3.7vw, 52px);
   line-height: 1.08;
   text-wrap: balance;
@@ -175,7 +176,8 @@
   line-height: 1.82;
 }
 :root body[data-blog-page="article"] .journal-prose-v6 h2 {
-  font-family: var(--premium-serif);
+  font-family: var(--premium-display);
+  font-weight: 800;
   font-size: clamp(30px, 3vw, 40px);
   line-height: 1.15;
   overflow-wrap: anywhere;
@@ -191,11 +193,11 @@
 :root body[data-page="about"] main .public-intro-surface-v7 h1,
 :root body:has(#advertising-enquiries) main .public-intro-surface-v7 h1 {
   max-width: 22ch;
-  font-family: var(--premium-serif);
+  font-family: var(--premium-display);
   font-size: clamp(40px, 4.8vw, 68px);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.04;
-  letter-spacing: -.05em;
+  letter-spacing: -.04em;
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
@@ -214,9 +216,9 @@
 }
 :root body[data-page="about"] main .legal-v3 > section h2 {
   margin: 0;
-  font-family: var(--premium-serif);
+  font-family: var(--premium-display);
   font-size: clamp(30px, 3vw, 42px);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.13;
   overflow-wrap: anywhere;
 }
@@ -244,7 +246,8 @@
   box-shadow: none;
 }
 :root body:has(#advertising-enquiries) main .legal-v3 > section:not(#advertising-enquiries) h2 {
-  font-family: var(--premium-serif);
+  font-family: var(--premium-display);
+  font-weight: 800;
   font-size: clamp(25px, 2.5vw, 34px);
   line-height: 1.17;
 }
@@ -260,11 +263,11 @@
 }
 :root body:has(.policy-nav-v3) main .legal-v3 > h1,
 :root body:has(#appeal-form-v3) main .legal-v3 > h1 {
-  font-family: var(--premium-serif);
+  font-family: var(--premium-display);
   font-size: clamp(40px, 4.6vw, 64px);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.05;
-  letter-spacing: -.05em;
+  letter-spacing: -.04em;
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
@@ -308,9 +311,9 @@
   box-shadow: none;
 }
 :root body:has(.policy-nav-v3) main .legal-v3 > section h2 {
-  font-family: var(--premium-serif);
+  font-family: var(--premium-display);
   font-size: clamp(31px, 3vw, 42px);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.15;
   overflow-wrap: anywhere;
 }
@@ -329,9 +332,9 @@
 /* Public team and member identity stay legible as names/badges grow. */
 :root body[data-page="staff-public"] main .staff-public-hero h1 {
   max-width: 19ch;
-  font-family: var(--premium-serif);
+  font-family: var(--premium-display);
   font-size: clamp(44px, 5.5vw, 74px);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.04;
   text-wrap: balance;
   overflow-wrap: anywhere;
