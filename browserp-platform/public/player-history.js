@@ -22,12 +22,12 @@
   function inspect(data, svg, geometry, previous) {
     const { width, height, left, right, plotWidth, baseline, plotHeight, top, start, end } = geometry;
     const surface = make("div"), help = make("p", "Hover or drag across the graph to see player counts and times.");
-    const keyboardHelp = make("span", " Use arrow keys to move between readings; Home and End jump to the first and last. Escape hides the readout.");
+    const keyboardHelp = make("span", " Use arrow keys to move between recorded counts; Home and End jump to the first and last. Escape hides the readout.");
     keyboardHelp.className = "player-history-keyboard-help"; help.append(keyboardHelp);
     surface.className = "player-history-inspector";
     surface.tabIndex = 0;
     surface.setAttribute("role", "slider");
-    surface.setAttribute("aria-label", "Recorded player observation");
+    surface.setAttribute("aria-label", "Recorded player count");
     surface.setAttribute("aria-orientation", "horizontal");
     surface.setAttribute("aria-valuemin", "1");
     surface.setAttribute("aria-valuemax", String(data.points.length));
@@ -80,9 +80,9 @@
       // Distance between displayed samples does not establish source coverage.
       const tolerance = Math.min(150000, 12 / (plotWidth * scale) * (end - start));
       if (Math.abs(times[nearest] - at) > tolerance) {
-        marker.setAttribute("visibility", "hidden"); value.textContent = "No reading to show here";
+        marker.setAttribute("visibility", "hidden"); value.textContent = "No recorded count here";
         time.hidden = true; tooltip.hidden = false; visible = false;
-        surface.setAttribute("aria-valuetext", "No reading to show at this position");
+        surface.setAttribute("aria-valuetext", "No recorded count at this position");
         return;
       }
       show(nearest);
@@ -172,7 +172,7 @@
     const maximum = Math.max(1, ...data.points.map(point => point.players));
     const top = Math.max(5, Math.ceil(maximum / 5) * 5);
     const width = Math.max(280, Math.min(chart.clientWidth || 760, 760)), height = 240, left = 58, right = 20, plotWidth = width - left - right, baseline = 200, plotHeight = 174;
-    const svg = svgNode("svg", { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": `Player observations for the last ${ranges[data.range]}. Dots show recorded counts; empty periods have no displayed observation.` });
+    const svg = svgNode("svg", { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": `Player counts for the last ${ranges[data.range]}. Dots show recorded counts; blank periods were not measured.` });
     for (const value of [0, Math.round(top / 2), top]) {
       const y = baseline - value / top * plotHeight;
       svg.append(svgNode("line", { x1: left, x2: width - right, y1: y, y2: y, class: "player-history-grid" }));
@@ -190,10 +190,9 @@
       const title = svgNode("title"); title.textContent = `${date.format(new Date(point.at))}: ${point.players.toLocaleString()} players`; dot.append(title); svg.append(dot);
     }
     inspection = inspect(data, svg, { width, height, left, right, plotWidth, baseline, plotHeight, top, start, end }, previous);
-    const notes = [`Last reading: ${clock.format(new Date(data.lastAt))}${new Date(start).toDateString() !== new Date(end).toDateString() ? ` · ${day.format(new Date(data.lastAt))}` : ""}. Times are local.`];
-    if (data.sampled) notes.push("Showing selected readings.");
-    if (data.truncated) notes.push("Showing the latest available readings.");
-    notes.push("Gaps have no reading to show.");
+    const notes = [`Updated ${clock.format(new Date(data.lastAt))}${new Date(start).toDateString() !== new Date(end).toDateString() ? ` · ${day.format(new Date(data.lastAt))}` : ""}.`];
+    if (data.sampled) notes.push("Some recorded counts are shown.");
+    if (data.truncated) notes.push("Older counts aren’t available here.");
     status.textContent = notes.join(" ");
     lastWidth = chart.clientWidth;
     observer?.observe(chart);
@@ -230,14 +229,12 @@
 
   details.addEventListener("toggle", () => {
     if (!details.open || !current || table.childElementCount) return;
-    const notes = [`${current.observations.toLocaleString()} recorded observations. Dots show measured counts; no values are filled between them.`];
-    if (current.sampled) notes.push("A selection is shown, retaining the busiest and quietest readings in each time interval.");
-    if (current.truncated) notes.push("Only the most recent available part of this range is shown because the observation limit was reached.");
-    else if (current.partial) notes.push("Coverage is incomplete: some periods have no recorded count.");
-    notes.push(`Last observation: ${date.format(new Date(current.lastAt))}. Times are local to your device.`);
+    const notes = [`${current.observations.toLocaleString()} recorded player counts. Blank periods were not recorded.`];
+    if (current.sampled) notes.push("This list shows selected counts, including the busiest and quietest times.");
+    if (current.truncated) notes.push("Older counts aren’t available in this range.");
     table.append(make("p", notes.join(" ")));
-    const element = make("table"), caption = make("caption", current.sampled ? "Displayed observations (selected from the recorded history)" : "Recorded player observations"), head = make("thead"), headers = make("tr"), body = make("tbody");
-    for (const label of ["Observed at (local time)", "Players"]) { const th = make("th", label); th.scope = "col"; headers.append(th); }
+    const element = make("table"), caption = make("caption", current.sampled ? "Selected player counts" : "Recorded player counts"), head = make("thead"), headers = make("tr"), body = make("tbody");
+    for (const label of ["Time", "Players"]) { const th = make("th", label); th.scope = "col"; headers.append(th); }
     head.append(headers);
     for (const point of [...current.points].reverse()) {
       const row = make("tr"), cell = make("td"), time = make("time", date.format(new Date(point.at))); time.dateTime = point.at; cell.append(time);

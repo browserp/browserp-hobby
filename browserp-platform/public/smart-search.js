@@ -78,7 +78,7 @@
     root.classList.add("smart-discovery");
     const searchRow = node("div", "smart-search-row");
     const searchLabel = node("label", "field-v3 field-search-v3"); searchLabel.append(node("span", "", "Search servers"));
-    const search = Object.assign(node("input"), { type: "search", id: "directory-search", maxLength: 120, placeholder: "Search by name or play style" }); searchLabel.append(search);
+    const search = Object.assign(node("input"), { type: "search", id: "directory-search", maxLength: 120, placeholder: "Find a server or play style" }); searchLabel.append(search);
     const toggle = node("button", "button-v3 button-secondary-v3 smart-filter-toggle", "More filters"); toggle.type = "button"; toggle.setAttribute("aria-expanded", "false"); toggle.setAttribute("aria-controls", "smart-refinements");
     searchRow.append(searchLabel, toggle); root.append(searchRow);
     const primary = node("div", "smart-primary-filters"); const refinements = node("div", "smart-refinements"); refinements.id = "smart-refinements";

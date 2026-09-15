@@ -7,7 +7,7 @@
     row.className = "directory-control-row";
     row.id = "games";
     row.setAttribute("role", "group");
-    row.setAttribute("aria-label", "Directory filters and games");
+    row.setAttribute("aria-label", "Choose a game");
     toggle.textContent = "Filters";
     toggle.setAttribute("aria-controls", "directory-filter-panel");
     const buttons = [];
@@ -26,12 +26,10 @@
       button.append(image, label);
       button.addEventListener("click", () => {
         const selected = getFilters().platform === id;
-        if (!selected) setOpen(true);
         change("platform", selected ? "all" : id);
       });
       row.append(button); buttons.push(button);
     }
-    row.append(toggle);
     const panel = document.createElement("div");
     panel.id = "directory-filter-panel";
     panel.className = "directory-filter-panel";
@@ -55,7 +53,6 @@
       const chips = root.querySelector(".smart-filter-chips");
       if (chips) resultBar.append(chips);
     }
-    let previousGame = getFilters().platform;
     function setOpen(open) {
       panel.hidden = !open;
       panel.inert = !open;
@@ -64,8 +61,6 @@
     function sync(filters) {
       const applied = Object.keys(window.BrowseRPDiscovery.labels).filter(key => filters[key] !== window.BrowseRPDiscovery.defaults[key]).length;
       toggle.textContent = applied ? `Filters (${applied})` : "Filters";
-      if (filters.platform !== previousGame && filters.platform !== "all") setOpen(true);
-      previousGame = filters.platform;
       for (const button of buttons) {
         const selected = button.dataset.directoryGame === filters.platform;
         button.setAttribute("aria-pressed", String(selected));

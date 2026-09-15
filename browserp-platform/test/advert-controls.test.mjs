@@ -182,7 +182,7 @@ test("creative framing never selects stage geometry or disables the existing ima
   assert.match(shared, /min-height: clamp\(280px, 35cqi, 560px\)/);
   assert.match(shared, /min-height: calc\(125cqi \+ 360px\)/);
   assert.match(read("browserp-v3.css"), /transition: opacity \.35s ease, transform 7s ease/);
-  assert.doesNotMatch(shared, /\.side-ad-image-v3[^{}]*\{[^{}]*transition:\s*none/);
+  assert.match(shared, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.side-ad-image-v3 \{ transition: none;/);
 });
 
 test("keyboard focus is visible and reduced motion stops press scaling without hiding chevrons", t => {

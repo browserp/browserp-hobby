@@ -40,7 +40,8 @@ test("Discover starts unfiltered and its disclosure never changes results or req
   const h = harness(); t.after(() => h.dom.window.close()); await pause(10);
   assert.equal(h.api.getFilters().platform, "all");
   assert.equal(h.$("#directory-filter-panel").hidden, true);
-  assert.equal(h.$(".directory-control-row").children.length, 5);
+  assert.equal(h.$(".directory-control-row").children.length, 4);
+  assert.equal(h.$(".smart-search-row .smart-filter-toggle") !== null, true);
   assert.equal(h.$("#mode-filter").parentElement.hidden, true);
   const before = { url: h.w.location.href, requests: h.requests.length, results: h.$("#list").textContent, filters: JSON.stringify(h.api.getFilters()) };
   for (const open of [true, false, true]) {
@@ -52,7 +53,7 @@ test("Discover starts unfiltered and its disclosure never changes results or req
   assert.deepEqual({ url: h.w.location.href, requests: h.requests.length, results: h.$("#list").textContent, filters: JSON.stringify(h.api.getFilters()) }, before);
 });
 
-test("Discover game choices reveal contextual filters while preserving a search", async t => {
+test("Discover game choices retain contextual filters and search", async t => {
   const h = harness({ url: "https://browserp.test/servers?q=community&platform=fivem&mode=qbcore" }); t.after(() => h.dom.window.close()); await pause(10);
   h.$('[data-directory-game="minecraft"]').click(); await pause(10);
   assert.equal(h.$("#directory-filter-panel").hidden, false);
@@ -65,6 +66,16 @@ test("Discover game choices reveal contextual filters while preserving a search"
   assert.equal(h.api.getFilters().platform, "all");
   assert.equal(h.$("#directory-search").value, "community");
   assert.equal(h.$("#mode-filter").parentElement.hidden, true);
+});
+
+test("choosing a game is a direct shortcut and keeps detailed filters closed", async t => {
+  const h = harness(); t.after(() => h.dom.window.close()); await pause(10);
+  h.$('[data-directory-game="fivem"]').click(); await pause(10);
+  assert.equal(h.api.getFilters().platform, "fivem");
+  assert.equal(h.$("#directory-filter-panel").hidden, true);
+  h.$(".smart-filter-toggle").click();
+  assert.equal(h.$("#directory-filter-panel").hidden, false);
+  assert.equal(h.$("#mode-filter").parentElement.hidden, false);
 });
 
 test("Discover retains intentional handoff filters when the panel is closed and reopened", async t => {

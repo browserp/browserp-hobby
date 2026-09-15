@@ -43,7 +43,7 @@ try {
             contained: rect.left >= stage.left && rect.right <= stage.right && rect.top >= stage.top && rect.bottom <= stage.bottom };
         });
         assert.equal(style.width, 44); assert.equal(style.height, 44);
-        assert.equal(style.radius, "7px"); assert.equal(style.inset, "6px");
+        assert.equal(style.radius, "12px"); assert.equal(style.inset, "0px");
         assert.equal(style.background, "rgba(0, 0, 0, 0)"); assert.equal(style.font, "0px");
         assert.equal(style.transform, "none"); assert.deepEqual(style.pointer, ["none", "none"]);
         assert.equal(style.contained, true);
@@ -52,19 +52,21 @@ try {
         if (route === "/servers") {
           const controlLayout = await advert.evaluate(element => {
             const card = element.getBoundingClientRect(), controls = element.querySelector(".ad-controls-v3").getBoundingClientRect();
-            const dots = element.querySelector(".ad-dots-v3").getBoundingClientRect(), pause = element.querySelector(".ad-pause-v7").getBoundingClientRect();
+            const dots = element.querySelector(".ad-dots-v3").getBoundingClientRect();
             return {
-              contained: controls.left >= card.left && controls.right <= card.right && controls.bottom <= card.bottom,
-              sameRow: Math.abs((dots.top + dots.bottom) / 2 - (pause.top + pause.bottom) / 2) < 1,
+              contained: controls.left >= card.left - .5 && controls.right <= card.right + .5 && controls.bottom <= card.bottom + .5,
+              centered: Math.abs((dots.left + dots.right) / 2 - (controls.left + controls.right) / 2) < 1,
               grouped: element.querySelector(".ad-controls-v3")?.contains(element.querySelector(".ad-dots-v3"))
-                && element.querySelector(".ad-controls-v3")?.contains(element.querySelector(".ad-pause-v7")),
+                && !element.querySelector(".ad-pause-v7"),
+              rail: getComputedStyle(element.querySelector(".ad-dot-v3"), "::after").height,
               ratio: getComputedStyle(element.querySelector(".side-ad-stage-v3")).aspectRatio
             };
           });
           assert.equal(controlLayout.contained, true, "Directory controls stay inside the advert card");
-          assert.equal(controlLayout.sameRow, true, "Indicators and rotation action share one row");
-          assert.equal(controlLayout.grouped, true, "Indicators and rotation action share one labelled control group");
-          if (!blocked) assert.equal(controlLayout.ratio, "4 / 5", "Healthy directory artwork uses its approved 4:5 frame");
+          assert.equal(controlLayout.centered, true, "Progress rails stay centered beneath artwork");
+          assert.equal(controlLayout.grouped, true, "Progress rails retain the labelled control group without extra copy");
+          assert.equal(controlLayout.rail, "4px");
+          if (!blocked) assert.equal(controlLayout.ratio, "auto", "Directory artwork is sized by its content, without a clipped fixed frame");
           for (let slide = 0; slide < await advert.locator(".ad-dot-v3").count(); slide++) {
             if (blocked) await advert.locator(".side-ad-image-notice-v3").waitFor({ state: "visible" });
             assert.equal(await advert.evaluate(element => {

@@ -42,12 +42,13 @@ test("default 8h preserves same-origin preview access and measured responsive do
     assert.equal(svg.querySelectorAll(".player-history-point").length, 2); assert.equal(svg.querySelectorAll("path,polyline").length, 0);
     assert.ok(Number([...svg.querySelectorAll(".player-history-point")].at(-1).getAttribute("cx")) < 300, "Last point is not extended to now");
     assert.match(root.textContent, /Hover or drag across the graph/);
-    assert.match(root.querySelector("[data-history-status]").textContent, /Last reading: .*Times are local\. Gaps have no reading to show\./);
+    assert.match(root.querySelector("[data-history-status]").textContent, /^Updated .*\.$/);
+    assert.doesNotMatch(root.querySelector("[data-history-status]").textContent, /Blank periods/);
     assert.doesNotMatch(root.querySelector("[data-history-status]").textContent, /observations|Coverage|selection/);
     assert.doesNotMatch(root.querySelector("[data-history-status]").textContent, /Showing/);
     const details = root.querySelector("details"); details.open = true; details.dispatchEvent(new dom.window.Event("toggle"));
     assert.equal(root.querySelectorAll("tbody tr").length, 2); assert.equal(root.querySelector("tbody time").dateTime, payload().lastAt);
-    assert.match(root.querySelector("[data-history-table]").textContent, /Coverage is incomplete/);
+    assert.match(root.querySelector("[data-history-table]").textContent, /recorded player counts\. Blank periods were not recorded\./);
     assert.deepEqual([...root.querySelectorAll("tbody td:last-child")].map(cell => cell.textContent), ["30", "0"]);
     assert.equal(calls.length, 1);
   } finally { dom.window.close(); }
@@ -60,9 +61,9 @@ test("changing ranges cancels old loads and out-of-order completion cannot repla
     assert.equal(pending.length, 2); assert.equal(pending[0].opts.signal.aborted, true);
     pending[1].resolve(answer(payload("24h", { truncated: true, sampled: true })));
     await settle();
-    assert.match(root.querySelector("[data-history-status]").textContent, /Showing selected readings\. Showing the latest available readings\./);
+    assert.match(root.querySelector("[data-history-status]").textContent, /Some recorded counts are shown\. Older counts aren’t available here\./);
     const details = root.querySelector("details"); details.open = true; details.dispatchEvent(new dom.window.Event("toggle"));
-    assert.match(root.querySelector("[data-history-table]").textContent, /observation limit was reached/); assert.match(root.querySelector("svg").getAttribute("aria-label"), /24 hours/);
+    assert.match(root.querySelector("[data-history-table]").textContent, /Older counts aren’t available in this range/); assert.match(root.querySelector("svg").getAttribute("aria-label"), /24 hours/);
     pending[0].resolve(answer(payload())); await settle();
     assert.match(root.querySelector("svg").getAttribute("aria-label"), /24 hours/); assert.equal(root.getAttribute("aria-busy"), "false");
   } finally { dom.window.close(); }
@@ -127,7 +128,7 @@ test("resize observation starts after populated renders and stays detached throu
     await finish(payload("24h", { supported: false, platform: "roblox", points: [], observations: 0, firstAt: null, lastAt: null }));
     assert.equal(h.observing(), false);
     assert.equal(h.observations.length, 3);
-    assert.ok(h.observations.every(observation => observation.populated && observation.status.startsWith("Last reading:")), "Every observation begins after the complete chart and status exist");
+    assert.ok(h.observations.every(observation => observation.populated && observation.status.startsWith("Updated ")), "Every observation begins after the complete chart and status exist");
   } finally { dom.window.close(); }
 });
 
@@ -156,8 +157,8 @@ test("hover selects exact zero/count timestamps, gaps hide the guide, and keyboa
     assert.equal(root.querySelector(".player-history-tooltip time").dateTime, payload().firstAt);
     assert.equal(root.querySelector(".player-history-guide").getAttribute("x1"), points[0].getAttribute("cx"));
     pointer(dom, surface, "pointermove", 179);
-    assert.match(root.querySelector(".player-history-tooltip").textContent, /No reading to show here/);
-    assert.equal(surface.getAttribute("aria-valuetext"), "No reading to show at this position");
+    assert.match(root.querySelector(".player-history-tooltip").textContent, /No recorded count here/);
+    assert.equal(surface.getAttribute("aria-valuetext"), "No recorded count at this position");
     assert.equal(root.querySelector(".player-history-selection").getAttribute("visibility"), "hidden");
     surface.focus();
     const key = value => surface.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: value, bubbles: true, cancelable: true }));
@@ -232,7 +233,7 @@ test("touch scrubbing survives bubbled child capture loss and stops only when it
     pointer(dom, svg, "lostpointercapture", first, 101, "touch");
     const gapMove = pointer(dom, surface, "pointermove", 179, 101, "touch");
     assert.equal(gapMove.defaultPrevented, true);
-    assert.equal(root.querySelector(".player-history-tooltip strong").textContent, "No reading to show here");
+    assert.equal(root.querySelector(".player-history-tooltip strong").textContent, "No recorded count here");
     pointer(dom, surface, "lostpointercapture", 179, 101, "touch", 2);
     pointer(dom, surface, "pointermove", last, 101, "touch");
     assert.equal(root.querySelector(".player-history-tooltip strong").textContent, "30 players");

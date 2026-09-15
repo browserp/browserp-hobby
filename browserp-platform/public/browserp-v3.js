@@ -417,6 +417,23 @@
     let markArtworkAvailable;
     let imageSource = "";
     let imageRequest = 0;
+    let transitionImage, transitionTimeout;
+    const removeTransition = () => {
+      window.clearTimeout(transitionTimeout);
+      transitionImage?.remove();
+      transitionImage = null;
+    };
+    const releaseTransition = () => {
+      if (!transitionImage) return;
+      const leaving = transitionImage;
+      leaving.classList.add("is-leaving");
+      leaving.addEventListener("transitionend", () => {
+        if (transitionImage === leaving) removeTransition();
+      }, { once: true });
+      transitionTimeout = window.setTimeout(() => {
+        if (transitionImage === leaving) removeTransition();
+      }, 500);
+    };
     const failedImages = new Set();
     const listeners = [];
     const listen = (type, handler) => {
@@ -444,6 +461,8 @@
         image.classList.remove("is-changing");
         root.classList.toggle("artwork-unavailable", unavailable);
         imageNotice.hidden = !unavailable;
+        if (unavailable) removeTransition();
+        else releaseTransition();
         // Reuse the site's wordmark; never substitute another campaign image
         // or address when a browser blocks the creative.
         if (unavailable && !fallbackBrand.getAttribute("src")) fallbackBrand.src = "/assets/browserp-logo-v5.png?v=20260908";
@@ -467,7 +486,11 @@
           const dot = node("button", "ad-dot-v3");
           dot.type = "button";
           dot.setAttribute("aria-label", `Show advert ${position + 1}: ${advert.headline || advert.name || "BrowseRP advert"}`);
-          dot.addEventListener("click", () => { index = position; draw(); restart(); });
+          dot.addEventListener("click", () => {
+            if (position === index) paused = !paused;
+            else { index = position; draw(); }
+            restart();
+          });
           dots.append(dot);
         });
         controls = node("div", "ad-controls-v3");
@@ -500,6 +523,17 @@
         image.onerror = failed;
         if (failedImages.has(imageSource)) markArtworkUnavailable();
         else {
+          // Hold the previous artwork until the requested image is actually
+          // ready, then fade it out. This avoids a blank frame or text/image
+          // mismatch during slow downloads and manual slide changes.
+          removeTransition();
+          if (!reducedMotion.matches && image.complete && image.naturalWidth && !root.classList.contains("artwork-unavailable") && image.getAttribute("src") !== source) {
+            transitionImage = image.cloneNode(false);
+            transitionImage.classList.add("ad-transition-image-v3");
+            transitionImage.alt = "";
+            transitionImage.setAttribute("aria-hidden", "true");
+            image.parentElement.insertBefore(transitionImage, image.nextSibling);
+          }
           image.classList.add("is-changing");
           image.src = imageSource;
           if (image.complete) {
@@ -522,6 +556,11 @@
       const strong = node("strong", "", advert.headline || advert.name || "BrowseRP advert");
       const body = node("span", "", advert.body || "");
       copy.replaceChildren(strong, body);
+      if (visual && !reducedMotion.matches) {
+        copy.classList.remove("ad-copy-enter-v3");
+        void copy.offsetWidth;
+        copy.classList.add("ad-copy-enter-v3");
+      }
       const destination = safeDestination(advert.destinationUrl);
       if (destination) {
         const link = node("a", "", advert.ctaLabel || "Learn more");
@@ -531,6 +570,10 @@
       }
       $$('button', dots || document.createElement("div")).forEach((dot, position) => {
         dot.setAttribute("aria-current", position === index ? "true" : "false");
+        dot.setAttribute("aria-pressed", position === index && paused ? "true" : "false");
+        dot.setAttribute("aria-label", position === index
+          ? `${paused ? "Resume" : "Pause"} advert rotation`
+          : `Show advert ${position + 1}: ${list[position].headline || list[position].name || "BrowseRP advert"}`);
       });
     }
     let timer;
@@ -542,6 +585,7 @@
       disposed = true;
       imageRequest++;
       stop();
+      removeTransition();
       visibilityObserver?.disconnect();
       document.removeEventListener("visibilitychange", visibilityChanged);
       reducedMotion.removeEventListener?.("change", restart);
@@ -553,7 +597,15 @@
     }
     function restart() {
       stop();
-      if (canRotate()) {
+      const playing = canRotate();
+      root.classList.toggle("ad-is-playing", playing);
+      $$('button', dots || document.createElement("div")).forEach((dot, position) => {
+        dot.setAttribute("aria-pressed", position === index && paused ? "true" : "false");
+        dot.setAttribute("aria-label", position === index
+          ? `${paused ? "Resume" : "Pause"} advert rotation`
+          : `Show advert ${position + 1}: ${list[position].headline || list[position].name || "BrowseRP advert"}`);
+      });
+      if (playing) {
         timer = window.setInterval(() => {
           if (!canRotate()) { stop(); return; }
           index = (index + 1) % list.length; draw();
@@ -575,11 +627,6 @@
         inView = visible; restart();
       }, { threshold: .01 });
       visibilityObserver.observe(root);
-    }
-    if (visual && list.length > 1) {
-      const pause = node("button", "ad-pause-v7", "Pause rotation"); pause.type = "button"; pause.setAttribute("aria-pressed", "false");
-      pause.addEventListener("click", () => { paused = !paused; pause.textContent = paused ? "Resume rotation" : "Pause rotation"; pause.setAttribute("aria-pressed", String(paused)); restart(); });
-      controls?.append(pause);
     }
     $$('[data-ad-direction]', root).forEach((button) => button.addEventListener("click", () => {
       index = (index + (button.dataset.adDirection === "next" ? 1 : -1) + list.length) % list.length;
@@ -748,8 +795,13 @@
   function updateServerPlayers(server, { failed = false } = {}) {
     const status = serverPlayerStatus(server);
     const text = failed ? "Player count unavailable" : status.text;
-    $("#server-status-v3").textContent = text;
-    const fact = $("#server-info-v5 .server-info-card-v5:last-child dd");
+    const live = !failed && status.text !== "Player count unavailable" && status.text.includes("online");
+    const headingStatus = $("#server-status-v3");
+    headingStatus.textContent = text;
+    headingStatus.classList.toggle("is-live-v3", live);
+    const factCard = $("#server-info-v5 .server-info-card-v5:last-child");
+    factCard?.classList.toggle("is-live-v3", live);
+    const fact = factCard?.querySelector("dd");
     if (fact) fact.textContent = text;
     const checked = $("#server-checked-v3");
     if (!checked) return;
