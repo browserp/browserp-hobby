@@ -57,11 +57,19 @@
 :root body[data-page="home"] .home-hero-intro .search-v3 input::placeholder { color: #687b88; }
 :root body[data-page="home"] .home-hero-visual {
   position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   justify-self: end;
   width: min(100%, 410px);
   aspect-ratio: 1;
+  border: 5px solid rgb(255 255 255 / .9);
+  border-radius: 19px;
+  background: #fffdfb;
   transform: rotate(3deg);
   filter: drop-shadow(0 30px 44px rgb(4 17 29 / .38));
+  animation: hero-collage-float 8s ease-in-out infinite;
 }
 :root body[data-page="home"] .home-hero-visual::before {
   content: "";
@@ -70,15 +78,37 @@
   border: 2px solid #77d9d6;
   border-radius: 20px;
   transform: rotate(5deg);
+  pointer-events: none;
+  z-index: -1;
 }
-:root body[data-page="home"] .home-hero-visual img {
+:root body[data-page="home"] .home-hero-visual .hero-game-link {
   position: relative;
+  z-index: 0;
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border: 5px solid rgb(255 255 255 / .84);
-  border-radius: 19px;
+  min-width: 0;
+  min-height: 0;
+  background-image: url("/assets/games/all-games-collage.webp");
+  background-size: 200% 200%;
+  background-repeat: no-repeat;
+  transition: transform .25s ease, filter .25s ease;
+}
+:root body[data-page="home"] .home-hero-visual .hero-game-fivem { background-position: left top; border-top-left-radius: 14px; }
+:root body[data-page="home"] .home-hero-visual .hero-game-redm { background-position: right top; border-top-right-radius: 14px; }
+:root body[data-page="home"] .home-hero-visual .hero-game-roblox { background-position: left bottom; border-bottom-left-radius: 14px; }
+:root body[data-page="home"] .home-hero-visual .hero-game-minecraft { background-position: right bottom; border-bottom-right-radius: 14px; }
+:root body[data-page="home"] .home-hero-visual .hero-game-link:is(:hover, :focus-visible) {
+  z-index: 3;
+  transform: scale(1.055);
+  filter: saturate(1.1) brightness(1.04);
+}
+:root body[data-page="home"] .home-hero-visual .hero-game-link:focus-visible {
+  outline: 3px solid #ffbad4;
+  outline-offset: -5px;
+}
+:root body[data-page="home"] .home-hero-visual .hero-game-link:active { transform: scale(1.025); }
+@keyframes hero-collage-float {
+  0%, 100% { transform: rotate(3deg) translateY(0); }
+  50% { transform: rotate(3deg) translateY(-8px); }
 }
 
 /* The four actual game choices stay links, but read like visual destinations. */
@@ -150,15 +180,13 @@
   :root body[data-page="home"] .home-hero-intro h1 { max-width: 12ch; font-size: clamp(46px, 11vw, 64px); }
   :root body[data-page="home"] .home-hero-intro .hero-copy-v3 > p { font-size: 17px; }
   :root body[data-page="home"] .home-hero-visual {
-    position: absolute;
-    top: 40px;
-    right: -100px;
-    width: 310px;
-    opacity: .16;
-    filter: none;
+    position: relative;
+    justify-self: center;
+    width: min(100% - 24px, 330px);
+    margin: 38px auto 0;
+    opacity: 1;
+    filter: drop-shadow(0 23px 32px rgb(4 17 29 / .32));
   }
-  :root body[data-page="home"] .home-hero-visual::before { display: none; }
-  :root body[data-page="home"] .home-hero-visual img { border: 0; }
   :root body[data-page="home"] .home-game-discovery .game-grid-v3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   :root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) .game-art-v3 { aspect-ratio: 3 / 2; }
 }
@@ -168,6 +196,9 @@
   :root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) strong { font-size: 17px; }
 }
 @media (prefers-reduced-motion: reduce) {
+  :root body[data-page="home"] .home-hero-visual { animation: none; }
+  :root body[data-page="home"] .home-hero-visual .hero-game-link { transition: none; }
+  :root body[data-page="home"] .home-hero-visual .hero-game-link:is(:hover, :focus-visible, :active) { transform: none; }
   :root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) { transition: none; }
   :root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3):is(:hover, :focus-visible) { transform: none; }
 }
@@ -176,5 +207,7 @@
   :root body[data-page="home"] .section-rail-v3 { background: Canvas; }
   :root body[data-page="home"] .home-hero-intro :is(h1, .eyebrow-v3, p),
   :root body[data-page="home"] .section-rail-v3 :is(h2, .eyebrow-v3, p, strong, span) { color: CanvasText; }
-  :root body[data-page="home"] .home-hero-visual { display: none; }
+  :root body[data-page="home"] .home-hero-visual { filter: none; border-color: CanvasText; background: Canvas; animation: none; }
+  :root body[data-page="home"] .home-hero-visual .hero-game-link { display: flex; align-items: center; justify-content: center; background: Canvas; border: 1px solid CanvasText; color: CanvasText; }
+  :root body[data-page="home"] .home-hero-visual .hero-game-link .visually-hidden { position: static; width: auto; height: auto; margin: 0; padding: 8px; overflow: visible; clip: auto; clip-path: none; white-space: normal; }
 }

@@ -9,7 +9,43 @@
   function suggestions(input, getFilters, getFacets, choose) {
     const list = node("div", "search-suggestions-v3");
     list.id = `${input.id}-suggestions`; list.hidden = true; list.inert = true; list.setAttribute("role", "listbox");
-    input.parentElement.append(list); input.setAttribute("role", "combobox"); input.setAttribute("aria-autocomplete", "list"); input.setAttribute("aria-controls", list.id); input.setAttribute("aria-expanded", "false"); input.autocomplete = "off";
+    // The homepage search sits inside an intentionally clipped hero. Put only its
+    // listbox at document level so suggestions can extend beyond the banner.
+    const homeOverlay = input.id === "home-search" && document.body.dataset.page === "home";
+    if (homeOverlay) { list.classList.add("home-search-suggestions-overlay"); document.body.append(list); }
+    else input.parentElement.append(list);
+    input.setAttribute("role", "combobox"); input.setAttribute("aria-autocomplete", "list"); input.setAttribute("aria-controls", list.id); input.setAttribute("aria-expanded", "false"); input.autocomplete = "off";
+    function placeHomeOverlay() {
+      if (!homeOverlay || list.hidden) return;
+      const anchor = input.closest(".search-v3") || input;
+      const rect = anchor.getBoundingClientRect();
+      const viewportWidth = window.innerWidth, viewportHeight = window.innerHeight;
+      const gap = 12, offset = 8;
+      const width = Math.min(rect.width, viewportWidth - gap * 2);
+      const left = Math.max(gap, Math.min(rect.left, viewportWidth - gap - width));
+      const below = Math.max(0, viewportHeight - rect.bottom - gap - offset);
+      const headerBottom = Math.max(0, Math.min(viewportHeight, document.querySelector(".header-v3")?.getBoundingClientRect().bottom || 0));
+      const topLimit = Math.max(gap, headerBottom + offset);
+      const above = Math.max(0, rect.top - topLimit - offset);
+      const showAbove = below < 240 && above > below;
+      const available = showAbove ? above : below;
+      list.style.width = `${width}px`;
+      list.style.left = `${left}px`;
+      list.style.maxHeight = `${Math.max(48, Math.min(360, available))}px`;
+      if (showAbove) {
+        list.style.top = "auto";
+        list.style.bottom = `${viewportHeight - rect.top + offset}px`;
+      } else {
+        list.style.bottom = "auto";
+        list.style.top = `${rect.bottom + offset}px`;
+      }
+    }
+    if (homeOverlay) {
+      window.addEventListener("resize", placeHomeOverlay);
+      window.addEventListener("scroll", placeHomeOverlay, true);
+      window.visualViewport?.addEventListener("resize", placeHomeOverlay);
+      window.visualViewport?.addEventListener("scroll", placeHomeOverlay);
+    }
     let active = -1;
     function render() {
       const filters = getFilters(); const facets = getFacets(); const term = M.normal(input.value);
@@ -36,7 +72,7 @@
         return button;
       }));
       if (!list.children.length) return close(input, list);
-      list.hidden = false; list.inert = false; list.classList.add("search-suggestions-open"); input.setAttribute("aria-expanded", "true");
+      list.hidden = false; list.inert = false; list.classList.add("search-suggestions-open"); input.setAttribute("aria-expanded", "true"); placeHomeOverlay();
     }
     input.addEventListener("focus", render);
     input.addEventListener("input", render);
@@ -48,6 +84,7 @@
         event.preventDefault(); active = active < 0 ? (event.key === "ArrowDown" ? 0 : list.children.length - 1) : (active + (event.key === "ArrowDown" ? 1 : -1) + list.children.length) % list.children.length;
         [...list.children].forEach((item, index) => item.setAttribute("aria-selected", String(index === active)));
         input.setAttribute("aria-activedescendant", list.children[active].id);
+        list.children[active].scrollIntoView?.({ block: "nearest" });
       } else if (event.key === "Enter" && active >= 0) { event.preventDefault(); list.children[active].click(); }
     });
     return { render, close: () => close(input, list) };

@@ -343,6 +343,49 @@ test("homepage search suggestions can select a game, and searching remains avail
   h.dom.window.close();
 });
 
+test("homepage search listbox escapes the clipped hero and fits above or below the field", async t => {
+  const h = homeHarness(); t.after(() => h.dom.window.close()); await pause(10);
+  const input = h.$("#home-search"), form = h.$("#home-search-form"), list = h.$("#home-search-suggestions");
+  assert.equal(list.parentElement, h.w.document.body);
+  assert.equal(list.classList.contains("home-search-suggestions-overlay"), true);
+  h.w.innerWidth = 390; h.w.innerHeight = 700;
+  form.getBoundingClientRect = () => ({ left: 8, top: 140, right: 376, bottom: 196, width: 368, height: 56 });
+  input.focus();
+  assert.equal(list.hidden, false);
+  assert.equal(list.style.left, "12px");
+  assert.equal(list.style.width, "366px");
+  assert.equal(list.style.top, "204px");
+  assert.equal(list.style.bottom, "auto");
+  assert.equal(input.getAttribute("aria-expanded"), "true");
+  form.getBoundingClientRect = () => ({ left: 12, top: 520, right: 378, bottom: 576, width: 366, height: 56 });
+  h.w.dispatchEvent(new h.w.Event("scroll"));
+  assert.equal(list.style.top, "auto");
+  assert.equal(list.style.bottom, "188px");
+  assert.equal(list.style.maxHeight, "360px");
+  h.w.innerWidth = 320; h.w.innerHeight = 700;
+  form.getBoundingClientRect = () => ({ left: 12, top: 420, right: 308, bottom: 538, width: 296, height: 118 });
+  h.$(".header-v3").getBoundingClientRect = () => ({ top: 0, bottom: 66, height: 66 });
+  h.w.dispatchEvent(new h.w.Event("resize"));
+  assert.equal(list.style.bottom, "288px");
+  assert.equal(list.style.maxHeight, "338px");
+  assert.equal(700 - 288 - 338, 74, "flipped panel clears the 66px sticky header by 8px");
+  const scrolled = [];
+  list.firstChild.scrollIntoView = options => scrolled.push(options.block);
+  input.dispatchEvent(new h.w.KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+  assert.ok(input.getAttribute("aria-activedescendant"));
+  assert.deepEqual(scrolled, ["nearest"]);
+  input.dispatchEvent(new h.w.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  assert.equal(list.hidden, true);
+  assert.equal(input.getAttribute("aria-expanded"), "false");
+});
+
+test("directory suggestions retain their in-field placement", async t => {
+  const h = harness(); t.after(() => h.dom.window.close()); await pause(10);
+  const input = h.$("#directory-search"), list = h.$("#directory-search-suggestions");
+  assert.equal(list.parentElement, input.parentElement);
+  assert.equal(list.classList.contains("home-search-suggestions-overlay"), false);
+});
+
 
 test("launch-game taxonomy deduplicates aliases per server and ranks real usage without showcase inflation", () => {
   const fixtures = [
