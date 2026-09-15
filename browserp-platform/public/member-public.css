@@ -15,13 +15,14 @@
 .member-heading-v7 { padding-bottom: 4px; }
 .member-heading-v7 h1 { margin: 3px 0 1px; font-size: clamp(31px,4vw,48px); line-height: 1.07; letter-spacing: -.045em; overflow-wrap: anywhere; }
 .member-heading-v7 p { margin: 0; }
-.member-handle-v7 { color: var(--pink-strong); font-size: 14px; font-weight: 650; }
+.member-handle-v7 { color: var(--pink-strong); font-size: 14px; font-weight: 650; overflow-wrap: anywhere; }
 .member-joined-v7 { color: var(--muted); font-size: 13px; }
 .member-bio-v7 { max-width: 760px; margin: 24px 38px 0; color: var(--copy); font-size: 16px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
 .member-badges-v7 { display: flex; flex-wrap: wrap; gap: 9px; min-height: 28px; margin: 22px 38px 34px; }
-.member-badge-v7 { position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border: 1px solid color-mix(in srgb,var(--pink) 34%,var(--line)); border-radius: 8px; background: color-mix(in srgb,var(--pink) 8%,var(--panel)); color: var(--text); font-size: 12px; font-weight: 700; cursor: help; }
+.member-badge-v7 { position: relative; display: inline-flex; align-items: center; min-width: 0; max-width: 100%; gap: 6px; padding: 6px 11px; border: 1px solid color-mix(in srgb,var(--pink) 34%,var(--line)); border-radius: 8px; background: color-mix(in srgb,var(--pink) 8%,var(--panel)); color: var(--text); font-size: 14px; line-height: 1.35; font-weight: 700; white-space: normal; overflow-wrap: anywhere; cursor: help; }
+:root body[data-page="member"] main.member-page-v7 .member-badge-v7 { font-size: 14px; }
 .member-badge-v7[data-kind="browserp_staff"] { border-color: color-mix(in srgb,var(--violet) 45%,var(--line)); background: color-mix(in srgb,var(--violet) 10%,var(--panel)); }
-.member-badge-v7::after { content: attr(data-description); position: absolute; left: 0; bottom: calc(100% + 8px); width: max-content; max-width: min(300px,75vw); padding: 9px 12px; border-radius: 9px; background: var(--bg-soft); border: 1px solid var(--line-strong); color: var(--text); box-shadow: var(--shadow-md); font-size: 12px; font-weight: 450; line-height: 1.45; white-space: normal; overflow-wrap: anywhere; opacity: 0; visibility: hidden; pointer-events: none; z-index: 2; }
+.member-badge-v7::after { content: attr(data-description); position: absolute; left: 0; bottom: calc(100% + 8px); width: max-content; max-width: min(300px,75vw); padding: 9px 12px; border-radius: 9px; background: var(--bg-soft); border: 1px solid var(--line-strong); color: var(--text); box-shadow: var(--shadow-md); font-size: 14px; font-weight: 450; line-height: 1.5; white-space: normal; overflow-wrap: anywhere; opacity: 0; visibility: hidden; pointer-events: none; z-index: 2; }
 .member-badge-v7:hover::after,.member-badge-v7:focus-visible::after { opacity: 1; visibility: visible; }
 .member-badge-v7:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
 .member-section-head-v7 { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin: 58px 0 22px; }
@@ -34,9 +35,9 @@
 .member-report-v7 summary:hover { color: var(--pink-strong); }
 .member-report-v7 form { display: grid; gap: 16px; max-width: 570px; padding: 20px 0; }
 .member-report-v7 form p { margin: 0; color: var(--copy); font-size: 14px; line-height: 1.5; }
-.member-report-v7 label { display: grid; gap: 7px; color: var(--text); font-size: 13px; font-weight: 650; }
+.member-report-v7 label { display: grid; min-width: 0; gap: 7px; color: var(--text); font-size: 14px; line-height: 1.45; font-weight: 650; overflow-wrap: anywhere; }
 .member-report-v7 select,.member-report-v7 textarea { width: 100%; padding: 12px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--panel); color: var(--text); font: inherit; }
 .member-report-v7 textarea { min-height: 110px; resize: vertical; }
-.member-report-v7 form button { justify-self: start; }
+.member-report-v7 form button { justify-self: start; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 :root[data-theme="light"] .member-hero-v7 { background: var(--panel); }
 @media (max-width: 700px) { .member-page-v7 { padding: 18px 0 70px; } .member-identity-v7 { padding: 0 20px; gap: 15px; margin-top: -34px; } .member-avatar-v7 { width: 76px; height: 76px; border-radius: 19px; } .member-bio-v7 { margin: 20px 20px 0; } .member-badges-v7 { margin: 19px 20px 28px; } .member-section-head-v7 { align-items: start; flex-direction: column; margin-top: 42px; } .member-server-grid-v7 { grid-template-columns: 1fr; } }

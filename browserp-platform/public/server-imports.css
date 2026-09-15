@@ -49,8 +49,12 @@
 
 @media (max-width: 480px) {
   #server-detail-v3 .detail-title-v3.detail-title-launch-v6 { padding: 17px; }
-  #server-detail-v3 .detail-heading-launch-v6 { grid-template-columns: 62px minmax(0, 1fr); gap: 12px; }
-  #server-detail-v3 .detail-logo-v3 { width: 62px; height: 62px; border-radius: 12px; }
+  /* The identity stays compact while the name gets the full phone width. */
+  #server-detail-v3 .detail-heading-launch-v6 { grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 10px; }
+  #server-detail-v3 .detail-heading-copy-launch-v6 { display: contents; }
+  #server-detail-v3 .detail-logo-v3 { grid-area: 1 / 1 / 2 / 2; width: 52px; height: 52px; border-radius: 11px; }
+  #server-detail-v3 .detail-heading-copy-launch-v6 .eyebrow-v3 { grid-area: 1 / 2 / 2 / 3; margin: 0; }
+  #server-detail-v3 .detail-heading-copy-launch-v6 h1 { grid-area: 2 / 1 / 3 / -1; min-width: 0; }
   #server-detail-v3 .detail-title-launch-v6 h1 { font-size: clamp(27px, 8.7vw, 34px); }
   #server-detail-v3 .detail-title-launch-v6 .detail-actions-v3 { grid-template-columns: minmax(0, 1fr); }
   #server-detail-v3 .detail-title-launch-v6 #server-join-v3 { grid-column: auto; }

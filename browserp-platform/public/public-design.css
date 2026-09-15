@@ -625,8 +625,8 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
 :root #server-detail-v3.server-page-v7 .server-info-grid-v5 { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin: 16px 0 0; }
 :root #server-detail-v3.server-page-v7 .server-info-card-v5 { min-height: 80px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 7px; padding: 12px; border: 1px solid var(--line-soft); border-radius: 10px; background: color-mix(in srgb,var(--panel-2) 42%,var(--panel)); box-shadow: none; }
 :root #server-detail-v3.server-page-v7 .server-info-card-v5:last-child { border-bottom: 1px solid var(--line-soft); }
-:root #server-detail-v3.server-page-v7 .server-info-card-v5 dt { font-size: 11px; font-weight: 650; letter-spacing: .01em; color: var(--muted); }
-:root #server-detail-v3.server-page-v7 .server-info-card-v5 dd { max-width: 100%; text-align: left; font-size: 14px; font-weight: 700; line-height: 1.45; font-variant-numeric: tabular-nums; }
+:root #server-detail-v3.server-page-v7 .server-info-card-v5 dt { min-width: 0; font-size: 13px; font-weight: 650; letter-spacing: .01em; line-height: 1.35; color: var(--muted); overflow-wrap: anywhere; }
+:root #server-detail-v3.server-page-v7 .server-info-card-v5 dd { min-width: 0; max-width: 100%; text-align: left; font-size: 14px; font-weight: 700; line-height: 1.45; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 :root #server-detail-v3.server-page-v7 .server-info-wide-v5 { grid-column: 1 / -1; min-height: 68px; }
 :root #server-detail-v3.server-page-v7 .server-info-card-v5.is-live-v3 { border-color: color-mix(in srgb,#4fce99 38%,var(--line)); background: color-mix(in srgb,#4fce99 7%,var(--panel)); }
 :root #server-detail-v3 #server-status-v3.is-live-v3,
@@ -638,6 +638,12 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
 @media (max-width: 520px) {
   :root #server-detail-v3 .detail-heading-copy-launch-v6 { gap: 11px; }
   :root body[data-page="servers"] .directory-discovery .smart-filter-toggle { min-width: 104px; padding: 0 12px; }
+}
+@media (max-width: 360px) {
+  /* At narrow phone widths, facts need the full line to remain legible when
+     browser text is enlarged or a community supplies a long value. */
+  :root #server-detail-v3.server-page-v7 .server-info-grid-v5 { grid-template-columns: minmax(0, 1fr); }
+  :root #server-detail-v3.server-page-v7 .server-info-card-v5 { min-height: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .ad-dot-v3::before,
@@ -651,6 +657,29 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .ad-dot-v3[aria-current="true"]::before { background: Highlight; }
   :root #server-detail-v3.server-page-v7 .server-info-card-v5,
   :root #server-detail-v3 .detail-meta-v3 .metadata-value-v5 { border-color: ButtonText; }
+}
+/* On a phone the account sheet owns the bottom edge. Brief feedback moves
+   below the header rather than covering its actions or the shortlist notice. */
+@media (max-width: 760px) {
+  /* Backdrop-filter makes a fixed child relative to the sticky header in
+     browsers. Remove it only while the bottom account sheet is open. */
+  :root body:not(.staff-v3):not([data-staff-page]) :is(.header-v3, .site-header):has(.account-popover-v3[data-open="true"]) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  :root body:not(.staff-v3):not([data-staff-page]):has(.account-popover-v3[data-open="true"]) .toast {
+    top: calc(84px + env(safe-area-inset-top, 0px));
+    right: 12px;
+    bottom: auto;
+    max-width: calc(100% - 24px);
+  }
+  :root body:not(.staff-v3):not([data-staff-page]):has(.account-popover-v3[data-open="true"]) .shortlist-status-v9 {
+    top: calc(164px + env(safe-area-inset-top, 0px));
+    bottom: auto;
+  }
+  :root body:not(.staff-v3):not([data-staff-page]):has(.account-popover-v3[data-open="true"]):not(:has(.toast.show)) .shortlist-status-v9 {
+    top: calc(84px + env(safe-area-inset-top, 0px));
+  }
 }
 .server-listed-by-v7 { display: flex; align-items: center; gap: 10px; margin: 16px 0 0; color: var(--muted); font-size: 13px; }
 .server-listed-by-v7[hidden] { display: none; }

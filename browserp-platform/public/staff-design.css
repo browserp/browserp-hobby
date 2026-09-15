@@ -274,10 +274,10 @@ body.staff-v3 {
    Three pending row guides occupy the initial preview space; real records can grow. */
 .staff-v3 .overview-priority-placeholder { display: none; }
 @media (min-width: 1101px) {
-  .staff-v3 .overview-priority-space { min-block-size: 8.0625rem; margin-bottom: 24px; }
+  .staff-v3 .overview-priority-space { min-block-size: 8.25rem; margin-bottom: 24px; }
   .staff-v3 .overview-priority-space > .staff-priorities { margin-bottom: 0; }
   .staff-v3 .overview-priority-space:has(> #overview-priorities[hidden]) > .overview-priority-placeholder {
-    display: flex; align-items: center; min-block-size: 8.0625rem; margin: 0; padding: 24px;
+    display: flex; align-items: center; min-block-size: 8.25rem; margin: 0; padding: 24px;
     border: 1px solid var(--line); border-radius: var(--card-radius); background: var(--panel);
     color: var(--muted); font-size: 13px; line-height: 1.6;
   }
@@ -479,6 +479,11 @@ body.staff-v3 {
   border-radius: 20px;
   background: var(--panel);
   box-shadow: var(--shadow-lg);
+  animation: staff-login-enter .18s ease-out both;
+}
+@keyframes staff-login-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .staff-v3 .staff-login-card-v3::before { height: 5px; background: var(--pink); }
 .staff-v3 .staff-login-card-v3 > .logo-v3 { margin-block: 8px 28px; }
@@ -562,11 +567,22 @@ body.staff-v3 {
   .staff-duty-availability) { max-width: 100%; }
 .staff-v3 .staff-duty-people li > div { flex: 1 1 170px; }
 .staff-v3 .staff-duty-people li :is(strong, small) { overflow-wrap: anywhere; }
+.staff-v3 .staff-scraper-card > span { min-width: 0; }
+.staff-v3 .staff-scraper-card :is(strong, small),
+.staff-v3 .overview-role-card :is(.staff-state-v3, summary, li) { overflow-wrap: anywhere; }
 
 @media (max-width: 920px) and (min-width: 761px) {
   .staff-v3 :is(.overview-role-grid, .staff-form-grid-v3) { grid-template-columns: minmax(0, 1fr); }
   .staff-v3 .overview-role-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .staff-v3 .staff-top-v3 { min-height: 0; }
+  .staff-v3 .staff-top-v3 { min-height: 0; flex-wrap: wrap; }
+  .staff-v3 .staff-top-v3 > div:first-child { flex: 1 1 100%; }
+  .staff-v3 .staff-top-v3 > .button-v3 {
+    align-self: flex-start;
+    max-width: 100%;
+    margin: 0;
+    white-space: normal;
+    text-align: center;
+  }
 }
 
 @media (max-width: 760px) {
@@ -608,6 +624,7 @@ body.staff-v3 {
 }
 @media (prefers-reduced-motion: reduce) {
   .staff-v3 .staff-work-row { transition: none; }
+  .staff-v3 .staff-login-card-v3 { animation: none; }
 }
 @media (forced-colors: active) {
   .staff-v3 .staff-top-v3,

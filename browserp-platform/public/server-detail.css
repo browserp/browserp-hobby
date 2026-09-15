@@ -321,6 +321,19 @@
   :root body #server-detail-v3.server-page-v7 .detail-title-v3 h1 { font-size: clamp(32px, 8vw, 43px); }
   :root body #server-detail-v3.server-page-v7 .detail-actions-v3 { margin-top: 19px; }
 }
+@media (max-width: 480px) {
+  :root body #server-detail-v3.server-page-v7 .detail-heading-copy-launch-v6 { display: contents; }
+  :root body #server-detail-v3.server-page-v7 .detail-logo-v3 { width: 52px; height: 52px; border-radius: 11px; }
+  :root body #server-detail-v3.server-page-v7 .detail-title-v3 h1 {
+    max-width: none;
+    font-size: clamp(28px, 7.7vw, 34px);
+    line-height: 1.1;
+    letter-spacing: -.025em;
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+  }
+  :root body #server-detail-v3.server-page-v7 .detail-actions-v3 .button-v3 { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+}
 @media (forced-colors: active) {
   :root body #server-detail-v3.server-page-v7 .detail-banner-v3,
   :root body #server-detail-v3.server-page-v7 .detail-title-v3.detail-title-launch-v6,

@@ -23,7 +23,7 @@ body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage > .shell {
 .profile-settings-layout-v7 .member-connection-unavailable { max-width: 12ch; text-align: right; line-height: 1.5; }
 .profile-settings-layout-v7 .member-connection-title { gap: 10px; }
 .profile-settings-layout-v7 .member-connection-title strong { font-size: 15px; }
-.profile-settings-layout-v7 .member-connected-badge { font-size: 12px; padding: 3px 9px; white-space: nowrap; }
+.profile-settings-layout-v7 .member-connected-badge { min-width: 0; max-width: 100%; font-size: 14px; line-height: 1.35; padding: 3px 9px; white-space: normal; overflow-wrap: anywhere; }
 .profile-settings-layout-v7 .member-connections h3 { font-size: 20px; }
 .profile-picture-editor-v3 { grid-template-columns: 84px minmax(0, 1fr); }
 .profile-picture-editor-v3 .button { justify-self: start; max-width: 100%; }
@@ -31,7 +31,7 @@ body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage > .shell {
 .profile-form-v2 .portal-field input[readonly] { color: var(--copy); background: var(--bg-soft); cursor: default; }
 .profile-form-v2 .portal-field :is(input, textarea, select) { min-width: 0; border-color: var(--line); background-color: var(--bg); border-radius: var(--radius-sm); transition: border-color .18s ease, box-shadow .18s ease; }
 .profile-form-v2 .portal-field :is(input, textarea, select):focus-visible { border-color: var(--cyan); outline: 3px solid var(--focus); outline-offset: 3px; }
-.profile-form-v2 .portal-status { margin: 0; font-size: 13px; }
+.profile-form-v2 .portal-status { margin: 0; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
 .dashboard-view .portal-nav { top: 88px; background: color-mix(in srgb, var(--panel) 96%, transparent); border-radius: var(--radius-sm); }
 .dashboard-view .metric-v2 { min-height: 128px; border-radius: var(--radius-sm); }
 .dashboard-view .portal-empty-v2 { border-style: solid; border-color: var(--line-soft); background: var(--bg-soft); border-radius: var(--radius-sm); }
@@ -75,14 +75,14 @@ body:is([data-page="profile"], [data-page="dashboard"]) .portal-stage > .shell {
   .profile-picture-editor-v3 { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; }
   .profile-picture-preview-v3 { width: 64px; height: 64px; grid-row: auto; }
   .profile-picture-editor-v3 .portal-help { grid-column: 1 / -1; }
-  .profile-picture-editor-v3 .button { padding-inline: 12px; font-size: 13px; }
+  .profile-picture-editor-v3 .button { max-width: 100%; padding-inline: 12px; font-size: 14px; line-height: 1.35; white-space: normal; overflow-wrap: anywhere; }
 }
 .profile-banner-picker-v7 { margin-top: 32px; padding-top: 30px; border-top: 1px solid var(--line); }
 .profile-banner-heading-v7 h3 { margin: 0 0 5px; font-size: 20px; }
 .profile-banner-heading-v7 p { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
 .profile-banner-preview-v7 { width: 100%; height: clamp(110px,18vw,170px); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
 .profile-banner-choices-v7 { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 18px; }
-.profile-banner-choice-v7 { min-height: 44px; padding: 8px 16px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--panel); color: var(--copy); font-size: 13px; font-weight: 650; cursor: pointer; }
+.profile-banner-choice-v7 { min-width: 0; max-width: 100%; min-height: 44px; padding: 8px 16px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--panel); color: var(--copy); font-size: 14px; line-height: 1.35; font-weight: 650; white-space: normal; overflow-wrap: anywhere; cursor: pointer; }
 .profile-banner-choice-v7:hover { border-color: var(--pink); color: var(--text); }
 .profile-banner-choice-v7[aria-pressed="true"] { border-color: var(--pink); color: var(--text); background: color-mix(in srgb,var(--pink) 10%,var(--panel)); }
 .profile-banner-choice-v7:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
