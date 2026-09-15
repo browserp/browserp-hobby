@@ -186,3 +186,109 @@
   :root body[data-page="find-server"] main .finder-choice:has(input:checked) { border-color: Highlight; outline: 2px solid Highlight; box-shadow: none; }
   :root body[data-page="find-server"] main .finder-progress button[aria-current="step"] { border-color: Highlight; }
 }
+
+/* A short, welcoming guided flow: clear current step and highly legible
+   answer tiles rather than thin controls on a flat canvas. */
+:root body[data-page="find-server"] main .finder-progress {
+  margin-bottom: 22px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+}
+:root body[data-page="find-server"] main .finder-progress ol { gap: 8px; border: 0; }
+:root body[data-page="find-server"] main .finder-progress button {
+  min-height: 58px;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  text-align: left;
+}
+:root body[data-page="find-server"] main .finder-progress button[aria-current="step"] {
+  border-color: color-mix(in srgb, var(--pink) 48%, var(--line));
+  background: color-mix(in srgb, var(--pink) 12%, var(--panel));
+  color: var(--text);
+  box-shadow: inset 0 3px var(--pink);
+}
+:root body[data-page="find-server"] main .finder-progress button[aria-current="step"] > span {
+  border-color: var(--pink);
+  background: var(--pink);
+  color: var(--bg);
+}
+:root body[data-page="find-server"] main .finder-form {
+  padding: clamp(24px, 3vw, 38px);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--pink) 10%, transparent), transparent 34%),
+    var(--panel);
+  box-shadow: var(--shadow-sm);
+}
+:root body[data-page="find-server"] main .finder-step-count { color: var(--pink); }
+:root body[data-page="find-server"] main .finder-question legend {
+  max-width: 26ch;
+  font-size: clamp(30px, 3.35vw, 44px);
+  line-height: 1.08;
+}
+:root body[data-page="find-server"] main .finder-choice {
+  min-height: 82px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--bg-soft);
+  box-shadow: inset 0 1px var(--edge-highlight);
+  transition: border-color .18s ease, background-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+:root body[data-page="find-server"] main .finder-choice:has(input:checked) {
+  border-color: var(--pink);
+  background: color-mix(in srgb, var(--pink) 14%, var(--panel));
+  box-shadow: inset 4px 0 var(--pink), 0 8px 24px rgb(0 0 0 / .1);
+}
+:root body[data-page="find-server"] main .finder-choice input { accent-color: var(--pink); }
+:root body[data-page="find-server"] main .finder-choice-copy strong {
+  font-size: 17px;
+  font-weight: 750;
+  letter-spacing: -.015em;
+}
+:root body[data-page="find-server"] main .finder-choice-copy small { font-size: 13px; line-height: 1.5; }
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice { min-height: 0; }
+:root body[data-page="find-server"] main .finder-game-art {
+  margin-bottom: 7px;
+  border: 1px solid var(--line-soft);
+  border-radius: 9px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / .07);
+}
+:root body[data-page="find-server"] main .finder-summary {
+  border-top: 4px solid var(--pink);
+  background:
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--pink) 14%, transparent), transparent 45%),
+    var(--panel);
+}
+:root body[data-page="find-server"] main .finder-summary h2 { font-size: 30px; }
+@media (hover: hover) and (pointer: fine) {
+  :root body[data-page="find-server"] main .finder-choice:not(:has(input:checked)):hover {
+    border-color: var(--pink);
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+}
+@media (max-width: 560px) {
+  :root body[data-page="find-server"] main .finder-progress { padding: 5px; }
+  :root body[data-page="find-server"] main .finder-progress ol { gap: 4px; }
+  :root body[data-page="find-server"] main .finder-progress button { min-height: 60px; padding: 7px 3px; text-align: center; font-size: 11px; }
+  :root body[data-page="find-server"] main .finder-form { padding: 22px 17px; }
+  :root body[data-page="find-server"] main .finder-question legend { font-size: clamp(29px, 8vw, 38px); }
+  :root body[data-page="find-server"] main .finder-choice { min-height: 74px; padding: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root body[data-page="find-server"] main .finder-choice { transition: none; }
+  :root body[data-page="find-server"] main .finder-choice:hover { transform: none; }
+}
+@media (forced-colors: active) {
+  :root body[data-page="find-server"] main :is(.finder-progress, .finder-form, .finder-choice, .finder-summary) { background: Canvas; border-color: CanvasText; box-shadow: none; }
+  :root body[data-page="find-server"] main .finder-choice:has(input:checked),
+  :root body[data-page="find-server"] main .finder-progress button[aria-current="step"] { border-color: Highlight; outline: 2px solid Highlight; box-shadow: none; }
+}

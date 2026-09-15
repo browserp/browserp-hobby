@@ -236,3 +236,93 @@
   :root body #server-detail-v3.server-page-v7 .detail-title-v3.detail-title-launch-v6,
   :root body #server-detail-v3.server-page-v7 .server-facts-v3 { border-color: CanvasText; }
 }
+
+/* A community profile has a recognisable masthead and a direct path to join.
+   The actual submitted banner is still the hero; nothing masks its artwork. */
+:root body #server-detail-v3.server-page-v7 .detail-banner-v3 {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--pink) 18%, transparent), transparent 40%),
+    linear-gradient(135deg, var(--panel), var(--bg-soft));
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+:root body #server-detail-v3.server-page-v7 .detail-banner-v3 > .server-import-banner-v3 {
+  aspect-ratio: 3.3 / 1;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  object-fit: cover;
+}
+:root body #server-detail-v3.server-page-v7 .detail-title-v3.detail-title-launch-v6 {
+  margin: 0;
+  padding: clamp(26px, 3vw, 42px);
+  border: 0;
+  border-top: 5px solid var(--pink);
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--pink) 14%, transparent), transparent 44%),
+    var(--panel);
+}
+:root body #server-detail-v3.server-page-v7 .detail-logo-v3 {
+  width: 104px;
+  height: 104px;
+  border: 3px solid var(--panel);
+  border-radius: 19px;
+  background: var(--surface-inset);
+  box-shadow: 0 0 0 1px var(--line), 0 12px 28px rgb(0 0 0 / .18);
+}
+:root body #server-detail-v3.server-page-v7 .detail-heading-copy-launch-v6 .eyebrow-v3 {
+  color: var(--pink);
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+:root body #server-detail-v3.server-page-v7 .detail-title-v3 h1 {
+  max-width: 20ch;
+  font-size: clamp(40px, 4.5vw, 68px);
+  font-weight: 550;
+}
+:root body #server-detail-v3.server-page-v7 .detail-meta-v3 {
+  padding: 16px 0 0;
+  border-top: 1px solid var(--line-soft);
+}
+:root body #server-detail-v3.server-page-v7 .detail-actions-v3 {
+  gap: 10px;
+  margin-top: 25px;
+}
+:root body #server-detail-v3.server-page-v7 .detail-actions-v3 .button-v3 {
+  min-height: 50px;
+  padding-inline: 20px;
+  border-radius: 10px;
+  font-weight: 750;
+}
+:root body #server-detail-v3.server-page-v7 .detail-actions-v3 .button-secondary-v3 {
+  border: 1px solid var(--line-strong);
+  background: var(--bg-soft);
+}
+:root body #server-detail-v3.server-page-v7 .server-about-v7 h2,
+:root body #server-detail-v3.server-page-v7 .server-comments-v7 h2 {
+  padding-left: 18px;
+  border-left: 4px solid var(--pink);
+}
+:root body #server-detail-v3.server-page-v7 .server-facts-v3 {
+  border-top-color: var(--pink);
+  background:
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--pink) 11%, transparent), transparent 45%),
+    var(--panel);
+}
+@media (max-width: 760px) {
+  :root body #server-detail-v3.server-page-v7 .detail-banner-v3 { border-radius: 15px; }
+  :root body #server-detail-v3.server-page-v7 .detail-banner-v3 > .server-import-banner-v3 { aspect-ratio: 2.2 / 1; }
+  :root body #server-detail-v3.server-page-v7 .detail-title-v3.detail-title-launch-v6 { padding: 22px 18px; border-top-width: 4px; }
+  :root body #server-detail-v3.server-page-v7 .detail-logo-v3 { width: 72px; height: 72px; border-radius: 14px; }
+  :root body #server-detail-v3.server-page-v7 .detail-title-v3 h1 { font-size: clamp(32px, 8vw, 43px); }
+  :root body #server-detail-v3.server-page-v7 .detail-actions-v3 { margin-top: 19px; }
+}
+@media (forced-colors: active) {
+  :root body #server-detail-v3.server-page-v7 .detail-banner-v3,
+  :root body #server-detail-v3.server-page-v7 .detail-title-v3.detail-title-launch-v6,
+  :root body #server-detail-v3.server-page-v7 .server-facts-v3 { background: Canvas; border-color: CanvasText; box-shadow: none; }
+}

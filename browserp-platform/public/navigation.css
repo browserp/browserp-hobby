@@ -3,6 +3,18 @@
 .header-v3 > .nav-v3,.site-header > .site-nav { --nav-height: 88px; min-height: 88px; width: min(calc(100% - 72px),var(--shell)); }
 .header-v3 > .nav-v3 .logo-lockup-v3,.site-header > .site-nav .logo-lockup-v3 { width: 190px; min-width: 190px; height: 54px; }
 .public-header-v6 { background: color-mix(in srgb, var(--bg) 94%, transparent); }
+/* A calmer, more deliberate masthead: the active destination and the main
+   owner action read immediately, while the original brand remains intact. */
+.public-header-v6 {
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--pink) 22%, var(--line-soft));
+  backdrop-filter: blur(18px) saturate(1.12);
+}
+.public-header-v6::after {
+  content: ""; position: absolute; inset: auto 0 -1px; height: 2px;
+  background: linear-gradient(90deg, var(--pink), var(--violet) 45%, var(--cyan) 82%, transparent);
+  opacity: .56; pointer-events: none;
+}
 /* Leave room around the rounded panel without moving Close away from its opener. */
 .public-nav-v6 { width: min(calc(100% - 72px),var(--shell)); min-height: 88px; display: flex; align-items: center; gap: 26px; }
 .navigation-brand-v6 { display: inline-flex; align-items: center; flex: none; }
@@ -25,11 +37,20 @@
 .public-nav-links-v6 > a::after { content: ""; position: absolute; height: 2px; bottom: 5px; inset-inline: 12px; background: var(--pink); border-radius: 2px; transform: scaleX(0); transition: transform .2s ease; }
 .public-nav-links-v6 > a:hover,.public-nav-links-v6 > a[aria-current="page"] { color: var(--text); }
 .public-nav-links-v6 > a:hover::after,.public-nav-links-v6 > a[aria-current="page"]::after { transform: scaleX(1); }
+.public-nav-links-v6 > a[aria-current="page"] {
+  background: color-mix(in srgb, var(--pink) 10%, transparent);
+  border-radius: 10px;
+}
 .public-nav-actions-v6 { display: flex; align-items: center; gap: 10px; }
 .public-nav-actions-v6 > .button-v3 { white-space: nowrap; font-size: 14px; }
 .public-nav-actions-v6 .account-name-v3 { max-width: 92px; }
 .navigation-toggle-v6,.navigation-close-v6 { flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 9px; width: 100px; min-width: 100px; height: 46px; padding: 10px 13px; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; line-height: 1.4; cursor: pointer; touch-action: manipulation; transition: border-color .2s ease,background .2s ease; }
 .navigation-toggle-v6:hover,.navigation-close-v6:hover { background: var(--panel-2); border-color: var(--pink); }
+.navigation-toggle-v6 {
+  border-color: color-mix(in srgb, var(--pink) 26%, var(--line));
+  box-shadow: inset 0 0 0 1px var(--edge-highlight);
+}
+.navigation-toggle-v6 svg { color: var(--pink); }
 .navigation-toggle-v6:active,.navigation-close-v6:active { border-color: var(--pink-strong); }
 .navigation-toggle-v6 svg,.navigation-close-v6 svg { width: 22px; height: 22px; flex: none; }
 .navigation-dialog-v6 { position: fixed; inset: 4px 12px 12px auto; width: min(410px,calc(100vw - 24px)); max-width: none; height: min(560px,calc(100dvh - 16px)); max-height: none; margin: 0; padding: 0; border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: var(--bg-soft); color: var(--text); box-shadow: var(--shadow-lg); overflow: visible; opacity: 0; transition: opacity var(--motion-enter, 180ms) ease; }
@@ -38,6 +59,10 @@
 .navigation-dialog-v6::backdrop { background: rgb(3 2 6 / .72); backdrop-filter: none; opacity: 0; transition: opacity var(--motion-enter, 180ms) ease; }
 .navigation-dialog-v6[data-open="true"]::backdrop { opacity: 1; }
 .navigation-panel-v6 { display: flex; flex-direction: column; min-width: 0; width: 100%; height: 100%; overflow: hidden; border-radius: inherit; background: var(--surface-raised, var(--panel)); }
+.navigation-panel-v6 {
+  background: radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--pink) 12%, transparent), transparent 35%),
+    var(--surface-raised, var(--panel));
+}
 .navigation-top-v6 { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex: none; padding: 13px 20px; border-bottom: 1px solid var(--line-soft); }
 .navigation-top-v6 .navigation-brand-v6 img { width: 150px; height: 42px; }
 .navigation-close-v6 { position: fixed; top: 21px; right: 36px; z-index: 1; }

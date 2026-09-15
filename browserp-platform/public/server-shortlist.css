@@ -65,3 +65,148 @@
     box-shadow: none;
   }
 }
+
+/* Directory results should feel like communities worth entering, not a table.
+   This scope leaves recommendation, member and staff cards untouched. */
+:root body[data-page="servers"] main #server-list {
+  gap: 14px;
+}
+:root body[data-page="servers"] main #server-list > .server-shortlist-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--pink);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 0 0, color-mix(in srgb, var(--pink) 10%, transparent), transparent 32%),
+    var(--panel);
+  box-shadow: var(--shadow-sm);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+:root body[data-page="servers"] main #server-list > .server-shortlist-card:is(:hover, :focus-within) {
+  border-color: var(--pink);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+:root body[data-page="servers"] main #server-list .server-card:not(.server-card-skeleton) {
+  grid-template-columns: 96px minmax(0, 1fr) minmax(148px, 170px);
+  gap: 7px 24px;
+  padding: 22px 22px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+:root body[data-page="servers"] main #server-list .server-card .server-card-media {
+  width: 96px;
+  height: 96px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-inset);
+  box-shadow: 0 8px 22px rgb(0 0 0 / .13);
+}
+:root body[data-page="servers"] main #server-list .server-card > h3 {
+  color: var(--text);
+  font-size: clamp(22px, 2.15vw, 28px);
+  font-weight: 750;
+  line-height: 1.18;
+  letter-spacing: -.045em;
+}
+:root body[data-page="servers"] main #server-list .server-card > .server-description {
+  margin-top: 3px;
+  color: var(--copy);
+  font-size: 14px;
+  line-height: 1.6;
+}
+:root body[data-page="servers"] main #server-list .server-card > .server-meta {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+:root body[data-page="servers"] main #server-list .server-card .status {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-soft);
+  color: var(--copy);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .02em;
+}
+:root body[data-page="servers"] main #server-list .server-card .status.online {
+  border-color: color-mix(in srgb, var(--success) 32%, var(--line));
+  background: color-mix(in srgb, var(--success) 10%, var(--panel));
+  color: var(--success);
+}
+:root body[data-page="servers"] main #server-list .server-card > .server-card-bottom {
+  gap: 12px;
+}
+:root body[data-page="servers"] main #server-list .server-card-bottom .server-card-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 8px 15px;
+  border-radius: 9px;
+  background: var(--pink);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: filter .18s ease;
+}
+:root body[data-page="servers"] main #server-list .server-shortlist-card:is(:hover, :focus-within) .server-card-action {
+  filter: brightness(1.08);
+}
+:root body[data-page="servers"] main #server-list .server-shortlist-actions {
+  justify-content: flex-end;
+  padding: 12px 22px 14px;
+  border: 0;
+  border-top: 1px solid var(--line-soft);
+  background: color-mix(in srgb, var(--bg-soft) 46%, var(--panel));
+}
+:root body[data-page="servers"] main #server-list .server-shortlist-actions .shortlist-button-v9 {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+  color: var(--copy);
+}
+:root body[data-page="servers"] main #server-list .server-shortlist-actions .shortlist-button-v9:is(:hover, :focus-visible) {
+  border-color: var(--pink);
+  color: var(--text);
+}
+:root body[data-page="servers"] main #server-list .server-shortlist-actions .shortlist-button-v9[aria-pressed="true"] {
+  border-color: var(--pink);
+  background: color-mix(in srgb, var(--pink) 14%, var(--panel));
+  color: var(--text);
+  box-shadow: inset 0 3px var(--pink);
+}
+@media (max-width: 760px) {
+  :root body[data-page="servers"] main #server-list { gap: 11px; }
+  :root body[data-page="servers"] main #server-list .server-card:not(.server-card-skeleton) {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 7px 14px;
+    padding: 18px 16px 0;
+  }
+  :root body[data-page="servers"] main #server-list .server-card .server-card-media { width: 64px; height: 64px; border-radius: 10px; }
+  :root body[data-page="servers"] main #server-list .server-card > h3 { font-size: 20px; }
+  :root body[data-page="servers"] main #server-list .server-card .status { justify-self: start; }
+  :root body[data-page="servers"] main #server-list .server-card > .server-card-bottom { flex-direction: row; align-items: center; justify-content: space-between; text-align: left; }
+  :root body[data-page="servers"] main #server-list .server-shortlist-actions { justify-content: flex-start; padding: 10px 16px 13px; }
+}
+@media (max-width: 420px) {
+  :root body[data-page="servers"] main #server-list .server-card:not(.server-card-skeleton) { padding-inline: 13px; }
+  :root body[data-page="servers"] main #server-list .server-shortlist-actions { padding-inline: 13px; }
+  :root body[data-page="servers"] main #server-list .server-card-bottom .server-card-action { padding-inline: 11px; font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root body[data-page="servers"] main #server-list > .server-shortlist-card,
+  :root body[data-page="servers"] main #server-list .server-card-bottom .server-card-action { transition: none; }
+  :root body[data-page="servers"] main #server-list > .server-shortlist-card:is(:hover, :focus-within) { transform: none; }
+}
+@media (forced-colors: active) {
+  :root body[data-page="servers"] main #server-list > .server-shortlist-card,
+  :root body[data-page="servers"] main #server-list .server-shortlist-actions { background: Canvas; border-color: CanvasText; box-shadow: none; }
+  :root body[data-page="servers"] main #server-list .server-card-bottom .server-card-action { border: 1px solid ButtonText; background: ButtonFace; color: ButtonText; }
+}

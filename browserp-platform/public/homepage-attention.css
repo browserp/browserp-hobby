@@ -1,0 +1,180 @@
+/* A more vivid front door, layered after the shared public design. */
+:root body[data-page="home"] .home-hero-intro {
+  overflow: hidden;
+  padding-block: clamp(66px, 7vw, 104px) clamp(62px, 7vw, 94px);
+  border-bottom-color: rgb(255 255 255 / .14);
+  background:
+    radial-gradient(circle at 78% 18%, rgb(107 219 217 / .24), transparent 31%),
+    radial-gradient(circle at 62% 100%, rgb(233 77 143 / .27), transparent 45%),
+    linear-gradient(118deg, #101b2c 6%, #1a3349 61%, #214958 100%);
+}
+/* The older public light-theme hero rule is more specific than the base rule. */
+:root[data-theme="light"] body[data-page="home"]:not(.staff-v3):not([data-staff-page]) .home-hero-intro {
+  background:
+    radial-gradient(circle at 78% 18%, rgb(107 219 217 / .24), transparent 31%),
+    radial-gradient(circle at 62% 100%, rgb(233 77 143 / .27), transparent 45%),
+    linear-gradient(118deg, #101b2c 6%, #1a3349 61%, #214958 100%);
+}
+:root body[data-page="home"] .home-hero-intro[data-wordmark-surface]::after {
+  background: linear-gradient(90deg, rgb(12 24 39 / .86), rgb(12 24 39 / .26) 67%, transparent);
+  opacity: .58;
+}
+:root body[data-page="home"] .home-hero-intro .home-hero-pattern { opacity: .36; }
+:root body[data-page="home"] .home-hero-intro .shell-v3 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(280px, .72fr);
+  align-items: center;
+  gap: clamp(28px, 4vw, 72px);
+}
+:root body[data-page="home"] .home-hero-intro .hero-copy-v3 { position: relative; z-index: 1; min-width: 0; }
+:root body[data-page="home"] .home-hero-intro .eyebrow-v3 { color: #ffbad4; }
+:root body[data-page="home"] .home-hero-intro h1 {
+  max-width: 12ch;
+  color: #fffdfb;
+  font-size: clamp(58px, 6.6vw, 94px);
+  line-height: .98;
+  letter-spacing: -.07em;
+}
+:root body[data-page="home"] .home-hero-intro h1 .gradient-text-v3 {
+  color: #ffbad4;
+  background-image: linear-gradient(100deg, #ffbad4, #83e4df);
+}
+:root body[data-page="home"] .home-hero-intro .hero-copy-v3 > p {
+  max-width: 47ch;
+  margin-top: 24px;
+  color: #d8e5e8;
+  font-size: clamp(17px, 1.6vw, 20px);
+  line-height: 1.62;
+}
+:root body[data-page="home"] main .home-hero-intro .search-v3 {
+  max-width: 640px;
+  margin-top: 32px;
+  border: 1px solid rgb(255 255 255 / .72);
+  background: #fffdfb;
+  box-shadow: 0 18px 48px rgb(3 14 28 / .25);
+}
+:root body[data-page="home"] .home-hero-intro .search-v3 input { color: #26394b; }
+:root body[data-page="home"] .home-hero-intro .search-v3 input::placeholder { color: #687b88; }
+:root body[data-page="home"] .home-hero-visual {
+  position: relative;
+  justify-self: end;
+  width: min(100%, 410px);
+  aspect-ratio: 1;
+  transform: rotate(3deg);
+  filter: drop-shadow(0 30px 44px rgb(4 17 29 / .38));
+}
+:root body[data-page="home"] .home-hero-visual::before {
+  content: "";
+  position: absolute;
+  inset: 13px -13px -13px 13px;
+  border: 2px solid #77d9d6;
+  border-radius: 20px;
+  transform: rotate(5deg);
+}
+:root body[data-page="home"] .home-hero-visual img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 5px solid rgb(255 255 255 / .84);
+  border-radius: 19px;
+}
+
+/* The four actual game choices stay links, but read like visual destinations. */
+:root body[data-page="home"] .home-game-discovery { padding-block: clamp(36px, 4vw, 52px) 6px; }
+:root body[data-page="home"] .home-game-discovery .game-showcase-v3 > span {
+  padding-bottom: 18px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+:root body[data-page="home"] .home-game-discovery .game-grid-v3 { gap: clamp(12px, 1.5vw, 20px); }
+:root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) {
+  gap: 10px;
+  padding: 12px;
+  border-top: 3px solid var(--pink);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+:root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) .game-art-v3 {
+  aspect-ratio: 3 / 2;
+  border-radius: 10px;
+}
+:root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) strong {
+  color: var(--text);
+  font-size: clamp(18px, 1.6vw, 22px);
+  letter-spacing: -.035em;
+}
+:root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3):is(:hover, :focus-visible) {
+  transform: translateY(-4px);
+  border-color: var(--pink);
+  box-shadow: var(--shadow-md);
+}
+:root body[data-page="home"] .home-game-discovery .hero-actions-v3 { margin-top: 24px; }
+
+/* A contrasting close gives the marketing section its own silhouette. */
+:root body[data-page="home"] .section-rail-v3 {
+  background:
+    radial-gradient(circle at 90% 15%, rgb(119 217 214 / .18), transparent 32%),
+    linear-gradient(125deg, #112234, #19394b);
+}
+:root body[data-page="home"] .section-rail-v3 .editorial-v3 h2 { color: #fffdfb; }
+:root body[data-page="home"] .section-rail-v3 .editorial-v3 > p { color: #d8e5e8; }
+:root body[data-page="home"] .section-rail-v3 .editorial-v3 > .eyebrow-v3 { color: #ffbad4; }
+:root body[data-page="home"] main .section-rail-v3 .trust-grid-v3 article {
+  border: 1px solid rgb(255 255 255 / .2);
+  border-top: 3px solid #ffbad4;
+  background: rgb(255 255 255 / .06);
+  box-shadow: none;
+}
+:root body[data-page="home"] .section-rail-v3 .trust-grid-v3 strong { color: #fffdfb; }
+:root body[data-page="home"] .section-rail-v3 .trust-grid-v3 span { color: #c5d8e0; }
+:root body[data-page="home"]:not(.staff-v3):not([data-staff-page]) main .section-rail-v3 .button-secondary-v3 {
+  border-color: rgb(255 255 255 / .52);
+  color: #fffdfb;
+  background: transparent;
+}
+:root body[data-page="home"]:not(.staff-v3):not([data-staff-page]) main .section-rail-v3 .button-secondary-v3:hover { background: rgb(255 255 255 / .11); }
+
+@media (max-width: 850px) {
+  :root body[data-page="home"] .home-hero-intro .shell-v3 { grid-template-columns: minmax(0, 1fr) 240px; gap: 20px; }
+  :root body[data-page="home"] .home-hero-visual { width: 240px; }
+  :root body[data-page="home"] .home-hero-intro h1 { font-size: clamp(50px, 7.7vw, 68px); }
+}
+@media (max-width: 700px) {
+  :root body[data-page="home"] .home-hero-intro { padding-block: 56px 48px; }
+  :root body[data-page="home"] .home-hero-intro .shell-v3 { display: block; }
+  :root body[data-page="home"] .home-hero-intro h1 { max-width: 12ch; font-size: clamp(46px, 11vw, 64px); }
+  :root body[data-page="home"] .home-hero-intro .hero-copy-v3 > p { font-size: 17px; }
+  :root body[data-page="home"] .home-hero-visual {
+    position: absolute;
+    top: 40px;
+    right: -100px;
+    width: 310px;
+    opacity: .16;
+    filter: none;
+  }
+  :root body[data-page="home"] .home-hero-visual::before { display: none; }
+  :root body[data-page="home"] .home-hero-visual img { border: 0; }
+  :root body[data-page="home"] .home-game-discovery .game-grid-v3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) .game-art-v3 { aspect-ratio: 3 / 2; }
+}
+@media (max-width: 360px) {
+  :root body[data-page="home"] .home-hero-intro h1 { font-size: 44px; }
+  :root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) { padding: 8px; }
+  :root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) strong { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) { transition: none; }
+  :root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3):is(:hover, :focus-visible) { transform: none; }
+}
+@media (forced-colors: active) {
+  :root body[data-page="home"] .home-hero-intro,
+  :root body[data-page="home"] .section-rail-v3 { background: Canvas; }
+  :root body[data-page="home"] .home-hero-intro :is(h1, .eyebrow-v3, p),
+  :root body[data-page="home"] .section-rail-v3 :is(h2, .eyebrow-v3, p, strong, span) { color: CanvasText; }
+  :root body[data-page="home"] .home-hero-visual { display: none; }
+}

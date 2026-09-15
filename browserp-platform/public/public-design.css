@@ -853,3 +853,90 @@ body:not(.staff-v3):not([data-staff-page]) {
     background: Canvas; border-color: CanvasText; box-shadow: none;
   }
 }
+
+/* Second visual pass: stronger identity on editorial, game and reading pages.
+   Artwork and content remain real; the glow is a non-interactive backdrop. */
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.public-intro-surface-v7, .finder-heading, .journal-article-head-v6) {
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 92% 4%, color-mix(in srgb, var(--pink) 23%, transparent), transparent 36%),
+    radial-gradient(circle at 0% 100%, color-mix(in srgb, var(--cyan) 12%, transparent), transparent 44%),
+    var(--panel);
+  box-shadow: var(--shadow-md);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.public-intro-surface-v7, .finder-heading, .journal-article-head-v6)::after {
+  content: ""; position: absolute; right: -68px; top: -68px; width: 230px; height: 230px;
+  border: 1px solid color-mix(in srgb, var(--pink) 38%, transparent);
+  border-radius: 50%; box-shadow: 0 0 0 34px color-mix(in srgb, var(--pink) 5%, transparent),
+    0 0 0 68px color-mix(in srgb, var(--cyan) 4%, transparent);
+  opacity: .65; pointer-events: none; z-index: -1;
+}
+:root body:not(.staff-v3):not([data-staff-page]) :is(.game-page-hero-v4, .journal-hero-v6, .staff-public-hero) {
+  background:
+    radial-gradient(circle at 84% 15%, color-mix(in srgb, var(--pink) 27%, transparent), transparent 37%),
+    radial-gradient(circle at 5% 90%, color-mix(in srgb, var(--cyan) 12%, transparent), transparent 44%),
+    var(--bg-soft);
+}
+:root body:not(.staff-v3):not([data-staff-page]) .game-page-hero-v4[data-platform] {
+  background:
+    radial-gradient(circle at 86% 24%, color-mix(in srgb, var(--platform-accent) 28%, transparent), transparent 40%),
+    linear-gradient(135deg, var(--bg-soft), var(--bg));
+}
+:root body:not(.staff-v3):not([data-staff-page]) :is(.game-page-hero-v4, .journal-hero-v6, .staff-public-hero) h1 {
+  max-width: 16ch; font-weight: 850;
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .game-grid-v3 > a[data-platform] {
+  border-top: 4px solid var(--platform-accent, var(--pink));
+  background: linear-gradient(150deg, color-mix(in srgb, var(--platform-accent, var(--pink)) 10%, var(--panel)), var(--panel) 60%);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .game-grid-v3 > a[data-platform]:is(:hover, :focus-visible) {
+  border-color: var(--platform-accent, var(--pink));
+  box-shadow: var(--shadow-md);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .journal-card-v6 {
+  border-top: 4px solid color-mix(in srgb, var(--pink) 58%, var(--cyan));
+  background: linear-gradient(160deg, var(--panel), color-mix(in srgb, var(--cyan) 3%, var(--panel)));
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .journal-card-featured-v6 {
+  border-top-color: var(--pink);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--pink) 15%, var(--panel)), var(--panel) 72%);
+}
+:root body[data-page="about"] main .legal-v3 > section {
+  border-left: 4px solid color-mix(in srgb, var(--pink) 56%, var(--cyan));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--pink) 5%, var(--panel)), var(--panel) 72%);
+}
+:root body[data-page="about"] main .legal-v3 > section:nth-of-type(even) {
+  border-left-color: var(--cyan);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--cyan) 6%, var(--panel)), var(--panel) 72%);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .hero-actions-v3 .button-primary-v3 {
+  box-shadow: 0 12px 26px color-mix(in srgb, var(--pink) 26%, transparent);
+}
+:root[data-theme="light"] body:not(.staff-v3):not([data-staff-page]) main .game-grid-v3 > a[data-platform="roblox"] {
+  --platform-accent: #526b82;
+}
+:root body:not(.staff-v3):not([data-staff-page]) .footer-v3 {
+  position: relative; margin-top: 0; padding-top: clamp(44px, 5vw, 72px);
+  border-top: 1px solid var(--line);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--cyan) 5%, var(--bg-soft)), var(--bg-soft) 64%);
+}
+:root body:not(.staff-v3):not([data-staff-page]) .footer-v3::before {
+  content: ""; position: absolute; inset: -2px 0 auto; height: 3px;
+  background: linear-gradient(90deg, var(--pink), var(--violet) 44%, var(--cyan));
+  pointer-events: none;
+}
+:root body:not(.staff-v3):not([data-staff-page]) .footer-column-v3 strong {
+  display: block; margin-bottom: 16px; color: var(--text); font-size: 12px;
+  font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
+}
+:root body:not(.staff-v3):not([data-staff-page]) .footer-column-v3 a:is(:hover, :focus-visible) {
+  color: var(--pink-strong); text-decoration: underline; text-underline-offset: 5px;
+}
+@media (max-width: 760px) {
+  :root body:not(.staff-v3):not([data-staff-page]) main :is(.public-intro-surface-v7, .finder-heading, .journal-article-head-v6)::after {
+    width: 160px; height: 160px; right: -92px; top: -74px;
+  }
+}
+@media (forced-colors: active), print {
+  :root body:not(.staff-v3):not([data-staff-page]) main :is(.public-intro-surface-v7, .finder-heading, .journal-article-head-v6)::after { content: none; }
+}
