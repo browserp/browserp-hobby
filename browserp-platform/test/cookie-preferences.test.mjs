@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { JSDOM } from "jsdom";
 
 const source = readFileSync(new URL("../public/recommendations.js", import.meta.url), "utf8");
+const design = readFileSync(new URL("../public/public-design.css", import.meta.url), "utf8");
 const key = "browserp-recommendations-v1";
 const choiceKey = "browserp-cookie-choice-v1";
 const markup = '<body><footer class="footer-v3"><div class="footer-column-v3"><a href="/legal#cookies">Cookie policy</a></div></footer></body>';
@@ -68,6 +69,20 @@ test("first visit offers equal choices without enabling storage and a rejection 
   const next = await page(t, w => w.localStorage.setItem(choiceKey, first.w.localStorage.getItem(choiceKey)));
   assert.ok(!next.w.document.querySelector('[data-cookie-prompt]') || next.w.document.querySelector('[data-cookie-prompt]').hidden);
   assert.equal(next.w.BrowseRPRecommendations.read().enabled, false);
+});
+
+test("first-visit choices sit before page content on phones instead of covering it", async t => {
+  const { w } = await page(t, window => {
+    const main = window.document.createElement("main");
+    main.innerHTML = "<h1>Browse a roleplay game</h1>";
+    window.document.querySelector("footer").before(main);
+  });
+  const prompt = w.document.querySelector("[data-cookie-prompt]");
+  assert.equal(w.document.querySelector("main").previousElementSibling, prompt);
+  assert.match(design, /@media \(max-width: 640px\)[\s\S]*?\.cookie-prompt-v3\s*\{[^}]*position: relative;/);
+  assert.match(design, /\.cookie-prompt-copy-v3\s*\{[^}]*overflow-y: auto;/);
+  assert.match(design, /\.cookie-prompt-spacer-v3\s*\{ display: none; \}/);
+  assert.equal(prompt.querySelectorAll(".cookie-prompt-actions-v3 button").length, 3);
 });
 
 test("acceptance persists and existing explicit recommendation opt-in is not prompted again", async t => {

@@ -367,7 +367,12 @@
     manage.setAttribute("aria-haspopup", "dialog"); manage.addEventListener("click", () => openCookiePreferences(manage));
     actions.append(manage); prompt.append(copy, actions);
     const spacer = el("div", "cookie-prompt-spacer-v3"); spacer.setAttribute("aria-hidden", "true");
-    document.body.append(spacer, prompt);
+    document.body.append(spacer);
+    // A fixed desktop card can live anywhere in the document; on narrow screens
+    // it participates in the page flow so it never covers the page heading.
+    const main = document.querySelector("main");
+    if (main) main.before(prompt);
+    else document.body.append(prompt);
     function reserveSpace() {
       const height = prompt.hidden ? 0 : Math.ceil(prompt.getBoundingClientRect().height) + 32;
       spacer.style.height = `${height}px`;

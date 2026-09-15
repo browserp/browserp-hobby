@@ -968,12 +968,19 @@ body:not(.staff-v3):not([data-staff-page]) {
 }
 @media (max-width: 640px) {
   :root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-v3 {
-    left: 12px; right: 12px; bottom: 12px; width: calc(100% - 24px);
-    max-height: 58dvh; padding: 16px; gap: 10px;
+    position: relative; left: auto; right: auto; bottom: auto;
+    width: calc(100% - 24px); max-height: min(50dvh, 430px);
+    margin: 12px auto 0; padding: 16px; gap: 10px;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  :root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-copy-v3 {
+    min-height: 0; overflow-y: auto; scrollbar-width: thin;
   }
   :root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-actions-v3 {
-    bottom: -16px; padding-top: 10px;
+    position: static; flex-shrink: 0; padding-top: 10px;
   }
+  :root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-spacer-v3 { display: none; }
+  html:has([data-cookie-prompt]:not([hidden])) { scroll-padding-bottom: 0; }
 }
 @media (forced-colors: active) {
   :root body:not(.staff-v3):not([data-staff-page]) .cookie-prompt-v3,
