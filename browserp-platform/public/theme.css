@@ -2,14 +2,14 @@
    themes; these fallback values also support pages before final wiring. */
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f7f7f7; --bg-soft: #eeeeee; --panel: #ffffff; --panel-2: #eeeeee;
-  --text: #1c1c1c; --copy: #494949; --muted: #626262;
-  --line: #d8d8d8; --line-soft: #e6e6e6; --line-strong: #aaaaaa;
-  --pink: #a90868; --pink-strong: #900457; --cyan: #006d84; --violet: #6e33b9;
-  --info: #006d84; --success: #147044; --warning: #8a510c; --danger: #af2741;
-  --control-bg: #ffffff; --control-border: #838383;
-  --surface-hover: #e9e9e9; --selection-surface: #e8e8e8; --interactive-edge: #6e33b9;
-  --surface-raised: #ffffff; --surface-inset: #eeeeee;
+  --bg: #f6f2ec; --bg-soft: #eee7dd; --panel: #fffdf9; --panel-2: #f2ede5;
+  --text: #223344; --copy: #44566a; --muted: #526275;
+  --line: #d8d1c7; --line-soft: #e8e1d7; --line-strong: #9c9b9a;
+  --pink: #a52b65; --pink-strong: #8b2353; --cyan: #0a6872; --violet: #61419d;
+  --info: #0a6872; --success: #236d50; --warning: #835619; --danger: #aa3150;
+  --control-bg: #fffdf9; --control-border: #7c8690;
+  --surface-hover: #eee8df; --selection-surface: #f1e4e7; --interactive-edge: #a52b65;
+  --surface-raised: #fffdf9; --surface-inset: #f2ede5;
   --edge-highlight: rgb(255 255 255 / .3);
   --shadow-sm: 0 2px 6px rgb(0 0 0 / .06);
   --shadow-md: 0 4px 10px rgb(0 0 0 / .06), 0 20px 50px rgb(0 0 0 / .12);
@@ -27,7 +27,7 @@
 }
 :root[data-theme="light"] ::selection { color: var(--text); background: var(--selection-surface); }
 :root[data-theme="light"] .header-v3,
-:root[data-theme="light"] .public-header-v6 { background: rgb(255 255 255 / .96); border-color: var(--line-soft); }
+:root[data-theme="light"] .public-header-v6 { background: color-mix(in srgb, var(--panel) 96%, transparent); border-color: var(--line-soft); }
 :root[data-theme="light"] .navigation-dialog-v6 { box-shadow: var(--shadow-lg); }
 :root[data-theme="light"] .navigation-dialog-v6::backdrop { background: var(--overlay-scrim); }
 
@@ -97,7 +97,7 @@
 :root[data-theme] :is(.navigation-toggle-v6,.navigation-close-v6) { transition-property: border-color; }
 
 :root[data-theme="light"] .hero-v3 { background: transparent; }
-:root[data-theme="light"] [data-wordmark-surface]::after { background: linear-gradient(90deg,rgb(248 245 248 / .9),rgb(248 245 248 / .75) 60%,rgb(248 245 248 / .2)); }
+:root[data-theme="light"] [data-wordmark-surface]::after { background: linear-gradient(90deg,color-mix(in srgb,var(--bg) 90%,transparent),color-mix(in srgb,var(--bg) 75%,transparent) 60%,transparent); }
 :root[data-theme="light"] :is(.section-v3,.footer-v3,.page-body,.platform-band,.discover-section,.category-section,.credits-section,.tools-section,.staff-section,.foundation-section) { background-color: var(--bg); border-color: var(--line-soft); }
 :root[data-theme="light"] :is(.discover-section,.tools-section,.foundation-section) { background-color: var(--panel); }
 :root[data-theme="light"] .footer-v3 { background: var(--bg-soft); }

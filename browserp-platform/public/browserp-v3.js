@@ -673,17 +673,19 @@
     }
     const grid = node("div", "shell-v3 footer-grid-v3");
     const brand = node("div", "footer-brand-v3");
-    const lockup = node("a", "logo-lockup-v3"); lockup.href = "/"; lockup.setAttribute("aria-label", "BrowseRP home"); const mark = new Image(); mark.src = "/assets/browserp-logo-v5.png?v=20260908"; mark.alt = "BrowseRP"; mark.className = "logo-full-v5";
-    lockup.append(mark); brand.append(lockup, node("p", "", "A clearer way to discover roleplay communities across games."));
+    const lockup = node("a", "footer-home-v3 logo-lockup-v3"); lockup.href = "/"; lockup.setAttribute("aria-label", "BrowseRP home"); const mark = new Image(); mark.src = "/assets/browserp-logo-v5.png?v=20260908"; mark.alt = "BrowseRP"; mark.className = "logo-full-v5";
+    lockup.append(mark); brand.append(lockup, node("p", "", "One place to discover roleplay communities across FiveM, RedM, Roblox and Minecraft."));
     grid.append(brand);
     const groups = [
-      ["Discover", [["Browse servers","/servers"],["UK servers","/servers?region=United%20Kingdom"],["US servers","/servers?region=United%20States"],["Blog","/blog"]]],
+      ["Explore", [["Browse servers","/servers"],["Browse games","/games"],["Recently added","/servers?sort=newest"],["UK servers","/servers?region=United%20Kingdom"],["US servers","/servers?region=United%20States"],["Blog","/blog"]]],
       ["Server owners", [["List my server","/list-server"],["My listings","/dashboard"],["Advertise","/advertise"],["BrowseRP Coins","/coins"]]],
-      ["BrowseRP", [["Our vision","/about"],["Community standards","/legal#standards"],["Safety","/legal#safety"],["Ban appeal","/appeal"]]],
-      ["Legal & help", [["Privacy policy","/privacy"],["Terms of service","/terms"],["Cookie policy","/legal#cookies"],["Help & contact","/legal#contact"]]]
+      ["Community", [["Our vision","/about"],["Meet the staff","/staff"],["Community standards","/legal#standards"],["Safety guidelines","/legal#safety"],["Ban appeal","/appeal"]]],
+      ["Legal & help", [["Privacy policy","/privacy"],["Terms of service","/terms"],["Cookie policy","/legal#cookies"],["Refund policy","/legal#refunds"],["Help & contact","/legal#contact"]]]
     ];
     for (const [heading, links] of groups) { const column=node("div","footer-column-v3");column.append(node("strong","",heading));for(const [label,href] of links){const link=node("a","",label);link.href=href;column.append(link);}grid.append(column); }
-    const bottom=node("div","shell-v3 footer-bottom-v3");bottom.append(node("span","",`© ${new Date().getFullYear()} BrowseRP · Operated in the United Kingdom`));
+    const bottom=node("div","shell-v3 footer-bottom-v3");
+    const year=node("span","",String(new Date().getFullYear())); year.dataset.yearV3="";
+    const copyright=node("span"); copyright.append("© ",year," BrowseRP · Operated in the United Kingdom"); bottom.append(copyright);
     root.replaceChildren(grid,bottom);
     window.BrowseRPRecommendations?.mountCookiePreferences?.(root);
   }

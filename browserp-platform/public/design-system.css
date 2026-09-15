@@ -2,38 +2,38 @@
    No routing, layout ordering, permissions or control semantics live here. */
 :root {
   color-scheme: dark;
-  --bg: #0a0a0a; --bg-soft: #111111; --panel: #171717; --panel-2: #202020;
-  --text: #f5f5f5; --copy: #c4c4c4; --muted: #a3a3a3;
-  --line: #333333; --line-soft: #262626; --line-strong: #555555;
-  --pink: #ff4aa8; --pink-strong: #ff63b4; --cyan: #00cbea; --violet: #b276ff;
-  --info: #00cbea; --success: #6dd5a0; --warning: #f1c277; --danger: #ff92a7;
-  --control-bg: #111111; --control-border: #808080;
-  --surface-hover: #252525; --selection-surface: #242424; --interactive-edge: #b276ff;
-  --surface-raised: #202020; --surface-inset: #111111;
-  --edge-highlight: rgb(255 255 255 / .025);
+  --bg: #101a28; --bg-soft: #162334; --panel: #1a2a3c; --panel-2: #24374c;
+  --text: #f7f9f8; --copy: #d6dfdf; --muted: #aabdc5;
+  --line: #415266; --line-soft: #304257; --line-strong: #627489;
+  --pink: #f28db5; --pink-strong: #ffbad1; --cyan: #78d9d3; --violet: #bea8e9;
+  --info: #78d9d3; --success: #83d6ac; --warning: #f1c883; --danger: #ff9aaa;
+  --control-bg: #162334; --control-border: #72849a;
+  --surface-hover: #2b4055; --selection-surface: #344254; --interactive-edge: #78d9d3;
+  --surface-raised: #22354a; --surface-inset: #132031;
+  --edge-highlight: rgb(255 255 255 / .055);
   --shadow-sm: 0 2px 6px rgb(0 0 0 / .12);
   --shadow-md: 0 4px 12px rgb(0 0 0 / .2), 0 20px 50px rgb(0 0 0 / .28);
   --shadow-lg: 0 8px 24px rgb(0 0 0 / .24), 0 32px 80px rgb(0 0 0 / .4);
   --overlay-scrim: rgb(0 0 0 / .72);
   --font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --control-height: 48px; --control-radius: 12px; --card-radius: 16px; --panel-radius: 20px;
+  --control-height: 48px; --control-radius: 8px; --card-radius: 12px; --panel-radius: 16px;
   --radius-xs: 8px; --radius-sm: var(--control-radius); --radius-md: var(--card-radius); --radius-lg: var(--panel-radius);
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
   --space-6: 24px; --space-8: 32px; --space-12: 48px; --space-16: 64px;
   --motion-fast: 160ms; --motion-enter: 180ms; --motion-ease: cubic-bezier(.2,.72,.2,1);
-  --brand-action-gradient: linear-gradient(110deg, #bf087b 0%, #7937c8 48%, #00778f 100%);
+  --brand-action-gradient: linear-gradient(110deg, #a72a67, #a72a67);
 }
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f7f7f7; --bg-soft: #eeeeee; --panel: #ffffff; --panel-2: #eeeeee;
-  --text: #1c1c1c; --copy: #494949; --muted: #626262;
-  --line: #d8d8d8; --line-soft: #e6e6e6; --line-strong: #aaaaaa;
-  --pink: #a90868; --pink-strong: #900457; --cyan: #006d84; --violet: #6e33b9;
-  --info: #006d84; --success: #147044; --warning: #8a510c; --danger: #af2741;
-  --control-bg: #ffffff; --control-border: #838383;
-  --surface-hover: #e9e9e9; --selection-surface: #e8e8e8; --interactive-edge: #6e33b9;
-  --surface-raised: #ffffff; --surface-inset: #eeeeee;
-  --edge-highlight: rgb(255 255 255 / .3);
+  --bg: #f6f2ec; --bg-soft: #eee7dd; --panel: #fffdf9; --panel-2: #f2ede5;
+  --text: #223344; --copy: #44566a; --muted: #526275;
+  --line: #d8d1c7; --line-soft: #e8e1d7; --line-strong: #9c9b9a;
+  --pink: #a52b65; --pink-strong: #8b2353; --cyan: #0a6872; --violet: #61419d;
+  --info: #0a6872; --success: #236d50; --warning: #835619; --danger: #aa3150;
+  --control-bg: #fffdf9; --control-border: #7c8690;
+  --surface-hover: #eee8df; --selection-surface: #f1e4e7; --interactive-edge: #a52b65;
+  --surface-raised: #fffdf9; --surface-inset: #f2ede5;
+  --edge-highlight: rgb(255 255 255 / .55);
   --shadow-sm: 0 2px 6px rgb(0 0 0 / .06);
   --shadow-md: 0 4px 10px rgb(0 0 0 / .06), 0 20px 50px rgb(0 0 0 / .12);
   --shadow-lg: 0 8px 24px rgb(0 0 0 / .09), 0 32px 80px rgb(0 0 0 / .17);

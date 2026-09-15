@@ -41,3 +41,84 @@
   .directory-control-row button { font-size: 11px; }
   .directory-filter-panel .smart-primary-filters,.directory-filter-panel .smart-refinements { grid-template-columns: 1fr; }
 }
+
+/* Editorial discovery controls sit on the page canvas, with selection carried
+   by a crisp rule instead of a coloured tile. The shared layout still owns
+   disclosure, result ordering and advert placement. */
+:root body[data-page="servers"] main .directory-discovery.smart-discovery {
+  padding-block: 8px 0;
+}
+:root body[data-page="servers"] main .directory-control-row {
+  gap: 6px 16px;
+  padding-block: 10px 14px;
+  border-block: 1px solid var(--line-soft);
+}
+:root body[data-page="servers"] main .directory-control-row button {
+  min-height: 50px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--control-radius, 12px);
+  background: transparent;
+  color: var(--copy);
+  font-size: 14px;
+  font-weight: 600;
+  transition: color var(--motion-fast, 160ms) ease, border-color var(--motion-fast, 160ms) ease, background-color var(--motion-fast, 160ms) ease;
+}
+:root body[data-page="servers"] main .directory-control-row button:is(:hover, :focus-visible) {
+  color: var(--text);
+  border-color: var(--line);
+  background: var(--surface-hover);
+}
+:root body[data-page="servers"] main .directory-game-choice[aria-pressed="true"] {
+  color: var(--text);
+  border-color: var(--line);
+  background: var(--selection-surface);
+  box-shadow: inset 0 -3px var(--platform-accent, var(--cyan));
+}
+:root body[data-page="servers"] main .directory-control-row .smart-filter-toggle {
+  padding-inline: 18px;
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--text);
+  font-weight: 650;
+}
+:root body[data-page="servers"] main .directory-control-row .smart-filter-toggle[aria-expanded="true"] {
+  border-color: var(--interactive-edge);
+  background: var(--selection-surface);
+}
+:root body[data-page="servers"] main .directory-filter-panel {
+  gap: 20px 24px;
+  margin-top: 24px;
+  padding-block: 4px 28px;
+  border-bottom-color: var(--line);
+}
+:root body[data-page="servers"] main .directory-filter-panel .field-v3 > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+:root body[data-page="servers"] main .directory-game-hint {
+  padding: 12px 16px;
+  border-left: 3px solid var(--cyan);
+  background: var(--surface-inset);
+  color: var(--copy);
+  line-height: 1.55;
+}
+@media (max-width: 760px) {
+  :root body[data-page="servers"] main .directory-control-row { gap: 4px 8px; }
+  :root body[data-page="servers"] main .directory-control-row button { min-height: 44px; padding: 8px 10px; font-size: 13px; }
+  :root body[data-page="servers"] main .directory-control-row .smart-filter-toggle { padding-inline: 12px; }
+  :root body[data-page="servers"] main .directory-filter-panel { gap: 16px 12px; }
+}
+@media (max-width: 420px) {
+  :root body[data-page="servers"] main .directory-control-row button { padding-inline: 8px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root body[data-page="servers"] main .directory-control-row button { transition: none; }
+}
+@media (forced-colors: active) {
+  :root body[data-page="servers"] main .directory-game-choice[aria-pressed="true"],
+  :root body[data-page="servers"] main .smart-filter-toggle[aria-expanded="true"] { border-color: Highlight; outline: 1px solid Highlight; box-shadow: none; }
+}

@@ -139,9 +139,9 @@
   top.append(brand(), close);
   const scroll = make("div", "navigation-scroll-v6");
   const intro = make("div", "navigation-intro-v6 navigation-enter-v6");
-  const title = make("h2", "", "Where to next?");
+  const title = make("h2", "", "Menu");
   title.id = "navigation-title-v6";
-  intro.append(make("span", "navigation-eyebrow-v6", "Explore BrowseRP"), title);
+  intro.append(title);
 
   const search = make("form", "navigation-search-v6 navigation-enter-v6");
   search.action = "/servers";
@@ -152,7 +152,7 @@
   input.type = "search";
   input.name = "q";
   input.maxLength = 120;
-  input.placeholder = "Search BrowseRP";
+  input.placeholder = "Search communities";
   input.setAttribute("aria-label", "Search servers, games or play styles");
   const submit = make("button");
   submit.type = "submit";
@@ -163,22 +163,18 @@
   const links = make("nav", "navigation-links-v6 navigation-enter-v6");
   links.setAttribute("aria-label", "Explore");
   const menuItems = [...items, ["Staff", "/staff", "Meet the BrowseRP team", "staff"]];
-  menuItems.forEach(([label, href, description, symbol]) => {
+  menuItems.forEach(([label, href, , symbol]) => {
     const anchor = link("", href, "navigation-link-v6");
     const copy = make("span", "navigation-link-copy-v6");
-    copy.append(make("strong", "", label), make("small", "", description));
+    copy.append(make("strong", "", label));
     const mark = make("span", "navigation-link-icon-v6");
     mark.append(icon(symbol));
     anchor.append(mark, copy, icon("arrow"));
     links.append(anchor);
   });
 
-  const games = make("section", "navigation-games-v6 navigation-enter-v6");
-  games.setAttribute("aria-labelledby", "navigation-games-title-v6");
-  const gamesHeading = make("div", "navigation-section-heading-v6");
-  const gamesTitle = make("h3", "", "Jump into a game");
-  gamesTitle.id = "navigation-games-title-v6";
-  gamesHeading.append(gamesTitle, link("View all", "/games"));
+  const games = make("details", "navigation-games-v6 navigation-disclosure-v6 navigation-enter-v6");
+  const gamesHeading = make("summary", "navigation-disclosure-summary-v6", "Browse by game");
   const gameLinks = make("div", "navigation-game-grid-v6");
   [["FiveM", "fivem"], ["RedM", "redm"], ["Minecraft", "minecraft"], ["Roblox", "roblox"]].forEach(([label, id]) => {
     const anchor = link(label, `/games/${id}`, "navigation-game-v6");
@@ -187,12 +183,8 @@
   });
   games.append(gamesHeading, gameLinks);
 
-  const appearance = make("section", "navigation-appearance-v6 navigation-enter-v6");
-  appearance.setAttribute("aria-labelledby", "navigation-appearance-title-v6");
-  const appearanceHeading = make("div", "navigation-appearance-heading-v6");
-  const appearanceTitle = make("h3", "", "Appearance");
-  appearanceTitle.id = "navigation-appearance-title-v6";
-  appearanceHeading.append(appearanceTitle, make("span", "", "Saved on this device"));
+  const appearance = make("details", "navigation-appearance-v6 navigation-disclosure-v6 navigation-enter-v6");
+  const appearanceHeading = make("summary", "navigation-disclosure-summary-v6", "Appearance");
   const themeChoices = make("div", "navigation-theme-choices-v6");
   themeChoices.setAttribute("role", "group");
   themeChoices.setAttribute("aria-label", "Choose the public site appearance");
@@ -231,7 +223,7 @@
   extra.setAttribute("aria-label", "More from BrowseRP");
   extra.append(link("Find my server", "/find-server", "discovery-link-v9"), link("Compare servers", "/compare", "discovery-link-v9"), link("Advertise", "/advertise"), link("Help & contact", "/legal#contact"), link("Policies", "/legal"));
   foot.append(cta, extra);
-  scroll.append(intro, search, links, games, appearance, account, foot);
+  scroll.append(intro, search, links, account, foot, games, appearance);
   panel.append(top, scroll);
   dialog.append(panel);
   document.body.append(dialog);
@@ -303,8 +295,9 @@
       return;
     }
     if (event.key !== "Tab" || dialog.inert) return;
-    const controls = [...dialog.querySelectorAll('a[href],button,input,[tabindex="0"]')]
-      .filter((element) => !element.disabled && element.tabIndex >= 0 && !element.closest("[inert],[hidden]") && element.getClientRects().length);
+    const controls = [...dialog.querySelectorAll('a[href],button,input,summary,[tabindex="0"]')]
+      .filter((element) => !element.disabled && element.tabIndex >= 0 && !element.closest("[inert],[hidden]")
+        && (!element.closest("details:not([open])") || element.tagName === "SUMMARY") && element.getClientRects().length);
     if (!controls.length) return;
     // Some browser keyboard preferences skip links and buttons. Explicitly
     // advance within this modal so those preferences cannot strand focus.

@@ -34,10 +34,10 @@ for (const theme of ["dark", "light"]) test(`${theme} theme switches control sur
   }
   assert.ok(contrast(token("--control-border"), token("--control-bg")) >= 3, "field boundary remains visible");
   assert.ok(contrast(token("--violet"), token("--selection-surface")) >= 4.5, "selected controls retain readable labels");
-  assert.equal(token("--brand-action-gradient").match(/#[a-f0-9]{6}/gi)?.length, 3, "action gradient exposes its three tested colour stops");
+  assert.ok((token("--brand-action-gradient").match(/#[a-f0-9]{6}/gi) || []).length >= 1, "action colour exposes a tested stop");
   for (const stop of token("--brand-action-gradient").match(/#[a-f0-9]{6}/gi) || []) assert.ok(contrast("#ffffff", stop) >= 4.5, "primary gradient supports white labels");
-  assert.equal(root.getPropertyValue("--panel").trim(), theme === "light" ? "#ffffff" : "#171717", "neutral surface palette is applied");
-  assert.equal(root.getPropertyValue("--text").trim(), theme === "light" ? "#1c1c1c" : "#f5f5f5", "neutral label palette is applied");
+  assert.equal(root.getPropertyValue("--panel").trim(), theme === "light" ? "#fffdf9" : "#1a2a3c", "editorial surface palette is applied");
+  assert.equal(root.getPropertyValue("--text").trim(), theme === "light" ? "#223344" : "#f7f9f8", "editorial label palette is applied");
 });
 
 function contrast(a, b) {

@@ -178,6 +178,7 @@ function staticRoute(pathname) {
   if (pathname === "/privacy") return "privacy.html";
   if (pathname === "/terms") return "terms.html";
   if (pathname === "/about") return "about.html";
+  if (pathname === "/staff") return "staff.html";
   if (pathname === "/games" || /^\/games\/[a-z0-9-]+$/i.test(pathname)) return "game.html";
   if (pathname === "/blog") return "blog.html";
   if (/^\/blog\/[a-z0-9-]+$/i.test(pathname)) return "blog-post.html";

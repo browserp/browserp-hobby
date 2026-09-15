@@ -215,9 +215,22 @@ body:is([data-page="profile"], [data-page="dashboard"]) .access-gate-v2 h1 { fon
 :where(body:not(.staff-v3):not([data-staff-page])) .staff-public-section { min-height: 0; }
 :where(body:not(.staff-v3):not([data-staff-page])) :is(.empty-v3, .journal-empty-v6) { padding: 32px 24px; border-radius: var(--panel-radius, 20px); background: var(--panel); border-color: var(--line); }
 :where(body:not(.staff-v3):not([data-staff-page])) .footer-v3 { margin-top: 0; }
-:where(body:not(.staff-v3):not([data-staff-page])) .footer-grid-v3 { gap: 24px 32px; padding-block: 40px 24px; }
-:where(body:not(.staff-v3):not([data-staff-page])) .footer-column-v3 a { min-height: 44px; padding-block: 8px; font-size: 14px; }
-:where(body:not(.staff-v3):not([data-staff-page])) .footer-bottom-v3 { padding-block: 20px; gap: 12px 24px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .footer-grid-v3 { gap: 28px 32px; padding-block: 44px 28px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .footer-brand-v3 p { color: var(--copy); line-height: 1.55; }
+:where(body:not(.staff-v3):not([data-staff-page])) .footer-home-v3 { display: inline-flex; max-width: 100%; }
+:where(body:not(.staff-v3):not([data-staff-page])) .footer-home-v3:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .footer-column-v3 strong { margin-bottom: 8px; color: var(--text); font-size: 15px; line-height: 1.4; }
+:where(body:not(.staff-v3):not([data-staff-page])) .footer-column-v3 :is(a, .cookie-preferences-trigger-v3) { display: flex; align-items: center; width: 100%; min-height: 44px; padding-block: 8px; color: var(--copy); font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; }
+:where(body:not(.staff-v3):not([data-staff-page])) .footer-column-v3 :is(a, .cookie-preferences-trigger-v3):hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+:where(body:not(.staff-v3):not([data-staff-page])) .footer-bottom-v3 { padding-block: 20px; gap: 12px 24px; color: var(--copy); font-size: 14px; }
+@media (max-width: 1100px) {
+  :where(body:not(.staff-v3):not([data-staff-page])) .footer-grid-v3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :where(body:not(.staff-v3):not([data-staff-page])) .footer-brand-v3 { grid-column: 1 / -1; }
+}
+@media (max-width: 430px) {
+  :where(body:not(.staff-v3):not([data-staff-page])) .footer-grid-v3 { grid-template-columns: minmax(0, 1fr); }
+  :where(body:not(.staff-v3):not([data-staff-page])) .footer-column-v3 + .footer-column-v3 { border-top: 1px solid var(--line-soft); padding-top: 14px; }
+}
 
 /* Existing chart geometry, gaps and real observations remain unchanged. */
 :root #server-detail-v3 .player-history { margin-block: 8px 24px; padding: 28px 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
@@ -644,3 +657,199 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
 .server-listed-by-v7 a { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; color: var(--text); }
 .server-listed-by-v7 a:hover strong { color: var(--pink-strong); text-decoration: underline; text-underline-offset: 3px; }
 .server-listed-by-v7 a img,.server-listed-by-v7 a span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; object-fit: cover; background: var(--panel-2); color: var(--pink-strong); font-size: 12px; font-weight: 750; }
+
+/* Public editorial layer. The shared theme supplies the ink and accents;
+   these frames give discovery, reading and account tasks one visual rhythm. */
+body:not(.staff-v3):not([data-staff-page]) {
+  --public-frame: color-mix(in srgb, var(--pink) 28%, var(--line));
+  --public-tint: color-mix(in srgb, var(--pink) 8%, var(--panel));
+  --public-teal-tint: color-mix(in srgb, var(--cyan) 5%, var(--bg-soft));
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.eyebrow-v3, .ds-eyebrow) {
+  color: var(--pink); font-size: 12px; font-weight: 750; letter-spacing: .16em; text-transform: uppercase;
+}
+:root body:not(.staff-v3):not([data-staff-page]) :is(main.section-v3, main .section-v3, main .journal-feed-v6) {
+  padding-block: clamp(54px, 6vw, 88px);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.section-head-v3, .journal-heading-v6) {
+  border-left: 4px solid var(--pink); padding-left: clamp(18px, 2.5vw, 30px); margin-bottom: 32px;
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.section-head-v3, .journal-heading-v6) h2 {
+  font-size: clamp(32px, 3.5vw, 46px); line-height: 1.08; letter-spacing: -.05em; text-wrap: balance;
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.section-head-v3, .journal-heading-v6) p {
+  max-width: 64ch; color: var(--copy); line-height: 1.65;
+}
+
+/* Large full-width leads retain the original artwork and pattern layers. */
+:root body:not(.staff-v3):not([data-staff-page]) :is(.home-hero-intro, .game-page-hero-v4, .journal-hero-v6, .staff-public-hero) {
+  background: linear-gradient(120deg, var(--public-tint), var(--public-teal-tint) 58%, var(--bg) 100%);
+  border-bottom: 1px solid var(--line);
+}
+:root body[data-page="home"] .home-hero-intro { padding-block: clamp(82px, 9vw, 142px) clamp(50px, 6vw, 86px); }
+:root body[data-page="home"] .home-hero-intro h1 {
+  max-width: 14ch; font-size: clamp(58px, 7vw, 106px); line-height: .97; letter-spacing: -.07em; text-wrap: balance;
+}
+:root body[data-page="home"] .home-hero-intro .hero-copy-v3 > p {
+  max-width: 55ch; font-size: clamp(18px, 1.8vw, 22px); line-height: 1.62;
+}
+:root body:not(.staff-v3):not([data-staff-page]) :is(.game-page-hero-v4, .journal-hero-v6, .staff-public-hero) {
+  padding-block: clamp(62px, 7vw, 104px);
+}
+:root body:not(.staff-v3):not([data-staff-page]) :is(.game-page-hero-v4, .journal-hero-v6, .staff-public-hero) h1 {
+  font-size: clamp(46px, 5.7vw, 78px); line-height: 1.02; letter-spacing: -.06em; text-wrap: balance;
+}
+:root body:not([data-page="home"]):not(.staff-v3):not([data-staff-page]) main .hero-v3 {
+  padding-block: clamp(68px, 8vw, 116px); background: linear-gradient(120deg, var(--public-tint), var(--public-teal-tint) 60%, var(--bg));
+}
+:root body:not([data-page="home"]):not(.staff-v3):not([data-staff-page]) main .hero-v3 h1 {
+  max-width: 15ch; font-size: clamp(48px, 6vw, 82px); line-height: 1.02; letter-spacing: -.06em;
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.public-intro-surface-v7, .directory-intro-v3, .finder-heading, .journal-article-head-v6) {
+  position: relative; isolation: isolate; overflow: hidden;
+  padding: clamp(28px, 4vw, 56px); border: 1px solid var(--line); border-left: 4px solid var(--pink);
+  border-radius: 20px; background: linear-gradient(140deg, var(--public-tint), var(--panel) 72%);
+  box-shadow: var(--shadow-sm);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.public-intro-surface-v7, .directory-intro-v3, .finder-heading, .journal-article-head-v6) h1 {
+  max-width: 18ch; font-size: clamp(40px, 5.1vw, 68px); line-height: 1.05; letter-spacing: -.055em; text-wrap: balance;
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.public-intro-surface-v7, .directory-intro-v3, .finder-heading, .journal-article-head-v6) p {
+  max-width: 66ch; color: var(--copy); font-size: clamp(16px, 1.5vw, 19px); line-height: 1.65;
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .legal-v3 > h1 {
+  max-width: 20ch; font-size: clamp(42px, 5vw, 66px); line-height: 1.05; letter-spacing: -.055em; text-wrap: balance;
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .legal-v3 > .prose-v3 { max-width: 68ch; font-size: 18px; line-height: 1.7; }
+
+/* Search and choice controls feel like part of the page canvas. */
+:root body[data-page="home"] main .search-v3 {
+  padding: 8px; border-color: var(--line-strong); border-radius: 16px; background: var(--panel); box-shadow: var(--shadow-md);
+}
+:root body[data-page="servers"] main .directory-discovery.smart-discovery {
+  padding: clamp(18px, 2.7vw, 30px); border: 1px solid var(--line); border-radius: 18px;
+  background: var(--panel); box-shadow: var(--shadow-sm);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.listing-form-v3, #appeal-form-v3, #advertising-enquiry-form, .finder-form) {
+  padding: clamp(22px, 3vw, 38px); border: 1px solid var(--line); border-radius: 18px;
+  background: var(--panel); box-shadow: var(--shadow-sm);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.field-v3, .portal-field) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]), select, textarea) {
+  min-height: 50px; border: 1px solid var(--line-strong); border-radius: 11px; background: var(--bg-soft);
+  color: var(--text); font-size: 16px;
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.field-v3, .portal-field) :is(input, select, textarea):focus-visible {
+  border-color: var(--pink); outline: 2px solid var(--focus); outline-offset: 2px;
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.button-v3, .button):not(.button-quiet-v3):not(.button-ghost) {
+  min-height: 52px; padding-inline: 20px; border-radius: 10px; font-size: 15px; font-weight: 700;
+}
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.button-secondary-v3, .button-secondary) {
+  border-color: var(--line-strong); background: var(--panel);
+}
+
+/* Cards use warm or cool theme surfaces instead of an undifferentiated list. */
+:root body:not(.staff-v3):not([data-staff-page]) main :is(.server-shortlist-card, .game-grid-v3 > a, .game-official-card-v6, .trust-grid-v3 article, .staff-public-card, .finder-choice, .finder-summary, .empty-v3) {
+  border: 1px solid var(--line); border-radius: 18px; background: var(--panel); box-shadow: var(--shadow-sm);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .server-shortlist-card { border-left: 3px solid var(--public-frame); }
+:root body:not(.staff-v3):not([data-staff-page]) main .trust-grid-v3 article { min-height: 154px; padding: 26px; border-top: 3px solid var(--public-frame); }
+:root body:not(.staff-v3):not([data-staff-page]) main .game-grid-v3 > a { padding: 14px; }
+:root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) {
+  padding: 14px; border: 1px solid var(--line); border-radius: 18px;
+  background: var(--panel); box-shadow: var(--shadow-sm);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .game-grid-v3 > a:is(:hover, :focus-within),
+:root body:not(.staff-v3):not([data-staff-page]) main .game-official-card-v6:is(:hover, :focus-within),
+:root body:not(.staff-v3):not([data-staff-page]) main .server-shortlist-card:is(:hover, :focus-within) {
+  border-color: var(--public-frame); background: var(--surface-hover); box-shadow: var(--shadow-md); transform: none;
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .finder-choice:has(input:checked) {
+  border-color: var(--pink); background: var(--public-tint); box-shadow: inset 0 0 0 1px var(--pink);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .finder-summary { border-top: 3px solid var(--public-frame); }
+:root body:not(.staff-v3):not([data-staff-page]) main .empty-v3 { border-style: solid; }
+
+/* Reading and comparison keep real text and table semantics intact. */
+:root body:not(.staff-v3):not([data-staff-page]) main .journal-grid-v6 { gap: 24px; }
+:root body:not(.staff-v3):not([data-staff-page]) main .journal-card-v6 {
+  padding: clamp(24px, 3vw, 38px); border: 1px solid var(--line); border-radius: 18px;
+  background: var(--panel); box-shadow: var(--shadow-sm);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .journal-card-featured-v6 {
+  border-left: 4px solid var(--pink); background: linear-gradient(135deg, var(--public-tint), var(--panel) 72%);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .journal-card-v6:is(:hover, :focus-within) {
+  border-color: var(--public-frame); background: var(--surface-hover); box-shadow: var(--shadow-md);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .legal-v3 section {
+  margin-block: 18px; padding: clamp(24px, 3vw, 38px); scroll-margin-top: 110px;
+  border: 1px solid var(--line); border-radius: 16px; background: var(--panel);
+}
+:root body:not(.staff-v3):not([data-staff-page]) main .legal-v3 section h2 { font-size: clamp(26px, 2.9vw, 36px); letter-spacing: -.04em; }
+:root body[data-page="compare"] main :is(.compare-toolbar, .compare-results) {
+  border: 1px solid var(--line); border-radius: 16px; background: var(--panel); box-shadow: var(--shadow-sm);
+}
+:root body[data-page="compare"] main .compare-toolbar { padding: 22px; }
+
+/* Signed-in pages become one clear workspace with distinct summary and tasks. */
+:root body:is([data-page="profile"], [data-page="dashboard"]) main.portal-stage { padding-block: clamp(44px, 5vw, 76px); }
+:root body:is([data-page="profile"], [data-page="dashboard"]) main .portal-head { padding-bottom: 28px; border-bottom: 3px solid var(--public-frame); }
+:root body:is([data-page="profile"], [data-page="dashboard"]) main .metric-grid-v2 {
+  gap: 0; margin-block: 28px 36px; border: 1px solid var(--line); border-radius: 18px;
+  background: var(--panel); box-shadow: var(--shadow-sm); overflow: hidden;
+}
+:root body:is([data-page="profile"], [data-page="dashboard"]) main .dashboard-view .portal-panel-v2 {
+  margin-block: 18px; padding: clamp(24px, 3vw, 40px); border: 1px solid var(--line); border-radius: 18px;
+  background: var(--panel); box-shadow: var(--shadow-sm);
+}
+:root body:is([data-page="profile"], [data-page="dashboard"]) main .portal-item { padding-block: 18px; border-bottom-color: var(--line-soft); }
+
+/* Public member profiles retain their chosen banner while joining the same frame system. */
+:root body[data-page="member"] main.member-page-v7 { padding-block: clamp(36px, 5vw, 68px) 88px; }
+:root body[data-page="member"] main.member-page-v7 .member-hero-v7 {
+  border: 1px solid var(--line); border-left: 4px solid var(--pink); border-radius: 22px;
+  background: var(--panel); box-shadow: var(--shadow-md);
+}
+:root body[data-page="member"] main.member-page-v7 .member-heading-v7 h1 {
+  font-size: clamp(38px, 4.5vw, 60px); line-height: 1.03; letter-spacing: -.055em;
+}
+:root body[data-page="member"] main.member-page-v7 .member-section-head-v7 {
+  border-left: 4px solid var(--pink); padding-left: 24px; margin-bottom: 28px;
+}
+:root body[data-page="member"] main.member-page-v7 .member-section-head-v7 h2 {
+  font-size: clamp(30px, 3.4vw, 44px); line-height: 1.1;
+}
+:root body[data-page="member"] main.member-page-v7 .member-report-v7 {
+  max-width: 720px; margin-top: 56px; padding: 22px; border: 1px solid var(--line); border-radius: 16px;
+  background: var(--panel);
+}
+:root body[data-page="member"] main.member-page-v7 .member-report-v7 :is(select, textarea) {
+  border-color: var(--line-strong); background: var(--bg-soft); font-size: 16px;
+}
+:root body[data-page="member"] main.member-page-v7 .member-empty-v7 {
+  padding: 28px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel);
+}
+
+@media (max-width: 760px) {
+  :root body[data-page="home"] .home-hero-intro { padding-block: 64px 46px; }
+  :root body[data-page="home"] .home-hero-intro h1 { font-size: clamp(48px, 11vw, 72px); }
+  :root body:not(.staff-v3):not([data-staff-page]) :is(.game-page-hero-v4, .journal-hero-v6, .staff-public-hero) { padding-block: 56px; }
+  :root body:not(.staff-v3):not([data-staff-page]) main :is(.public-intro-surface-v7, .directory-intro-v3, .finder-heading, .journal-article-head-v6) { padding: 24px; border-left-width: 3px; }
+  :root body:not(.staff-v3):not([data-staff-page]) main :is(.section-head-v3, .journal-heading-v6) { padding-left: 16px; border-left-width: 3px; }
+  :root body:not(.staff-v3):not([data-staff-page]) main .trust-grid-v3 article { padding: 20px; }
+  :root body:not(.staff-v3):not([data-staff-page]) main .legal-v3 section { padding: 22px; }
+  :root body[data-page="member"] main.member-page-v7 .member-section-head-v7 { padding-left: 16px; border-left-width: 3px; }
+  :root body[data-page="member"] main.member-page-v7 .member-report-v7 { padding: 18px; }
+}
+@media (max-width: 420px) {
+  :root body:not(.staff-v3):not([data-staff-page]) main :is(.public-intro-surface-v7, .directory-intro-v3, .finder-heading, .journal-article-head-v6) { padding: 20px; }
+  :root body:not(.staff-v3):not([data-staff-page]) main .game-grid-v3 > a { padding: 10px; }
+  :root body:not(.staff-v3):not([data-staff-page]) main :is(.listing-form-v3, #appeal-form-v3, #advertising-enquiry-form, .finder-form) { padding: 20px; }
+  :root body:is([data-page="profile"], [data-page="dashboard"]) main .dashboard-view .portal-panel-v2 { padding: 20px; }
+}
+@media (forced-colors: active) {
+  :root body:not(.staff-v3):not([data-staff-page]) main :is(.public-intro-surface-v7, .directory-intro-v3, .finder-heading, .journal-article-head-v6, .journal-card-v6, .legal-v3 section, .portal-panel-v2, .server-shortlist-card) {
+    background: Canvas; border-color: CanvasText; box-shadow: none;
+  }
+}

@@ -1,42 +1,42 @@
 :root {
   color-scheme: dark;
-  --bg: #050507;
-  --bg-soft: #0a080d;
-  --panel: #100d13;
-  --panel-2: #18121c;
-  --line: #302437;
-  --line-soft: #211826;
-  --text: #fffaff;
-  --copy: #d7ceda;
-  --muted: #a297a8;
-  --pink: #ec4fa6;
-  --pink-strong: #ff6cba;
-  --violet: #9b6cff;
-  --cyan: #59cde0;
-  --info: #b79aff;
-  --success: #57d7a2;
-  --warning: #f1bd6b;
-  --danger: #ff8192;
+  --bg: #101a28;
+  --bg-soft: #162334;
+  --panel: #1a2a3c;
+  --panel-2: #24374c;
+  --line: #415266;
+  --line-soft: #304257;
+  --text: #f7f9f8;
+  --copy: #d6dfdf;
+  --muted: #aabdc5;
+  --pink: #f28db5;
+  --pink-strong: #ffbad1;
+  --violet: #bea8e9;
+  --cyan: #78d9d3;
+  --info: #78d9d3;
+  --success: #83d6ac;
+  --warning: #f1c883;
+  --danger: #ff9aaa;
   --focus: var(--cyan);
   --ink: var(--text);
   --quiet: var(--muted);
   --canvas: var(--bg);
   --surface: var(--panel);
   --surface-2: var(--panel-2);
-  --line-strong: #4a3853;
+  --line-strong: #627489;
   --brand-gradient: linear-gradient(100deg, var(--pink), var(--cyan));
   /* Deeper logo hues keep white labels readable through the existing sweep. */
-  --brand-action-gradient: linear-gradient(105deg, #ad176f, #00628f 50%, #ad176f);
+  --brand-action-gradient: linear-gradient(110deg, #a72a67, #a72a67);
   --motion-ease: cubic-bezier(.2, .72, .2, 1);
   --accent: var(--pink);
   --accent-strong: var(--pink-strong);
   --accent-ink: #ffffff;
   --shadow: 0 22px 70px rgb(0 0 0 / .32);
   /* One family for controls, content cards and larger panels in both themes. */
-  --radius-xs: 8px;
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --shadow-sm: 0 4px 16px rgb(0 0 0 / .14);
   --shadow-md: 0 12px 32px rgb(0 0 0 / .24);
   --shadow-lg: 0 24px 72px rgb(0 0 0 / .4);
@@ -79,7 +79,7 @@ img { display: block; max-width: 100%; }
   transform: none;
 }
 
-.header-v3 { position: sticky; top: 0; z-index: 80; background: rgba(7,8,11,.97); border-bottom: 1px solid var(--line-soft); backdrop-filter: blur(8px); }
+.header-v3 { position: sticky; top: 0; z-index: 80; background: color-mix(in srgb, var(--bg) 96%, transparent); border-bottom: 1px solid var(--line-soft); backdrop-filter: blur(8px); }
 .nav-v3 { --nav-height: 72px; position: relative; min-height: var(--nav-height); display: flex; align-items: center; gap: 34px; padding-right: 70px; }
 .logo-v3 { flex: none; }
 .logo-lockup-v3 { display: inline-flex; align-items: center; gap: 2px; min-width: 166px; height: 48px; transition: transform .24s var(--motion-ease), filter .24s var(--motion-ease), opacity .24s var(--motion-ease); transform-origin: left center; animation: browserp-pulse-v3 12s ease-in-out infinite; }

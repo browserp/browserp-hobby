@@ -219,7 +219,7 @@ test("opening and closing preserves scroll state and returns focus to the menu t
     assert.equal(toggle.getAttribute("aria-expanded"), "true");
     assert.equal(toggle.getAttribute("aria-haspopup"), "dialog");
     assert.equal(toggle.getAttribute("aria-controls"), dialog.id);
-    assert.equal(h.$(`#${dialog.getAttribute("aria-labelledby")}`).textContent, "Where to next?");
+    assert.equal(h.$(`#${dialog.getAttribute("aria-labelledby")}`).textContent, "Menu");
     assert.equal(h.w.document.activeElement, h.$(".navigation-close-v6"));
     assert.equal(h.w.document.body.style.overflow, "hidden");
     h.$(".navigation-close-v6").click();
