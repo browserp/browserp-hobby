@@ -12,7 +12,7 @@ const servers = Array.from({ length: 24 }, (_, index) => ({
   online: true, players: index, capacity: 64, tags: ["roleplay"]
 }));
 
-async function harness(t, { reduced = false, observerAvailable = true } = {}) {
+async function harness(t, { reduced = false, coarse = false, observerAvailable = true } = {}) {
   const dom = new JSDOM(read("game.html"), { url: "https://browserp.test/games/fivem?platform=redm", runScripts: "outside-only", pretendToBeVisual: true });
   t.after(() => dom.window.close());
   const w = dom.window, requests = [], observers = [];
@@ -20,7 +20,7 @@ async function harness(t, { reduced = false, observerAvailable = true } = {}) {
   const style = w.document.createElement("style");
   style.textContent = [...read("browserp-v3.css").matchAll(/\.(?:reveal-v3(?:\.is-revealed)?|reveal-on-scroll)\s*\{[^}]*\}/g)].slice(0, 3).map(match => match[0]).join("\n");
   w.document.head.append(style);
-  w.matchMedia = () => ({ matches: reduced, addEventListener() {} });
+  w.matchMedia = query => ({ matches: query.includes("prefers-reduced-motion") ? reduced : query.includes("pointer: coarse") ? coarse : false, addEventListener() {} });
   if (observerAvailable) w.IntersectionObserver = class {
     constructor(callback, options) { this.callback = callback; this.options = options; this.targets = new Set(); observers.push(this); }
     observe(target) { this.targets.add(target); }
@@ -83,6 +83,21 @@ test("reduced-motion game pages display asynchronous results without relying on 
     assert.equal(h.w.getComputedStyle(card).opacity, "1", "Every asynchronous result card must already be visible");
     assert.equal(h.observers.some(observer => observer.targets.has(card)), false, "Result cards must not depend on any observer");
   }
+});
+
+test("touch pages reveal lightweight sections once but never gate long server results", async t => {
+  const h = await harness(t, { coarse: true });
+  const observer = h.observers.find(item => item.options?.rootMargin === "0px 0px 35% 0px");
+  assert.ok(observer);
+  const feature = h.$("#game-future-v6");
+  assert.equal(observer.targets.has(feature), true, "a small section may animate as it enters view");
+  assert.equal(feature.classList.contains("reveal-on-scroll"), true);
+  assert.equal(observer.targets.has(h.$("#game-results-v4")), false, "live server results remain immediately available");
+  await h.loaded();
+  for (const card of h.$("#game-server-list-v4").children) assert.equal(observer.targets.has(card), false);
+  observer.deliver(feature, 1);
+  assert.equal(feature.classList.contains("is-revealed"), true);
+  assert.equal(observer.targets.has(feature), false, "observing stops after the one-time entrance");
 });
 
 test("a browser without IntersectionObserver still renders its game results visibly", async t => {

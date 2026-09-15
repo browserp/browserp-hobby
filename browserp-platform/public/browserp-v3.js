@@ -203,7 +203,7 @@
       pending.clear();
     }
 
-    function register(node, _delay = 0, allowScrollReveal = true) {
+    function register(node, delay = 0, allowScrollReveal = true) {
       if (!(node instanceof Element)) return;
       if (!node.classList.contains("reveal-v3")) node.classList.add("reveal-v3");
       if (!allowScrollReveal) {
@@ -211,10 +211,15 @@
         if (observer) observer.unobserve(node);
         return;
       }
-      if (prefersReduced() || prefersDirectScroll() || typeof IntersectionObserver !== "function") {
+      // Keep long, data-heavy card collections direct on touch devices, while
+      // a few major sections can still enter once through the compositor.
+      const directTouch = prefersDirectScroll() && !node.matches(".hero-v3,.section-v3,.footer-v3");
+      if (prefersReduced() || directTouch || typeof IntersectionObserver !== "function") {
         node.classList.add("is-revealed");
         return;
       }
+      node.classList.add("reveal-on-scroll");
+      node.style.setProperty("--reveal-delay", `${Math.min(144, Math.max(0, Number(delay) || 0))}ms`);
       if (!observer) {
         pending.add(node);
         createObserver();
@@ -234,9 +239,9 @@
       selectors.forEach((selector) => {
         $$(selector, root).forEach((item) => {
           if (item.classList.contains("reveal-v3")) return;
-          item.classList.add("reveal-v3", "reveal-on-scroll");
+          item.classList.add("reveal-v3");
           const containsLiveResults = item.matches(".section-v3") && item.querySelector(".server-list-v3, #game-server-list-v4");
-          register(item, Math.min(index++, 6) * 12, !containsLiveResults && !prefersDirectScroll());
+          register(item, Math.min(index++, 6) * 12, !containsLiveResults);
         });
       });
     }

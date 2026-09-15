@@ -70,7 +70,7 @@ test("signed-in navigation keeps the avatar menu, public links and a local publi
   assert.match(shell, /!document\.body\.hasAttribute\("data-staff-page"\)/);
   assert.match(css, /:root\[data-theme="light"\]/);
   assert.match(css, /\.account-popover-v3/);
-  assert.match(navigation, /Browse by game/);
+  assert.match(navigation, /Jump into a game/);
   assert.match(navigation, /navigation-theme-choice-v6/);
   assert.match(navigation, /\["Blog", "\/blog",/);
   assert.match(navigation, /\["Games", "\/games",/);

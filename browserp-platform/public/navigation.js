@@ -111,7 +111,15 @@
   toggle.setAttribute("aria-controls", "public-navigation");
   toggle.setAttribute("aria-haspopup", "dialog");
   toggle.append(icon("menu"), make("span", "", "Menu"));
-  nav.replaceChildren(brand(), inlineLinks, inlineActions, toggle);
+  const find = make("button", "navigation-find-v7");
+  find.type = "button";
+  find.setAttribute("aria-label", "Quick find servers and games");
+  find.setAttribute("aria-expanded", "false");
+  find.setAttribute("aria-controls", "public-navigation");
+  find.setAttribute("aria-haspopup", "dialog");
+  find.title = "Quick find (press / or Ctrl+K)";
+  find.append(icon("search"), make("span", "", "Find"));
+  nav.replaceChildren(brand(), inlineLinks, inlineActions, find, toggle);
   let brandParked = false;
   const syncBrandMotion = () => {
     const pattern = document.querySelector(".home-hero-pattern");
@@ -141,7 +149,7 @@
   const intro = make("div", "navigation-intro-v6 navigation-enter-v6");
   const title = make("h2", "", "Menu");
   title.id = "navigation-title-v6";
-  intro.append(title);
+  intro.append(title, make("p", "", "Search communities or jump straight into a game."));
 
   const search = make("form", "navigation-search-v6 navigation-enter-v6");
   search.action = "/servers";
@@ -152,7 +160,7 @@
   input.type = "search";
   input.name = "q";
   input.maxLength = 120;
-  input.placeholder = "Search communities";
+  input.placeholder = "Search servers or games";
   input.setAttribute("aria-label", "Search servers, games or play styles");
   const submit = make("button");
   submit.type = "submit";
@@ -174,7 +182,7 @@
   });
 
   const games = make("details", "navigation-games-v6 navigation-disclosure-v6 navigation-enter-v6");
-  const gamesHeading = make("summary", "navigation-disclosure-summary-v6", "Browse by game");
+  const gamesHeading = make("summary", "navigation-disclosure-summary-v6", "Jump into a game");
   const gameLinks = make("div", "navigation-game-grid-v6");
   [["FiveM", "fivem"], ["RedM", "redm"], ["Minecraft", "minecraft"], ["Roblox", "roblox"]].forEach(([label, id]) => {
     const anchor = link(label, `/games/${id}`, "navigation-game-v6");
@@ -182,6 +190,7 @@
     gameLinks.append(anchor);
   });
   games.append(gamesHeading, gameLinks);
+  games.open = true;
 
   const appearance = make("details", "navigation-appearance-v6 navigation-disclosure-v6 navigation-enter-v6");
   const appearanceHeading = make("summary", "navigation-disclosure-summary-v6", "Appearance");
@@ -223,7 +232,7 @@
   extra.setAttribute("aria-label", "More from BrowseRP");
   extra.append(link("Find my server", "/find-server", "discovery-link-v9"), link("Compare servers", "/compare", "discovery-link-v9"), link("Advertise", "/advertise"), link("Help & contact", "/legal#contact"), link("Policies", "/legal"));
   foot.append(cta, extra);
-  scroll.append(intro, search, links, account, foot, games, appearance);
+  scroll.append(intro, search, links, games, account, foot, appearance);
   panel.append(top, scroll);
   dialog.append(panel);
   document.body.append(dialog);
@@ -233,9 +242,10 @@
   let closeTimer;
   let openingFrame;
   let previousOverflow;
+  let returnTarget = toggle;
   function alignCloseButton() {
     // Read before scroll locking: removing a scrollbar can move the header.
-    const box = toggle.getBoundingClientRect();
+    const box = (returnTarget?.isConnected ? returnTarget : toggle).getBoundingClientRect();
     if (!(box.width > 0 && box.height > 0)) return;
     for (const [property, value] of Object.entries({ left: box.left, top: box.top, width: box.width, height: box.height })) {
       close.style.setProperty(property, `${value}px`);
@@ -251,7 +261,8 @@
     document.body.style.overflow = previousOverflow;
     document.body.classList.remove("navigation-open-v6");
     toggle.setAttribute("aria-expanded", "false");
-    toggle.focus({ preventScroll: true });
+    find.setAttribute("aria-expanded", "false");
+    (returnTarget?.isConnected ? returnTarget : toggle).focus({ preventScroll: true });
   }
   function closeMenu(immediate = false) {
     if (!dialog.open) return;
@@ -260,19 +271,22 @@
     dialog.dataset.open = "false";
     dialog.inert = true;
     toggle.setAttribute("aria-expanded", "false");
+    find.setAttribute("aria-expanded", "false");
     clearTimeout(closeTimer);
     if (immediate || reducedMotion.matches) finishClose();
     else closeTimer = setTimeout(finishClose, 220);
   }
-  function openMenu() {
+  function openMenu({ focusSearch = false, opener = toggle } = {}) {
     clearTimeout(closeTimer);
     dialog.inert = false;
     if (dialog.open) {
       dialog.dataset.open = "true";
       toggle.setAttribute("aria-expanded", "true");
-      close.focus({ preventScroll: true });
+      find.setAttribute("aria-expanded", "true");
+      (focusSearch ? input : close).focus({ preventScroll: true });
       return;
     }
+    returnTarget = opener;
     alignCloseButton();
     previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -280,10 +294,21 @@
     dialog.showModal();
     scroll.scrollTop = 0;
     toggle.setAttribute("aria-expanded", "true");
-    close.focus({ preventScroll: true });
+    find.setAttribute("aria-expanded", "true");
+    (focusSearch ? input : close).focus({ preventScroll: true });
     openingFrame = requestAnimationFrame(() => { dialog.dataset.open = "true"; });
   }
-  toggle.addEventListener("click", openMenu);
+  toggle.addEventListener("click", () => openMenu());
+  find.addEventListener("click", () => openMenu({ focusSearch: true, opener: find }));
+  document.addEventListener("keydown", event => {
+    const quickFind = (event.key === "/" && !event.altKey && !event.ctrlKey && !event.metaKey)
+      || (event.key?.toLowerCase() === "k" && (event.ctrlKey || event.metaKey) && !event.altKey);
+    if (!quickFind || event.defaultPrevented || event.isComposing) return;
+    const target = event.target instanceof Element ? event.target : document.activeElement;
+    if (target?.closest?.("input, textarea, select, [contenteditable], [role='textbox']")) return;
+    event.preventDefault();
+    openMenu({ focusSearch: true, opener: find });
+  });
   close.addEventListener("click", () => closeMenu());
   dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeMenu(); });
   dialog.addEventListener("keydown", (event) => {
@@ -317,6 +342,7 @@
     document.body.style.overflow = previousOverflow ?? "";
     document.body.classList.remove("navigation-open-v6");
     toggle.setAttribute("aria-expanded", "false");
+    find.setAttribute("aria-expanded", "false");
   });
   compact.addEventListener("change", () => closeMenu(true));
   window.addEventListener("resize", () => { if (dialog.open) alignCloseButton(); });

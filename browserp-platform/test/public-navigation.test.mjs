@@ -191,6 +191,8 @@ test("all public pages expose the same complete header and dialog navigation", a
       assert.deepEqual([...h.w.document.querySelectorAll("[data-theme-choice-v6]")].map(item => item.textContent), ["Dark", "Light"]);
       assert.equal(h.w.document.querySelectorAll("[data-account-v3]").length, 2, "both account slots are available to session hydration");
       assert.equal(h.$(".public-nav-actions-v6 a[href='/list-server']").textContent, "List a server");
+      assert.equal(h.$(".navigation-find-v7").getAttribute("aria-controls"), "public-navigation");
+      assert.equal(h.$(".navigation-find-v7").getAttribute("aria-label"), "Quick find servers and games");
       assert.ok(h.$(".navigation-footer-v6 a[href='/list-server']"));
       assert.equal(h.$(".navigation-extra-v6 a[href='/legal#contact']").textContent, "Help & contact");
       assert.equal(h.$(".navigation-brand-v6").getAttribute("href"), "/");
@@ -231,6 +233,50 @@ test("opening and closing preserves scroll state and returns focus to the menu t
     assert.equal(h.w.document.activeElement, toggle);
     assert.equal(h.showCalls, 1);
     assert.equal(h.closeCalls, 1);
+  } finally { h.dom.window.close(); }
+});
+
+test("Quick Find opens the shared search immediately and returns focus to its own trigger", () => {
+  const h = harness();
+  try {
+    const find = h.$(".navigation-find-v7");
+    find.focus();
+    find.click();
+    h.frame();
+    const dialog = h.$("#public-navigation");
+    assert.equal(dialog.open, true);
+    assert.equal(find.getAttribute("aria-expanded"), "true");
+    assert.equal(h.w.document.activeElement, h.$(".navigation-search-v6 input"));
+    assert.equal(h.$(".navigation-games-v6").open, true, "game shortcuts are ready without another disclosure");
+    h.$(".navigation-close-v6").click();
+    h.tick(220);
+    assertClosed(h);
+    assert.equal(find.getAttribute("aria-expanded"), "false");
+    assert.equal(h.w.document.activeElement, find);
+  } finally { h.dom.window.close(); }
+});
+
+test("keyboard Quick Find shortcuts skip editable controls and focus search elsewhere", () => {
+  const h = harness();
+  try {
+    const shortcut = (key, options = {}) => new h.w.KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...options });
+    const editable = h.w.document.createElement("textarea");
+    h.w.document.body.append(editable);
+    editable.focus();
+    editable.dispatchEvent(shortcut("/"));
+    editable.dispatchEvent(shortcut("k", { ctrlKey: true }));
+    assertClosed(h);
+    h.$(".navigation-toggle-v6").focus();
+    const slash = shortcut("/");
+    h.w.document.activeElement.dispatchEvent(slash);
+    assert.equal(slash.defaultPrevented, true);
+    assert.equal(h.$("#public-navigation").open, true);
+    assert.equal(h.w.document.activeElement, h.$(".navigation-search-v6 input"));
+    h.$(".navigation-close-v6").click(); h.tick(220);
+    const command = shortcut("k", { metaKey: true });
+    h.$(".navigation-toggle-v6").dispatchEvent(command);
+    assert.equal(command.defaultPrevented, true);
+    assert.equal(h.w.document.activeElement, h.$(".navigation-search-v6 input"));
   } finally { h.dom.window.close(); }
 });
 

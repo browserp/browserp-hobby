@@ -1017,3 +1017,42 @@ body:not(.staff-v3):not([data-staff-page]) {
     background: Canvas; border-color: CanvasText; box-shadow: none;
   }
 }
+
+/* Scroll-linked entrances are one shot, never a hidden-content gate.  Only
+   opacity and translation animate; large, live server lists paint in place. */
+:root body:not(.staff-v3):not([data-staff-page]) main :is(section, article, h2, h3)[id] {
+  scroll-margin-block-start: clamp(80px, 8vw, 104px);
+}
+/* This affects anchor/programmatic navigation, not finger-driven scrolling. */
+@media screen and (max-width: 760px) and (prefers-reduced-motion: no-preference) {
+  :root:has(body:not(.staff-v3):not([data-staff-page])) { scroll-behavior: smooth; }
+}
+@media screen and (prefers-reduced-motion: no-preference) {
+  :root body:not(.staff-v3):not([data-staff-page]) main :is(.journal-card-v6, .game-grid-v3 > a, .game-official-card-v6, .trust-grid-v3 article, .staff-public-card, .finder-choice, .server-shortlist-card) {
+    transition: transform 220ms var(--motion-ease, ease-out), border-color 220ms ease,
+      background-color 220ms ease, box-shadow 220ms ease;
+  }
+}
+@media screen and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :root body:not(.staff-v3):not([data-staff-page]) main :is(.journal-card-v6, .game-grid-v3 > a, .game-official-card-v6, .trust-grid-v3 article, .staff-public-card, .finder-choice):is(:hover, :focus-within) {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+@media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  @keyframes public-scroll-enter-v7 {
+    from { opacity: .84; transform: translate3d(0, 13px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+  :root body:not(.staff-v3):not([data-staff-page]) .reveal-on-scroll.is-revealed:not(.section-v3:has(.server-list-v3, #game-server-list-v4)) {
+    animation: public-scroll-enter-v7 520ms var(--motion-ease, ease-out) var(--reveal-delay, 0ms) 1 backwards;
+  }
+}
+@media screen and (max-width: 640px) and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  :root body:not(.staff-v3):not([data-staff-page]) .reveal-on-scroll.is-revealed:not(.section-v3:has(.server-list-v3, #game-server-list-v4)) {
+    animation-duration: 440ms;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:has(body:not(.staff-v3):not([data-staff-page])) { scroll-behavior: auto; }
+  :root body:not(.staff-v3):not([data-staff-page]) .reveal-on-scroll.is-revealed { animation: none; }
+}

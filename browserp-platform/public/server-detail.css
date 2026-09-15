@@ -339,3 +339,25 @@
   :root body #server-detail-v3.server-page-v7 .detail-title-v3.detail-title-launch-v6,
   :root body #server-detail-v3.server-page-v7 .server-facts-v3 { background: Canvas; border-color: CanvasText; box-shadow: none; }
 }
+
+/* Keep the identity, live details and actions in the same comfortable inset.
+   The media above remains edge-to-edge; this is only the listing body. */
+:root body #server-detail-v3.server-page-v7 .detail-banner-v3 .detail-title-v3.detail-title-launch-v6 {
+  padding: clamp(28px, 3vw, 42px) clamp(28px, 3.2vw, 46px) clamp(30px, 3vw, 42px);
+}
+:root body #server-detail-v3.server-page-v7 .detail-banner-v3 .detail-heading-launch-v6 {
+  min-width: 0;
+}
+:root body #server-detail-v3.server-page-v7 .detail-banner-v3 .detail-heading-copy-launch-v6 {
+  min-width: 0;
+}
+@media (max-width: 760px) {
+  :root body #server-detail-v3.server-page-v7 .detail-banner-v3 .detail-title-v3.detail-title-launch-v6 {
+    padding: 24px 22px 28px;
+  }
+}
+@media (max-width: 480px) {
+  :root body #server-detail-v3.server-page-v7 .detail-banner-v3 .detail-title-v3.detail-title-launch-v6 {
+    padding: 21px 18px 25px;
+  }
+}
