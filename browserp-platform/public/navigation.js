@@ -237,6 +237,7 @@
     // Read before scroll locking: removing a scrollbar can move the header.
     const box = (returnTarget?.isConnected ? returnTarget : toggle).getBoundingClientRect();
     if (!(box.width > 0 && box.height > 0)) return;
+    close.dataset.iconOnly = String(box.width < 100);
     for (const [property, value] of Object.entries({ left: box.left, top: box.top, width: box.width, height: box.height })) {
       close.style.setProperty(property, `${value}px`);
     }
