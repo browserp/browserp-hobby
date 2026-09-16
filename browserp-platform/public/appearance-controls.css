@@ -1,0 +1,105 @@
+/* One shared appearance selector; page layout and theme content are unchanged. */
+:root body :is(.navigation-theme-choices-v6, .first-visit-appearance-choices, .staff-theme-options) {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  min-width: 0;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-inset, var(--panel));
+}
+:root body :is(.navigation-theme-choices-v6, .first-visit-appearance-choices, .staff-theme-options)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset-block: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 3);
+  box-sizing: border-box;
+  border: 1px solid var(--interactive-edge, var(--line-strong));
+  border-radius: 8px;
+  background: var(--selection-surface, var(--panel-2));
+  box-shadow: 0 1px 3px rgb(0 0 0 / .08);
+  transform: translateX(calc(var(--appearance-index, 0) * 100%));
+  transition: transform 260ms cubic-bezier(.2, .8, .2, 1);
+  pointer-events: none;
+}
+:root body :is(.navigation-theme-choices-v6, .first-visit-appearance-choices, .staff-theme-options) > button {
+  position: relative;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 8px 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.25;
+  white-space: nowrap;
+  cursor: pointer;
+  transform: none;
+  transition: color 160ms ease;
+}
+:root body :is(.navigation-theme-choices-v6, .first-visit-appearance-choices, .staff-theme-options) > button:is(:hover, [aria-pressed="true"]) {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--text);
+}
+:root body :is(.navigation-theme-choices-v6, .first-visit-appearance-choices, .staff-theme-options) > button:focus-visible {
+  outline: 2px solid var(--focus, var(--interactive-edge));
+  outline-offset: 2px;
+}
+:root[data-brand-motion="off"] body :is(.navigation-theme-choices-v6, .first-visit-appearance-choices, .staff-theme-options)::before {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root body :is(.navigation-theme-choices-v6, .first-visit-appearance-choices, .staff-theme-options)::before,
+  :root body :is(.navigation-theme-choices-v6, .first-visit-appearance-choices, .staff-theme-options) > button { transition: none; }
+}
+@media (forced-colors: active) {
+  :root body :is(.navigation-theme-choices-v6, .first-visit-appearance-choices, .staff-theme-options)::before { display: none; }
+  :root body :is(.navigation-theme-choices-v6, .first-visit-appearance-choices, .staff-theme-options) > button[aria-pressed="true"] {
+    border-color: Highlight;
+    color: Highlight;
+  }
+}
+
+/* Keep the two navigation controls together when inline links collapse. */
+:root:is([data-theme="dark"], [data-theme="light"]) .public-nav-v6 {
+  justify-content: flex-start;
+  column-gap: 12px;
+}
+@media (max-width: 1080px) {
+  :root:is([data-theme="dark"], [data-theme="light"]) .public-nav-v6 > .navigation-brand-v6 {
+    margin-inline-end: auto;
+  }
+}
+@media (max-width: 520px) {
+  :root:is([data-theme="dark"], [data-theme="light"]) .public-nav-v6 { column-gap: 8px; }
+  :root:is([data-theme="dark"], [data-theme="light"]) .public-nav-v6 > :is(.navigation-find-v7, .navigation-toggle-v6) {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+  }
+}
+
+/* All four game destinations remain together; narrower screens can swipe
+   the same row rather than separating the choices into different rows. */
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-game-discovery .game-grid-v3 {
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 12px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 4px 4px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}

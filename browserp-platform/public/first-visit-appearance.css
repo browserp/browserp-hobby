@@ -15,7 +15,7 @@
 }
 .first-visit-appearance-choices {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
   border-radius: 12px;
@@ -49,3 +49,8 @@
 }
 
 .first-visit-appearance-choice:hover:not([aria-pressed="true"]) { background: var(--surface-hover, var(--panel-2)); }
+
+@media (max-width: 420px) {
+  .first-visit-appearance { grid-template-columns: minmax(0, 1fr); }
+  .first-visit-appearance-choices { grid-column: 1 / -1; }
+}

@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en-GB">
 <head>
+  <script src="/appearance.js?v=20260916-themes1"></script>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#07080b"><meta name="application-name" content="BrowseRP"><meta name="apple-mobile-web-app-title" content="BrowseRP">
   <title>Find my server — BrowseRP</title>
@@ -12,9 +13,11 @@
   <meta property="og:image" content="https://www.browserp.com/browserp-mark-v3.png"><meta property="og:image:alt" content="BrowseRP RP logo"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1254"><meta property="og:image:height" content="1254"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://www.browserp.com/browserp-mark-v3.png"><meta name="twitter:image:alt" content="BrowseRP RP logo">
   <link rel="icon" href="/favicon.ico?v=2.12.1" sizes="32x32 48x48"><link rel="icon" type="image/png" sizes="192x192" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2.12.1" sizes="180x180"><link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/browserp-v3.css?v=20260915-premium4"><link rel="stylesheet" href="/navigation.css?v=20260915-quickfind1"><link rel="stylesheet" href="/public-layout.css?v=2.23.1"><link rel="stylesheet" href="/product-polish.css?v=20260915-searchfix1"><link rel="stylesheet" href="/server-finder.css?v=20260915-blocktype1">
-  <script src="/navigation.js?v=20260915-quickfind1" defer></script><script src="/touch-feedback.js?v=2.18.0" defer></script><script src="/recommendations.js?v=20260915-cookieflow1" defer></script><script src="/browserp-v3.js?v=20260915-quickfind-motion1" defer></script><script src="/discovery-model.js?v=2.15.0" defer></script><script src="/server-finder.js?v=1" defer></script>
+  <script src="/navigation.js?v=20260916-themes1" defer></script><script src="/touch-feedback.js?v=2.18.0" defer></script><script src="/recommendations.js?v=20260916-themes1" defer></script><script src="/browserp-v3.js?v=20260916-themes1" defer></script><script src="/discovery-model.js?v=2.15.0" defer></script><script src="/server-finder.js?v=1" defer></script>
 
-<link rel="stylesheet" href="/design-system.css?v=20260915-blocktype-buttons1"><link rel="stylesheet" href="/public-design.css?v=20260915-blocktype1"><link rel="stylesheet" href="/premium-pages.css?v=20260915-blocktype1"></head>
+<link rel="stylesheet" href="/design-system.css?v=20260915-blocktype-buttons1"><link rel="stylesheet" href="/public-design.css?v=20260915-blocktype1"><link rel="stylesheet" href="/premium-pages.css?v=20260915-blocktype1"><link rel="stylesheet" href="/appearance-themes.css?v=20260916-themes1">
+  <link rel="stylesheet" href="/appearance-controls.css?v=20260916-themes1">
+</head>
 <body data-page="find-server">
   <a class="skip-link" href="#main">Skip to finder</a>
   <header class="header-v3"><nav class="shell-v3 nav-v3" aria-label="Main navigation"><a class="logo-v3" href="/" aria-label="BrowseRP home"><span class="logo-lockup-v3"><img class="logo-full-v5" src="/assets/browserp-logo-v5.png?v=20260908" alt="BrowseRP"></span></a><button class="menu-v3" type="button" data-menu-v3 aria-expanded="false" aria-label="Open menu"><span></span><span></span><span></span></button><div class="nav-links-v3" data-nav-links-v3><a href="/servers">Discover</a><a href="/games">Games</a><a href="/blog">Blog</a><a href="/about">About</a></div><div class="nav-actions-v3" data-nav-actions-v3><a class="button-v3 button-secondary-v3" data-account-v3 href="/dashboard">Sign in</a><a class="button-v3 button-primary-v3" href="/list-server">List a server</a></div></nav></header>
@@ -27,10 +30,10 @@
           <p class="finder-step-count" data-finder-step-count hidden>Question 1 of 4</p>
           <fieldset class="finder-question" data-finder-question="platform" aria-describedby="finder-game-help"><legend tabindex="-1">Which game?</legend><p id="finder-game-help" class="finder-help">Pick a world you want to play in, or keep your options open.</p><div class="finder-choices finder-game-choices" data-finder-options="platform">
             <label class="finder-choice"><input type="radio" name="platform" value="all" checked><span class="finder-choice-copy"><strong>Any game</strong><small>Explore all supported games</small></span></label>
-            <label class="finder-choice"><input type="radio" name="platform" value="fivem"><span class="finder-choice-copy"><strong>FiveM</strong><small>GTA V multiplayer</small></span></label>
-            <label class="finder-choice"><input type="radio" name="platform" value="redm"><span class="finder-choice-copy"><strong>RedM</strong><small>Red Dead Redemption 2 multiplayer</small></span></label>
-            <label class="finder-choice"><input type="radio" name="platform" value="roblox"><span class="finder-choice-copy"><strong>Roblox</strong><small>Player-made experiences</small></span></label>
-            <label class="finder-choice"><input type="radio" name="platform" value="minecraft"><span class="finder-choice-copy"><strong>Minecraft</strong><small>Block-built worlds</small></span></label>
+            <label class="finder-choice" data-platform="fivem"><input type="radio" name="platform" value="fivem"><span class="finder-choice-copy"><strong>FiveM</strong><small>GTA V multiplayer</small></span></label>
+            <label class="finder-choice" data-platform="redm"><input type="radio" name="platform" value="redm"><span class="finder-choice-copy"><strong>RedM</strong><small>Red Dead Redemption 2 multiplayer</small></span></label>
+            <label class="finder-choice" data-platform="roblox"><input type="radio" name="platform" value="roblox"><span class="finder-choice-copy"><strong>Roblox</strong><small>Player-made experiences</small></span></label>
+            <label class="finder-choice" data-platform="minecraft"><input type="radio" name="platform" value="minecraft"><span class="finder-choice-copy"><strong>Minecraft</strong><small>Block-built worlds</small></span></label>
           </div></fieldset>
           <fieldset class="finder-question" data-finder-question="region" aria-describedby="finder-region-help"><legend tabindex="-1">Where would you like to play?</legend><p id="finder-region-help" class="finder-help">These are the regions listed by communities. They don’t guarantee connection quality or playing hours.</p><div class="finder-choices" data-finder-options="region"><label class="finder-choice"><input type="radio" name="region" value="all" checked><span class="finder-choice-copy"><strong>Any region</strong></span></label></div><p class="finder-option-note" data-finder-note="region"></p></fieldset>
           <fieldset class="finder-question" data-finder-question="access" aria-describedby="finder-access-help"><legend tabindex="-1">How would you like to join?</legend><p id="finder-access-help" class="finder-help">Some communities let you join straight away. Others ask you to apply first.</p><div class="finder-choices" data-finder-options="access">

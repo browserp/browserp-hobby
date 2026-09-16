@@ -26,6 +26,22 @@
   const node = (tag, className, text) => { const item = document.createElement(tag); if (className) item.className = className; if (text !== undefined) item.textContent = text; return item; };
   const icon = (id, className = "game-mark-v4") => { const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.classList.add(className); svg.setAttribute("aria-hidden", "true"); const use = document.createElementNS("http://www.w3.org/2000/svg", "use"); use.setAttribute("href", `/assets/game-marks-v4.svg#mark-${id}`); svg.append(use); return svg; };
 
+  // Only called for BrowseRP-authored game headings and descriptions below.
+  // Text nodes preserve content and escaping; member/server content never enters here.
+  function gameCopy(element, text) {
+    const fragment = document.createDocumentFragment();
+    let offset = 0;
+    for (const match of String(text).matchAll(/\b(FiveM|RedM|Roblox|Minecraft)\b/g)) {
+      fragment.append(document.createTextNode(text.slice(offset, match.index)));
+      const name = node("span", "game-name-v9", match[0]);
+      name.dataset.gameName = match[0].toLowerCase();
+      fragment.append(name);
+      offset = match.index + match[0].length;
+    }
+    fragment.append(document.createTextNode(text.slice(offset)));
+    element.replaceChildren(fragment);
+  }
+
   function gameMark(id, className) {
     if (!GAMES.some((game) => game.id === id)) return icon(id, className);
     const image = node("img", `game-artwork-v5 game-official-artwork-v6 ${className}`);
@@ -117,8 +133,8 @@
     document.querySelector('meta[name="description"]').content = game.description;
     $("#game-page-mark-v4").replaceChildren(gameMark(game.id, "game-page-symbol-v4"));
     $("#game-page-eyebrow-v4").textContent = `${game.name} roleplay`;
-    $("#game-page-title-v4").textContent = `Find your ${game.name} roleplay community.`;
-    $("#game-page-lead-v4").textContent = game.description;
+    gameCopy($("#game-page-title-v4"), `Find your ${game.name} roleplay community.`);
+    gameCopy($("#game-page-lead-v4"), game.description);
     $("#game-hub-grid-v4").hidden = true;
     $("#game-future-v6").hidden = true;
     if (game.id === "roblox") {
@@ -126,7 +142,7 @@
       const apply = node("a", "button-v3 button-secondary-v3", "Apply to list your community"); apply.href = "/list-server?platform=roblox";
       $("#game-page-actions-v4").replaceChildren(browse, apply);
       const empty = $("#game-server-empty-v4");
-      const heading = node("h3", "", "Help shape Roblox roleplay on BrowseRP.");
+      const heading = node("h3", ""); gameCopy(heading, "Help shape Roblox roleplay on BrowseRP.");
       const copy = node("p", "", "Run a community? Apply for a reviewed listing. Applying to BrowseRP is separate from any application players need to join you.");
       const emptyApply = node("a", "button-v3 button-primary-v3", "Apply to list your community"); emptyApply.href = "/list-server?platform=roblox";
       empty.replaceChildren(heading, copy, emptyApply);
@@ -135,8 +151,8 @@
       document.title = `${game.name} — Coming soon — BrowseRP`;
       document.querySelector('meta[name="description"]').content = `${game.name} discovery is coming soon to BrowseRP.`;
       $("#game-page-eyebrow-v4").textContent = "Coming soon";
-      $("#game-page-title-v4").textContent = `${game.name} is coming soon.`;
-      $("#game-page-lead-v4").textContent = game.future ? game.description : "We’re starting with FiveM, RedM, Roblox and Minecraft. More games will join the directory in future.";
+      gameCopy($("#game-page-title-v4"), `${game.name} is coming soon.`);
+      gameCopy($("#game-page-lead-v4"), game.future ? game.description : "We’re starting with FiveM, RedM, Roblox and Minecraft. More games will join the directory in future.");
       const browse = node("a", "button-v3 button-primary-v3", "Explore available games"); browse.href = "/games";
       $("#game-page-actions-v4").replaceChildren(browse);
       if (game.future) {
@@ -150,7 +166,7 @@
       return;
     }
     const results = $("#game-results-v4"); results.hidden = false;
-    $("#game-results-title-v4").textContent = game.id === "roblox" ? "Roblox communities" : `${game.name} servers`;
+    gameCopy($("#game-results-title-v4"), game.id === "roblox" ? "Roblox communities" : `${game.name} servers`);
     $("#game-results-lead-v4").textContent = `Reviewed ${game.line.toLowerCase()} listings appear below.`;
     $("#game-directory-link-v4").href = `/servers?platform=${encodeURIComponent(game.id)}`;
     window.BrowseRPSearch.mount({ root: $("#game-discovery-controls"), list: $("#game-server-list-v4"), empty: $("#game-server-empty-v4"), count: $("#game-result-count"), fixedGame: game.id, render: (list, servers) => list.replaceChildren(...servers.map(serverCard)) });

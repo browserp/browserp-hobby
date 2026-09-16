@@ -1,22 +1,8 @@
 (() => {
   "use strict";
   // Appearance only: no session, account, consent or private-data requests.
-  const KEY = "browserp-theme";
-  const read = () => {
-    try { const value = localStorage.getItem(KEY); if (value === "light" || value === "dark") return value; } catch { /* Keep the established dark default. */ }
-    return "dark";
-  };
-  function apply(theme, persist = false) {
-    const value = theme === "light" ? "light" : "dark";
-    document.documentElement.dataset.theme = value;
-    document.documentElement.style.colorScheme = value;
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = value === "light" ? "#f3f6fb" : "#080d18";
-    if (persist) { try { localStorage.setItem(KEY, value); } catch { /* The current page still changes. */ } }
-    document.querySelectorAll("[data-staff-theme]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.staffTheme === value)));
-    window.dispatchEvent(new CustomEvent("browserp:theme-changed", { detail: { theme: value } }));
-    return value;
-  }
+  const read = () => window.BrowseRPTheme?.get() || "default";
+  const apply = (theme, persist = false) => window.BrowseRPTheme?.apply(theme, { persist }) || "default";
   const make = (tag, text, className) => {
     const node = document.createElement(tag);
     if (text) node.textContent = text;
@@ -45,15 +31,15 @@
     const appearance = make("div", undefined, "staff-appearance");
     appearance.append(make("span", "Appearance", "staff-appearance-label"));
     const options = make("div", undefined, "staff-theme-options ds-tabs"); options.setAttribute("role", "group"); options.setAttribute("aria-label", "Colour theme");
-    for (const theme of ["dark", "light"]) {
-      const button = make("button", theme === "dark" ? "Dark" : "Light");
+    for (const { value: theme, label } of window.BrowseRPTheme?.choices || []) {
+      const button = make("button", label);
       button.type = "button"; button.dataset.staffTheme = theme;
       button.setAttribute("aria-pressed", String(document.documentElement.dataset.theme === theme));
       button.addEventListener("click", () => apply(theme, true)); options.append(button);
     }
+    window.BrowseRPTheme?.syncControls(options);
     appearance.append(options, make("small", "Saved on this device")); sidebar.append(appearance);
   }
   window.BrowseRPStaffAppearance = Object.freeze({ get: read, apply, mount });
-  window.addEventListener("storage", event => { if (event.key === KEY && ["light", "dark"].includes(event.newValue)) apply(event.newValue); });
   apply(read());
 })();

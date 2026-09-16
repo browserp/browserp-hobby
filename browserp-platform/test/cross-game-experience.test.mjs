@@ -66,7 +66,7 @@ test("signed-in navigation keeps the avatar menu, public links and a local publi
   assert.match(shell, /\["Profile", "\/profile"\]/);
   // Staff entry and pre-MFA eligibility are exercised with real session
   // hydration in public-navigation.test.mjs, separately from workspace access.
-  assert.match(shell, /browserp-theme/);
+  assert.match(read("public/appearance.js"), /browserp-theme/);
   assert.match(shell, /!document\.body\.hasAttribute\("data-staff-page"\)/);
   assert.match(css, /:root\[data-theme="light"\]/);
   assert.match(css, /\.account-popover-v3/);

@@ -15,6 +15,7 @@
   const disabled = (option) => option.disabled || (option.parentElement?.tagName === "OPTGROUP" && option.parentElement.disabled);
   const options = (record) => Array.from(record.select.options).map((option, index) => ({ option, index })).filter(({ option }) => !option.hidden && !option.parentElement?.hidden);
   const selectable = (record) => options(record).filter(({ option }) => !disabled(option));
+  const platformFor = (select, value) => (select.name === "platform" || select.id === "platform-filter") && ["fivem", "redm", "roblox", "minecraft"].includes(value) ? value : "";
   const isOpen = (record) => record.button.getAttribute("aria-expanded") === "true";
 
   function nameFor(select) {
@@ -82,6 +83,8 @@
       const item = make("div", "modern-select-option");
       item.id = `${record.popup.id}-option-${index}`;
       item.dataset.index = String(index);
+      const platform = platformFor(record.select, option.value);
+      if (platform) item.dataset.platform = platform;
       item.setAttribute("role", "option");
       item.setAttribute("aria-selected", String(index === record.select.selectedIndex));
       item.setAttribute("aria-disabled", String(disabled(option)));
@@ -99,6 +102,8 @@
     const { select, button } = record;
     if (!select.isConnected || !eligible(select)) { destroy(record); return; }
     record.value.textContent = select.options[select.selectedIndex]?.label || "Choose an option";
+    const platform = platformFor(select, select.value);
+    if (platform) button.dataset.platform = platform; else delete button.dataset.platform;
     button.disabled = select.matches(":disabled");
     button.setAttribute("aria-label", nameFor(select));
     button.setAttribute("aria-required", String(select.required));

@@ -3,13 +3,7 @@
 
   // Public pages share one menu; staff navigation has its own controller.
   if (document.body.hasAttribute("data-staff-page") || location.pathname.startsWith("/staffpanel")) return;
-  const themeKey = "browserp-theme";
-  let initialTheme = "dark";
-  try {
-    const savedTheme = localStorage.getItem(themeKey);
-    if (savedTheme === "light" || savedTheme === "dark") initialTheme = savedTheme;
-  } catch { /* Dark remains the public default. */ }
-  document.documentElement.dataset.theme = initialTheme;
+  window.BrowseRPTheme?.apply(window.BrowseRPTheme.get());
   const motionKey = "browserp-brand-motion";
   let motionEnabled = true;
   try { motionEnabled = localStorage.getItem(motionKey) !== "off"; } catch { /* Motion stays optional for this visit. */ }
@@ -197,21 +191,17 @@
   const themeChoices = make("div", "navigation-theme-choices-v6");
   themeChoices.setAttribute("role", "group");
   themeChoices.setAttribute("aria-label", "Choose the public site appearance");
-  [["Dark", "dark"], ["Light", "light"]].forEach(([label, value]) => {
+  (window.BrowseRPTheme?.choices || []).forEach(({ label, value }) => {
     const button = make("button", "navigation-theme-choice-v6", label);
     button.type = "button";
     button.dataset.themeChoiceV6 = value;
     button.setAttribute("aria-pressed", String(document.documentElement.dataset.theme === value));
     button.addEventListener("click", () => {
-      const selected = window.BrowseRPTheme?.set?.(value) || value;
-      if (!window.BrowseRPTheme) {
-        document.documentElement.dataset.theme = selected;
-        try { localStorage.setItem(themeKey, selected); } catch { /* The visible choice still applies for this page. */ }
-        window.dispatchEvent(new CustomEvent("browserp:theme-changed", { detail: { theme: selected } }));
-      }
+      window.BrowseRPTheme?.set(value);
     });
     themeChoices.append(button);
   });
+  window.BrowseRPTheme?.syncControls(themeChoices);
   appearance.append(appearanceHeading, themeChoices);
   const motionChoice = make("label", "navigation-motion-choice-v7");
   const motionInput = make("input"); motionInput.type = "checkbox"; motionInput.checked = motionEnabled;

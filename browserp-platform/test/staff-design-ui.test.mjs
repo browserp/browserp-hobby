@@ -12,19 +12,24 @@ function appearance(t, page = "overview", theme) {
   const dom = new JSDOM(read(`staffpanel-${page}.html`), { url: `https://browserp.test/staffpanel/${page}`, runScripts: "outside-only" });
   t.after(() => dom.window.close());
   const w = dom.window;
-  if (theme !== undefined) w.localStorage.setItem("browserp-theme", theme);
+  if (theme !== undefined) w.localStorage.setItem("browserp-appearance-v2", theme);
   const requests = [];
   w.fetch = async path => { requests.push(path); throw new Error("Appearance must not fetch"); };
+  w.eval(read("appearance.js"));
   w.eval(read("staff-workspace.js"));
   w.BrowseRPStaffAppearance.mount();
   return { w, requests };
 }
 
-test("staff appearance preserves dark default and explicit device choice without fetching or resetting storage", t => {
-  for (const saved of [undefined, "light", "dark", "invalid"]) {
+test("staff appearance preserves the current default and explicit device choice without fetching or resetting storage", t => {
+  for (const saved of [undefined, "default", "light", "dark", "invalid"]) {
     const { w, requests } = appearance(t, "overview", saved);
-    assert.equal(w.document.documentElement.dataset.theme, saved === "light" ? "light" : "dark");
-    assert.equal(w.localStorage.getItem("browserp-theme"), saved ?? null);
+    assert.equal(w.document.documentElement.dataset.theme, ["dark", "light"].includes(saved) ? saved : "default");
+    assert.equal(w.localStorage.getItem("browserp-appearance-v2"), saved ?? null);
+    const theme = w.document.documentElement.dataset.theme;
+    const choices = w.document.querySelector(".staff-theme-options");
+    assert.equal(choices.dataset.activeTheme, theme);
+    assert.equal(choices.style.getPropertyValue("--appearance-index"), String(["default", "dark", "light"].indexOf(theme)));
     assert.deepEqual(requests, []);
     assert.equal(w.document.querySelector(".public-header-v6"), null);
     assert.equal(w.document.querySelector("#staff-app-v3").hidden, true);
@@ -32,7 +37,7 @@ test("staff appearance preserves dark default and explicit device choice without
   }
 });
 
-test("both staff panels change appearance without remounting pending forms, selections or feedback", t => {
+test("staff workspace pages change appearance without remounting pending forms, selections or feedback", t => {
   for (const page of ["overview", "moderation"]) {
     const { w, requests } = appearance(t, page, "dark");
     const main = w.document.querySelector("main");
@@ -41,14 +46,15 @@ test("both staff panels change appearance without remounting pending forms, sele
     main.append(form);
     w.document.querySelector('[data-staff-theme="light"]').click();
     assert.equal(w.document.documentElement.dataset.theme, "light");
-    assert.equal(w.localStorage.getItem("browserp-theme"), "light");
+    assert.equal(w.localStorage.getItem("browserp-appearance-v2"), "light");
+    assert.equal(w.document.querySelector(".staff-theme-options").style.getPropertyValue("--appearance-index"), "2");
     assert.equal(form, main.lastElementChild);
     assert.equal(form.querySelector("textarea").value, "Keep this unsaved review");
     assert.equal(form.querySelector("input").checked, true);
     assert.equal(form.querySelector("button").disabled, true);
     assert.equal(form.getAttribute("aria-busy"), "true");
     assert.match(form.textContent, /Waiting for a confirmed decision/);
-    w.dispatchEvent(new w.StorageEvent("storage", { key: "browserp-theme", newValue: "dark" }));
+    w.dispatchEvent(new w.StorageEvent("storage", { key: "browserp-appearance-v2", newValue: "dark" }));
     assert.equal(w.document.documentElement.dataset.theme, "dark");
     assert.equal(form, main.lastElementChild);
     assert.equal(w.document.querySelector('[data-staff-theme="dark"]').getAttribute("aria-pressed"), "true");

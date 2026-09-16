@@ -16,6 +16,7 @@ test("hero movement pauses offscreen, in hidden pages and for reduced motion, th
   w.ResizeObserver = class { constructor(callback) { resized = callback; } observe() {} disconnect() { disconnected++; } };
   // Keep unrelated account/advert requests outside this lifecycle check.
   w.fetch = () => new Promise(() => {});
+  w.eval(readFileSync(new URL("../public/appearance.js", import.meta.url), "utf8"));
   w.eval(readFileSync(new URL("../public/browserp-v3.js", import.meta.url), "utf8"));
   const rows = pattern.querySelectorAll(".home-hero-wordmark-row").length;
   assert.ok(rows > 0);

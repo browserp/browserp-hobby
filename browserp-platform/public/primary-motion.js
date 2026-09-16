@@ -28,7 +28,9 @@
     const previous = ramps.get(control);
     const animation = control.getAnimations().find(item => item.animationName === "primary-colour-drift");
     if (!animation?.updatePlaybackRate) { stop(control); return; }
-    const eligible = motion.matches && !suspended && control.isConnected
+    const eligible = ["dark", "light"].includes(document.documentElement.dataset.theme)
+      && document.documentElement.dataset.brandMotion !== "off"
+      && motion.matches && !suspended && control.isConnected
       && control.dataset.primaryMotion !== "paused" && !control.matches(unavailable);
     if (!eligible) { stop(control); animation.updatePlaybackRate(1); return; }
     const target = control.matches(":hover,:focus-visible") ? 2.4 : 1;
@@ -41,7 +43,8 @@
     const ramp = { animation, target, rate: from, frame: null };
     ramps.set(control, ramp);
     function step(now) {
-      if (suspended || !motion.matches || !control.isConnected || control.matches(unavailable)
+      if (!["dark", "light"].includes(document.documentElement.dataset.theme) || document.documentElement.dataset.brandMotion === "off"
+        || suspended || !motion.matches || !control.isConnected || control.matches(unavailable)
         || control.dataset.primaryMotion === "paused" || animation.playState === "idle") {
         stop(control); animation.updatePlaybackRate(1); return;
       }
@@ -108,6 +111,12 @@
     document.documentElement.dataset.primaryMotion = value ? "paused" : "visible";
     controls.forEach(refresh);
   }
+  function refreshThemeMotion() {
+    controls.forEach(stop);
+    requestAnimationFrame(() => controls.forEach(refresh));
+  }
+  window.addEventListener("browserp:theme-changed", refreshThemeMotion);
+  window.addEventListener("browserp:brand-motion-changed", refreshThemeMotion);
   motion.addEventListener("change", () => controls.forEach(refresh));
   document.addEventListener("visibilitychange", () => suspend(document.hidden));
   window.addEventListener("pagehide", () => suspend(true));

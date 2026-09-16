@@ -12,45 +12,25 @@
     return element;
   }
 
-  const PUBLIC_THEME_KEY = "browserp-theme";
-
   function isPublicPage() {
     return !document.body.hasAttribute("data-staff-page") && !location.pathname.startsWith("/staffpanel");
   }
 
   function preferredTheme() {
-    try {
-      const saved = localStorage.getItem(PUBLIC_THEME_KEY);
-      if (saved === "light" || saved === "dark") return saved;
-    } catch { /* Appearance remains usable when local storage is unavailable. */ }
-    return "dark";
+    return window.BrowseRPTheme?.get() || "default";
   }
 
-  function applyTheme(theme, { persist = false } = {}) {
-    const selected = theme === "light" ? "light" : "dark";
-    document.documentElement.dataset.theme = selected;
-    document.documentElement.style.colorScheme = selected;
-    const colour = document.querySelector('meta[name="theme-color"]');
-    if (colour) colour.content = selected === "light" ? "#f7f7f7" : "#0a0a0a";
-    if (persist) {
-      try { localStorage.setItem(PUBLIC_THEME_KEY, selected); } catch { /* The visible choice still applies for this page. */ }
-    }
-    $$('[data-theme-choice-v6]').forEach(button => button.setAttribute("aria-pressed", String(button.dataset.themeChoiceV6 === selected)));
-    window.dispatchEvent(new CustomEvent("browserp:theme-changed", { detail: { theme: selected } }));
-    return selected;
+  function applyTheme(theme, options = {}) {
+    return window.BrowseRPTheme?.apply(theme, options) || "default";
   }
 
   if (isPublicPage() && !document.querySelector('link[data-public-theme],link[href^="/theme.css"]')) {
     const themeStyles = document.createElement("link");
     themeStyles.rel = "stylesheet";
-    themeStyles.href = "/theme.css?v=20260914-layout2";
+    themeStyles.href = "/theme.css?v=20260915-editorial1";
     themeStyles.dataset.publicTheme = "";
-    document.head.append(themeStyles);
+    document.head.insertBefore(themeStyles, document.querySelector('link[href^="/appearance-themes.css"]'));
   }
-  window.BrowseRPTheme = Object.freeze({ get: preferredTheme, set: theme => applyTheme(theme, { persist: true }) });
-  window.addEventListener("storage", event => {
-    if (event.key === PUBLIC_THEME_KEY && (event.newValue === "light" || event.newValue === "dark")) applyTheme(event.newValue);
-  });
 
   function initials(value) {
     return String(value || "BrowseRP member").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
@@ -679,7 +659,14 @@
     const grid = node("div", "shell-v3 footer-grid-v3");
     const brand = node("div", "footer-brand-v3");
     const lockup = node("a", "footer-home-v3 logo-lockup-v3"); lockup.href = "/"; lockup.setAttribute("aria-label", "BrowseRP home"); const mark = new Image(); mark.src = "/assets/browserp-logo-v5.png?v=20260908"; mark.alt = "BrowseRP"; mark.className = "logo-full-v5";
-    lockup.append(mark); brand.append(lockup, node("p", "", "One place to discover roleplay communities across FiveM, RedM, Roblox and Minecraft."));
+    lockup.append(mark);
+    const brandCopy = node("p", "");
+    brandCopy.append(document.createTextNode("One place to discover roleplay communities across "));
+    [["FiveM", ", "], ["RedM", ", "], ["Roblox", " and "], ["Minecraft", "."]].forEach(([label, separator]) => {
+      const gameName = node("span", "game-name-v9", label); gameName.dataset.gameName = label.toLowerCase();
+      brandCopy.append(gameName, document.createTextNode(separator));
+    });
+    brand.append(lockup, brandCopy);
     grid.append(brand);
     const groups = [
       ["Explore", [["Browse servers","/servers"],["Browse games","/games"],["Recently added","/servers?sort=newest"],["UK servers","/servers?region=United%20Kingdom"],["US servers","/servers?region=United%20States"],["Blog","/blog"]]],

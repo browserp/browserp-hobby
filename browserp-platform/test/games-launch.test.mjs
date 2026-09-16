@@ -5,14 +5,16 @@ import vm from "node:vm";
 
 function render(pathname) {
   class Element {
-    constructor(tag = "div", text = "") { this.tagName = tag; this.textContent = text; this.children = []; this.dataset = {}; this.attributes = {}; this.hidden = false; this.classList = { add() {} }; }
-    append(...items) { this.children.push(...items); }
+    constructor(tag = "div", text = "") { this.tagName = tag; this._text = text; this.children = []; this.dataset = {}; this.attributes = {}; this.hidden = false; this.classList = { add() {} }; }
+    get textContent() { return this._text + this.children.map(item => item.textContent).join(""); }
+    set textContent(value) { this._text = value; this.children = []; }
+    append(...items) { this.children.push(...items.flatMap(item => item.tagName === "#fragment" ? item.children : [item])); }
     prepend(...items) { this.children.unshift(...items); }
-    replaceChildren(...items) { this.children = items; }
+    replaceChildren(...items) { this._text = ""; this.children = []; this.append(...items); }
     setAttribute(name, value) { this.attributes[name] = value; }
   }
   const nodes = new Map();
-  const document = { title: "", querySelector(selector) { if (!nodes.has(selector)) nodes.set(selector, new Element()); return nodes.get(selector); }, createElement: (tag) => new Element(tag), createElementNS: (_, tag) => new Element(tag) };
+  const document = { title: "", querySelector(selector) { if (!nodes.has(selector)) nodes.set(selector, new Element()); return nodes.get(selector); }, createElement: (tag) => new Element(tag), createDocumentFragment: () => new Element("#fragment"), createTextNode: text => new Element("#text", text), createElementNS: (_, tag) => new Element(tag) };
   const requests = [];
   const context = { document, location: { pathname, search: "" }, URLSearchParams, window: { BrowseRPSearch: { mount({ fixedGame }) { requests.push(`/api/servers?platform=${fixedGame}`); } }, BrowseRPPlatforms: { theme(element, id) { element.dataset.platform = id; } } }, fetch: async(url) => { requests.push(url); return { ok: true, json: async() => ({ servers: [] }) }; } };
   vm.runInNewContext(readFileSync(new URL("../public/browserp-games.js", import.meta.url), "utf8"), context);
@@ -60,6 +62,8 @@ test("available game URLs keep their selected navigation and filtered server req
   assert.equal(links.find((link) => link.dataset.game === "roblox").attributes["aria-current"], "page");
   assert.match(requests[0], /platform=roblox/);
   assert.equal(nodes.get("#game-directory-link-v4").href, "/servers?platform=roblox");
+  assert.equal(nodes.get("#game-page-title-v4").textContent, "Find your Roblox roleplay community.");
+  assert.equal(nodes.get("#game-page-title-v4").children.find(item => item.dataset.gameName)?.textContent, "Roblox");
 });
 
 test("GTA VI and 6M future sections never request playable servers or offer a listing submission", () => {

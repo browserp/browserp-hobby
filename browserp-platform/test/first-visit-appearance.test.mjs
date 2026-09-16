@@ -11,7 +11,7 @@ const publicSource = read("../public/browserp-v3.js");
 const controllerEnd = publicSource.indexOf("  function initials(value) {");
 assert.ok(controllerEnd > 0, "the public theme controller remains available");
 const themeController = publicSource.slice(0, controllerEnd) + "})();";
-const themeKey = "browserp-theme", choiceKey = "browserp-cookie-choice-v1";
+const themeKey = "browserp-appearance-v2", choiceKey = "browserp-cookie-choice-v1";
 const recommendationKey = "browserp-recommendations-v1";
 
 async function page(t, { setup = () => {}, controller = true } = {}) {
@@ -20,6 +20,7 @@ async function page(t, { setup = () => {}, controller = true } = {}) {
   const w = dom.window, requests = [];
   w.fetch = async (url, options) => { requests.push({ url, options }); return { ok: true, json: async () => ({ authenticated: false }) }; };
   setup(w);
+  w.eval(read("../public/appearance.js"));
   if (controller) w.eval(themeController);
   w.eval(recommendations);
   w.document.dispatchEvent(new w.Event("DOMContentLoaded"));
@@ -31,19 +32,21 @@ async function page(t, { setup = () => {}, controller = true } = {}) {
 }
 const stored = w => Object.fromEntries(Object.keys(w.localStorage).map(key => [key, w.localStorage.getItem(key)]));
 
-test("first visit defaults to dark in a separate nonmodal keyboard-accessible Appearance group", async t => {
+test("first visit defaults to the current design in a separate nonmodal keyboard-accessible Appearance group", async t => {
   const { w, prompt, appearance, choice } = await page(t);
   assert.equal(w.document.querySelector("dialog"), null);
   assert.equal(w.document.activeElement, w.document.body);
   assert.equal(appearance.getAttribute("role"), "group");
   assert.equal(w.document.getElementById(appearance.getAttribute("aria-labelledby")).textContent, "Appearance");
   assert.match(w.document.getElementById(appearance.getAttribute("aria-describedby")).textContent, /separate from recommendation preferences/);
-  assert.equal(choice("dark").getAttribute("aria-pressed"), "true");
+  assert.equal(choice("default").getAttribute("aria-pressed"), "true");
+  assert.equal(appearance.querySelector(".first-visit-appearance-choices").style.getPropertyValue("--appearance-index"), "0");
+  assert.equal(choice("dark").getAttribute("aria-pressed"), "false");
   assert.equal(choice("light").getAttribute("aria-pressed"), "false");
   assert.equal(w.localStorage.getItem(themeKey), null, "no choice is written on arrival");
   assert.equal(w.localStorage.getItem(choiceKey), null);
   assert.equal(w.localStorage.getItem(recommendationKey), null);
-  for (const theme of ["dark", "light"]) {
+  for (const theme of ["default", "dark", "light"]) {
     const button = choice(theme);
     assert.equal(button.tagName, "BUTTON"); assert.equal(button.type, "button"); assert.equal(button.tabIndex, 0);
     button.focus(); assert.equal(w.document.activeElement, button);
@@ -61,7 +64,7 @@ test("theme selection uses the app controller and changes no consent, account, c
     w.localStorage.setItem("sb-test-auth-token", "fixture-session");
     w.localStorage.setItem("browserp-compare", "existing shortlist");
     w.document.cookie = "brp_csrf=fixture-session";
-    for (const theme of ["dark", "light"]) {
+    for (const theme of ["default", "dark", "light"]) {
       const button = w.document.createElement("button"); button.dataset.themeChoiceV6 = theme; w.document.body.prepend(button);
     }
   } });
@@ -73,9 +76,11 @@ test("theme selection uses the app controller and changes no consent, account, c
   assert.equal(w.document.cookie, cookies);
   assert.equal(w.document.documentElement.dataset.theme, "light");
   assert.equal(w.document.documentElement.style.colorScheme, "light");
-  assert.equal(w.document.querySelector('meta[name="theme-color"]').content, "#f7f7f7");
+  assert.equal(w.document.querySelector('meta[name="theme-color"]').content, "#fafafa");
   assert.equal(w.document.querySelector('[data-theme-choice-v6="light"]').getAttribute("aria-pressed"), "true");
   assert.equal(choice("light").getAttribute("aria-pressed"), "true");
+  assert.equal(choice("light").parentElement.style.getPropertyValue("--appearance-index"), "2");
+  assert.equal(choice("light").parentElement.dataset.activeTheme, "light");
   assert.equal(w.document.activeElement, choice("light"));
   assert.equal(prompt.hidden, false);
   assert.equal(w.BrowseRPRecommendations.read().enabled, false);

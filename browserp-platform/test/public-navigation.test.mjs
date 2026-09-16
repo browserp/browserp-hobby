@@ -51,6 +51,7 @@ function harness({ page = "index", pathname = routes[page] || `/${page}`, html =
     this.returnFocus?.focus();
     this.dispatchEvent(new w.Event("close"));
   };
+  w.eval(read("public/appearance.js"));
   w.eval(source);
   const $ = selector => w.document.querySelector(selector);
   const frame = () => {
@@ -106,15 +107,19 @@ test("header branding pauses in hidden or parked pages and resumes on return", (
   } finally { h.dom.window.close(); }
 });
 
-test("public appearance is local, explicit and keeps both choices in sync", () => {
+test("public appearance is local, explicit and keeps all three choices in sync", () => {
   const h = harness({ theme: "light" });
   try {
     assert.equal(h.w.document.documentElement.dataset.theme, "light");
+    assert.equal(h.$(".navigation-theme-choices-v6").style.getPropertyValue("--appearance-index"), "2");
+    assert.equal(h.$(".navigation-theme-choices-v6").dataset.activeTheme, "light");
     assert.equal(h.$('[data-theme-choice-v6="light"]').getAttribute("aria-pressed"), "true");
     assert.equal(h.$('[data-theme-choice-v6="dark"]').getAttribute("aria-pressed"), "false");
     h.$('[data-theme-choice-v6="dark"]').click();
     assert.equal(h.w.document.documentElement.dataset.theme, "dark");
-    assert.equal(h.w.localStorage.getItem("browserp-theme"), "dark");
+    assert.equal(h.w.localStorage.getItem("browserp-appearance-v2"), "dark");
+    assert.equal(h.$(".navigation-theme-choices-v6").style.getPropertyValue("--appearance-index"), "1");
+    assert.equal(h.$(".navigation-theme-choices-v6").dataset.activeTheme, "dark");
     assert.equal(h.$('[data-theme-choice-v6="dark"]').getAttribute("aria-pressed"), "true");
     assert.equal(h.$('[data-theme-choice-v6="light"]').getAttribute("aria-pressed"), "false");
     assert.equal(h.$(".navigation-theme-choices-v6").getAttribute("role"), "group");
@@ -188,7 +193,7 @@ test("all public pages expose the same complete header and dialog navigation", a
       assert.equal(staffLink.querySelector("strong").textContent, "Staff");
       assert.equal(staffLink.getAttribute("aria-current"), page === "staff" ? "page" : null);
       assert.deepEqual([...h.$(".navigation-game-grid-v6").children].map(item => item.getAttribute("href")).sort(), ["/games/fivem", "/games/minecraft", "/games/redm", "/games/roblox"]);
-      assert.deepEqual([...h.w.document.querySelectorAll("[data-theme-choice-v6]")].map(item => item.textContent), ["Dark", "Light"]);
+      assert.deepEqual([...h.w.document.querySelectorAll("[data-theme-choice-v6]")].map(item => item.textContent), ["Default", "Dark", "Light"]);
       assert.equal(h.w.document.querySelectorAll("[data-account-v3]").length, 2, "both account slots are available to session hydration");
       assert.equal(h.$(".public-nav-actions-v6 a[href='/list-server']").textContent, "List a server");
       assert.equal(h.$(".navigation-find-v7").getAttribute("aria-controls"), "public-navigation");

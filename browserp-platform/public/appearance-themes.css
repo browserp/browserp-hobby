@@ -1,0 +1,203 @@
+/* Optional appearances for the current BrowseRP application.
+   Default is deliberately absent: the current design remains its own source
+   of truth. These rules change presentation, never page structure or features.
+   Dark takes its colours from the preserved gm9926 design; its button motion
+   follows the continuous, fixed-size refinement from 14 September 2026. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #050507; --bg-soft: #0a080d; --panel: #111116; --panel-2: #19191f;
+  --text: #faf7fc; --copy: #d0cad5; --muted: #aaa7b5;
+  --line: #303039; --line-soft: #22222b; --line-strong: #595462;
+  --pink: #ec4fa6; --pink-strong: #ff78bd; --violet: #b68aff; --cyan: #59cde0;
+  --info: var(--cyan); --success: #6dd5a0; --warning: #f1c277; --danger: #ff92a7;
+  --control-bg: #0a080d; --control-border: #79717f;
+  --surface-hover: #211c26; --selection-surface: #282031; --interactive-edge: var(--violet);
+  --surface-raised: #1b171f; --surface-inset: #0a080d;
+  --edge-highlight: rgb(255 255 255 / .04);
+  --shadow-sm: 0 2px 6px rgb(0 0 0 / .18);
+  --shadow-md: 0 5px 16px rgb(0 0 0 / .22), 0 20px 50px rgb(0 0 0 / .3);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / .26), 0 32px 80px rgb(0 0 0 / .45);
+  --overlay-scrim: rgb(0 0 0 / .76);
+  --brand-action-gradient: linear-gradient(110deg, #bf087b 0%, #7937c8 48%, #006f86 100%);
+  --button-primary-shadow: 0 2px 5px rgb(0 0 0 / .18);
+  --button-primary-shadow-hover: 0 3px 12px rgb(191 8 123 / .18);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #fafafa; --bg-soft: #f2f2f4; --panel: #ffffff; --panel-2: #ededf0;
+  --text: #211b25; --copy: #4d4653; --muted: #655e6c;
+  --line: #d8d3dc; --line-soft: #e8e4eb; --line-strong: #a9a1b0;
+  --pink: #a90868; --pink-strong: #900457; --violet: #6834ac; --cyan: #006d84;
+  --info: var(--cyan); --success: #147044; --warning: #8a510c; --danger: #af2741;
+  --control-bg: #ffffff; --control-border: #827789;
+  --surface-hover: #efedf2; --selection-surface: #eae4f1; --interactive-edge: var(--violet);
+  --surface-raised: #ffffff; --surface-inset: #f2f2f4;
+  --edge-highlight: rgb(255 255 255 / .7);
+  --shadow-sm: 0 2px 7px rgb(36 24 43 / .045);
+  --shadow-md: 0 4px 12px rgb(36 24 43 / .055), 0 18px 48px rgb(36 24 43 / .08);
+  --shadow-lg: 0 8px 24px rgb(36 24 43 / .08), 0 30px 70px rgb(36 24 43 / .14);
+  --overlay-scrim: rgb(27 20 33 / .46);
+  --brand-action-gradient: linear-gradient(110deg, #ab096e 0%, #6834ac 48%, #00677c 100%);
+  --button-primary-shadow: 0 2px 6px rgb(91 35 94 / .12);
+  --button-primary-shadow-hover: 0 5px 15px rgb(91 35 94 / .16);
+}
+
+/* The homepage has authored blue artwork-independent surfaces. Theme those
+   surfaces explicitly, preserving the collage, its links and all geometry. */
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"]:not(.staff-v3):not([data-staff-page]) .home-hero-intro {
+  border-bottom-color: var(--line);
+  background: var(--bg);
+}
+:root[data-theme="dark"] body[data-page="home"] .home-hero-intro[data-wordmark-surface]::after {
+  background: linear-gradient(90deg, rgb(5 5 7 / .8), rgb(5 5 7 / .3) 67%, transparent);
+}
+:root[data-theme="dark"] body[data-page="home"] .home-hero-intro .home-hero-pattern { opacity: .85; }
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-intro h1 { color: var(--text); }
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-intro .eyebrow-v3 { color: var(--pink); }
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-intro .hero-copy-v3 > p { color: var(--copy); }
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] main .home-hero-intro .search-v3 {
+  border-color: var(--control-border); background: var(--panel); box-shadow: var(--shadow-md);
+}
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-intro .search-v3 input { color: var(--text); }
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-intro .search-v3 input::placeholder { color: var(--muted); }
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-visual {
+  background: var(--panel); border-color: var(--line-strong);
+  filter: drop-shadow(0 18px 30px rgb(0 0 0 / .2));
+}
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-visual::before { border-color: var(--violet); }
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-visual .hero-game-link:focus-visible { outline-color: var(--focus); }
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .section-rail-v3 { background: var(--bg-soft); }
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .section-rail-v3 .editorial-v3 h2,
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .section-rail-v3 .trust-grid-v3 strong { color: var(--text); }
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .section-rail-v3 .editorial-v3 > p,
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .section-rail-v3 .trust-grid-v3 span { color: var(--copy); }
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .section-rail-v3 .editorial-v3 > .eyebrow-v3 { color: var(--pink); }
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] main .section-rail-v3 .trust-grid-v3 article {
+  border-color: var(--line); border-top-color: var(--pink); background: var(--panel);
+}
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"]:not(.staff-v3):not([data-staff-page]) main .section-rail-v3 .button-secondary-v3 {
+  border-color: var(--line-strong); color: var(--text); background: var(--panel);
+}
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"]:not(.staff-v3):not([data-staff-page]) main .section-rail-v3 .button-secondary-v3:hover {
+  background: var(--surface-hover);
+}
+
+/* All ordinary surfaces use neutral theme layers; artwork overlays keep their
+   independent dark scrims and white text so community images remain legible. */
+:root[data-theme="dark"] body:not(.staff-v3):not([data-staff-page]) {
+  --public-tint: color-mix(in srgb, var(--pink) 3%, var(--panel));
+  --public-teal-tint: var(--bg-soft);
+}
+:root[data-theme="dark"] body:not(.staff-v3):not([data-staff-page]) :is(.game-page-hero-v4, .journal-hero-v6, .staff-public-hero) {
+  background: linear-gradient(120deg, var(--bg-soft), var(--bg));
+}
+:root[data-theme="light"] body:not(.staff-v3):not([data-staff-page]) {
+  --public-tint: color-mix(in srgb, var(--pink) 3%, var(--panel));
+  --public-teal-tint: var(--bg-soft);
+}
+:root:is([data-theme="dark"], [data-theme="light"]) body:not(.staff-v3):not([data-staff-page]) .footer-v3 { background: var(--bg-soft); }
+:root[data-theme="light"] #server-detail-v3 .detail-meta-v3 .metadata-value-v5 {
+  border-color: var(--line-strong); background: var(--panel-2); color: var(--text);
+}
+
+/* Retain the existing animated headline accents, with the original logo
+   palette. Nothing turns ordinary body copy or status colours into a gradient. */
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-intro h1 .gradient-text-v3 {
+  color: var(--pink); background: none; -webkit-text-fill-color: currentColor;
+}
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  :root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-intro h1 .gradient-text-v3 {
+    background-image: var(--brand-gradient); background-repeat: no-repeat; background-size: 160% 100%;
+    background-clip: text; -webkit-background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+  }
+}
+
+/* Dark and Light primary actions use one colour clock across pointer entry and exit.
+   primary-motion.js eases the playback rate without resetting the phase. */
+@property --primary-emphasis { syntax: "<number>"; inherits: false; initial-value: 0; }
+:root:is([data-theme="dark"], [data-theme="light"]) body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary) {
+  background-origin: border-box; background-repeat: no-repeat;
+  background-size: 160% 100%; background-position: 50% 50%;
+  --primary-emphasis: 0; transform: none !important;
+  transition: border-color var(--motion-fast), --primary-emphasis 480ms ease, box-shadow var(--motion-fast);
+}
+:root:is([data-theme="dark"], [data-theme="light"]) body:not(.staff-v3):not([data-staff-page]) :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary):is(:hover, :focus-visible, :active):not(:disabled):not([aria-disabled="true"]):not([aria-busy="true"]),
+:root:is([data-theme="dark"], [data-theme="light"]) body.staff-v3 :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary):is(:hover, :focus-visible, :active):not(:disabled):not([aria-disabled="true"]):not([aria-busy="true"]) {
+  background-image: var(--brand-action-gradient); background-size: 160% 100%;
+  background-repeat: no-repeat; background-origin: border-box;
+}
+@media screen and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  :root:is([data-theme="dark"], [data-theme="light"]) body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary):not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]):not([aria-busy="true"]) {
+    animation: primary-colour-drift 6.5s ease-in-out infinite alternate, primary-light-pulse 2.8s ease-in-out infinite;
+  }
+  :root:is([data-theme="dark"], [data-theme="light"]) body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary):is(:hover, :focus-visible):not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]):not([aria-busy="true"]) {
+    --primary-emphasis: 1;
+  }
+}
+@keyframes primary-colour-drift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+@keyframes primary-light-pulse {
+  0%, 100% { filter: brightness(calc(1 + var(--primary-emphasis) * .08)); }
+  50% { filter: brightness(calc(1 + var(--primary-emphasis) * .14)); }
+}
+:root:is([data-theme="dark"], [data-theme="light"]) body [data-primary-motion="paused"],
+:root:is([data-theme="dark"], [data-theme="light"])[data-primary-motion="paused"] body [data-primary-motion],
+:root:is([data-theme="dark"], [data-theme="light"])[data-brand-motion="off"] body [data-primary-motion] { animation-play-state: paused !important; }
+
+/* The user's animation switch and OS preference keep decorative effects quiet.
+   Stop at the same phase so switching motion off does not create a jump. */
+:root:is([data-theme="dark"], [data-theme="light"])[data-brand-motion="off"] body :is(.gradient-text-v3, .home-hero-visual),
+:root:is([data-theme="dark"], [data-theme="light"])[data-brand-motion="off"] body .journal-hero-v6 h1 > span {
+  animation-play-state: paused !important;
+}
+:root:is([data-theme="dark"], [data-theme="light"])[data-brand-motion="off"] body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary) {
+  animation-play-state: paused !important; filter: none !important; --primary-emphasis: 0 !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:is([data-theme="dark"], [data-theme="light"]) body :is(.gradient-text-v3, .home-hero-visual),
+  :root:is([data-theme="dark"], [data-theme="light"]) body .journal-hero-v6 h1 > span { animation: none !important; }
+  :root:is([data-theme="dark"], [data-theme="light"]) body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary) { animation: none !important; transition: none; filter: none; }
+}
+@media (forced-colors: active), print {
+  :root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"]:not(.staff-v3):not([data-staff-page]) .home-hero-intro,
+  :root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .section-rail-v3 { background: Canvas; }
+  :root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-intro h1 .gradient-text-v3 {
+    color: CanvasText; background: none; -webkit-text-fill-color: currentColor; animation: none;
+  }
+  :root:is([data-theme="dark"], [data-theme="light"]) body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary),
+  :root:is([data-theme="dark"], [data-theme="light"]) body:not(.staff-v3):not([data-staff-page]) :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary):is(:hover, :focus-visible, :active):not(:disabled):not([aria-disabled="true"]):not([aria-busy="true"]),
+  :root:is([data-theme="dark"], [data-theme="light"]) body.staff-v3 :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary):is(:hover, :focus-visible, :active):not(:disabled):not([aria-disabled="true"]):not([aria-busy="true"]) {
+    color: ButtonText; background: ButtonFace; border-color: ButtonText;
+    animation: none !important; filter: none; box-shadow: none; transition: none;
+  }
+}
+
+/* Game identity belongs to the name, never to a member's prose or a status.
+   Scoped token overrides keep authored component palettes consistent without
+   changing Default, labels, filters, links, artwork or native control values. */
+:root[data-theme="dark"] {
+  --game-fivem: #ffac69; --game-redm: #ff797f;
+  --game-roblox: #ffffff; --game-minecraft: #70d78a;
+}
+:root[data-theme="light"] {
+  --game-fivem: #98410a; --game-redm: #b52e3e;
+  --game-roblox: #26232b; --game-minecraft: #187340;
+}
+:root:is([data-theme="dark"], [data-theme="light"]) body :is([data-platform="fivem"], [data-game-name="fivem"]) { --platform-accent: var(--game-fivem) !important; }
+:root:is([data-theme="dark"], [data-theme="light"]) body :is([data-platform="redm"], [data-game-name="redm"]) { --platform-accent: var(--game-redm) !important; }
+:root:is([data-theme="dark"], [data-theme="light"]) body :is([data-platform="roblox"], [data-game-name="roblox"]) { --platform-accent: var(--game-roblox) !important; }
+:root:is([data-theme="dark"], [data-theme="light"]) body :is([data-platform="minecraft"], [data-game-name="minecraft"]) { --platform-accent: var(--game-minecraft) !important; }
+:root:is([data-theme="dark"], [data-theme="light"]) body .navigation-game-v6[data-platform] { --game-colour: var(--platform-accent); }
+@media (forced-colors: none) {
+  :root:is([data-theme="dark"], [data-theme="light"]) body :is(
+    .game-name-v9, .platform-badge-v5[data-platform], .navigation-game-v6[data-platform],
+    .directory-game-choice[data-platform], .game-nav-chip-v4[data-platform], .game-strip-v3 a[data-platform],
+    .game-grid-v3 [data-platform] strong, .game-hub-card-v4[data-platform] .game-hub-copy-v4 strong,
+    .finder-choice[data-platform] .finder-choice-copy strong, .modern-select-option[data-platform], .modern-select-trigger[data-platform],
+    .staff-scrapers-link[data-platform], .staff-scraper-platform, .staff-scraper-card[data-platform] strong,
+    .staff-fivem[data-platform] .fivem-heading .eyebrow-v3, .refresh-health-game[data-platform] > strong
+  ) { color: var(--platform-accent) !important; }
+}

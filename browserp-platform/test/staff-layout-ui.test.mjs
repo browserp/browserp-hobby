@@ -48,12 +48,12 @@ test("resizing staff navigation restores desktop access and skip link preserves 
   assert.equal(h.w.location.hash, "#fivem"); assert.equal(h.w.document.activeElement, h.main);
 });
 
-test("staff finishing styles load last on every private staff entry point and stay off public pages", () => {
+test("staff finishing styles precede shared appearance layers on every private entry point and stay off public pages", () => {
   const files = readdirSync(new URL("../public", import.meta.url)).filter(file => file.endsWith(".html"));
   for (const file of files) {
     const html = read(file); const links = [...html.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/g)].map(match => match[1]);
     const staffWorkspace = /<body\b[^>]*\bdata-staff-page=/.test(html) || file.startsWith("staffpanel");
-    if (staffWorkspace) assert.equal(new URL(links.at(-1), "https://browserp.com").pathname, "/staff-design.css", file);
+    if (staffWorkspace) assert.deepEqual(links.slice(-3).map(link => new URL(link, "https://browserp.com").pathname), ["/staff-design.css", "/appearance-themes.css", "/appearance-controls.css"], file);
     else assert.equal(links.some(link => link.startsWith("/staff-layout.css")), false, file);
   }
 });

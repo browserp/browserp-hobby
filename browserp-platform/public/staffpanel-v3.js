@@ -196,12 +196,12 @@
   }
 
   function preferredTheme() {
-    return window.BrowseRPStaffAppearance?.get() || "dark";
+    return window.BrowseRPStaffAppearance?.get() || window.BrowseRPTheme?.get() || "default";
   }
 
   function applyTheme(theme) {
     if (window.BrowseRPStaffAppearance) return window.BrowseRPStaffAppearance.apply(theme);
-    document.documentElement.dataset.theme = "dark";
+    window.BrowseRPTheme?.apply(theme);
   }
 
 

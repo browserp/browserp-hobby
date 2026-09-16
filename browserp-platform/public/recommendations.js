@@ -296,7 +296,7 @@
   function appearanceChoice() {
     if (!document.querySelector("link[data-first-visit-appearance]")) {
       const styles = el("link", ""); styles.rel = "stylesheet";
-      styles.href = "/first-visit-appearance.css?v=20260914-layout1"; styles.dataset.firstVisitAppearance = "";
+      styles.href = "/first-visit-appearance.css?v=20260916-themes1"; styles.dataset.firstVisitAppearance = "";
       document.head.append(styles);
     }
     const group = el("div", "first-visit-appearance");
@@ -305,35 +305,17 @@
     const title = el("h3", "first-visit-appearance-title", "Appearance"); title.id = "first-visit-appearance-title";
     const hint = el("p", "first-visit-appearance-hint", "Your theme is separate from recommendation preferences."); hint.id = "first-visit-appearance-hint";
     const choices = el("div", "first-visit-appearance-choices");
-    function update(theme) {
-      for (const button of choices.children) button.setAttribute("aria-pressed", String(button.dataset.appearanceChoice === theme));
+    function update() {
+      window.BrowseRPTheme?.syncControls(choices);
     }
-    for (const theme of ["dark", "light"]) {
-      const button = el("button", "first-visit-appearance-choice", theme === "dark" ? "Dark" : "Light");
+    for (const { value: theme, label } of window.BrowseRPTheme?.choices || []) {
+      const button = el("button", "first-visit-appearance-choice", label);
       button.type = "button"; button.dataset.appearanceChoice = theme;
-      button.addEventListener("click", () => {
-        if (window.BrowseRPTheme?.set) {
-          update(window.BrowseRPTheme.set(theme));
-          return;
-        }
-        // Keep appearance usable if the public page controller has not loaded.
-        document.documentElement.dataset.theme = theme;
-        document.documentElement.style.colorScheme = theme;
-        const colour = document.querySelector('meta[name="theme-color"]');
-        if (colour) colour.content = theme === "light" ? "#f8f5f8" : "#050507";
-        try { storage.setItem("browserp-theme", theme); } catch { /* The visible choice still applies for this page. */ }
-        window.dispatchEvent(new CustomEvent("browserp:theme-changed", { detail: { theme } }));
-      });
+      button.addEventListener("click", () => update(window.BrowseRPTheme.set(theme)));
       choices.append(button);
     }
-    let theme = document.documentElement.dataset.theme;
-    if (theme !== "light" && theme !== "dark") {
-      try { theme = storage.getItem("browserp-theme"); } catch { /* Dark is the default. */ }
-    }
-    update(theme === "light" ? "light" : "dark");
-    window.addEventListener("browserp:theme-changed", event => {
-      if (event.detail?.theme === "light" || event.detail?.theme === "dark") update(event.detail.theme);
-    });
+    update(window.BrowseRPTheme?.get() || "default");
+    window.addEventListener("browserp:theme-changed", event => update(event.detail?.theme));
     group.append(title, choices, brandingChoice(), hint);
     return group;
   }

@@ -144,3 +144,20 @@ test("changing to a touch viewport restores native control attributes and remove
     assert.equal(w.document.querySelectorAll(".modern-select-trigger").length, 1);
   } finally { dom.window.close(); }
 });
+
+
+test("game presentation markers follow allowed platform values without changing select behaviour", async () => {
+  const { dom, w, select, button, popup } = await setup({ html: '<form><label>Game<select name="platform"><option value="all">All games</option><option value="fivem">FiveM</option><option value="roblox">Roblox</option></select></label></form>' });
+  try {
+    assert.equal(button.hasAttribute("data-platform"), false);
+    button.click();
+    assert.equal(popup.querySelector('[data-index="0"]').hasAttribute("data-platform"), false);
+    assert.equal(popup.querySelector('[data-index="1"]').dataset.platform, "fivem");
+    popup.querySelector('[data-index="1"]').click();
+    assert.equal(button.dataset.platform, "fivem");
+    assert.equal(new w.FormData(w.document.querySelector("form")).get("platform"), "fivem");
+    button.click(); popup.querySelector('[data-index="0"]').click();
+    assert.equal(button.hasAttribute("data-platform"), false);
+    assert.equal(select.value, "all");
+  } finally { dom.window.close(); }
+});

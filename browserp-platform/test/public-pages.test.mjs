@@ -66,7 +66,11 @@ test("Roblox empty-state guidance and application destination match before and a
       assert.equal(empty.querySelector("a").getAttribute("href"), "/list-server?platform=roblox");
       const before = empty.innerHTML;
       const search = hydrateGame(dom);
-      assert.equal(empty.innerHTML, before);
+      const name = empty.querySelector('h3 > .game-name-v9[data-game-name="roblox"]');
+      assert.equal(name.textContent, "Roblox", "hydration adds the game colour without changing its name");
+      const comparable = empty.cloneNode(true);
+      comparable.querySelector('h3 > .game-name-v9[data-game-name="roblox"]').replaceWith(doc.createTextNode(name.textContent));
+      assert.equal(comparable.innerHTML, before, "all copy, semantic structure and application links are retained apart from the allowed colour span");
       assert.equal(empty.hidden, total > 0);
       assert.equal(search.fixedGame, "roblox");
       assert.equal(search.empty, empty);
