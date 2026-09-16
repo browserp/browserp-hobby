@@ -24,12 +24,8 @@ body:is([data-page="dashboard"], [data-page="profile"]) .dashboard-view > .porta
 }
 body:is([data-page="dashboard"], [data-page="profile"]) .dashboard-view > .portal-head > .home-hero-pattern,
 body:is([data-page="dashboard"], [data-page="profile"]) .dashboard-view > .portal-head::after {
-  top: -42px;
-  bottom: -20px;
-}
-@media (max-width: 760px) {
-  body:is([data-page="dashboard"], [data-page="profile"]) .dashboard-view > .portal-head > .home-hero-pattern,
-  body:is([data-page="dashboard"], [data-page="profile"]) .dashboard-view > .portal-head::after { top: -28px; }
+  top: calc(-1 * clamp(44px, 5vw, 76px));
+  bottom: 0;
 }
 .home-hero-pattern {
   position: absolute;
