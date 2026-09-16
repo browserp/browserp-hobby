@@ -135,6 +135,7 @@ export function createWordmarkCanvas(pattern, plane) {
       if (!canvas.isConnected) pattern.append(canvas);
       pattern.dataset.renderer = 'canvas';
       paint();
+      window.dispatchEvent(new Event('browserp:wordmark-ready'));
       if (running && !request) request = requestAnimationFrame(tick);
     } catch {
       if (disposed || generation !== build) return;

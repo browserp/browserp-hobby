@@ -1,0 +1,178 @@
+/* A focused discovery polish. The current routes, themes and filtering model
+   remain the source of truth; only presentation and link affordances change. */
+.account-trigger-v3 .account-avatar-v3 {
+  display: block;
+  background: linear-gradient(135deg, #f5d2ea, #bca5e7 55%, #9de9ed);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / .28);
+}
+:root body[data-page="home"] .home-hero-intro h1 .gradient-text-v3,
+:root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-intro h1 .gradient-text-v3 {
+  background-image: linear-gradient(100deg, #f55aaf 0%, #fca6d4 24%, #b885e8 51%, #66c7f1 76%, #48d5e1 100%) !important;
+  background-size: 160% 100%; background-clip: text; -webkit-background-clip: text;
+  color: #e979bc; -webkit-text-fill-color: transparent;
+}
+.home-hero-intro .hero-copy-v3 > p a.game-name-v9 {
+  color: var(--platform-accent);
+  text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  text-underline-offset: .19em; text-decoration-thickness: 1px;
+  transition: text-decoration-color .2s ease, filter .2s ease;
+}
+.home-hero-intro .hero-copy-v3 > p a.game-name-v9:hover { text-decoration-color: currentColor; filter: brightness(1.2); }
+.home-hero-intro .hero-copy-v3 > p a.game-name-v9:focus-visible { outline: 2px solid #fa8acb; outline-offset: 3px; border-radius: 2px; }
+
+/* One shared brand clock, with the existing gradient rather than a flyover. */
+.public-nav-v6 > .navigation-brand-v6::after {
+  background: linear-gradient(100deg, transparent 27%, rgb(255 107 186 / .44) 42%, rgb(193 136 255 / .52) 52%, rgb(100 219 239 / .43) 62%, transparent 77%) 0 0 / 240% 100%;
+  animation-timing-function: linear;
+}
+@keyframes navigation-brand-wave {
+  0%, 7%, 76%, 100% { background-position: 100% 0; opacity: 0; }
+  17% { opacity: .8; }
+  38% { background-position: 0 0; opacity: .75; }
+  51% { opacity: 0; }
+}
+.public-nav-v6 > .navigation-brand-v6::before { filter: drop-shadow(0 0 4px rgb(236 79 166 / .58)) drop-shadow(0 0 12px rgb(89 205 224 / .38)); }
+
+.public-nav-v6 > .button-primary-v3 { position: relative; overflow: hidden; }
+@media (prefers-reduced-motion: no-preference) {
+  .public-nav-v6[data-brand-motion="running"] > .button-primary-v3:is(:hover,:focus-visible) {
+    animation: navigation-list-glow 1.8s ease-in-out infinite;
+  }
+}
+@keyframes navigation-list-glow {
+  0%, 100% { filter: brightness(1.05); }
+  50% { filter: brightness(1.12); }
+}
+.navigation-find-v7,.navigation-toggle-v6 {
+  border-radius: 12px;
+  box-shadow: inset 0 1px rgb(255 255 255 / .06);
+  transition: border-color .22s ease, background-color .22s ease, box-shadow .22s ease, filter .22s ease;
+}
+.navigation-find-v7 { background: color-mix(in srgb, var(--cyan) 5%, var(--panel)); }
+.navigation-toggle-v6 { background: color-mix(in srgb, var(--pink) 4%, var(--panel)); }
+.navigation-find-v7:hover,.navigation-find-v7[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--cyan) 13%, var(--panel));
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--cyan) 16%, transparent);
+}
+.navigation-toggle-v6:hover,.navigation-toggle-v6[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--pink) 12%, var(--panel));
+  border-color: var(--pink);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--pink) 17%, transparent);
+}
+
+/* Keep all four destinations and their art, but trade four framed blocks for
+   an editorial row. Its existing horizontal swipe at small widths remains. */
+:root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) {
+  min-height: 0; padding: 0 0 12px; gap: 6px 0;
+  border: 0; border-bottom: 2px solid color-mix(in srgb, var(--platform-accent) 65%, var(--line));
+  border-radius: 0; background: transparent; box-shadow: none;
+  transition: border-color .2s ease, filter .2s ease;
+}
+:root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) .game-art-v3 {
+  width: 100%; height: auto; aspect-ratio: 16 / 9; margin: 0 0 6px;
+  border: 0; border-radius: 8px; box-shadow: none;
+}
+:root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) strong {
+  color: var(--platform-accent); font-size: clamp(18px, 1.6vw, 22px);
+}
+:root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3):is(:hover,:focus-visible) {
+  transform: none; border-color: var(--platform-accent); background: transparent;
+  box-shadow: none; filter: brightness(1.13);
+}
+.future-game-v10 {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 5px 16px;
+  width: fit-content; max-width: 100%; min-height: 50px;
+  margin-top: 16px; padding: 10px 0;
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--copy); font-size: 14px;
+}
+.future-game-v10 strong { color: var(--text); font-size: 17px; }
+.future-game-kicker-v10 { color: var(--pink-strong); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.future-game-arrow-v10 { color: var(--cyan); font-weight: 750; white-space: nowrap; }
+.future-game-v10:hover .future-game-arrow-v10 { text-decoration: underline; text-underline-offset: 4px; }
+
+/* The title and View action open the listing; the facts are their own real links.
+   The title's stretched hit area preserves the old whole-card click target. */
+.discovery-card-v10 { position: relative; }
+.discovery-card-v10 h3 .discovery-card-title-v10 { color: inherit; text-decoration: none; }
+.discovery-card-v10 h3 .discovery-card-title-v10::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.discovery-card-v10 .discovery-meta-v10 { position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: 6px; }
+.discovery-card-v10 .discovery-meta-v10 .metadata-value-v5::before { content: none; }
+.discovery-card-v10 .discovery-meta-v10 > :is(a,span) {
+  display: inline-flex; align-items: center; min-height: 31px; max-width: 100%;
+  padding: 4px 10px; border: 1px solid var(--line);
+  border-radius: 7px; background: var(--surface-inset,var(--panel-2));
+  color: var(--copy); font-size: 12px; font-weight: 700; line-height: 1.3;
+  white-space: normal; text-align: left; text-decoration: none;
+}
+.discovery-card-v10 .discovery-meta-v10 > .platform-badge-v5 {
+  color: var(--platform-accent); border-color: color-mix(in srgb,var(--platform-accent) 38%,var(--line));
+  background: color-mix(in srgb,var(--platform-accent) 9%,var(--panel));
+}
+.discovery-card-v10 .discovery-meta-v10 > a:is(:hover,:focus-visible) {
+  border-color: var(--pink); background: var(--selection-surface); color: var(--text);
+}
+.discovery-card-v10 .discovery-meta-v10 > a:focus-visible,
+.discovery-card-v10 .server-card-action:focus-visible,
+.discovery-card-v10 h3 a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.discovery-card-v10 .server-tags { position: relative; z-index: 2; }
+.discovery-card-v10 .server-tags span {
+  padding: 4px 8px !important; border: 1px solid var(--line) !important;
+  border-radius: 6px; background: var(--panel-2) !important;
+  color: var(--muted); font-weight: 600 !important;
+}
+.discovery-card-v10 .status {
+  padding: 6px 10px; border: 1px solid var(--line);
+  border-radius: 999px; background: var(--panel-2);
+  color: var(--copy); font-weight: 700;
+}
+.discovery-card-v10 .status.online {
+  border-color: color-mix(in srgb,var(--success) 40%,var(--line));
+  background: color-mix(in srgb,var(--success) 9%,var(--panel)); color: var(--success);
+}
+.discovery-card-v10 .status.online::before {
+  content: ""; display: inline-block; width: 7px; height: 7px;
+  margin-inline-end: 6px; border-radius: 50%; background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb,var(--success) 18%,transparent);
+}
+:root body:not(.staff-v3):not([data-staff-page]) .discovery-card-v10 .server-card-action {
+  position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: center;
+  min-height: 42px; padding: 8px 15px; border: 1px solid color-mix(in srgb,var(--pink) 55%,var(--line));
+  border-radius: 9px; background: color-mix(in srgb,var(--pink) 10%,var(--panel));
+  color: var(--pink-strong); font-size: 13px; font-weight: 800; transform: none;
+}
+:root body:not(.staff-v3):not([data-staff-page]) .discovery-card-v10 .server-card-action:is(:hover,:focus-visible) {
+  background: color-mix(in srgb,var(--pink) 18%,var(--panel)); border-color: var(--pink);
+}
+:root body:not(.staff-v3):not([data-staff-page]) .discovery-card-v10 .server-card-action::after { content: " ↗"; }
+:root body[data-page="servers"] main #server-list .discovery-card-v10 .server-card-action { background: color-mix(in srgb,var(--pink) 10%,var(--panel)); color: var(--pink-strong); }
+@media (max-width: 700px) {
+  .future-game-v10 { align-items: flex-start; }
+  .discovery-card-v10 .discovery-meta-v10 > :is(a,span) { min-height: 34px; }
+}
+
+.newcomer-guide-v10 { margin-top: 22px; padding: 15px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.newcomer-guide-v10[hidden] { display: none; }
+.newcomer-guide-v10 > div { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.newcomer-guide-v10 p { margin: 0; color: var(--copy); }
+.newcomer-guide-v10 strong { color: var(--text); }
+.newcomer-guide-v10 button { min-height: 44px; padding: 8px 12px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--panel-2); color: var(--text); font: inherit; font-weight: 700; cursor: pointer; }
+.newcomer-guide-v10 button:is(:hover,:focus-visible) { border-color: var(--pink); }
+.newcomer-dialog-v10 { width: min(480px,calc(100vw - 28px)); max-width: none; padding: 26px; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--surface-raised,var(--panel)); color: var(--text); box-shadow: var(--shadow-lg); }
+.newcomer-dialog-v10::backdrop { background: rgb(0 0 0 / .68); }
+.newcomer-dialog-v10 h2 { margin: 9px 0; font-size: clamp(24px,5vw,31px); }
+.newcomer-dialog-v10 p { color: var(--copy); line-height: 1.6; }
+.newcomer-dialog-v10 .newcomer-step-v10 { color: var(--pink-strong); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.newcomer-dialog-v10 .newcomer-actions-v10 { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.newcomer-dialog-v10 .newcomer-actions-v10 > :is(a,button) { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 9px 13px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--panel-2); color: var(--text); font: inherit; font-weight: 700; cursor: pointer; }
+.newcomer-dialog-v10 .newcomer-actions-v10 > .button-primary-v3 { border-color: transparent; color: white; }
+@media (prefers-reduced-motion: reduce) {
+  .public-nav-v6 > .button-primary-v3 { animation: none !important; }
+  :root body[data-page="home"] main .home-game-discovery .game-grid-v3 > a:not(.game-all-v3) { transition: none; }
+}
+:root[data-brand-motion="off"] .public-nav-v6 > .button-primary-v3 { animation: none !important; filter: none; }
+@media (forced-colors: active) {
+  :root body[data-page="home"] .home-hero-intro h1 .gradient-text-v3 { background-image: none !important; }
+  .discovery-card-v10 .discovery-meta-v10 > :is(a,span),.discovery-card-v10 .status,
+  .newcomer-guide-v10,.newcomer-dialog-v10 { border-color: CanvasText; background: Canvas; color: CanvasText; }
+}

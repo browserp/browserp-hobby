@@ -82,10 +82,9 @@
 
   function serverCard(server, directoryPreview = false) {
     const slug = String(server.slug || "").trim();
-    const card = element("a", "server-card");
+    const card = element("div", "server-card discovery-card-v10");
     window.BrowseRPPlatforms.theme(card, window.BrowseRPPlatforms.idFor(server));
-    card.href = `/server/${encodeURIComponent(slug)}`;
-    card.setAttribute("aria-label", `View ${String(server.name || "server")}`);
+    const listingHref = `/server/${encodeURIComponent(slug)}`;
     const media = element("div", "server-card-media");
     const initial = element("span", "server-initials", initials(server.name));
     const artwork = [...new Set([server.logo_url, server.banner_url].map(value => String(value || "").trim()))]
@@ -110,7 +109,9 @@
     top.append(status);
     card.append(top);
 
-    card.append(element("h3", "", server.name || "Roleplay server"));
+    const heading = element("h3", "");
+    const titleLink = element("a", "discovery-card-title-v10", server.name || "Roleplay server");
+    titleLink.href = listingHref; heading.append(titleLink); card.append(heading);
     card.append(element("p", "server-description", server.description || "Open the listing to learn more about this community."));
     // Preview-only omission of optional unknowns. Do not change the source
     // record, joining requirements, status, or detail/compare disclosures.
@@ -120,7 +121,7 @@
         if (/^(?:unknown|not confirmed|not specified|unspecified|unavailable|n\/a)$/i.test(String(preview[key] || "").trim())) preview[key] = "";
       }
     }
-    card.append(window.BrowseRPPlatforms.metadata(preview));
+    card.append(window.BrowseRPPlatforms.discoveryMetadata(preview));
 
     const tags = element("div", "server-tags");
     (Array.isArray(server.tags) ? server.tags : []).slice(0, directoryPreview ? 2 : 3).forEach((tag) => tags.append(element("span", "", tag)));
@@ -130,7 +131,8 @@
     const playerText = server.applicationOnly ? "Live player count not provided" : server.online
       ? `${Number(server.players || 0).toLocaleString()}${server.capacity ? ` / ${Number(server.capacity).toLocaleString()}` : ""} players${server.count_scope === "network" ? " across the network" : ""}`
       : "Player count unavailable";
-    bottom.append(element("strong", "", playerText), element("span", "server-card-action", "View listing"));
+    const view = element("a", "server-card-action", "View listing"); view.href = listingHref;
+    bottom.append(element("strong", "", playerText), view);
     card.append(bottom);
     return window.BrowseRPShortlist?.wrap(card, server) || card;
   }

@@ -85,7 +85,7 @@ test("homepage featured listings render only the backend response and show the r
       await new Promise(resolve => setTimeout(resolve, 10));
       assert.equal(w.document.querySelectorAll(".server-card").length, servers.length);
       assert.equal(w.document.querySelector("#featured-empty").hidden, servers.length > 0);
-      if (servers.length) assert.equal(w.document.querySelector(".server-card").getAttribute("href"), "/server/real-community");
+      if (servers.length) assert.equal(w.document.querySelector(".server-card h3 a").getAttribute("href"), "/server/real-community");
     } finally { dom.window.close(); }
   }
 });

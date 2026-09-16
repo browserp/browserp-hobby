@@ -121,7 +121,7 @@ test("published game/directory pages arrive with unique content and crawlable se
     const response = await request(path), doc = response.document();
     assert.equal(response.statusCode, 200, path);
     assert.equal(response.headers["x-robots-tag"], undefined, "Published production pages must remain crawlable");
-    assert.equal(doc.querySelectorAll('a[href="/server/cali-rp"]').length, 1);
+    assert.equal(doc.querySelectorAll('a[href="/server/cali-rp"]').length, 2);
     assert.equal(doc.querySelector(".platform-badge-v5")?.textContent, "FiveM");
     assert.equal(doc.querySelectorAll(".platform-badge-v5 svg").length, 0);
     assert.equal(doc.querySelector('link[rel="canonical"]').href, `https://www.browserp.com${path === "/servers" ? path : "/games/fivem"}`);
@@ -353,7 +353,7 @@ test("enhancement replaces prerendered game navigation and retains directory lin
     assert.equal(w.document.querySelectorAll("#game-page-nav-v4 a").length, 4);
     assert.equal(w.document.querySelectorAll("#game-page-mark-v4 img").length, 1);
     assert.equal(w.document.querySelector("#game-server-list-v4").hidden, false);
-    assert.equal(w.document.querySelectorAll('a[href="/server/cali-rp"]').length, 1);
+    assert.equal(w.document.querySelectorAll('a[href="/server/cali-rp"]').length, 2);
     assert.match(w.document.body.textContent, /Live updates are unavailable/);
     const input = w.document.querySelector("#directory-search"); input.value = "different"; input.dispatchEvent(new w.Event("input", { bubbles: true }));
     await new Promise(resolve => setTimeout(resolve, 250));

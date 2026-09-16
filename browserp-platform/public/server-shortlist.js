@@ -130,9 +130,9 @@
   window.addEventListener("pagehide", endSession);
   window.addEventListener("pageshow", event => { if (event.persisted) { endSession(); location.reload(); } });
   function enhance() {
-    document.querySelectorAll("a.server-card:not(.server-card-skeleton)").forEach(card => {
+    document.querySelectorAll(".server-card:not(.server-card-skeleton)").forEach(card => {
       if (card.parentElement.classList.contains("server-shortlist-card")) return;
-      const slug = /^\/server\/([a-z0-9-]+)$/.exec(card.getAttribute("href") || "")?.[1];
+      const slug = /^\/server\/([a-z0-9-]+)$/.exec(card.getAttribute("href") || card.querySelector(".discovery-card-title-v10")?.getAttribute("href") || "")?.[1];
       if (!slug) return;
       const marker = document.createComment("shortlist"); card.before(marker);
       marker.replaceWith(wrap(card, { id: card.dataset.serverId, slug, name: card.querySelector("h3")?.textContent }));

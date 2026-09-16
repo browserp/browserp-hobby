@@ -30,7 +30,7 @@ for (const kind of ['directory', 'game']) {
     const h = fixture(t, kind), card = h.render();
     assert.deepEqual([...card.querySelectorAll('.server-tags > span')].map(n => n.textContent), server.tags.slice(0, 3));
     assert.equal(card.querySelector('.server-tags').nextElementSibling.className, 'server-card-bottom');
-    assert.deepEqual([...card.querySelector('.platform-meta-v5').children].map(n => n.getAttribute('aria-label')), ['Game: FiveM', 'Region: United Kingdom', 'Language: French', 'Server setup: QBCore', 'Access: Approval required']);
+    assert.deepEqual([...card.querySelector('.platform-meta-v5').children].map(n => n.getAttribute('aria-label')), ['Game: FiveM. Browse matching communities', 'Region: United Kingdom. Browse matching communities', 'Language: French. Browse matching communities', 'Server setup: QBCore. Browse matching communities', 'Access: Approval required']);
     const escaped = h.render({ ...server, tags: ['<img src=x onerror=bad()>'], logo_url: 'javascript:bad()', banner_url: '//untrusted.example/image.png' });
     assert.equal(escaped.querySelector('.server-tags img'), null); assert.equal(escaped.querySelector('.server-tags').textContent, '<img src=x onerror=bad()>'); assert.equal(escaped.querySelector('.server-card-media img'), null);
     assert.equal(h.render({ ...server, tags: null }).querySelector('.server-tags').children.length, 0);
@@ -48,7 +48,7 @@ for (const [kind, playerText] of [['directory', '41 / 100 players'], ['game', '4
       'server-card-top',
       'title',
       'server-description',
-      'server-meta platform-meta-v5',
+      'server-meta platform-meta-v5 discovery-meta-v10',
       'server-tags',
       'server-card-bottom'
     ]);
@@ -56,6 +56,10 @@ for (const [kind, playerText] of [['directory', '41 / 100 players'], ['game', '4
     assert.equal(card.querySelector('.server-meta').nextElementSibling, card.querySelector('.server-tags'));
     assert.equal(card.querySelector('.server-card-bottom strong').textContent, playerText);
     assert.equal(card.querySelector('.server-card-action').textContent, 'View listing');
+    assert.equal(card.querySelector('h3 a').getAttribute('href'), '/server/community-test');
+    assert.equal(card.querySelector('.server-meta a[aria-label^="Region"]').getAttribute('href'), '/servers?platform=fivem&region=United+Kingdom');
+    assert.equal(card.querySelector('.server-meta a[aria-label^="Language"]').getAttribute('href'), '/servers?platform=fivem&language=French');
+    assert.equal(card.querySelector('.server-meta a[aria-label^="Server setup"]').getAttribute('href'), '/servers?platform=fivem&mode=QBCore');
   });
 }
 test('public and staff controller documents load the same standalone touch helper once', () => {

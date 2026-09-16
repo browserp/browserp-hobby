@@ -84,7 +84,8 @@
   }
 
   function serverCard(server) {
-    const link = node("a", "server-card"); link.href = `/server/${encodeURIComponent(server.slug || "")}`;
+    const link = node("div", "server-card discovery-card-v10");
+    const listingHref = `/server/${encodeURIComponent(server.slug || "")}`;
     window.BrowseRPPlatforms.theme(link, window.BrowseRPPlatforms.idFor(server));
     const media = node("div", "server-card-media");
     const initial = node("span", "server-initials", String(server.name || "RP").trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase());
@@ -101,11 +102,14 @@
     } else media.append(initial);
     const applicationOnly = server.applicationOnly === true;
     const top = node("div", "server-card-top"); top.append(media, node("span", `status${!applicationOnly && server.online ? " online" : ""}`, applicationOnly ? "Community listing" : server.online ? "Online now" : "Status unavailable"));
-    link.append(top, node("h3", "", server.name || "Roleplay server"), node("p", "server-description", server.description || "Open the listing to learn more."), window.BrowseRPPlatforms.metadata(server));
+    const title = node("h3", ""); const titleLink = node("a", "discovery-card-title-v10", server.name || "Roleplay server");
+    titleLink.href = listingHref; title.append(titleLink);
+    link.append(top, title, node("p", "server-description", server.description || "Open the listing to learn more."), window.BrowseRPPlatforms.discoveryMetadata(server));
     const tags = node("div", "server-tags");
     (Array.isArray(server.tags) ? server.tags : []).slice(0, 3).forEach(tag => tags.append(node("span", "", tag)));
     link.append(tags);
-    const bottom = node("div", "server-card-bottom"); bottom.append(node("strong", "", applicationOnly ? "Live player count not provided" : server.online ? `${Number(server.players || 0).toLocaleString()} players${server.count_scope === "network" ? " across the network" : ""}` : "Player count unavailable"), node("span", "server-card-action", "View listing")); link.append(bottom);
+    const bottom = node("div", "server-card-bottom"); const view = node("a", "server-card-action", "View listing"); view.href = listingHref;
+    bottom.append(node("strong", "", applicationOnly ? "Live player count not provided" : server.online ? `${Number(server.players || 0).toLocaleString()} players${server.count_scope === "network" ? " across the network" : ""}` : "Player count unavailable"), view); link.append(bottom);
     return window.BrowseRPShortlist?.wrap(link, server) || link;
   }
 

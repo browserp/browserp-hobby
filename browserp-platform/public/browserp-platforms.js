@@ -48,6 +48,26 @@
     if (server.verified) row.append(node("span", "metadata-value-v5", "Owner verified"));
     return row;
   }
+  // Cards have a separate listing link, so these chips may navigate to the
+  // directory's real filters without nesting anchors or changing detail facts.
+  function discoveryMetadata(server, engagement = {}) {
+    const row = node("div", "server-meta platform-meta-v5 discovery-meta-v10");
+    const game = idFor(server);
+    entries(server, engagement).forEach(([label, value], index) => {
+      if (!value) return;
+      const field = ["platform", "region", "language", "mode", "access"][index];
+      const filterable = index < 4 && !(index === 0 && game === "other")
+        && !/^(unknown|not confirmed|not specified|unavailable|n\/a)$/i.test(String(value).trim());
+      const item = filterable ? node("a", index === 0 ? "platform-badge-v5" : "metadata-value-v5", value)
+        : index === 0 ? badge(game, value) : node("span", "metadata-value-v5", value);
+      if (index === 0) theme(item, game);
+      item.setAttribute("aria-label", `${label}: ${value}${filterable ? ". Browse matching communities" : ""}`);
+      if (filterable) item.href = `/servers?${new URLSearchParams({ platform: game === "other" ? "all" : game, [field]: index === 0 ? game : value })}`;
+      row.append(item);
+    });
+    if (server.verified) row.append(node("span", "metadata-value-v5", "Owner verified"));
+    return row;
+  }
   function facts(server, engagement = {}) {
     const list = theme(node("dl", "server-info-grid-v5"), idFor(server));
     const rows = [...entries(server, engagement), ["Player status", server.applicationOnly ? "Live player count not provided" : server.online ? `${server.players || 0} / ${server.capacity || "?"} online` : "Status unavailable"]];
@@ -60,5 +80,5 @@
     });
     return list;
   }
-  window.BrowseRPPlatforms = Object.freeze({ names, resolve, idFor, theme, badge, entries, metadata, facts });
+  window.BrowseRPPlatforms = Object.freeze({ names, resolve, idFor, theme, badge, entries, metadata, discoveryMetadata, facts });
 })();

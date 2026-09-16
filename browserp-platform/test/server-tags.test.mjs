@@ -54,6 +54,7 @@ test("live server refresh preserves clickable tag filters and directory cards co
   try {
     const card = directory.window.document.querySelector(".server-card");
     assert.equal(card.querySelectorAll(".server-tags span").length, 3);
-    assert.equal(card.querySelectorAll("a").length, 0);
+    assert.equal(card.querySelectorAll("a a").length, 0);
+    assert.ok(card.querySelector('.discovery-meta-v10 a[href="/servers?platform=fivem&language=English"]'));
   } finally { directory.window.close(); }
 });

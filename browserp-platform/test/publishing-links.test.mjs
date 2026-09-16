@@ -76,8 +76,10 @@ test("initial directory cards use logo first, three existing features and honest
       assert.equal(output.statusCode, 200);
       const card = dom.window.document.querySelector(".server-card");
       assert.deepEqual([...card.querySelectorAll(".server-tags span")].map(span => span.textContent), row.tags.slice(0, 3));
-      assert.deepEqual([...card.children].map(node => node.matches("h3") ? "title" : node.className), ["server-card-top", "title", "server-description", "server-meta platform-meta-v5", "server-tags", "server-card-bottom"]);
-      assert.equal(card.querySelector(".server-description").nextElementSibling.className, "server-meta platform-meta-v5");
+      assert.deepEqual([...card.children].map(node => node.matches("h3") ? "title" : node.className), ["server-card-top", "title", "server-description", "server-meta platform-meta-v5 discovery-meta-v10", "server-tags", "server-card-bottom"]);
+      assert.equal(card.querySelector(".server-description").nextElementSibling.className, "server-meta platform-meta-v5 discovery-meta-v10");
+      assert.equal(card.querySelector('h3 a').getAttribute('href'), '/server/community');
+      assert.equal(card.querySelector('.server-meta a[aria-label^="Region"]').getAttribute('href'), '/servers?platform=roblox&region=United+States');
       assert.equal(card.querySelector(".server-tags").nextElementSibling.className, "server-card-bottom");
       assert.equal(card.querySelector(".status").textContent, "Community listing");
       assert.equal(card.querySelector(".status").classList.contains("online"), false);

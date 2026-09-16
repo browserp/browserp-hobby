@@ -58,7 +58,7 @@ test("a full asynchronous FiveM page keeps its tall results and dynamic cards fr
   assert.equal(h.$("#game-server-list-v4").children.length, 24);
   assert.equal(h.$("#game-server-list-v4").getAttribute("aria-busy"), "false");
   assert.equal(h.$("#game-server-empty-v4").hidden, true);
-  assert.deepEqual([...h.$(".platform-meta-v5").children].map(item => item.getAttribute("aria-label")), ["Game: FiveM", "Region: United Kingdom", "Language: French", "Server setup: QBCore", "Access: Approval required"]);
+  assert.deepEqual([...h.$(".platform-meta-v5").children].map(item => item.getAttribute("aria-label")), ["Game: FiveM. Browse matching communities", "Region: United Kingdom. Browse matching communities", "Language: French. Browse matching communities", "Server setup: QBCore. Browse matching communities", "Access: Approval required"]);
   assert.equal(observer.options.threshold, 0);
   assert.equal(observer.options.rootMargin, "0px 0px 35% 0px", "Static sections should begin revealing well before they enter the viewport");
   const firstCard = h.$("#game-server-list-v4").firstElementChild;

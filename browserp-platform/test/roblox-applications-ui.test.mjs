@@ -150,7 +150,7 @@ test("correction refresh preserves unsent Roblox edits and compares private evid
 
 test("Roblox game page links to the application and never displays an experience total for a manual community", t => {
   const dom = new JSDOM(read("game.html"), { url: "https://browserp.test/games/roblox", runScripts: "outside-only" }); const w = dom.window; t.after(() => w.close());
-  w.BrowseRPPlatforms = { theme() {}, idFor: server => server.platform_id, metadata: () => w.document.createElement("div") };
+  w.BrowseRPPlatforms = { theme() {}, idFor: server => server.platform_id, discoveryMetadata: () => w.document.createElement("div") };
   w.BrowseRPSearch = { mount: ({ list, render }) => render(list, [{ name: "Community fixture", slug: "fixture", platform_id: "roblox", applicationOnly: true, online: true, players: 99000 }]) };
   w.eval(read("browserp-games.js"));
   assert.ok(w.document.querySelector('#game-page-actions-v4 a[href="/list-server?platform=roblox"]'));

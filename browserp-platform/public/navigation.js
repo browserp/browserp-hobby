@@ -120,9 +120,19 @@
     nav.dataset.brandMotion = document.hidden || brandParked || !motionEnabled || document.documentElement.dataset.theme === "light"
       || pattern?.dataset.motion === "paused" ? "paused" : "running";
   };
+  const alignBrandPhase = () => {
+    const canvasTime = document.querySelector(".home-hero-wordmark-canvas")?.wordmarkFrame?.time;
+    const fallbackTime = document.querySelector(".home-hero-wordmark-row")?.getAnimations?.()[0]?.currentTime;
+    const time = Number.isFinite(canvasTime) ? canvasTime : fallbackTime;
+    if (!Number.isFinite(time)) return;
+    for (const animation of nav.querySelector(".navigation-brand-v6")?.getAnimations?.({ subtree: true }) || []) {
+      if (animation.effect?.getTiming?.().duration === 18400) animation.currentTime = time % 18400;
+    }
+  };
   document.addEventListener("visibilitychange", syncBrandMotion);
   window.addEventListener("browserp:brand-motion-changed", syncBrandMotion);
-  window.addEventListener("browserp:wordmark-motion", syncBrandMotion);
+  window.addEventListener("browserp:wordmark-motion", () => { syncBrandMotion(); alignBrandPhase(); });
+  window.addEventListener("browserp:wordmark-ready", alignBrandPhase);
   window.addEventListener("browserp:theme-changed", syncBrandMotion);
   window.addEventListener("pagehide", () => { brandParked = true; syncBrandMotion(); });
   window.addEventListener("pageshow", () => { brandParked = false; syncBrandMotion(); });
