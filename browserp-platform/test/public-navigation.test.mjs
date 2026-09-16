@@ -154,6 +154,20 @@ const member = {
   user: { profile: { display_name: "Alex Rivers", avatar_review_status: "approved", avatar_url: "https://cdn.discordapp.com/avatar.png" } }
 };
 
+test("the older flattened BrowseRP avatar uses the transparent site mark only in the account chip", async () => {
+  const h = harness();
+  try {
+    const legacy = "https://example.test/profile/1787193557239-9cb54f6bcdcb84271c802482.png";
+    await sessionHydration(h, { session: { ...member, user: { profile: { display_name: "Member", avatar_url: legacy } } } });
+    assert.equal(h.$(".account-trigger-v3 .account-avatar-v3").getAttribute("src"), "/assets/browserp-icon-512.png");
+  } finally { h.dom.window.close(); }
+  const other = harness();
+  try {
+    await sessionHydration(other, { session: member });
+    assert.equal(other.$(".account-trigger-v3 .account-avatar-v3").src, member.user.profile.avatar_url);
+  } finally { other.dom.window.close(); }
+});
+
 test("ending a member session removes private header identity and returns account focus to sign in", async () => {
   const h = harness();
   try {

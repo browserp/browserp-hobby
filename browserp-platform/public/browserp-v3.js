@@ -40,7 +40,11 @@
     const url = [profile.custom_avatar_url, profile.customAvatarUrl, profile.avatar_url, profile.avatarUrl, profile.approved_avatar_url, profile.approvedAvatarUrl].find(value => safeWebsiteUrl(value));
     if (!url) return node("span", "account-initials-v3", initials(name));
     const image = new Image(); image.className = "account-avatar-v3"; image.alt = ""; image.referrerPolicy = "no-referrer";
-    image.addEventListener("error", () => image.replaceWith(node("span", "account-initials-v3", initials(name))), { once: true }); image.src = url;
+    // An older upload of the BrowseRP mark was flattened against black. Show
+    // the identical transparent site asset in the account chip; the approved
+    // profile record and every other member's uploaded avatar stay untouched.
+    const legacyMark = new URL(url).pathname.endsWith("/1787193557239-9cb54f6bcdcb84271c802482.png");
+    image.addEventListener("error", () => image.replaceWith(node("span", "account-initials-v3", initials(name))), { once: true }); image.src = legacyMark ? "/assets/browserp-icon-512.png" : url;
     return image;
   }
 
