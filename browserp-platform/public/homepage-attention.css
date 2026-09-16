@@ -110,6 +110,11 @@
   0%, 100% { transform: rotate(3deg) translateY(0); }
   50% { transform: rotate(3deg) translateY(-8px); }
 }
+@media (min-width: 1280px) {
+  :root body[data-page="home"] .home-hero-visual {
+    margin-inline-end: clamp(28px, calc((100vw - 1200px) * .35), 115px);
+  }
+}
 
 /* The four actual game choices stay links, but read like visual destinations. */
 :root body[data-page="home"] .home-game-discovery { padding-block: clamp(36px, 4vw, 52px) 6px; }
