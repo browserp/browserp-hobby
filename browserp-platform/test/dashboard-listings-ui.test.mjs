@@ -35,6 +35,7 @@ test("dashboard counts only published records while retaining the full recent li
   assert.equal(metric.querySelector("strong").textContent, "1");
   assert.equal(metric.querySelector("span").textContent, "Published listings");
   assert.match(metric.querySelector("small").textContent, /recent listings/);
+  assert.equal(h.$('.portal-nav a[href="#account"]').textContent, "Profile & privacy");
   assert.equal(h.$("#listings h2").textContent, "Your listings");
   assert.match(h.$("#listings .portal-panel-head p").textContent, /including archived entries/);
   assert.equal(h.w.document.querySelectorAll("#listings .portal-item").length, 6);
@@ -44,6 +45,35 @@ test("dashboard counts only published records while retaining the full recent li
   const publicLinks = [...h.w.document.querySelectorAll('#listings a[href^="/server/"]')];
   assert.deepEqual(publicLinks.map(link => link.getAttribute("href")), ["/server/published-community"]);
   assert.equal(h.w.document.querySelectorAll("#listings [data-owner-badge-action]").length, 1);
+});
+
+test("dashboard section navigation shows one focused panel without discarding other account controls", async t => {
+  const h = await dashboard(t, [listing("published")]);
+  const ids = ["listings", "submissions", "saved", "recent", "notifications", "content-status", "account"];
+  assert.deepEqual(ids.map(id => h.$(`#${id}`).id), ids, "all account sections remain available in the dashboard");
+  assert.equal(h.$("#listings").hidden, false);
+  assert.ok(ids.slice(1).every(id => h.$(`#${id}`).hidden), "the initial tab keeps the long dashboard collapsed");
+
+  const bio = h.$('#account textarea[name="bio"]');
+  bio.value = "Keep this unfinished profile note";
+  h.$('.portal-nav a[href="#saved"]').click();
+  assert.equal(h.w.location.hash, "#saved");
+  assert.equal(h.$("#saved").hidden, false);
+  assert.ok(ids.filter(id => id !== "saved").every(id => h.$(`#${id}`).hidden));
+  assert.equal(h.$('.portal-nav a[href="#saved"]').getAttribute("aria-current"), "page");
+  assert.equal(h.w.document.activeElement, h.$("#saved h2"));
+
+  h.w.location.hash = "#account"; h.w.dispatchEvent(new h.w.Event("hashchange"));
+  assert.equal(h.$("#account").hidden, false, "a direct account link opens its containing panel");
+  assert.equal(h.$('#account textarea[name="bio"]').value, "Keep this unfinished profile note", "switching sections does not rebuild the profile form");
+
+  const childTarget = h.w.document.createElement("span"); childTarget.id = "account-preferences"; h.$("#account").append(childTarget);
+  h.w.location.hash = "#account-preferences"; h.w.dispatchEvent(new h.w.Event("hashchange"));
+  assert.equal(h.$("#account").hidden, false, "a direct child target keeps its parent section active");
+
+  h.w.history.replaceState(null, "", "#recent"); h.w.dispatchEvent(new h.w.Event("popstate"));
+  assert.equal(h.$("#recent").hidden, false, "history navigation restores the selected section");
+  assert.equal(h.$('.portal-nav a[href="#recent"]').getAttribute("aria-current"), "page");
 });
 
 test("an archived-only account shows zero published listings without hiding the archive", async t => {

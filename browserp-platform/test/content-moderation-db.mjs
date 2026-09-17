@@ -81,6 +81,19 @@ test("guarded content uses real PostgreSQL permissions and transitions",async t=
   await assert.rejects(db.query("update public.profiles set display_name='Bypass'"),/permission denied/);
   await assert.rejects(result("public.staff_content_moderation()"),/permission required/);
  });
+ await t.test("provider failure review stays private and available for a staff decision",async()=>{
+  await login();const submitted=await result("public.member_server_interaction($1,'comment','Synthetic provider outage review.')",[server]);let s=await item(submitted.id);
+  await check(s,"review");await login();s=await result("public.member_apply_content_check($1,$2)",[s.id,s.version]);assert.equal(s.status,"pending_review");
+  await db.exec("reset role");assert.equal((await db.query("select status from public.server_comments where id=$1",[submitted.id])).rows[0].status,"pending_review");
+  await login(staff);assert.ok((await result("public.staff_content_moderation('comment')")).items.some(entry=>entry.id===s.id));
+  s=await result("public.staff_decide_content($1,$2,'approve','Reviewed the synthetic outage case.','fixture')",[s.id,s.version]);assert.equal(s.status,"published");
+ });
+ await t.test("biography writes clear approved text and require their separate staff review",async()=>{
+  await db.exec("reset role");await db.query("update public.profiles set bio_review_status='approved',approved_bio='Previously approved biography' where id=$1",[member]);
+  await login();const p=await result("public.member_update_profile('Approved member','New synthetic biography','public')");assert.equal(p.bioStatus,"pending_review");
+  await db.exec("reset role");const row=(await db.query("select bio,approved_bio,bio_review_status from public.profiles where id=$1",[member])).rows[0];
+  assert.equal(row.bio,"New synthetic biography");assert.equal(row.approved_bio,"");assert.equal(row.bio_review_status,"pending_review");
+ });
  await t.test("comment pending then server attestation + active owner apply publishes exact version",async()=>{
   await login();let submitted=await result("public.member_server_interaction($1,'comment','A welcoming roleplay community.')",[server]);first=await item(submitted.id);
   assert.equal(first.status,"pending_review");assert.equal(await check(first),true);

@@ -44,6 +44,68 @@ test("broken or unsafe avatars fall back to initials without an empty broken ima
   assert.equal(unsafe.document.querySelector(".portal-head .portal-avatar").textContent, "GM");
 });
 
+test("a synthetic transparent picture uses an alpha-preserving crop without a dark fill", async t => {
+  const profile = { display_name: "Transparent Member" };
+  const dom = new JSDOM('<body data-page="profile"><main id="portal-root"></main><div id="site-toast"></div></body>', { url: "https://browserp.test/profile", runScripts: "outside-only" });
+  t.after(() => dom.window.close());
+  const w = dom.window;
+  const canvasCalls = [];
+  let upload;
+  w.ResizeObserver = class { observe() {} disconnect() {} };
+  w.HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
+  w.HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); this.dispatchEvent(new w.Event("close")); };
+  w.FileReader = class extends w.EventTarget {
+    readAsDataURL() { this.result = "data:image/png;base64,dHJhbnNwYXJlbnQtZml4dHVyZQ=="; this.dispatchEvent(new w.Event("load")); }
+  };
+  w.Image = function () {
+    const image = w.document.createElement("img");
+    Object.defineProperties(image, { naturalWidth: { value: 256 }, naturalHeight: { value: 256 }, src: {
+      get() { return this.getAttribute("src") || ""; },
+      set(value) { this.setAttribute("src", value); queueMicrotask(() => this.dispatchEvent(new w.Event("load"))); }
+    } });
+    return image;
+  };
+  w.HTMLCanvasElement.prototype.getContext = function (kind, options) {
+    canvasCalls.push({ kind, options });
+    return { drawImage: (...args) => canvasCalls.push({ drawImage: args }), fillRect: () => canvasCalls.push({ fillRect: true }) };
+  };
+  w.HTMLCanvasElement.prototype.toDataURL = function (type) {
+    assert.equal(type, "image/png");
+    return "data:image/png;base64,cmV0YWluZWQtYWxwaGEtZml4dHVyZQ==";
+  };
+  w.fetch = async (path, options = {}) => {
+    if (path === "/api/me/avatar" && options.method === "POST") {
+      upload = JSON.parse(options.body);
+      return { ok: true, json: async () => ({ profile, moderation: { status: "pending_review" } }) };
+    }
+    const payload = path === "/api/auth/session" ? { authenticated: true, csrfToken: "test-csrf", user: { profile } }
+      : path === "/api/me/profile" ? { profile }
+        : path === "/api/me/overview" ? { overview: { profile } } : {};
+    return { ok: true, json: async () => payload };
+  };
+  w.eval(source); await settle();
+  const input = w.document.querySelector('.profile-picture-editor-v3 input[type="file"]');
+  assert.ok(input);
+  Object.defineProperty(input, "files", { configurable: true, value: [new w.File(["synthetic transparent PNG"], "avatar.png", { type: "image/png" })] });
+  input.dispatchEvent(new w.Event("change")); await settle();
+  const dialog = w.document.querySelector(".avatar-crop-dialog-v3");
+  assert.ok(dialog?.open);
+  const save = [...dialog.querySelectorAll("button")].find(button => button.textContent === "Save cropped picture");
+  save.dispatchEvent(new w.Event("click")); await settle();
+  assert.equal(canvasCalls[0]?.kind, "2d");
+  assert.equal(canvasCalls[0]?.options?.alpha, true);
+  assert.equal(canvasCalls.some(call => call.fillRect), false, "transparent pixels must not be prefilled with a dark square");
+  assert.equal(canvasCalls.filter(call => call.drawImage).length, 1, "the existing crop still draws the chosen image once");
+  assert.equal(upload?.imageData, "data:image/png;base64,cmV0YWluZWQtYWxwaGEtZml4dHVyZQ==");
+  const portalCSS = readFileSync(new URL("../public/browserp-portal-v2.css", import.meta.url), "utf8");
+  const publicCSS = readFileSync(new URL("../public/member-public.css", import.meta.url), "utf8");
+  const staffCSS = readFileSync(new URL("../public/staff-public.css", import.meta.url), "utf8");
+  assert.match(portalCSS, /\.portal-avatar:has\(> img\)\s*\{\s*background:\s*transparent/);
+  assert.match(portalCSS, /\.profile-picture-preview-v3:has\(> img\)\s*\{\s*background:\s*transparent/);
+  assert.match(publicCSS, /\.member-avatar-v7:has\(> img\)\s*\{\s*background:\s*transparent/);
+  assert.match(staffCSS, /\.staff-public-avatar:has\(> img:not\(\[hidden\]\)\)\s*\{\s*background:\s*transparent/);
+});
+
 test("private content status shows reasons and sends a versioned appeal while the approved avatar stays public", async t => {
   const profile = { display_name: "Gaming Member", avatar_url: "https://cdn.discordapp.com/avatars/test/approved.png" };
   const item = { id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", kind: "avatar", status: "blocked", reason: "The image could be mistaken for another member.", appealStatus: "none", createdAt: "2026-09-09T09:00:00Z", version: 6 }; let currentItem = item;

@@ -35,9 +35,9 @@ const presence = [
   { userId: revokedId, online: true }
 ];
 const profiles = [
-  { id: ownerId, display_name: "BrowseRP Owner", avatar_review_status: "approved", approved_avatar_url: `https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/${ownerId}/avatar.png` },
-  { id: adminId, display_name: "Community Admin", avatar_review_status: "approved", approved_avatar_url: "https://cdn.discordapp.com/avatars/123456789012345678/avatar_hash.png" },
-  { id: revokedId, display_name: "Former Staff", avatar_review_status: "approved", approved_avatar_url: "https://cdn.discordapp.com/avatars/123456789012345679/old.png" }
+  { id: ownerId, username: "browse_owner", profile_visibility: "public", display_name: "BrowseRP Owner", avatar_review_status: "approved", approved_avatar_url: `https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/${ownerId}/avatar.png` },
+  { id: adminId, username: "admin_private", profile_visibility: "private", display_name: "Community Admin", avatar_review_status: "approved", approved_avatar_url: "https://cdn.discordapp.com/avatars/123456789012345678/avatar_hash.png" },
+  { id: revokedId, username: "former_staff", profile_visibility: "public", display_name: "Former Staff", avatar_review_status: "approved", approved_avatar_url: "https://cdn.discordapp.com/avatars/123456789012345679/old.png" }
 ];
 
 function rosterTransport(t, { roster = [memberships[2]], rosterStatus = 200, presenceStatus = 200 } = {}) {
@@ -73,6 +73,7 @@ test("roster membership comes only from the service-only canonical projection", 
   assert.equal(new Headers(calls[0].options.headers).get("apikey"), "server-roster-fixture");
   assert.deepEqual(JSON.parse(calls[0].options.body), {});
   assert.equal(calls.some(call => call.url.pathname === "/rest/v1/staff_memberships"), false);
+  assert.match(calls.find(call => call.url.pathname === "/rest/v1/profiles").url.searchParams.get("select"), /username,profile_visibility/);
 });
 
 test("missing or malformed canonical membership fails closed without raw membership fallback", async t => {
@@ -103,12 +104,21 @@ test("public staff projection exposes every active member with a boolean presenc
   assert.equal(staff.length, 2);
   assert.deepEqual(staff.map((member) => member.roleName), ["Owner", "Direct Manager"]);
   assert.deepEqual(staff.map((member) => member.online), [false, true]);
-  assert.deepEqual(Object.keys(staff[0]).sort(), ["avatarUrl", "displayName", "joinedAt", "online", "roleName"].sort());
+  assert.deepEqual(Object.keys(staff[0]).sort(), ["avatarUrl", "displayName", "joinedAt", "online", "profileUrl", "roleName"].sort());
   assert.equal(staff.some((member) => member.displayName === "Former Staff"), false);
   assert.equal(staff[0].joinedAt, "2026-08-19T17:49:30.567Z");
+  assert.equal(staff[0].profileUrl, "/user/browse_owner");
+  assert.equal(staff[1].profileUrl, null, "a private staff profile is not linked from the public roster");
   for (const member of staff) {
-    for (const privateKey of ["userId", "roleKey", "rank", "status", "permissions", "discordId", "email", "mfa", "lastSeenAt"]) assert.equal(privateKey in member, false);
+    for (const privateKey of ["userId", "username", "roleKey", "rank", "status", "permissions", "discordId", "email", "mfa", "lastSeenAt"]) assert.equal(privateKey in member, false);
   }
+});
+
+test("only public, valid staff handles become profile links", () => {
+  const cases = profiles.map(profile => profile.id === adminId ? { ...profile, profile_visibility: "members" } : profile);
+  assert.equal(publicStaffView(memberships, roles, cases)[1].profileUrl, null);
+  const malformed = profiles.map(profile => profile.id === ownerId ? { ...profile, username: "bad/name" } : profile);
+  assert.equal(publicStaffView(memberships, roles, malformed)[0].profileUrl, null);
 });
 
 test("public roster uses only approved, allowlisted avatar locations", () => {
@@ -168,6 +178,7 @@ test("public roster client renders its dynamic join label with DOM APIs, safe av
         roleName: "Owner",
         joinedAt: "2026-08-19T17:49:30.567Z",
         avatarUrl: null,
+        profileUrl: "/user/browse_owner",
         online: true
       },
       {
@@ -175,6 +186,7 @@ test("public roster client renders its dynamic join label with DOM APIs, safe av
         roleName: "Direct Manager",
         joinedAt: "2026-09-07T16:33:11.907685Z",
         avatarUrl: null,
+        profileUrl: "javascript:alert(1)",
         online: false
       }
     ] })
@@ -189,6 +201,8 @@ test("public roster client renders its dynamic join label with DOM APIs, safe av
   assert.equal(dom.window.document.querySelector(".staff-public-presence.is-online")?.textContent, "Online");
   assert.equal(dom.window.document.querySelector(".staff-public-presence.is-offline")?.textContent, "Offline");
   assert.equal(dom.window.document.querySelector("#staff-public-count")?.textContent, "2 staff members");
+  assert.equal(dom.window.document.querySelectorAll('.staff-public-card a[href="/user/browse_owner"]').length, 2, "the public staff avatar and name open the public profile");
+  assert.equal(dom.window.document.querySelectorAll(".staff-public-card:nth-child(2) a").length, 0, "an unsafe or private link never removes the staff card or becomes navigation");
 });
 
 test("existing API functions expose the safe roster without creating a thirteenth Vercel function", () => {

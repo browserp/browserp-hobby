@@ -124,16 +124,17 @@ test("evaluator completes routing mismatches without retries and CLI returns fai
 
 test("evaluator stops at the first provider failure and never copies error bodies or keys", async () => {
   const secretBody = "private-provider-body " + syntheticEnv.OPENAI_API_KEY;
-  for (const fetchImpl of [
-    async () => { throw new Error(secretBody); },
-    async () => new Response(secretBody, { status: 401 }),
-    async () => new Response(secretBody, { status: 429 }),
-    async () => new Response(JSON.stringify({ error: secretBody }), { headers: { "Content-Type": "application/json" } })
+  for (const [expected, fetchImpl] of [
+    ["provider_unavailable", async () => { throw new Error(secretBody); }],
+    ["provider_authentication_failed", async () => new Response(secretBody, { status: 401 })],
+    ["provider_access_denied", async () => new Response(secretBody, { status: 403 })],
+    ["provider_quota_or_rate_limit", async () => new Response(secretBody, { status: 429 })],
+    ["invalid_provider_response", async () => new Response(JSON.stringify({ error: secretBody }), { headers: { "Content-Type": "application/json" } })]
   ]) {
     let calls = 0;
     const result = await evaluateSyntheticContent({ env: syntheticEnv, fetchImpl: async (...args) => { calls++; return fetchImpl(...args); } });
     assert.equal(calls, 1); assert.equal(result.complete, false); assert.equal(result.passed, false);
-    assert.ok(["provider_unavailable", "invalid_provider_response"].includes(result.error));
+    assert.equal(result.error, expected);
     assert.equal(result.results.length, 1);
     assert.equal(JSON.stringify(result).includes(secretBody), false);
     assertPrivateReceipt(result);

@@ -44,7 +44,7 @@ export async function staffMinecraft(req,res,requestId,{fetchServer=fetchMinecra
   if(body.action==="refresh"){
     if(!entry.serverId)throw Object.assign(new Error("Publish this reviewed candidate before refreshing its public count."),{status:400});
     const result=await refreshMinecraftCode(entry.joinCode,{serverId:entry.serverId,strict:true,fetchServer});
-    return{result,message:result.skipped?"A recent check or another refresh is already in progress. No new observation was fetched; try again in one minute.":"The Minecraft observation was checked."};
+    return{result,message:result.skipped?"A recent check or another refresh is already in progress. No new observation was fetched; try again after the next scheduled check.":"The Minecraft observation was checked."};
   }
   if(body.action!=="publish")throw Object.assign(new Error("Choose a valid Minecraft scraper action."),{status:400});
   if(Number(entry.version)!==version)throw Object.assign(new Error("This candidate changed. Reload before publishing."),{status:409});
@@ -73,7 +73,7 @@ export async function refreshMinecraftCode(code,{serverId,strict=false,fetchServ
   if(!await rpc("service_claim_minecraft_refresh",{p_join_code:code},undefined,{useSecret:true,signal}))return{serverId,skipped:true,reason:"recent_or_in_progress",checkedAt:item.lastCheckedAt||null};
   let source;
   try{source=await fetchServer(item.address,{edition:item.edition,signal});}
-  catch(e){signal?.throwIfAborted();await rpc("service_mark_minecraft_unavailable",{p_join_code:code},undefined,{useSecret:true,signal});if(strict)throw e;return{players:null,capacity:null,online:false,unavailable:true};}
+  catch(e){signal?.throwIfAborted();await rpc("service_mark_minecraft_unavailable",{p_join_code:code},undefined,{useSecret:true,signal});if(strict)throw e;return{players:null,capacity:null,online:null,unavailable:true};}
   // Keep rejected saves in the worker-failure counter, without marking a
   // successfully read source unavailable or changing its stored freshness.
   signal?.throwIfAborted();
@@ -89,5 +89,5 @@ export async function enrichMinecraftServers(servers,{refresh=false}={}){
   let details;try{details=await rpc("public_minecraft_import_details",{p_server_ids:ids});}catch(e){if(e.code==="PGRST202")return servers;throw e;}
   const updated=new Map();if(refresh&&supabaseConfig().privileged)await Promise.allSettled((details||[]).filter(d=>!d.lastCheckedAt||Date.now()-Date.parse(d.lastCheckedAt)>=60_000).slice(0,3).map(async d=>{const v=await refreshMinecraftCode(d.joinCode,{serverId:d.serverId});if(v&&!v.skipped&&!v.unchanged)updated.set(d.serverId,v);}));
   const byId=new Map((details||[]).map(d=>[d.serverId,d]));
-  return servers.map(s=>{const d=byId.get(s.id);if(!d)return s;const live=updated.get(s.id),checkedAt=live?.checkedAt||d.lastCheckedAt,fresh=checkedAt&&Date.now()-Date.parse(checkedAt)<=300000&&(live?!live.unavailable:!d.statusUnavailable);return{...s,imported:true,website_url:d.websiteUrl,logo_url:d.logoUrl,banner_url:d.bannerUrl,keywords:d.keywords||[],minecraft_address:d.address,minecraft_edition:d.edition,count_scope:d.countScope,checked_at:checkedAt,players:fresh?(live?.players??s.players):null,capacity:fresh?(live?.capacity??s.capacity):null,online:fresh?(live?.online??s.online):false};});
+  return servers.map(s=>{const d=byId.get(s.id);if(!d)return s;const live=updated.get(s.id),checkedAt=live?.checkedAt||d.lastCheckedAt,fresh=checkedAt&&Date.now()-Date.parse(checkedAt)<=300000&&(live?!live.unavailable:!d.statusUnavailable);return{...s,imported:true,website_url:d.websiteUrl,logo_url:d.logoUrl,banner_url:d.bannerUrl,keywords:d.keywords||[],minecraft_address:d.address,minecraft_edition:d.edition,count_scope:d.countScope,checked_at:checkedAt,players:fresh?(live?.players??s.players):null,capacity:fresh?(live?.capacity??s.capacity):null,online:fresh?(live?.online??s.online):null};});
 }

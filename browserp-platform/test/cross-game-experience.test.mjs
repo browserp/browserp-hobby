@@ -63,7 +63,7 @@ test("signed-in navigation keeps the avatar menu, public links and a local publi
   const navigation = read("public/navigation.js");
   const css = read("public/theme.css");
   assert.match(shell, /account-trigger-v3/);
-  assert.match(shell, /\["Profile", "\/profile"\]/);
+  assert.match(shell, /\["Account & privacy", "\/dashboard#account"\]/);
   // Staff entry and pre-MFA eligibility are exercised with real session
   // hydration in public-navigation.test.mjs, separately from workspace access.
   assert.match(read("public/appearance.js"), /browserp-theme/);

@@ -31,6 +31,7 @@
     if (!["checked", "requested", "refreshed", "unchanged", "unavailable", "failed", "deferred"].every(key => validCount(run[key]))) return { tone: "warning", label: "Check-run details are incomplete" };
     if (age(run.finishedAt) > 180_000) return { tone: "warning", label: "No recent completed check run" };
     if (run.failed > 0 || run.deferred > 0) return { tone: "warning", label: "The latest check run needs attention" };
+    if (health.sourceRetries?.needsAttention > 0) return { tone: "warning", label: "Repeated source failures need staff review" };
     if (health.sources.stale > 0) return { tone: "warning", label: "Some source observations are unavailable" };
     if (!validCount(health.sources.total) || !validCount(health.sources.fresh) || !validCount(health.sources.stale)) return { tone: "warning", label: "Source freshness is unavailable" };
     if (health.sources.total === 0) return { tone: "neutral", label: "No published sources are being checked" };
@@ -61,7 +62,7 @@
     }
     const details = make("details", undefined, "refresh-health-details");
     details.append(make("summary", "Check history and source details"));
-    const explanation = make("p", "An unchanged source timestamp can be a successful check. A delayed or unavailable observation does not prove a server is offline. The scheduler does not record a per-source error reason.");
+    const explanation = make("p", "An unchanged source timestamp can be a successful check. Failed sources retry every five minutes; two retries over at least ten minutes trigger a staff alert. An unavailable observation does not prove a server is offline or closed. Raw source errors are not shown.");
     const schedule = health.scheduler || {};
     const delivery = Number.isInteger(schedule.lastDeliveryStatus) ? `HTTP ${schedule.lastDeliveryStatus}` : "Awaiting a response, or the retained response is no longer available";
     const facts = make("dl", undefined, "refresh-health-facts");
@@ -85,7 +86,22 @@
       body.append(row);
     }
     table.append(head, body); scroll.append(table); details.append(explanation, facts, scroll);
-    root.replaceChildren(metrics, games, details);
+    const retries = health.sourceRetries;
+    const alerts = make("section", undefined, "refresh-health-alerts");
+    if (retries && (retries.needsAttention > 0 || retries.pending > 0)) {
+      alerts.append(make("h3", "Sources needing another check"), make("p", `${count(retries.pending)} retrying; ${count(retries.needsAttention)} need staff review after repeated failures. Counts remain unavailable until a current observation succeeds.`));
+      const list = make("ul");
+      for (const item of (Array.isArray(retries.alerts) ? retries.alerts : []).slice(0, 50)) {
+        if (!names[item.platform] || typeof item.slug !== "string") continue;
+        const row = make("li");
+        const link = make("a", `${item.name || item.slug} · ${names[item.platform]}`);
+        link.href = `/server/${encodeURIComponent(item.slug)}`;
+        row.append(link, make("p", `${count(item.attempts)} failed checks since ${time(item.firstFailedAt)}. Last usable observation: ${time(item.lastCheckedAt)}. Next retry due: ${time(item.nextRetryAt)}.`));
+        list.append(row);
+      }
+      alerts.append(list, make("p", "Not refreshed: verify the community’s own information before recording an offline or closed status."));
+    }
+    root.replaceChildren(metrics, games, alerts, details);
   }
   async function init({ api, root = document.querySelector("[data-refresh-health]"), intervalMs = 60_000 } = {}) {
     if (!root || typeof api !== "function") return null;

@@ -73,6 +73,7 @@
   font-weight: 800;
 }
 .portal-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.portal-avatar:has(> img) { background: transparent; }
 
 .access-gate-v2 {
   max-width: 680px;
@@ -268,6 +269,7 @@
   font-weight: 800;
 }
 .profile-picture-preview-v3 img { width: 100%; height: 100%; object-fit: cover; }
+.profile-picture-preview-v3:has(> img) { background: transparent; }
 .profile-picture-editor-v3 .portal-help { max-width: 470px; }
 .avatar-crop-dialog-v3 { width: min(620px, calc(100% - 24px)); }
 .avatar-crop-viewport-v3 {

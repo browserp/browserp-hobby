@@ -44,6 +44,20 @@ test("health states distinguish source lag, worker errors, paused scheduling and
     const empty = fixture(); empty.lastRun = null; empty.lastCompletedRun = null; empty.lastSuccessfulRunAt = null; assert.equal(describe(empty).label, "Waiting for a completed check run");
   } finally { h.close(); }
 });
+test("repeated failures appear in the existing health panel as bounded text-only staff alerts", async () => {
+  const health = fixture();
+  health.sourceRetries = { pending: 1, needsAttention: 1, alerts: [{ name: '<img src=x onerror="bad()">', slug: "fixture-rp", platform: "fivem", attempts: 3, firstFailedAt: "2026-09-04T10:49:00Z", lastCheckedAt: "2026-09-04T10:48:00Z", nextRetryAt: "2026-09-04T11:04:00Z" }] };
+  const h = await harness(async () => ({ health }));
+  try {
+    assert.match(h.root.textContent, /Repeated source failures need staff review/);
+    assert.match(h.root.textContent, /1 retrying; 1 need staff review/);
+    assert.match(h.root.textContent, /3 failed checks/);
+    assert.match(h.root.textContent, /Not refreshed/);
+    assert.match(h.root.textContent, /two retries over at least ten minutes/);
+    assert.equal(h.root.querySelector(".refresh-health-alerts img"), null);
+    assert.equal(h.root.querySelector(".refresh-health-alerts a").getAttribute("href"), "/server/fixture-rp");
+  } finally { h.close(); }
+});
 test("failed status reads retain clearly dated data and lost authorization hides it", async () => {
   let mode = "ok";
   const h = await harness(async () => { if (mode !== "ok") throw { status: Number(mode), message: "SECRET BACKEND ERROR" }; return { health: fixture() }; });

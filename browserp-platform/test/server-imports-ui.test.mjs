@@ -124,8 +124,38 @@ test("Missing, inconsistent and stale counts never render as a fabricated live z
 
 test("Untrusted media and Discord links disguised as game connect links are not rendered", async () => {
   const h = await harness([{ ...fixture(), logo_url: "/api/public/server-image?url=https%3A%2F%2F127.0.0.1%2Fprivate.png", banner_url: "https://evil.example/track.png", cfx_join_url: "https://discord.gg/not-a-join-link" }]);
-  try { assert.equal(h.$(".server-import-logo-v3"), null); assert.equal(h.$(".server-import-banner-v3"), null); assert.equal(h.$("#server-connect-v3").hidden, true); assert.equal(h.$("#server-initials-v3").textContent, "FC"); }
+  try { assert.equal(h.$(".server-import-logo-v3"), null); assert.equal(h.$(".server-import-banner-v3"), null); assert.equal(h.$("#server-connect-v3").hidden, true); assert.equal(h.$("#server-copy-cfx-v3").hidden, true); assert.equal(h.$("#server-initials-v3").textContent, "FC"); }
   finally { h.dom.window.close(); }
+});
+
+test("FiveM copies only its validated Cfx join link with visible and announced confirmation", async () => {
+  const copied = [];
+  const h = await harness([fixture()], { beforeInit(w) {
+    Object.defineProperty(w.navigator, "clipboard", { configurable: true, value: { writeText: async value => { copied.push(value); } } });
+  } });
+  try {
+    const copy = h.$("#server-copy-cfx-v3");
+    assert.equal(copy.hidden, false);
+    assert.equal(copy.textContent, "Copy Cfx link");
+    assert.equal(copy.previousElementSibling.id, "server-connect-v3");
+    copy.click(); await tick();
+    assert.deepEqual(copied, ["https://cfx.re/join/abc123"]);
+    assert.equal(copy.textContent, "Cfx link copied");
+    assert.match(h.$("#server-copy-cfx-status-v3").textContent, /copied to clipboard/);
+    assert.doesNotMatch(copy.textContent + h.$("#server-copy-cfx-status-v3").textContent, /\bIP\b/i);
+  } finally { h.dom.window.close(); }
+});
+
+test("FiveM copy failure offers the existing Cfx connection without claiming success", async () => {
+  const h = await harness([fixture()], { beforeInit(w) {
+    Object.defineProperty(w.navigator, "clipboard", { configurable: true, value: { writeText: async () => { throw new Error("Clipboard unavailable"); } } });
+  } });
+  try {
+    h.$("#server-copy-cfx-v3").click(); await tick();
+    assert.equal(h.$("#server-copy-cfx-v3").textContent, "Copy unavailable");
+    assert.match(h.$("#server-copy-cfx-status-v3").textContent, /Connect via Cfx instead/);
+    assert.equal(h.$("#server-connect-v3").hidden, false);
+  } finally { h.dom.window.close(); }
 });
 
 test("A reviewed official website remains separate from Discord and the Cfx game connection", async () => {
@@ -164,6 +194,7 @@ test("reviewed Roblox detail separates community joining from experience and nev
     assert.equal(h.$("#server-roblox-joining a").href,"https://www.roblox.com/games/12345");
     assert.equal(h.$("#server-join-v3").href,"https://discord.gg/community");
     assert.equal(h.$("#server-connect-v3").hidden,true);
+    assert.equal(h.$("#server-copy-cfx-v3").hidden,true);
     assert.equal(h.$("#server-info-v5 .server-info-card-v5:nth-child(4) dt").textContent,"Roblox experience");
   } finally { h.dom.window.close(); }
 });

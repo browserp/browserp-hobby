@@ -230,7 +230,7 @@
   cta.append(icon("arrow"));
   const extra = make("nav", "navigation-extra-v6");
   extra.setAttribute("aria-label", "More from BrowseRP");
-  extra.append(link("Find my server", "/find-server", "discovery-link-v9"), link("Compare servers", "/compare", "discovery-link-v9"), link("Advertise", "/advertise"), link("Help & contact", "/legal#contact"), link("Policies", "/legal"));
+  extra.append(link("Find my server", "/find-server", "discovery-link-v9"), link("Compare servers", "/compare", "discovery-link-v9"), link("Advertise", "/advertise"), link("Community standards", "/legal#standards"), link("Help & contact", "/legal#contact"), link("All policies", "/legal"));
   foot.append(cta, extra);
   scroll.append(intro, search, links, games, account, foot, appearance);
   panel.append(top, scroll);

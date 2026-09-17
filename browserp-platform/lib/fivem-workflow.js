@@ -81,7 +81,7 @@ export async function staffCfx(req, res, requestId, platform = "fivem") {
   if (body.action === "refresh") {
     if (!entry.serverId) throw Object.assign(new Error("Publish this candidate before refreshing its live count."), { status: 400 });
     const result = await refreshCfxCode(entry.joinCode, { platform, strict: true });
-    return { result, message: result ? `The current ${platformName} observation was checked.` : "This server was checked recently. Try again in one minute." };
+    return { result, message: result ? `The current ${platformName} observation was checked.` : "This server was checked recently or is waiting for its next retry. Try again after the next scheduled check." };
   }
   if (body.action !== "publish") throw Object.assign(new Error("Choose a valid scraper action."), { status: 400 });
   const version = expectedVersion(body.expectedVersion);
@@ -111,7 +111,7 @@ export async function refreshCfxCode(joinCode, { platform = "fivem", strict = fa
     signal?.throwIfAborted();
     await rpc("service_mark_cfx_unavailable", { p_platform: platform, p_join_code: code }, undefined, { useSecret: true, signal });
     if (strict) throw error;
-    return { online: false, players: null, capacity: null, unavailable: true };
+    return { online: null, players: null, capacity: null, unavailable: true };
   }
   // A rejected save is a processing failure, not an unavailable source.
   // Let the scheduler record it without overwriting the source's last error.
@@ -147,7 +147,7 @@ export async function enrichImportedServers(servers, { refresh = false } = {}) {
     return {
       ...server, imported: info.imported, claimable: info.claimable, keywords: info.keywords || [], website_url: info.websiteUrl ?? server.website_url ?? null,
       ...(info.imported ? { logo_url: info.logoUrl, banner_url: info.bannerUrl, checked_at: checkedAt,
-        online: fresh ? (live?.online ?? server.online) : false,
+        online: fresh ? (live?.online ?? server.online) : null,
         players: fresh ? (live?.players ?? server.players) : null,
         capacity: fresh ? (live?.capacity ?? server.capacity) : null } : {})
     };

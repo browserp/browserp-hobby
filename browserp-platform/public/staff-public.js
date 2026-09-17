@@ -48,7 +48,12 @@
   function card(member) {
     const article = element("article", "staff-public-card");
     const head = element("div", "staff-public-card-head");
-    const avatar = element("div", "staff-public-avatar");
+    const profileHref = typeof member.profileUrl === "string" && /^\/user\/[a-z0-9_]{3,30}$/.test(member.profileUrl) ? member.profileUrl : "";
+    const avatar = element(profileHref ? "a" : "div", "staff-public-avatar");
+    if (profileHref) {
+      avatar.href = profileHref;
+      avatar.setAttribute("aria-label", `View ${member.displayName}'s public profile`);
+    }
     const fallback = element("span", "staff-public-avatar-fallback", initials(member.displayName));
     fallback.setAttribute("aria-hidden", "true");
     avatar.append(fallback);
@@ -73,7 +78,11 @@
     dot.setAttribute("aria-hidden", "true");
     presence.append(dot, document.createTextNode(member.online === true ? "Online" : "Offline"));
     meta.append(element("span", "staff-public-role", member.roleName), presence);
-    copy.append(element("h3", "", member.displayName), meta);
+    const heading = element("h3", "");
+    const name = element(profileHref ? "a" : "span", "", member.displayName);
+    if (profileHref) name.href = profileHref;
+    heading.append(name);
+    copy.append(heading, meta);
     head.append(avatar, copy);
 
     const joined = element("div", "staff-public-joined");

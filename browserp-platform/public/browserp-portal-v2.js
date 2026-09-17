@@ -94,6 +94,7 @@
 
   let profileRequest = 0;
   let privacyController = null;
+  let clearDashboardNavigation = () => {};
   function clearPrivacyRequests() { privacyController?.destroy(); privacyController = null; }
   window.addEventListener("browserp:session-ended", () => { profileRequest++; clearPrivacyRequests(); });
 
@@ -282,7 +283,7 @@
     if (!Object.hasOwn(messages, event.detail?.reason)) return;
     state.sessionEnded = true;
     state.session = { authenticated: false, user: null, csrfToken: "" };
-    state.csrfToken = ""; state.staffOverview = null;
+    state.csrfToken = ""; state.staffOverview = null; clearDashboardNavigation(); clearDashboardNavigation = () => {};
     if (!root || !["profile", "dashboard"].includes(page)) return;
     document.querySelectorAll(".avatar-crop-dialog-v3").forEach(dialog => { if (dialog.open && typeof dialog.close === "function") dialog.close(); dialog.remove(); });
     const siteToast = document.querySelector("#site-toast");
@@ -314,6 +315,47 @@
     nav.setAttribute("aria-label", "Page sections");
     items.forEach(([href, label]) => nav.append(link(href, "", label)));
     return nav;
+  }
+
+  function dashboardSectionNavigation(nav, stack) {
+    const sections = [...stack.querySelectorAll(":scope > .portal-panel-v2")];
+    const byId = new Map(sections.map(section => [section.id, section]));
+    const sectionForHash = () => {
+      let targetId = "";
+      try { targetId = decodeURIComponent(location.hash.slice(1)); } catch { return sections[0] || null; }
+      if (byId.has(targetId)) return byId.get(targetId);
+      const target = targetId ? [...stack.querySelectorAll("[id]")].find(element => element.id === targetId) : null;
+      return sections.find(section => target && section.contains(target)) || sections[0] || null;
+    };
+    const activate = (section, { focus = false } = {}) => {
+      if (!section) return;
+      sections.forEach(candidate => { candidate.hidden = candidate !== section; });
+      nav.querySelectorAll("a[href^='#']").forEach(item => {
+        if (item.getAttribute("href") === `#${section.id}`) item.setAttribute("aria-current", "page");
+        else item.removeAttribute("aria-current");
+      });
+      if (!focus) return;
+      const heading = section.querySelector("h2") || section;
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    };
+    const sync = () => activate(sectionForHash(), { focus: true });
+    nav.addEventListener("click", event => {
+      const item = event.target.closest("a[href^='#']");
+      if (!item || !nav.contains(item)) return;
+      const section = byId.get(item.getAttribute("href").slice(1));
+      if (!section) return;
+      event.preventDefault();
+      if (location.hash !== `#${section.id}`) history.pushState(null, "", `#${section.id}`);
+      activate(section, { focus: true });
+    });
+    window.addEventListener("hashchange", sync);
+    window.addEventListener("popstate", sync);
+    activate(sectionForHash());
+    return () => {
+      window.removeEventListener("hashchange", sync);
+      window.removeEventListener("popstate", sync);
+    };
   }
 
   function metric(value, label, note) {
@@ -499,8 +541,7 @@
       viewport.addEventListener("pointercancel", () => { dragging=false; });
       save.addEventListener("click", async () => {
         save.disabled=true;save.textContent="Uploading…";
-        const canvas=document.createElement("canvas");canvas.width=512;canvas.height=512;const context=canvas.getContext("2d",{alpha:false});
-        context.fillStyle="#0b0910";context.fillRect(0,0,512,512);
+        const canvas=document.createElement("canvas");canvas.width=512;canvas.height=512;const context=canvas.getContext("2d",{alpha:true});
         const size=scaleState();const factor=512/viewportSize;context.drawImage(image,((viewportSize-size.width)/2+offsetX)*factor,((viewportSize-size.height)/2+offsetY)*factor,size.width*factor,size.height*factor);
         try { const result = await api("/api/me/avatar",{method:"POST",body:JSON.stringify({imageData:canvas.toDataURL("image/png")})});if(result.profile)publishProfile(result.profile);dialog.close();toast(moderationFeedback("avatar",result.moderation));await refresh(); }
         catch(error){toast(error.message,"error");save.disabled=false;save.textContent="Save cropped picture";}
@@ -741,6 +782,7 @@
   }
 
   async function dashboardPage(session) {
+    clearDashboardNavigation(); clearDashboardNavigation = () => {};
     if (!session?.authenticated) {
       const authState = new URLSearchParams(location.search).get("auth");
       await signInGate({
@@ -772,7 +814,8 @@
       logout.addEventListener("click", signOut);
       heading.actions.append(logout);
       content.append(heading.head);
-      content.append(portalNav([["#listings", "Listings"], ["#submissions", "Reviews"], ["#saved", "Favourites"], ["#recent", "Recent"], ["#notifications", "Notifications"], ["#content-status", "Content status"], ["#account", "Profile"]]));
+      const sectionNav = portalNav([["#listings", "Listings"], ["#submissions", "Reviews"], ["#saved", "Favourites"], ["#recent", "Recent"], ["#notifications", "Notifications"], ["#content-status", "Content status"], ["#account", "Profile & privacy"]]);
+      content.append(sectionNav);
 
       const metrics = make("section", "metric-grid-v2");
       metrics.setAttribute("aria-label", "Account summary");
@@ -795,6 +838,7 @@
         dashboardProfile(profile, refresh)
       );
       content.append(stack);
+      clearDashboardNavigation = dashboardSectionNavigation(sectionNav, stack);
       setRoot(content);
     } catch (error) {
       if (error.status === 401) {

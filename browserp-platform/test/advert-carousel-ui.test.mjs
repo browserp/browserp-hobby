@@ -78,6 +78,7 @@ async function harness(t, { outcomes = {}, reduced = false, decoding = false, vi
     setVisible(value, target = root) { observers.filter(observer => observer.targets.has(target)).forEach(observer => observer.emit(target, value)); },
     setHidden(value) { visibility = value ? "hidden" : "visible"; w.document.dispatchEvent(new w.Event("visibilitychange")); },
     setReduced(value) { motion.matches = value; [...motionListeners].forEach(callback => callback()); },
+    setBrandMotion(value) { w.document.documentElement.dataset.brandMotion = value; w.document.dispatchEvent(new w.Event("browserp:brand-motion-changed")); },
     setHover(value) { hovered = value; root.dispatchEvent(new w.Event(value ? "mouseenter" : "mouseleave")); },
     $: selector => root.querySelector(selector), async hydrate(items = adverts) { release(items); await tick(); } };
 }
@@ -97,11 +98,12 @@ test("offscreen adverts retain the creative and resume only with viewport, page 
   h.setHidden(true); assert.equal(h.timers.size, 0);
   h.setVisible(false); h.setHidden(false); assert.equal(h.timers.size, 0);
   h.setVisible(true); assert.equal(h.timers.size, 1);
-  h.$('.ad-dot-v3[aria-current="true"]').click(); assert.equal(h.timers.size, 0);
-  h.setVisible(false); h.setVisible(true); assert.equal(h.timers.size, 0, "Visibility cannot override explicit pause");
+  h.$('.ad-dot-v3[aria-current="true"]').click(); assert.equal(h.timers.size, 1, "Current progress bar is not a hidden pause control");
+  h.setBrandMotion("off"); assert.equal(h.timers.size, 0);
+  h.setVisible(false); h.setVisible(true); assert.equal(h.timers.size, 0, "Visibility cannot override motion off");
   h.$('[data-ad-direction="next"]').click(); assert.equal(source(), artwork[2]);
-  assert.equal(h.timers.size, 0, "Manual navigation preserves pause");
-  h.$('.ad-dot-v3[aria-current="true"]').click(); assert.equal(h.timers.size, 1);
+  assert.equal(h.timers.size, 0, "Manual navigation works with motion off");
+  h.setBrandMotion("on"); assert.equal(h.timers.size, 1);
   h.setHover(true); assert.equal(h.timers.size, 0);
   h.setVisible(false); h.setVisible(true); assert.equal(h.timers.size, 0);
   h.setHover(false); assert.equal(h.timers.size, 1);
@@ -164,8 +166,8 @@ test("blocked artwork renders a compact labelled advert, does not retry failures
   assert.equal(controls.getAttribute('aria-label'), 'Advertisement controls');
   assert.equal(controls.firstElementChild, h.$('.ad-dots-v3'));
   assert.equal(controls.lastElementChild, h.$('.ad-dots-v3'));
-  current().click(); assert.equal(current().getAttribute('aria-label'), 'Resume advert rotation'); assert.equal(current().getAttribute('aria-pressed'), 'true');
-  current().click(); assert.equal(current().getAttribute('aria-label'), 'Pause advert rotation'); assert.equal(current().getAttribute('aria-pressed'), 'false');
+  current().click(); assert.equal(current().getAttribute('aria-label'), 'Show advert 1: Reviewed advert 1');
+  assert.equal(current().hasAttribute('aria-pressed'), false);
   h.$('[data-ad-direction="next"]').click();
   assert.equal(h.root.classList.contains("artwork-unavailable"), false);
   assert.equal(h.w.getComputedStyle(h.$(".side-ad-stage-v3")).minHeight, "570px");

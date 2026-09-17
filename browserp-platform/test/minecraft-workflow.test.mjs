@@ -56,7 +56,7 @@ test('Minecraft skipped refresh keeps an unavailable public count unknown rather
  if(url.pathname.endsWith('/rpc/service_claim_minecraft_refresh'))return response(false);
 },async()=>{
  const [result]=await enrichMinecraftServers([{id:serverId,platform_id:'minecraft',players:42,capacity:100,online:true}],{refresh:true});
- assert.equal(result.players,null);assert.equal(result.capacity,null);assert.equal(result.online,false);
+ assert.equal(result.players,null);assert.equal(result.capacity,null);assert.equal(result.online,null);
 }));
 
 test('Minecraft publication remains successful if only its later observation write fails',async()=>{

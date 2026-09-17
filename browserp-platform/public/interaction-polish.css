@@ -1,0 +1,21 @@
+/* Scoped article and directory search states. Loaded after the theme styles. */
+:root body[data-blog-page="index"]:not(.staff-v3):not([data-staff-page]) main .journal-card-v6 {
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+}
+:root body[data-blog-page="index"]:not(.staff-v3):not([data-staff-page]) main .journal-card-featured-v6 {
+  background: linear-gradient(145deg, color-mix(in srgb, var(--pink) 6%, var(--panel)), var(--panel) 72%);
+}
+:root body[data-blog-page="index"]:not(.staff-v3):not([data-staff-page]) main .journal-card-v6:is(:hover, :focus-within) {
+  border-color: var(--pink);
+  background: color-mix(in srgb, var(--pink) 12%, var(--panel));
+  box-shadow: var(--shadow-md);
+  transform: none;
+}
+
+:root body[data-page="servers"] main #discovery-controls .smart-search-row input:focus-visible {
+  border-color: var(--pink);
+  outline: 2px solid var(--focus, var(--pink));
+  outline-offset: 2px;
+  box-shadow: none;
+}

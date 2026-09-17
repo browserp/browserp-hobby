@@ -141,6 +141,9 @@
   object-fit: cover;
 }
 .staff-public-avatar img[hidden] { display: none; }
+.staff-public-avatar:has(> img:not([hidden])) { background: transparent; text-decoration: none; }
+.staff-public-avatar:has(> img:not([hidden])) .staff-public-avatar-fallback { visibility: hidden; }
+.staff-public-avatar:focus-visible,.staff-public-card h3 a:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
 .staff-public-card-copy { min-width: 0; }
 .staff-public-card h3 {
   overflow: hidden;
@@ -152,6 +155,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.staff-public-card h3 a { color: inherit; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; }
+.staff-public-card h3 a:hover { text-decoration-color: currentColor; }
 .staff-public-role {
   display: inline-flex;
   align-items: center;

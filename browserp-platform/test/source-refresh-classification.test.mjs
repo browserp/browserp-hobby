@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { refreshCfxCode } from "../lib/fivem-workflow.js";
-import { refreshMinecraftCode } from "../lib/minecraft-workflow.js";
+import { refreshCfxCode, enrichImportedServers } from "../lib/fivem-workflow.js";
+import { refreshMinecraftCode, enrichMinecraftServers } from "../lib/minecraft-workflow.js";
 import { scheduledStatusRefresh } from "../lib/status-refresh-workflow.js";
 
 const serverId = "00000000-0000-4000-8000-000000000101", minecraftCode = "abcdef012345";
@@ -12,7 +12,7 @@ const raw = (stale = false) => ({ EndPoint: "abc123", Data: { clients: 0, svMaxc
 
 function backend(t, { mode = "save-failure", controller } = {}) {
   const names = [], original = globalThis.fetch;
-  const environment = { SUPABASE_URL: "https://fixture.supabase.co", SUPABASE_SECRET_KEY: "sb_secret_fixture" };
+  const environment = { SUPABASE_URL: "https://fixture.supabase.co", SUPABASE_SECRET_KEY: "sb_secret_fixture", SUPABASE_PUBLISHABLE_KEY: "sb_publishable_fixture" };
   const before = Object.fromEntries(Object.keys(environment).map(key => [key, process.env[key]]));
   Object.assign(process.env, environment);
   t.after(() => { globalThis.fetch = original; for (const [key, value] of Object.entries(before)) value === undefined ? delete process.env[key] : process.env[key] = value; });
@@ -54,7 +54,10 @@ for (const platform of ["fivem", "minecraft"]) {
   });
   test(`${platform}: upstream failure still marks unavailable and strict mode reports the source error`, async t => {
     const h = backend(t, { mode: "fetch-failure" });
-    assert.equal((await h.run(platform)).unavailable, true);
+    const result = await h.run(platform);
+    assert.equal(result.unavailable, true);
+    assert.equal(result.online, null, "a failed check is not an offline observation");
+    assert.equal(result.players, null);
     await assert.rejects(h.run(platform, true));
     assert.equal(h.names.filter(name => /^service_mark_/.test(name)).length, 2);
     assert.equal(h.names.some(name => /^service_refresh_/.test(name)), false);
@@ -75,6 +78,26 @@ test("Cfx timestamps older than five minutes remain unavailable without an attem
   const h = backend(t, { mode: "stale" }); assert.equal((await h.run("fivem")).unavailable, true);
   assert.equal(h.names.some(name => /^service_refresh_/.test(name)), false);
   assert.equal(h.names.filter(name => /^service_mark_/.test(name)).length, 1);
+});
+
+test("public enrichment distinguishes failed and stale checks from a verified zero or reported offline", async t => {
+  backend(t);
+  let detail;
+  globalThis.fetch = async url => {
+    assert.equal(new URL(url).hostname, "fixture.supabase.co");
+    assert.match(new URL(url).pathname, /public_(server|minecraft)_import_details$/);
+    return reply([{ serverId, imported: true, ...detail }]);
+  };
+  for (const [platform, enrich] of [["fivem", enrichImportedServers], ["minecraft", enrichMinecraftServers]]) {
+    const source = { id: serverId, platform_id: platform, online: true, players: 0, capacity: 64 };
+    for (const overrides of [{ statusUnavailable: true }, { lastCheckedAt: new Date(Date.now() - 301000).toISOString() }]) {
+      detail = { lastCheckedAt: new Date().toISOString(), statusUnavailable: false, ...overrides };
+      const [result] = await enrich([source]); assert.equal(result.online, null); assert.equal(result.players, null); assert.equal(result.capacity, null);
+    }
+    detail = { lastCheckedAt: new Date().toISOString(), statusUnavailable: false };
+    const [zero] = await enrich([source]); assert.equal(zero.online, true); assert.equal(zero.players, 0);
+    const [offline] = await enrich([{ ...source, online: false }]); assert.equal(offline.online, false);
+  }
 });
 test("a Cfx timestamp rejected at save time propagates without a false source failure", async t => {
   const h = backend(t, { mode: "stale-at-save" }); await assert.rejects(h.run("fivem"), { code: "P0001" });

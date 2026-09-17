@@ -74,11 +74,11 @@ test("static first-load skeletons precede requests and clear for success, empty 
   }
 });
 
-test("inline advert survives redraws, pagination and empty results without losing controls, creative or pause state", async t => {
+test("inline advert survives redraws, pagination and empty results without losing controls, creative or selected slide", async t => {
   const h = await harness(t);
   const draw = rows => h.w.BrowseRPDirectory.render(h.list, rows);
   const current = () => h.ad.querySelector('.ad-dot-v3[aria-current="true"]'), next = h.ad.querySelector('[data-ad-direction="next"]');
-  assert.ok(current()); next.click(); const pause = current(); pause.click(); pause.focus();
+  assert.ok(current()); next.click(); const selected = current(); selected.click(); selected.focus();
   const creative = h.ad.querySelector("[data-ad-copy]").textContent;
   const cleanup = h.ad._browserpAdvertCleanup;
   for (const n of [8, 24, 48, 3, 0, 7]) {
@@ -87,14 +87,16 @@ test("inline advert survives redraws, pagination and empty results without losin
     assert.equal(h.ad.isConnected, true);
     assert.equal(h.list.children[Math.min(n, 6)], h.ad);
     assert.equal(h.list.querySelectorAll(".server-card").length, n);
-    assert.equal(current(), pause);
-    assert.equal(pause.getAttribute("aria-pressed"), "true");
-    assert.equal(h.doc.activeElement, pause);
+    assert.equal(current(), selected);
+    assert.equal(selected.getAttribute("aria-current"), "true");
+    assert.equal(selected.hasAttribute("aria-pressed"), false);
+    assert.equal(h.doc.activeElement, selected);
     assert.equal(h.ad.querySelector("[data-ad-copy]").textContent, creative);
     assert.equal(h.ad._browserpAdvertCleanup, cleanup);
   }
   next.click(); assert.notEqual(h.ad.querySelector("[data-ad-copy]").textContent, creative);
-  assert.equal(current().getAttribute("aria-pressed"), "true");
+  assert.equal(current().getAttribute("aria-current"), "true");
+  assert.notEqual(current(), selected);
   const card = h.list.querySelector(".server-card");
   assert.doesNotMatch(card.querySelector(".server-meta").textContent, /Not confirmed|Unknown/);
   assert.match(card.textContent, /Application required/);
@@ -109,19 +111,20 @@ test("visible sort/filter count and real empty/error/retry transitions retain th
   const sort = h.doc.getElementById("sort-filter"), panel = h.doc.getElementById("directory-filter-panel");
   assert.ok(sort.closest(".result-bar-v3")); assert.equal(panel.contains(sort), false);
   assert.equal(h.doc.getElementById("result-count").textContent, "8 servers");
-  const pause = h.ad.querySelector('.ad-dot-v3[aria-current="true"]'); pause.click();
+  const selected = h.ad.querySelector('.ad-dot-v3[aria-current="true"]'); selected.click();
   h.setRows([]);
   h.w.history.replaceState(null, "", "/servers?region=Europe&sort=newest"); h.w.dispatchEvent(new h.w.PopStateEvent("popstate")); await tick();
   assert.equal(h.list.hidden, true); assert.equal(h.doc.getElementById("directory-empty").hidden, false);
   assert.equal(h.doc.querySelector(".smart-filter-toggle").textContent, "Filters (1)");
-  assert.equal(sort.value, "newest"); assert.equal(h.ad.querySelector('.ad-dot-v3[aria-current="true"]'), pause);
+  assert.equal(sort.value, "newest"); assert.equal(h.ad.querySelector('.ad-dot-v3[aria-current="true"]'), selected);
   h.setFail(true); h.w.dispatchEvent(new h.w.PopStateEvent("popstate")); await tick();
   assert.equal(h.doc.getElementById("result-count").textContent, "Servers unavailable");
   assert.equal(h.list.hidden, true);
   h.setFail(false); h.setRows([server(1), server(2)]);
   [...h.doc.querySelectorAll("#directory-empty button")].find(button => button.textContent === "Try again").click(); await tick();
   assert.equal(h.list.hidden, false); assert.equal(h.list.children[2], h.ad);
-  assert.equal(pause.getAttribute("aria-pressed"), "true");
+  assert.equal(selected.getAttribute("aria-current"), "true");
+  assert.equal(selected.hasAttribute("aria-pressed"), false);
   assert.equal(h.doc.getElementById("result-count").textContent, "2 servers");
 });
 

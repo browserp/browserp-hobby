@@ -269,8 +269,8 @@
       button.append(avatar, node("span", "account-name-v3", name), node("span", "account-chevron-v3", "⌄"));
       const menu = node("nav", "account-popover-v3"); menu.hidden = true; menu.inert = true; menu.id = `account-navigation-${index}`; menu.setAttribute("aria-label", "Your account"); button.setAttribute("aria-controls", menu.id);
       const menuItems = [
-        ["Profile", "/profile"], ["My servers", "/dashboard#listings"], ["Favourite servers", "/dashboard#saved"],
-        ["Recently viewed", "/dashboard#recent"], ["Reviews", "/dashboard#submissions"], ["Settings", "/dashboard#account"]
+        ["My profile", "/profile"], ["My servers", "/dashboard#listings"], ["Favourite servers", "/dashboard#saved"],
+        ["Recently viewed", "/dashboard#recent"], ["Reviews", "/dashboard#submissions"], ["Account & privacy", "/dashboard#account"]
       ].map(([label, href]) => { const item=node("a","",label);item.href=href;return item; });
       if (staffEntryAllowed) {
         const staff = node("a", "account-staff-v3 button-v3 button-primary-v3", "Staff panel"); staff.href = "/staffpanel"; menuItems.push(staff);
@@ -481,8 +481,9 @@
           dot.type = "button";
           dot.setAttribute("aria-label", `Show advert ${position + 1}: ${advert.headline || advert.name || "BrowseRP advert"}`);
           dot.addEventListener("click", () => {
-            if (position === index) paused = !paused;
-            else { index = position; draw(); }
+            if (position === index) return;
+            index = position;
+            draw();
             restart();
           });
           dots.append(dot);
@@ -521,7 +522,7 @@
           // ready, then fade it out. This avoids a blank frame or text/image
           // mismatch during slow downloads and manual slide changes.
           removeTransition();
-          if (!reducedMotion.matches && image.complete && image.naturalWidth && !root.classList.contains("artwork-unavailable") && image.getAttribute("src") !== source) {
+          if (!reducedMotion.matches && document.documentElement.dataset.brandMotion !== "off" && image.complete && image.naturalWidth && !root.classList.contains("artwork-unavailable") && image.getAttribute("src") !== source) {
             transitionImage = image.cloneNode(false);
             transitionImage.classList.add("ad-transition-image-v3");
             transitionImage.alt = "";
@@ -550,7 +551,7 @@
       const strong = node("strong", "", advert.headline || advert.name || "BrowseRP advert");
       const body = node("span", "", advert.body || "");
       copy.replaceChildren(strong, body);
-      if (visual && !reducedMotion.matches) {
+      if (visual && !reducedMotion.matches && document.documentElement.dataset.brandMotion !== "off") {
         copy.classList.remove("ad-copy-enter-v3");
         void copy.offsetWidth;
         copy.classList.add("ad-copy-enter-v3");
@@ -564,14 +565,9 @@
       }
       $$('button', dots || document.createElement("div")).forEach((dot, position) => {
         dot.setAttribute("aria-current", position === index ? "true" : "false");
-        dot.setAttribute("aria-pressed", position === index && paused ? "true" : "false");
-        dot.setAttribute("aria-label", position === index
-          ? `${paused ? "Resume" : "Pause"} advert rotation`
-          : `Show advert ${position + 1}: ${list[position].headline || list[position].name || "BrowseRP advert"}`);
       });
     }
     let timer;
-    let paused = false;
     let inView = false, disposed = false, visibilityObserver;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     function stop() { window.clearInterval(timer); }
@@ -582,23 +578,19 @@
       removeTransition();
       visibilityObserver?.disconnect();
       document.removeEventListener("visibilitychange", visibilityChanged);
+      document.removeEventListener("browserp:brand-motion-changed", restart);
       reducedMotion.removeEventListener?.("change", restart);
       listeners.forEach((remove) => remove());
       if (image) { image.onload = null; image.onerror = null; }
     };
     function canRotate() {
-      return !disposed && inView && root.isConnected && visual && list.length > 1 && !paused && !reducedMotion.matches && document.visibilityState !== "hidden" && !root.matches(":hover") && !root.contains(document.activeElement);
+      return !disposed && inView && root.isConnected && visual && list.length > 1 && document.documentElement.dataset.brandMotion !== "off" && !reducedMotion.matches && document.visibilityState !== "hidden" && !root.matches(":hover") && !root.contains(document.activeElement);
     }
     function restart() {
       stop();
+      if (document.documentElement.dataset.brandMotion === "off") removeTransition();
       const playing = canRotate();
       root.classList.toggle("ad-is-playing", playing);
-      $$('button', dots || document.createElement("div")).forEach((dot, position) => {
-        dot.setAttribute("aria-pressed", position === index && paused ? "true" : "false");
-        dot.setAttribute("aria-label", position === index
-          ? `${paused ? "Resume" : "Pause"} advert rotation`
-          : `Show advert ${position + 1}: ${list[position].headline || list[position].name || "BrowseRP advert"}`);
-      });
       if (playing) {
         timer = window.setInterval(() => {
           if (!canRotate()) { stop(); return; }
@@ -608,6 +600,7 @@
     }
     function visibilityChanged() { restart(); }
     document.addEventListener("visibilitychange", visibilityChanged);
+    document.addEventListener("browserp:brand-motion-changed", restart);
     reducedMotion.addEventListener?.("change", restart);
     // Offscreen rotations still change image/copy layout. Keep the current
     // creative until visible; without observation, manual controls still work.
@@ -908,6 +901,32 @@
       const validConnect = typeof connectUrl === "string" && /^https:\/\/cfx\.re\/join\/[a-z0-9]{6,12}\/?$/i.test(connectUrl);
       connect.hidden = !validConnect;
       if (validConnect) { connect.href = connectUrl; connect.rel = "noopener noreferrer"; connect.textContent = "Connect via Cfx"; }
+      const copyCfx = $("#server-copy-cfx-v3");
+      const copyCfxStatus = $("#server-copy-cfx-status-v3");
+      if (copyCfx && copyCfxStatus) {
+        const canCopy = server.platform_id === "fivem" && validConnect;
+        copyCfx.hidden = !canCopy;
+        copyCfx.textContent = "Copy Cfx link";
+        copyCfxStatus.textContent = "";
+        if (canCopy) copyCfx.dataset.cfxUrl = connectUrl;
+        else delete copyCfx.dataset.cfxUrl;
+        if (copyCfx.dataset.copyReady !== "true") {
+          copyCfx.dataset.copyReady = "true";
+          copyCfx.addEventListener("click", async () => {
+            const url = copyCfx.dataset.cfxUrl;
+            if (!url || copyCfx.hidden || !/^https:\/\/cfx\.re\/join\/[a-z0-9]{6,12}\/?$/i.test(url)) return;
+            copyCfx.disabled = true;
+            try {
+              await navigator.clipboard.writeText(url);
+              copyCfx.textContent = "Cfx link copied";
+              copyCfxStatus.textContent = "Cfx join link copied to clipboard.";
+            } catch {
+              copyCfx.textContent = "Copy unavailable";
+              copyCfxStatus.textContent = "Could not copy the Cfx link. Use Connect via Cfx instead.";
+            } finally { copyCfx.disabled = false; }
+          });
+        }
+      }
       let robloxBox = $("#server-roblox-joining");
       if (server.applicationOnly && server.roblox && /^https:\/\/www\.roblox\.com\/games\/[1-9][0-9]{0,19}$/.test(server.roblox.experienceUrl || "")) {
         if (!robloxBox) { robloxBox = node("section", "server-community-joining"); robloxBox.id = "server-roblox-joining"; connect.parentElement.after(robloxBox); }

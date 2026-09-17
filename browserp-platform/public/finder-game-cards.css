@@ -1,0 +1,88 @@
+/* Artwork belongs to the game choice; the existing radios and form remain. */
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice:has(input[value="all"]) {
+  grid-column: 1 / -1;
+  justify-self: start;
+  min-height: 52px;
+  padding: 10px 16px;
+}
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice:has(input[value="all"]) .finder-choice-copy { flex: 1; }
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform] {
+  --finder-game-colour: #fff;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: end;
+  align-content: end;
+  min-height: 200px;
+  padding: 18px;
+  border: 2px solid var(--line-strong);
+  background: #111116;
+  box-shadow: 0 5px 14px rgb(0 0 0 / .12);
+  transform: none;
+}
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform="fivem"] { --finder-game-colour: #ffb16f; }
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform="redm"] { --finder-game-colour: #ff9296; }
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform="minecraft"] { --finder-game-colour: #87e7a0; }
+:root body[data-page="find-server"] main .finder-game-choices .finder-game-art {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background-size: cover;
+  background-position: center;
+  box-shadow: none;
+}
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform]::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(5 5 9 / .08) 0%, rgb(5 5 9 / .6) 32%, rgb(5 5 9 / .95) 65%);
+  pointer-events: none;
+}
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform] input {
+  order: 0;
+  align-self: end;
+  margin-bottom: 5px;
+  accent-color: var(--finder-game-colour);
+  color-scheme: dark;
+}
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform] .finder-choice-copy { flex: 1; }
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform] .finder-choice-copy strong { color: var(--finder-game-colour) !important; }
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform] small { color: #f4eff6; }
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform]:has(input:checked) {
+  border-color: var(--finder-game-colour);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--finder-game-colour), 0 8px 20px rgb(0 0 0 / .18);
+}
+:root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform]:has(input:focus-visible) {
+  outline: 3px solid var(--finder-game-colour);
+  outline-offset: 5px;
+}
+@media (hover: hover) and (pointer: fine) {
+  :root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform]:not(:has(input:checked)):hover {
+    border-color: var(--finder-game-colour);
+    box-shadow: 0 8px 20px rgb(0 0 0 / .2);
+    transform: none;
+  }
+}
+@media (max-width: 560px) {
+  :root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform] { min-height: 184px; padding: 12px; gap: 8px; }
+}
+:root[data-brand-motion="off"] body[data-page="find-server"] main .finder-choice { transition: none; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  :root body[data-page="find-server"] main .finder-game-choices .finder-choice { transition: none; transform: none; }
+}
+@media (forced-colors: active) {
+  :root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform] { background: Canvas; border-color: CanvasText; box-shadow: none; }
+  :root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform]::before,
+  :root body[data-page="find-server"] main .finder-game-choices .finder-game-art { display: none; }
+  :root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform] .finder-choice-copy :is(strong, small) { color: CanvasText !important; }
+  :root body[data-page="find-server"] main .finder-game-choices .finder-choice[data-platform]:has(input:checked) { border-color: Highlight; outline: 2px solid Highlight; box-shadow: none; }
+}

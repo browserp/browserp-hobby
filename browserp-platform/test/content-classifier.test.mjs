@@ -221,6 +221,25 @@ test("network, HTTP, redirect, malformed JSON and provider error content yield r
   }
 });
 
+test("HTTP diagnostics retain only a safe status category and cancel unread error bodies", async () => {
+  for (const [status, code] of [[401, "provider_authentication_failed"], [403, "provider_access_denied"],
+    [429, "provider_quota_or_rate_limit"], [500, "provider_unavailable"], [302, "provider_unavailable"]]) {
+    let calls = 0, cancelled = false, read = false;
+    const answer = await classifyContent(comment, { env: enabled, fetch: async () => {
+      calls++;
+      const body = new ReadableStream({
+        pull() { read = true; throw new Error(enabled.OPENAI_API_KEY); },
+        cancel() { cancelled = true; }
+      }, { highWaterMark: 0 });
+      return new Response(body, { status, headers: { "Content-Type": "application/json" } });
+    } });
+    contract(answer, "review");
+    assert.equal(answer.details.code, code);
+    assert.equal(calls, 1); assert.equal(cancelled, true); assert.equal(read, false);
+    assert.equal(JSON.stringify(answer).includes(enabled.OPENAI_API_KEY), false);
+  }
+});
+
 test("response byte caps apply before parsing and cancel oversized streams", async () => {
   let cancelled = 0;
   for (const withLength of [false, true]) {

@@ -86,7 +86,16 @@ function validateProvider(payload, image) {
 }
 
 async function readResponse(response, signal) {
-  if (!response || response.ok !== true || response.redirected === true) fail("provider_unavailable");
+  if (!response || response.redirected === true) fail("provider_unavailable");
+  if (response.ok !== true) {
+    // Status alone is safe to retain. Never read error bodies: they can echo
+    // credentials or submitted content. A 429 does not distinguish depleted
+    // quota from a temporary rate limit, and must not imply either diagnosis.
+    const code = ({ 401: "provider_authentication_failed", 403: "provider_access_denied",
+      429: "provider_quota_or_rate_limit" })[response.status] || "provider_unavailable";
+    void response.body?.cancel().catch(() => {});
+    fail(code);
+  }
   if (!/^application\/json(?:\s*;|$)/i.test(response.headers?.get("content-type") || "")) fail("invalid_provider_response");
   const declared = response.headers.get("content-length");
   if (declared !== null && (!/^\d+$/.test(declared) || Number(declared) > MAX_RESPONSE_BYTES)) fail("provider_response_too_large");

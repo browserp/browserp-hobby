@@ -213,7 +213,9 @@ test("all public pages expose the same complete header and dialog navigation", a
       assert.equal(h.$(".navigation-find-v7").getAttribute("aria-controls"), "public-navigation");
       assert.equal(h.$(".navigation-find-v7").getAttribute("aria-label"), "Quick find servers and games");
       assert.ok(h.$(".navigation-footer-v6 a[href='/list-server']"));
+      assert.equal(h.$(".navigation-extra-v6 a[href='/legal#standards']").textContent, "Community standards");
       assert.equal(h.$(".navigation-extra-v6 a[href='/legal#contact']").textContent, "Help & contact");
+      assert.equal(h.$(".navigation-extra-v6 a[href='/legal']").textContent, "All policies");
       assert.equal(h.$(".navigation-brand-v6").getAttribute("href"), "/");
       assert.equal(h.$("[data-menu-v3], [data-menu-button], [data-site-menu]"), null, "old menu controls no longer own the header");
       assertClosed(h);
@@ -652,7 +654,8 @@ test("slow authenticated hydration keeps the open menu usable and creates unique
       assert.equal(menu.inert, true);
       assert.equal(menu.getAttribute("aria-label"), "Your account");
       assert.equal(menu.querySelector('[role="menuitem"]'), null, "ordinary navigation retains ordinary link keyboard semantics");
-      assert.equal(menu.querySelector('a[href="/profile"]').textContent, "Profile");
+      assert.equal(menu.querySelector('a[href="/profile"]').textContent, "My profile");
+      assert.equal(menu.querySelector('a[href="/dashboard#account"]').textContent, "Account & privacy");
       assert.equal(menu.querySelector(".account-danger-v3").textContent, "Sign out");
     }
   } finally { h.dom.window.close(); }

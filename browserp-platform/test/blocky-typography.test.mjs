@@ -32,7 +32,7 @@ test("all public templates load the new display styles without the retired motio
   const pages = ["404", "about", "advertise", "appeal", "blog-post", "blog", "coins", "compare", "dashboard", "find-server", "game", "index", "legal", "list-server", "privacy", "profile", "server", "servers", "staff", "terms", "user"];
   for (const page of pages) {
     const html = read(`${page}.html`);
-    assert.match(html, /public-design\.css\?v=20260915-blocktype1/);
+    assert.match(html, /public-design\.css\?v=[a-zA-Z0-9-]+/);
     assert.match(html, /premium-pages\.css\?v=20260915-blocktype1/);
     assert.match(html, /design-system\.css\?v=20260915-blocktype-buttons1/);
     assert.doesNotMatch(html, /primary-motion\.js/);

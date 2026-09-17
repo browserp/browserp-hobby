@@ -1,6 +1,7 @@
 import { rest, rpc } from "./supabase.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const USERNAME = /^[a-z0-9_]{3,30}$/;
 const ROLE_KEY = /^[a-z0-9_]{2,40}$/;
 const CONTROL = /[\u0000-\u001f\u007f]/;
 const PROFILE_MEDIA_ORIGIN = "https://kywabzfgjoqiznnxygbq.supabase.co";
@@ -64,7 +65,9 @@ export function publicStaffView(memberships, roles, profiles, presence = []) {
       const avatarUrl = profile.avatar_review_status === "approved"
         ? safePublicStaffAvatar(profile.approved_avatar_url)
         : null;
-      return [{ displayName, roleName: role.name, joinedAt, avatarUrl, online: onlineById.get(userId) === true, _rank: role.rank }];
+      const profileUrl = profile.profile_visibility === "public" && USERNAME.test(profile.username || "")
+        ? `/user/${profile.username}` : null;
+      return [{ displayName, roleName: role.name, joinedAt, avatarUrl, profileUrl, online: onlineById.get(userId) === true, _rank: role.rank }];
     })
     .sort((left, right) => right._rank - left._rank
       || String(left.joinedAt || "").localeCompare(String(right.joinedAt || ""))
@@ -93,7 +96,7 @@ export async function publicStaffRoster() {
 
   const [roles, profiles, presence] = await Promise.all([
     rest(`staff_roles?select=key,name,rank&key=${inFilter(roleKeys)}&limit=100`, { useSecret: true }),
-    rest(`profiles?select=id,display_name,avatar_review_status,approved_avatar_url&id=${inFilter(userIds)}&limit=100`, { useSecret: true }),
+    rest(`profiles?select=id,username,profile_visibility,display_name,avatar_review_status,approved_avatar_url&id=${inFilter(userIds)}&limit=100`, { useSecret: true }),
     rpc("service_public_staff_presence", {}, undefined, { useSecret: true }).catch(() => [])
   ]);
   return publicStaffView(memberships, roles, profiles, presence);

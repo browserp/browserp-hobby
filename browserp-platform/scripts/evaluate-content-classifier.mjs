@@ -15,6 +15,7 @@ const ERROR_CODES = new Set([
   "invalid_input", "unsupported_content_kind", "invalid_text_input", "invalid_local_signals",
   "provider_not_enabled", "provider_not_configured", "invalid_configuration",
   "provider_unavailable", "provider_timeout", "provider_response_too_large",
+  "provider_authentication_failed", "provider_access_denied", "provider_quota_or_rate_limit",
   "invalid_provider_response", "incomplete_provider_coverage", "inconsistent_provider_response"
 ]);
 const SETTING_NAMES = [
