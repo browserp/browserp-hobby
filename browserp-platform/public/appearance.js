@@ -27,7 +27,7 @@
   function ensureThemeMotion() {
     if (!document.body || document.querySelector("script[data-theme-motion]")) return;
     const script = document.createElement("script");
-    script.src = "/primary-motion.js?v=20260917-default-motion1";
+    script.src = "/primary-motion.js?v=20260917-boost-border1";
     script.dataset.themeMotion = "";
     document.head.append(script);
   }

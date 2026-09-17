@@ -142,3 +142,18 @@ test("missing, invalid and failed avatars use initials without inventing badges"
     assert.equal(unavailable.querySelector(".comment-badge-v3"), null, "unknown badges are never inferred or displayed");
   } finally { dom.window.close(); }
 });
+
+ test("comment name and picture link only to a valid local member profile", () => {
+  const dom = harness();
+  try {
+    const item = dom.window.BrowseRPPublicComments.render({ author: "Alex", username: "alex_rp", body: "Hello" });
+    const links = [...item.querySelectorAll("a.comment-profile-link-v3")];
+    assert.equal(links.length, 2);
+    for (const link of links) assert.equal(link.getAttribute("href"), "/user/alex_rp");
+    assert.ok(links[0].querySelector(".comment-initials-v3"));
+    assert.equal(links[1].textContent, "Alex");
+    for (const username of [null, "", "//evil.test", "../staffpanel", "<script>"]) {
+      assert.equal(dom.window.BrowseRPPublicComments.render({author:"Private", username}).querySelector("a"), null);
+    }
+  } finally { dom.window.close(); }
+});

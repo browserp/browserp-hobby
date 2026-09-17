@@ -9,6 +9,56 @@
     if (className) node.className = className;
     return node;
   };
+  function mountToolSearch(sidebar) {
+    const search = make("div", undefined, "staff-tool-search");
+    const label = make("label", "Find a staff tool", "staff-tool-search-label");
+    const input = make("input");
+    input.type = "search";
+    input.id = "staff-tool-search-input";
+    input.placeholder = "Search staff tools";
+    input.autocomplete = "off";
+    input.maxLength = 80;
+    input.tabIndex = 0; // Included in the existing mobile menu focus loop.
+    label.htmlFor = input.id;
+    const results = make("div", undefined, "staff-tool-search-results");
+    results.id = "staff-tool-search-results";
+    results.setAttribute("role", "group");
+    results.setAttribute("aria-label", "Matching staff tools");
+    results.hidden = true;
+    input.setAttribute("aria-controls", results.id);
+    const status = make("p", "", "staff-tool-search-status");
+    status.setAttribute("role", "status");
+    const render = () => {
+      const query = input.value.trim().toLocaleLowerCase("en-GB");
+      results.replaceChildren();
+      results.hidden = !query;
+      status.textContent = "";
+      if (!query) return;
+      const seen = new Set();
+      const links = [...sidebar.querySelectorAll(".staff-nav-v3 a[href], .staff-local-nav a[href], #moderation-tabs a[href]")]
+        .filter(link => !link.closest("[hidden]") && !link.closest("[inert]"))
+        .filter(link => {
+          const url = new URL(link.href, location.href);
+          return url.origin === location.origin && url.pathname.startsWith("/staffpanel/")
+            && link.textContent.toLocaleLowerCase("en-GB").includes(query)
+            && !seen.has(url.href) && seen.add(url.href);
+        }).slice(0, 8);
+      for (const link of links) {
+        const result = make("a", link.textContent.trim(), "staff-tool-search-result");
+        result.href = link.getAttribute("href");
+        results.append(result);
+      }
+      status.textContent = links.length ? `${links.length} matching ${links.length === 1 ? "tool" : "tools"}` : "No matching staff tools";
+    };
+    input.addEventListener("input", render);
+    input.addEventListener("focus", render);
+    input.addEventListener("keydown", event => {
+      if (event.key !== "Escape" || !input.value) return;
+      event.preventDefault(); event.stopPropagation(); input.value = ""; render();
+    });
+    search.append(label, input, results, status);
+    sidebar.querySelector(".staff-workspace-label")?.after(search);
+  }
   function mount() {
     const sidebar = document.querySelector(".staff-sidebar-v3");
     const nav = sidebar?.querySelector(".staff-nav-v3");
@@ -16,6 +66,7 @@
     sidebar.dataset.staffAppearance = "ready";
     const mark = make("span", "Staff panel", "staff-workspace-label");
     sidebar.querySelector(".logo-v3")?.after(mark);
+    mountToolSearch(sidebar);
     const tools = make("nav", undefined, "staff-local-nav"); tools.setAttribute("aria-label", "Staff panel tools");
     const groups = [
       ["Your work", [["Availability", "overview-duty"], ["Your sign-in security", "overview-authenticators"]]],

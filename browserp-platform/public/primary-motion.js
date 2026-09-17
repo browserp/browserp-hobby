@@ -4,7 +4,7 @@
   // CSS owns the colour and light. This only eases the existing colour clock's
   // speed, preserving its position when the pointer enters, leaves or returns.
   if (!Element.prototype.getAnimations) return;
-  const selector = ".button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary";
+  const selector = ".button-primary-v3,.button-primary,.small-button-primary,.ds-button-primary,.server-boosted-v11";
   const unavailable = ":disabled,[aria-disabled='true'],[aria-pressed='true'],[aria-busy='true']";
   const motion = matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) and (forced-colors: none)");
   const controls = new Set();
@@ -26,14 +26,14 @@
   function refresh(control) {
     if (!controls.has(control)) return;
     const previous = ramps.get(control);
-    const animation = control.getAnimations().find(item => item.animationName === "primary-colour-drift");
+    const animation = control.getAnimations({ subtree: control.matches(".server-boosted-v11") }).find(item => item.animationName === "primary-colour-drift");
     if (!animation?.updatePlaybackRate) { stop(control); return; }
     const eligible = ["default", "dark", "light"].includes(document.documentElement.dataset.theme)
       && document.documentElement.dataset.brandMotion !== "off"
       && motion.matches && !suspended && control.isConnected
       && control.dataset.primaryMotion !== "paused" && !control.matches(unavailable);
     if (!eligible) { stop(control); animation.updatePlaybackRate(1); return; }
-    const target = control.matches(":hover,:focus-visible") ? 2.4 : 1;
+    const target = (control.matches(":hover,:focus-visible") || control.matches(".server-boosted-v11:focus-within")) ? 2.4 : 1;
     if (previous?.animation === animation && previous.target === target) return;
     const from = previous?.animation === animation ? previous.rate : animation.playbackRate;
     stop(control);

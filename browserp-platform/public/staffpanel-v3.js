@@ -62,6 +62,7 @@
       if (fresh.authenticated !== true) { showLogin(); return; }
       if (fresh.staff !== true || fresh.user?.id !== accountId) { showDenied(); return; }
       setWorkspaceVisible(true);
+      void checkBoostNavigation();
       void touchPresence();
     } catch (error) { if (generation === state.generation) showSessionUnavailable(error); }
   }
@@ -802,13 +803,27 @@
     };
     window.addEventListener("hashchange", update); update();
   }
+  async function checkBoostNavigation() {
+    if (document.body.dataset.staffPage === "overview") return; // Overview's Boost module owns its capability check.
+    const link = $('[data-overview-tool="overview-featured-boost"]');
+    if (!link || !state.authorized) return;
+    link.hidden = true;
+    const generation = state.generation;
+    const accountId = state.session?.user?.id;
+    try {
+      const { feature } = await api("/api/admin/featured-boost");
+      if (generation === state.generation && state.authorized && state.session?.user?.id === accountId) {
+        link.hidden = feature?.canManage !== true;
+      }
+    } catch { link.hidden = true; }
+  }
   async function init(){
     const legacy = { profiles: "profiles", accounts: "activity", staff: "staff", security: "bans" };
     const pageKey = document.body.dataset.staffPage;
     if (legacy[pageKey]) { location.replace(`/staffpanel/moderation#${legacy[pageKey]}`); return; }
     if (pageKey === "content") { location.replace("/staffpanel/overview#overview-adverts"); return; }
     if (pageKey === "overview" && location.hash === "#overview-roles") { location.replace("/staffpanel/moderation#staff"); return; }
-    mobile();applyTheme(document.documentElement.dataset.theme||preferredTheme());if(!await ensureStaff())return;focusOverviewTool();updateModerationHeading();startPresence();void window.BrowseRPStaffRefreshHealth?.init({api});window.BrowseRPStaffScrapers?.init({api});try{const page=document.body.dataset.staffPage;if(page==="overview") {
+    mobile();applyTheme(document.documentElement.dataset.theme||preferredTheme());if(!await ensureStaff())return;focusOverviewTool();updateModerationHeading();void checkBoostNavigation();startPresence();void window.BrowseRPStaffRefreshHealth?.init({api});window.BrowseRPStaffScrapers?.init({api});try{const page=document.body.dataset.staffPage;if(page==="overview") {
       advertisingEnquiries = window.BrowseRPAdvertisingEnquiries?.initStaff({ api, accountId: state.session?.user?.id, root: $("#advertising-enquiries"), onAuthFailure: showLogin });
       let toolsMounted = false;
       await window.BrowseRPStaffOverview.init({ api, onAuthFailure: showLogin, onLoad: async (website) => {

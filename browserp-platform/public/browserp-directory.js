@@ -123,13 +123,6 @@
     const titleLink = element("a", "discovery-card-title-v10", server.name || "Roleplay server");
     titleLink.href = listingHref; heading.append(titleLink);
     top.append(media, heading);
-    if (server.staffBoosted) {
-      const flame = element("span", "server-boost-flame-v11", "🔥");
-      flame.title = "Boosted server";
-      flame.setAttribute("aria-label", "Boosted server");
-      flame.tabIndex = 0;
-      top.append(flame);
-    }
     card.append(top);
     card.append(element("p", "server-description", server.description || "Open the listing to learn more about this community."));
     // Preview-only omission of optional unknowns. Do not change the source
@@ -170,7 +163,7 @@
     card.append(bottom);
     if (freshCount) card.dataset.playerFreshUntil = String(checkedAt + 300000);
     const item = window.BrowseRPShortlist?.wrap(card, server) || card;
-    if (server.staffBoosted) item.classList.add("server-boosted-v11");
+    if (server.staffBoosted) { item.classList.add("server-boosted-v11"); item.title = "Boosted server"; }
     return item;
   }
 
@@ -245,7 +238,7 @@
 
   function removeFeaturedDecoration() {
     const list = select("#featured-server-list");
-    list?.querySelectorAll(".server-boosted-v11").forEach(item => item.classList.remove("server-boosted-v11"));
+    list?.querySelectorAll(".server-boosted-v11").forEach(item => { item.classList.remove("server-boosted-v11"); item.removeAttribute("title"); });
     list?.querySelectorAll(".server-boost-flame-v11").forEach(item => item.remove());
   }
 

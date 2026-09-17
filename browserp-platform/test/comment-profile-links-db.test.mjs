@@ -1,0 +1,27 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { PGlite } from '@electric-sql/pglite';
+test('published comment links include permitted profile usernames without exposing private identities', async t => {
+ const db = new PGlite(); t.after(()=>db.close());
+ await db.exec(`create role anon; create role authenticated; create role service_role;
+ create schema private;
+ create function private.member_badge_projection(uuid) returns jsonb language sql as $$select '{"badges":[]}'::jsonb$$;
+ create table public.servers(id uuid,slug text,access_type text,cfx_join_url text,animated_media_enabled boolean,status text,age_rating text);
+ create table public.server_votes(server_id uuid);
+ create table public.profiles(id uuid,display_name text,username text,profile_visibility text,avatar_review_status text,approved_avatar_url text);
+ create table public.server_comments(id uuid,server_id uuid,author_id uuid,body text,created_at timestamptz,edited_at timestamptz,parent_comment_id uuid,status text);
+ insert into public.servers values('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','test','public',null,false,'published','all');
+ insert into public.profiles select ('00000000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid,'Member','member_'||i,v,'approved',null from (values(1,'public'),(2,'basic'),(3,'members'),(4,'private')) as x(i,v);
+ insert into public.server_comments select id,'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',id,'Hello',now(),null,null,'published' from public.profiles;`);
+ await db.exec(readFileSync(new URL('../supabase/migrations/20260917130641_comment_profile_links.sql',import.meta.url),'utf8'));
+ const get=async()=> (await db.query("select public.public_server_engagement('test') as data")).rows[0].data;
+ let comments=(await get()).comments;
+ assert.equal(comments.length,4);
+ assert.deepEqual(comments.map(c=>c.username).filter(Boolean).sort(),['member_1','member_2','member_3']);
+ assert.equal(comments.filter(c=>c.username===null).length,1);
+ await db.exec("update public.server_comments set status='pending_review'");
+ assert.deepEqual((await get()).comments,[]);
+ await db.exec("update public.servers set status='draft'");
+ assert.equal(await get(),null);
+});

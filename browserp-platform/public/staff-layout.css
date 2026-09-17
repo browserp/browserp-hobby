@@ -15,6 +15,16 @@ body.staff-v3 {
 .staff-v3 .staff-sidebar-v3 > .logo-v3 { margin: 0 10px 34px; }
 .staff-v3 .staff-sidebar-v3 .logo-lockup-v3 { min-width: 0; width: 100%; height: 54px; }
 .staff-v3 .staff-sidebar-v3 .logo-full-v5 { width: 194px; max-height: 54px; object-fit: contain; }
+.staff-v3 .staff-tool-search { margin: 0 2px 18px; padding: 0 8px 18px; border-bottom: 1px solid var(--line); }
+.staff-v3 .staff-tool-search-label { display: block; margin-bottom: 8px; color: var(--copy); font-size: 12px; font-weight: 750; }
+.staff-v3 .staff-tool-search input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--panel); color: var(--text); font: inherit; font-size: 14px; }
+.staff-v3 .staff-tool-search input::placeholder { color: var(--muted); opacity: 1; }
+.staff-v3 .staff-tool-search input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.staff-v3 .staff-tool-search-results { display: grid; gap: 4px; max-height: min(280px, 38vh); overflow-y: auto; margin-top: 8px; }
+.staff-v3 .staff-tool-search-results[hidden] { display: none; }
+.staff-v3 .staff-tool-search-result { display: flex; align-items: center; min-height: 44px; padding: 9px 11px; border-radius: var(--radius-sm); color: var(--text); background: var(--panel-2); font-size: 13px; font-weight: 650; }
+.staff-v3 .staff-tool-search-result:is(:hover, :focus-visible) { color: var(--text); background: color-mix(in srgb, var(--pink) 14%, var(--panel-2)); outline: 2px solid var(--pink); outline-offset: 1px; }
+.staff-v3 .staff-tool-search-status { min-height: 1.25em; margin: 7px 0 0; color: var(--muted); font-size: 12px; }
 .staff-v3 .staff-nav-v3 { gap: 7px; }
 .staff-v3 .staff-nav-v3 > a,
 .staff-v3 .staff-scrapers-menu > summary {

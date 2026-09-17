@@ -250,24 +250,31 @@
   :root body:not(.staff-v3):not([data-staff-page]) .discovery-card-v10 .server-card-bottom .player-count-v10.is-live::before { background: Highlight; }
 }
 
-/* Timed staff feature: visible only while the server is the active home boost. */
-:root body[data-page="home"] #featured-server-list > .server-boosted-v11 {
-  position: relative; border: 1px solid #e875b8;
-  background: color-mix(in srgb, #ec60af 8%, var(--panel));
-  box-shadow: 0 0 0 1px color-mix(in srgb, #ef83bf 35%, transparent), 0 12px 30px color-mix(in srgb, #d94694 12%, transparent);
+/* Boosted cards use the selected theme's button colours without obscuring content. */
+:root body[data-page="home"] #featured-server-list > .server-boosted-v11 { position: relative; }
+:root body[data-page="home"] #featured-server-list > .server-boosted-v11::after {
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  border-radius: inherit; padding: 2px;
+  background-image: var(--brand-action-gradient); background-size: 160% 100%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  transition: filter 480ms ease;
 }
-:root body[data-page="home"] #featured-server-list .server-boosted-v11 .server-card { position: relative; }
-.server-boost-flame-v11 {
-  position: absolute; z-index: 3; top: 12px; right: 12px; display: grid; place-items: center;
-  width: 30px; height: 30px; border: 1px solid color-mix(in srgb, #ee70b5 55%, var(--line));
-  border-radius: 9px; background: color-mix(in srgb, #f080ba 15%, var(--panel));
-  font-size: 17px; line-height: 1; cursor: help;
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  :root body[data-page="home"] #featured-server-list > .server-boosted-v11::after {
+    animation: primary-colour-drift 6.5s ease-in-out infinite alternate;
+  }
+  :root:not([data-brand-motion="off"]) body[data-page="home"] #featured-server-list > .server-boosted-v11:focus-within::after { filter: brightness(1.14); }
+  @media (hover: hover) and (pointer: fine) {
+    :root:not([data-brand-motion="off"]) body[data-page="home"] #featured-server-list > .server-boosted-v11:hover::after { filter: brightness(1.14); }
+  }
 }
-.server-boost-flame-v11:focus-visible { outline: 2px solid #ee70b5; outline-offset: 2px; }
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-brand-motion="off"]) .server-boost-flame-v11 { animation: browse-boost-flame 2.3s ease-in-out infinite; }
+:root[data-brand-motion="off"] body[data-page="home"] #featured-server-list > .server-boosted-v11::after,
+:root[data-primary-motion="paused"] body[data-page="home"] #featured-server-list > .server-boosted-v11::after,
+:root body[data-page="home"] #featured-server-list > .server-boosted-v11[data-primary-motion="paused"]::after { animation-play-state: paused; }
+@media (forced-colors: active) {
+  :root body[data-page="home"] #featured-server-list > .server-boosted-v11 { outline: 2px solid Highlight; }
 }
-@keyframes browse-boost-flame { 50% { filter: brightness(1.18); box-shadow: 0 0 13px color-mix(in srgb,#f076b9 35%,transparent); } }
 
 /* Game hubs keep artwork and copy inside their columns at laptop and phone sizes. */
 :root body[data-page="games"] .game-page-hero-grid-v4:has(.game-page-all-logo-v5) {

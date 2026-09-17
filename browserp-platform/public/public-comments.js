@@ -140,13 +140,22 @@
     return typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
   }
 
+  function profileLink(comment, content, name) {
+    if (!/^[a-z0-9_]{3,30}$/.test(comment.username || "")) return content;
+    const link = make("a", "comment-profile-link-v3");
+    link.href = `/user/${encodeURIComponent(comment.username)}`;
+    link.setAttribute("aria-label", `View ${name}'s profile`);
+    link.append(content);
+    return link;
+  }
+
   function render(comment = {}) {
     const name = String(comment.author || "BrowseRP member").trim() || "BrowseRP member";
     const item = make("article", "comment-v3");
     const heading = make("header", "comment-heading-v3");
     const identity = make("div", "comment-identity-v3");
     const authorLine = make("div", "comment-author-line-v3");
-    authorLine.append(make("strong", "", name));
+    authorLine.append(profileLink(comment, make("strong", "", name), name));
     const badges = badgeList(comment.badges, comment.staffRole);
     if (badges) authorLine.append(badges);
     identity.append(authorLine);
@@ -163,7 +172,7 @@
       }
       identity.append(dates);
     }
-    heading.append(avatar(comment.avatarUrl, name), identity);
+    heading.append(profileLink(comment, avatar(comment.avatarUrl, name), name), identity);
     item.append(heading);
     const parent = parentQuote(comment.parent);
     if (parent) item.append(parent);
