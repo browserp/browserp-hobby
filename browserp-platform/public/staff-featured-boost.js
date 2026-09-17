@@ -9,6 +9,7 @@
   const start = root.querySelector("[data-boost-start]");
   const end = root.querySelector("[data-boost-end]");
   const retry = root.querySelector("[data-boost-retry]");
+  const navigationLink = document.querySelector('[data-overview-tool="overview-featured-boost"]');
   let api;
   let version = null;
   let busy = false;
@@ -32,7 +33,7 @@
     select.replaceChildren(new Option("Choose a published server", ""));
     duration.value = "1"; reason.value = "";
     end.hidden = retry.hidden = root.hidden = true;
-    root.inert = true; root.setAttribute("inert", "");
+    root.inert = true; root.setAttribute("inert", ""); if (navigationLink) navigationLink.hidden = true;
     message("Loading boost controls…"); controls();
   }
   function showActive(token) {
@@ -98,7 +99,7 @@
   window.addEventListener("pagehide", reset);
   window.BrowseRPStaffFeaturedBoost = { reset, init: async ({ api: request }) => {
     reset(); api = request;
-    root.hidden = false; root.inert = false; root.removeAttribute("inert");
+    root.hidden = false; root.inert = false; root.removeAttribute("inert"); if (navigationLink) navigationLink.hidden = false;
     await load(generation);
   } };
   reset();

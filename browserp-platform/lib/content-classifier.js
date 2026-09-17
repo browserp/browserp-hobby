@@ -51,7 +51,7 @@ function validateSignals(signals) {
 }
 
 function prepareInput({ kind, text, imageBytes, mimeType }) {
-  if (!["comment", "display_name", "avatar"].includes(kind)) fail("unsupported_content_kind");
+  if (!["comment", "display_name", "avatar", "message"].includes(kind)) fail("unsupported_content_kind");
   if (kind === "avatar") {
     if (!(imageBytes instanceof Uint8Array) || imageBytes.byteLength < 1 || imageBytes.byteLength > 1024 * 1024
       || !MIME_TYPES.has(mimeType) || (text !== undefined && text !== "")) fail("invalid_image_input");

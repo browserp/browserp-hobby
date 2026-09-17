@@ -50,8 +50,8 @@
       metric("Sources checked", run ? `${count(run.checked)} / ${count(run.requested)}` : "—", "Processed in the latest completed run, including unsuccessful source responses."),
       metric("Updated observations", run ? count(run.refreshed) : "—", run ? `${count(run.unchanged)} observations were unchanged. Both count as successful source checks.` : "No completed run is recorded."),
       metric("Worker failures", run ? count(run.failed) : "—", "Processing failures in the latest completed run. Missing source responses are shown separately below."),
-      metric("Current observations", `${count(sources.fresh)} / ${count(sources.total)}`, "Published imported listings with usable observations from the last five minutes."),
-      metric("Stale / unavailable", count(sources.stale), `${count(sources.unavailable)} have no usable source response; ${count(sources.neverChecked)} have no recorded observation.`)
+      metric("Up-to-date player counts", `${count(sources.fresh)} / ${count(sources.total)}`, "Published imported listings with usable observations from the last five minutes."),
+      metric("Outdated or missing counts", count(sources.stale), `${count(sources.unavailable)} have no usable source response; ${count(sources.neverChecked)} have no recorded observation.`)
     );
     const games = make("div", undefined, "refresh-health-games"); games.setAttribute("aria-label", "Freshness by game");
     for (const platform of Array.isArray(health.platforms) ? health.platforms : []) {
@@ -61,7 +61,7 @@
       games.append(card);
     }
     const details = make("details", undefined, "refresh-health-details");
-    details.append(make("summary", "Check history and source details"));
+    details.append(make("summary", "Technical diagnostics"));
     const explanation = make("p", "An unchanged source timestamp can be a successful check. Failed sources retry every five minutes; two retries over at least ten minutes trigger a staff alert. An unavailable observation does not prove a server is offline or closed. Raw source errors are not shown.");
     const schedule = health.scheduler || {};
     const delivery = Number.isInteger(schedule.lastDeliveryStatus) ? `HTTP ${schedule.lastDeliveryStatus}` : "Awaiting a response, or the retained response is no longer available";

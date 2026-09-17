@@ -643,12 +643,10 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
 :root #server-detail-v3.server-page-v7 .server-info-card-v5 dt { min-width: 0; font-size: 13px; font-weight: 650; letter-spacing: .01em; line-height: 1.35; color: var(--muted); overflow-wrap: anywhere; }
 :root #server-detail-v3.server-page-v7 .server-info-card-v5 dd { min-width: 0; max-width: 100%; text-align: left; font-size: 14px; font-weight: 700; line-height: 1.45; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 :root #server-detail-v3.server-page-v7 .server-info-wide-v5 { grid-column: 1 / -1; min-height: 68px; }
-:root #server-detail-v3.server-page-v7 .server-info-card-v5.is-live-v3 { border-color: color-mix(in srgb,#4fce99 38%,var(--line)); background: color-mix(in srgb,#4fce99 7%,var(--panel)); }
-:root #server-detail-v3 #server-status-v3.is-live-v3,
-:root #server-detail-v3 .server-info-card-v5.is-live-v3 dd { display: inline-flex; align-items: center; gap: 9px; }
-:root #server-detail-v3 #server-status-v3.is-live-v3::before,
-:root #server-detail-v3 .server-info-card-v5.is-live-v3 dd::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #4fce99; box-shadow: 0 0 0 4px rgb(79 206 153 / .14); animation: browse-live 2.6s ease-in-out infinite; }
-@keyframes browse-live { 50% { box-shadow: 0 0 0 7px rgb(79 206 153 / .04); } }
+:root #server-detail-v3 #server-status-v3.is-live-v3 { display: inline-flex; align-items: center; gap: 9px; color: var(--success); }
+:root #server-detail-v3 #server-status-v3.is-live-v3::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 4px color-mix(in srgb,var(--success) 14%,transparent); animation: browse-live 2.6s ease-in-out infinite; }
+@keyframes browse-live { 50% { box-shadow: 0 0 0 7px color-mix(in srgb,var(--success) 4%,transparent); } }
+:root[data-brand-motion="off"] #server-detail-v3 #server-status-v3.is-live-v3::before { animation: none; }
 
 @media (max-width: 520px) {
   :root #server-detail-v3 .detail-heading-copy-launch-v6 { gap: 11px; }
@@ -664,14 +662,14 @@ body[data-page="servers"] [data-directory-loading-controls] .server-description-
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .ad-dot-v3::before,
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .side-ad-copy-v3.ad-copy-enter-v3 { animation: none; }
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .side-ad-image-v3 { transition: none; }
-  :root #server-detail-v3 #server-status-v3.is-live-v3::before,
-  :root #server-detail-v3 .server-info-card-v5.is-live-v3 dd::before { animation: none; }
+  :root #server-detail-v3 #server-status-v3.is-live-v3::before { animation: none; }
 }
 @media (forced-colors: active) {
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .ad-dot-v3::after { background: ButtonText; }
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .ad-dot-v3[aria-current="true"]::before { background: Highlight; }
   :root #server-detail-v3.server-page-v7 .server-info-card-v5,
   :root #server-detail-v3 .detail-meta-v3 .metadata-value-v5 { border-color: ButtonText; }
+  :root #server-detail-v3 #server-status-v3.is-live-v3::before { background: Highlight; box-shadow: none; }
 }
 /* On a phone the account sheet owns the bottom edge. Brief feedback moves
    below the header rather than covering its actions or the shortlist notice. */

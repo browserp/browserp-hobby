@@ -19,6 +19,7 @@ import { moderationMutation, moderationQuery } from "../lib/staff-moderation.js"
 import { staffAuthenticators } from "../lib/staff-authenticators.js";
 import { staffDuty } from "../lib/staff-duty.js";
 import { memberPreferences } from "../lib/member-preferences.js";
+import { memberMessages } from "../lib/member-messages.js";
 import { staffAccountErasurePreflight } from "../lib/account-erasure-preflight.js";
 import { qrCodeDataUri } from "../lib/authenticator-qr.js";
 import { prepareInitialStaffAuthenticator, verifyInitialStaffAuthenticator } from "../lib/staff-initial-authenticator.js";
@@ -28,6 +29,7 @@ import { staffAdvertMedia } from "../lib/staff-advert-media.js";
 import { contentModeration, contentAvatar, processContentCheck, processOAuthContent, registerPrivateAvatar } from "../lib/content-moderation.js";
 import { preparedPngRaster } from "../lib/prepared-png.js";
 import { publicStaffRoster } from "../lib/public-staff.js";
+import { basicMemberAvatar } from "../lib/public-members.js";
 import {
   authCapabilities,
   beginOAuth,
@@ -223,6 +225,7 @@ function providerRoute(provider) {
 
 const routes = {
   "public/document": publicPage,
+  "me/messages": endpoint(["GET", "POST"], memberMessages),
   "public/profile-report": endpoint("POST", async (req, res) => {
     assertSameOrigin(req);
     const session = await getSession(req, res, { required: true });
@@ -469,6 +472,19 @@ const routes = {
   "admin/content-moderation": endpoint(["GET", "POST"], async (req, res, requestId) => ok(res, await contentModeration(req, res, { staff: true, requestId }))),
   "content-moderation/preview": endpoint("GET", (req, res) => contentAvatar(req, res)),
   "public/profile-avatar": endpoint("GET", (req, res) => contentAvatar(req, res, { publicImage: true })),
+  "public/basic-profile-avatar": endpoint("GET", async (req, res) => {
+    await rateLimit(req, "public-basic-profile-picture", 120, 300);
+    const username = new URL(req.url || "/api/public/basic-profile-avatar", appUrl(req)).searchParams.get("username");
+    const image = await basicMemberAvatar(username);
+    res.statusCode = 200;
+    res.setHeader("Content-Type", image.mimeType);
+    res.setHeader("Content-Length", image.bytes.length);
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Content-Security-Policy", "default-src 'none'; sandbox");
+    res.setHeader("Cache-Control", "private, no-store");
+    res.setHeader("Referrer-Policy", "no-referrer");
+    return res.end(image.bytes);
+  }),
 
   "me/profile": endpoint(["GET", "POST"], async (req, res) => {
     if (req.method === "POST" && contentWritePaused(res)) return;
@@ -494,7 +510,7 @@ const routes = {
     const bio = String(body.bio || "").replace(/\r\n?/g, "\n").trim();
     const visibility = String(body.visibility || "public").trim().toLowerCase();
     if (bio.length > 500 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(bio)
-      || !["public", "members", "private"].includes(visibility)) {
+      || !["public", "members", "private", "basic"].includes(visibility)) {
       throw Object.assign(new Error("Check your display name, bio and visibility."), { status: 400 });
     }
     const profile = await rpc("member_update_profile", {

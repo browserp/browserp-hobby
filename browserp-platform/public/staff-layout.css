@@ -63,6 +63,7 @@ body.staff-v3 {
 .staff-v3 .staff-top-v3 p { max-width: 66ch; margin-top: 14px; font-size: 15px; line-height: 1.7; }
 .staff-v3 .staff-top-v3 > .button-v3 { flex: none; margin: 0 0 0 auto; align-self: center; }
 .staff-v3 :is(h2, h3, h4) { line-height: 1.3; letter-spacing: -.025em; text-wrap: balance; }
+.staff-v3 :is(.overview-module, .overview-users, [data-refresh-health]) :is(h2, h3, summary):focus-visible { outline: 3px solid var(--focus); outline-offset: 6px; }
 .staff-v3 :is(.overview-main, .moderation-main) h2 { font-size: clamp(23px, 2.3vw, 29px); }
 .staff-v3 :is(.staff-top-v3, .overview-users, .overview-module, .moderation-staff-box, .staff-section-v3, .staff-fivem, .staff-claims) { scroll-margin-top: 24px; }
 

@@ -1,0 +1,71 @@
+{
+  "reviewedAt": "2026-09-17T03:11:13Z",
+  "purpose": "Additional distinct communities beyond the existing 40 FiveM, 20 RedM and 3 Minecraft published roster; staff review only",
+  "candidates": [
+    {
+      "platform": "minecraft",
+      "status": "review",
+      "decision": "first_review",
+      "joinCode": "bf542a0719ba",
+      "address": "mc.roleplayhub.com",
+      "edition": "java",
+      "name": "SchoolRP",
+      "description": "SchoolRP is an English-speaking Minecraft Java roleplay community set in the contemporary town of Karakura. New players begin as students and can build stories through classes, local businesses and town life; some specialist roles require separate applications. Its published rules cover character conduct, roleplay, safety and reports, and the community offers getting-started guides. Join through the Roleplay Hub address and select SchoolRP. Any displayed player count covers the hub network, which also advertises Creative, rather than SchoolRP alone.",
+      "region": "Not confirmed",
+      "language": "English",
+      "framework": "School RP",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/SCsBfgnvvP",
+      "websiteUrl": "https://schoolrp.net/",
+      "logoUrl": null,
+      "tags": ["roleplay", "java edition", "school rp", "city rp", "jobs", "economy"],
+      "keywords": ["roleplay hub", "karakura", "student stories", "classes", "town life", "applications for specialist roles"],
+      "publicationGate": "Recheck exact SchoolRP world entry and managed icon, and keep the network-scoped player-count explanation. Review the dated player-experience concerns without treating allegations as fact."
+    },
+    {
+      "platform": "minecraft",
+      "status": "review",
+      "decision": "specialist_activity_followup",
+      "joinCode": "da11508a95a7",
+      "address": "potp.rpdnd.com",
+      "edition": "java",
+      "name": "RPDND — Paths of the Past",
+      "description": "RPDND's Paths of the Past is an English-speaking Minecraft Java community for ages 16 and over that blends Dungeons & Dragons 5e character play with a persistent fantasy world and Dungeon Master events. The current campaign adds survival and steampunk elements. Players may explore and begin roleplaying on its graylist server, while character applications and approval are needed for event participation. Read the Session 0 rules and beginner's guide, then use its official Discord for registration and help.",
+      "region": "International",
+      "language": "English",
+      "framework": "D&D 5e RP",
+      "accessType": "public",
+      "discordUrl": "https://discord.gg/rpdnd",
+      "websiteUrl": "https://www.rpdnd.com/",
+      "logoUrl": null,
+      "tags": ["roleplay", "java edition", "fantasy rp", "dungeons and dragons", "events", "survival"],
+      "keywords": ["rpdnd", "paths of the past", "potp", "dungeon master", "character application", "graylist", "steampunk"],
+      "publicationGate": "Confirm representative activity beyond one off-peak 10/100 observation, exact campaign destination and usable official artwork; do not import the older play.rpdnd.com realm as a duplicate."
+    },
+    {
+      "platform": "fivem",
+      "status": "review",
+      "decision": "commercial_fit_review",
+      "joinCode": "7blbde",
+      "name": "PMA",
+      "description": "PMA is an English-speaking FiveM roleplay community for adults aged over 18. Its current public rules describe character-driven city play, civilian and emergency-service roles, consent boundaries, reporting and detailed scene limits. The operator links a Discord support route and an official store. Paid subscriptions offer substantial queue priority, direct moderator-call convenience and, at the highest tier, removal of AFK checks; read those terms before joining. The precise general admission requirement is not confirmed from public guidance.",
+      "region": "United States",
+      "language": "English",
+      "framework": "Not confirmed",
+      "accessType": "unknown",
+      "discordUrl": "https://discord.gg/pmarp",
+      "websiteUrl": "https://pma.network/",
+      "cfxJoinUrl": "https://cfx.re/join/7blbde",
+      "logoUrl": "https://frontend.cfx-services.net/api/servers/icon/7blbde/1389858937.png",
+      "bannerUrl": null,
+      "tags": ["roleplay", "serious rp", "economy", "police", "ems", "gangs", "businesses"],
+      "keywords": ["pma", "pmarp", "adults", "city roleplay", "queue priority"],
+      "publicationGate": "Main must decide whether the documented paid queue/moderation conveniences and AFK exemption fit BrowseRP's curated recommendation. Verify general admission, canonical image bytes and representative source history; preserve unknown access meanwhile."
+    }
+  ],
+  "notReady": [
+    {"name": "Back To The 90s", "platform": "fivem", "joinCode": "4gbr8p8", "reason": "Exact active English source and official Discord confirmed, but current public rules, reporting and general admission guidance remain unrecovered."},
+    {"name": "First Due Roleplay", "platform": "fivem", "joinCode": "gm3rzx", "reason": "Distinct fire/EMS focus, but exact source has no community URL or icon and current public rules/admission are not tied to this production identity."},
+    {"name": "Fables and Fantasy RP", "platform": "minecraft", "address": "play.fablesfantasyrp.com", "reason": "Readable official introduction and guide, but a single off-peak 0/100 status cannot establish sustained current RP activity or a stronger addition alongside Lord of the Craft."}
+  ]
+}

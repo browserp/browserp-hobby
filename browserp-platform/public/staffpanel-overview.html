@@ -60,7 +60,6 @@
     <aside class="staff-sidebar-v3">
       <a class="logo-v3" href="/"><span class="logo-lockup-v3"><img class="logo-full-v5" src="/assets/browserp-logo-v5.png?v=20260908" alt="BrowseRP"></span></a>
       <nav class="staff-nav-v3" aria-label="Staff navigation">
-        <span class="staff-nav-group-v3">Workspace</span>
         <a href="/staffpanel/overview" aria-current="page">Overview</a>
         <a href="/staffpanel/moderation">Moderation</a>
         <span class="staff-nav-group-v3">BrowseRP</span>
@@ -69,24 +68,24 @@
     </aside>
     <main class="staff-main-v3 overview-main" id="website-overview">
       <header class="staff-top-v3">
-        <div><span class="eyebrow-v3">Staff panel</span><h1>Overview</h1><p>Your review work, team availability and website tools.</p></div>
-        <a class="button-v3 button-secondary-v3" href="/">View website <span aria-hidden="true">↗</span></a>
+        <div><h1>Overview</h1><p>Current attention, staff availability and recent activity.</p></div>
+        <div class="staff-top-actions"><a id="overview-focus-back" class="button-v3 button-secondary-v3" href="#overview" hidden>Back to overview</a><a class="button-v3 button-secondary-v3" href="/">View website <span aria-hidden="true">↗</span></a></div>
       </header>
       <div class="overview-livebar"><p class="overview-live-state" id="overview-live-status" role="status">Loading website data…</p><button class="button-v3 button-quiet-v3" id="overview-refresh" type="button">Refresh now</button></div>
-      <div class="overview-priority-space">
+      <div class="overview-priority-space" data-overview-view="home">
         <p class="overview-priority-placeholder">Your available review priorities appear here.</p>
       <section class="staff-priorities" aria-label="Review priorities" id="overview-priorities" hidden>
         <a class="staff-priority" href="/staffpanel/moderation#queue" data-overview-priority-card="servers.review" hidden><span>Listing reviews</span><strong data-overview-priority="pendingSubmissions">—</strong><small>Awaiting a decision</small></a>
+        <a class="staff-priority" href="/staffpanel/moderation#content?kind=message" data-overview-priority-card="messages.review" hidden><span>Message reviews</span><strong data-overview-priority="pendingMessages">—</strong><small>Pending private messages</small></a>
         <a class="staff-priority" href="/staffpanel/moderation#reports" data-overview-priority-card="reports.read" hidden><span>Open reports</span><strong data-overview-priority="openReports">—</strong><small>Open or triaged</small></a>
         <a class="staff-priority" href="/staffpanel/moderation#security" data-overview-priority-card="security.read" hidden><span>Priority risks</span><strong data-overview-priority="securityAlerts">—</strong><small>High or critical, unresolved</small></a>
       </section>
       </div>
-      <div class="overview-work-grid">
+      <div class="overview-work-grid" data-overview-view="home">
         <section class="staff-work-panel" aria-labelledby="overview-work-title">
           <div class="staff-panel-heading"><div><h2 id="overview-work-title">Recent review work</h2></div><a class="button-v3 button-secondary-v3" href="/staffpanel/moderation">Open moderation</a></div>
           <p class="staff-panel-note">Recent items from your available review queues.</p>
           <div id="overview-work-queue" class="staff-work-list" aria-live="polite"><p class="staff-panel-note">Loading your review queues…</p></div>
-          <nav class="staff-panel-links" aria-label="Review queues"><a href="/staffpanel/moderation#queue">Listing reviews <span data-overview-queue="pendingSubmissions"></span></a><a href="/staffpanel/moderation#reports">Reports <span data-overview-queue="openReports"></span></a></nav>
         </section>
         <section class="staff-work-panel" aria-labelledby="overview-audit-title">
           <div class="staff-panel-heading"><div><h2 id="overview-audit-title">Recent staff activity</h2></div></div>
@@ -94,14 +93,13 @@
           <a class="staff-text-link" href="/staffpanel/moderation#logs">Open audit logs →</a>
         </section>
       </div>
-      <nav class="staff-management-links" aria-label="Website management"><a href="/staffpanel/moderation#members">Members</a><a href="/staffpanel/moderation#servers">Servers</a><a href="/staffpanel/moderation#staff">Staff &amp; roles</a></nav>
-      <section id="overview-duty" class="overview-module staff-duty" aria-labelledby="staff-duty-title" aria-busy="true">
-        <div class="overview-section-heading staff-duty-heading"><div><span class="eyebrow-v3">Staff operations</span><h2 id="staff-duty-title">Duty &amp; availability</h2><p>Record confirmed work sessions and tell the team when you are available.</p></div><p class="staff-duty-live" data-duty-live role="status">Loading duty information…</p></div>
-        <div class="staff-duty-content" data-duty-content><p class="staff-duty-empty">Checking your current duty state…</p></div>
+      <section id="overview-duty" class="overview-module staff-duty" data-overview-view="home availability" aria-labelledby="staff-duty-title" aria-busy="true">
+        <div class="overview-section-heading staff-duty-heading"><div><span class="eyebrow-v3">Staff presence</span><h2 id="staff-duty-title">Availability</h2><p>Let teammates know whether you are available, busy or away.</p></div><p class="staff-duty-live" data-duty-live role="status">Loading availability…</p></div>
+        <div class="staff-duty-content" data-duty-content><p class="staff-duty-empty">Checking current availability…</p></div>
       </section>
-      <section id="overview-refresh-health" data-refresh-health aria-label="Live listing checks"></section>
-      <section id="overview-adverts" class="overview-module" aria-label="Advertisements"><div data-advert-campaigns><div class="overview-section-heading"><div><span class="eyebrow-v3">Website placements</span><h2>Advertisements</h2><p>Loading advertisements…</p></div></div></div><section id="advertising-enquiries" aria-label="Advertising enquiries"><h3>Advertising enquiries</h3><p>Checking enquiry access…</p></section></section>
-      <section id="overview-featured-boost" class="overview-module staff-featured-boost" aria-labelledby="featured-boost-title" hidden inert>
+      <section id="overview-refresh-health" data-refresh-health data-overview-view="health" aria-label="Live listing checks"></section>
+      <section id="overview-adverts" class="overview-module" data-overview-view="adverts" aria-label="Advertisements"><div data-advert-campaigns><div class="overview-section-heading"><div><span class="eyebrow-v3">Website placements</span><h2>Advertisements</h2><p>Loading advertisements…</p></div></div></div><section id="advertising-enquiries" aria-label="Advertising enquiries"><h3>Advertising enquiries</h3><p>Checking enquiry access…</p></section></section>
+      <section id="overview-featured-boost" class="overview-module staff-featured-boost" data-overview-view="boost" aria-labelledby="featured-boost-title" hidden inert>
         <div class="overview-section-heading"><div><span class="eyebrow-v3">Homepage feature</span><h2 id="featured-boost-title">Boost a server</h2><p>Feature one published community at the top of New roleplay communities for a set time.</p></div></div>
         <p data-boost-status role="status">Loading boost controls…</p>
         <button data-boost-retry class="button-v3 button-secondary-v3" type="button" hidden>Reload boost controls</button>
@@ -112,8 +110,8 @@
           <div class="staff-featured-actions"><button data-boost-start disabled class="button-v3 button-primary-v3" type="button">Start boost</button><button data-boost-end disabled class="button-v3 button-secondary-v3" type="button" hidden>End current boost</button></div>
         </div>
       </section>
-      <section id="overview-publishing" class="overview-module" aria-label="Blog publishing"><div class="overview-section-heading"><div><span class="eyebrow-v3">Community updates</span><h2>Blog posts</h2><p>Loading publishing tools…</p></div><a class="button-v3 button-secondary-v3" href="/blog">View blog</a></div></section>
-      <section class="overview-users ds-chart-frame" id="overview-users" aria-labelledby="overview-users-title">
+      <section id="overview-publishing" class="overview-module" data-overview-view="publishing" aria-label="Blog publishing"><div class="overview-section-heading"><div><span class="eyebrow-v3">Community updates</span><h2>Blog posts</h2><p>Loading publishing tools…</p></div><a class="button-v3 button-secondary-v3" href="/blog">View blog</a></div></section>
+      <section class="overview-users ds-chart-frame" id="overview-users" data-overview-view="users" aria-labelledby="overview-users-title">
         <div class="overview-section-heading"><div><span class="eyebrow-v3">Website reporting</span><h2 id="overview-users-title">Registrations</h2><p>Current accounts by signup date · UTC</p></div>
           <details class="overview-range" id="overview-range"><summary>Time frame <strong id="overview-range-label">30 days</strong><span aria-hidden="true">⌄</span></summary><div class="overview-range-options" role="group" aria-label="User chart time frame"><button type="button" data-overview-range="30d" aria-pressed="true">30 days</button><button type="button" data-overview-range="90d" aria-pressed="false">90 days</button><button type="button" data-overview-range="180d" aria-pressed="false">180 days</button><button type="button" data-overview-range="1y" aria-pressed="false">1 year</button><button type="button" data-overview-range="max" aria-pressed="false">Max</button></div></details>
         </div>
@@ -124,13 +122,13 @@
         </figure>
         <details class="overview-data-table"><summary>View exact user counts</summary><div class="overview-data-scroll"><table><caption>Current registered accounts by signup date, in UTC</caption><thead><tr><th scope="col">Date</th><th scope="col">New users</th><th scope="col">Total users</th></tr></thead><tbody id="overview-user-data"></tbody></table></div></details>
       </section>
-      <section class="overview-metrics" id="staff-metrics-v3" aria-label="Website totals" aria-busy="true">
+      <section class="overview-metrics" id="staff-metrics-v3" data-overview-view="users" aria-label="Website totals" aria-busy="true">
         <article class="overview-metric"><span>Registered users</span><strong data-overview-metric="totalUsers">—</strong><small>Current accounts</small></article>
         <article class="overview-metric"><span>Published servers</span><strong data-overview-metric="publishedServers">—</strong><small>Live in the directory</small></article>
         <article class="overview-metric"><span>Published blog posts</span><strong data-overview-metric="publishedBlogs">—</strong><small>Live on the blog</small></article>
         <article class="overview-metric"><span>Active staff</span><strong data-overview-metric="activeStaff">—</strong><small>Your staff team</small></article>
       </section>
-      <details id="overview-authenticators" class="overview-module staff-authenticators"><summary>Your sign-in security</summary><div data-authenticators-content></div></details>
+      <details id="overview-authenticators" class="overview-module staff-authenticators" data-overview-view="security"><summary>Your sign-in security</summary><div data-authenticators-content></div></details>
       <p id="staff-status-v3" role="status"></p>
     </main>
   </div>

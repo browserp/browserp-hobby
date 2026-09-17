@@ -25,9 +25,9 @@
   catch { document.documentElement.dataset.brandMotion = "on"; }
 
   function ensureThemeMotion() {
-    if (!(["dark", "light"].includes(selected)) || !document.body || document.querySelector("script[data-theme-motion]")) return;
+    if (!document.body || document.querySelector("script[data-theme-motion]")) return;
     const script = document.createElement("script");
-    script.src = "/primary-motion.js?v=20260916-themes1";
+    script.src = "/primary-motion.js?v=20260917-default-motion1";
     script.dataset.themeMotion = "";
     document.head.append(script);
   }

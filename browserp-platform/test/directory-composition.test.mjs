@@ -100,8 +100,7 @@ test("inline advert survives redraws, pagination and empty results without losin
   const card = h.list.querySelector(".server-card");
   assert.doesNotMatch(card.querySelector(".server-meta").textContent, /Not confirmed|Unknown/);
   assert.match(card.textContent, /Application required/);
-  assert.match(card.textContent, /Reported offline/);
-  assert.match(card.textContent, /Player count unavailable/);
+  assert.equal(card.querySelector(".player-count-v10").textContent, "Reported offline · player count unavailable");
   assert.equal(h.list.querySelectorAll(".server-shortlist-actions").length, 7);
   assert.equal(card.querySelector("button"), null, "Save/Compare stay outside the listing link");
 });
@@ -134,10 +133,22 @@ test("home Boost decoration requires a future expiry and fresh player decoration
   assert.ok(future.list.querySelector(".server-boosted-v11"));
   card.dataset.playerFreshUntil = String(Date.now() - 1);
   future.w.dispatchEvent(new future.w.Event("pageshow"));
-  assert.equal(card.querySelector(".status").textContent, "Needs refresh");
+  assert.equal(card.querySelector(".discovery-card-identity-v10 .status"), null);
+  assert.equal(card.querySelector(".player-count-v10").textContent, "Player count needs a refresh");
   assert.equal(card.querySelector(".player-count-v10").classList.contains("is-live"), false);
   future.w.dispatchEvent(new future.w.Event("pagehide"));
   const expired = await featuredHarness(t, { slug: "community-1", expiresAt: new Date(Date.now() - 1).toISOString() });
   assert.equal(expired.list.querySelector(".server-boosted-v11"), null);
   expired.w.dispatchEvent(new expired.w.Event("pagehide"));
+});
+
+test("explicit 18+ joining tag stays visible on a card without changing player freshness", async t => {
+  const h = await harness(t);
+  h.w.BrowseRPDirectory.render(h.list, [{ ...server(1), tags: ["economy", "jobs", "18+"] }]);
+  const listing = h.list.querySelector(".server-card");
+  assert.equal(listing.querySelector(".discovery-card-identity-v10 .status"), null);
+  assert.equal(listing.querySelector(".server-tags a:first-child").textContent, "18+");
+  assert.equal(listing.querySelector(".server-tags a:first-child").classList.contains("server-age-tag-v11"), true);
+  assert.match(listing.querySelector(".server-tags a:first-child").getAttribute("aria-label"), /minimum joining age/);
+  assert.equal(listing.querySelector(".player-count-v10").classList.contains("is-live"), false);
 });

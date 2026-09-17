@@ -795,10 +795,6 @@
     const headingStatus = $("#server-status-v3");
     headingStatus.textContent = text;
     headingStatus.classList.toggle("is-live-v3", live);
-    const factCard = $("#server-info-v5 .server-info-card-v5:last-child");
-    factCard?.classList.toggle("is-live-v3", live);
-    const fact = factCard?.querySelector("dd");
-    if (fact) fact.textContent = text;
     const checked = $("#server-checked-v3");
     if (!checked) return;
     checked.hidden = server.imported !== true;
@@ -886,10 +882,10 @@
       updateServerPlayers(server);
       const tags = $("#server-tags-v3");
       tags.replaceChildren(...(Array.isArray(server.tags) ? server.tags : []).filter(tag => typeof tag === "string" && tag.trim()).map(tag => {
-        const link = node("a", "tag-v3 server-tag-link-v8", tag);
+        const link = node("a", `tag-v3 server-tag-link-v8${tag.trim() === "18+" ? " server-age-tag-v11" : ""}`, tag);
         const filters = new URLSearchParams({ platform: server.platform_id || "all", feature: tag });
         link.href = `/servers?${filters}`;
-        link.setAttribute("aria-label", `Browse ${platform} servers tagged ${tag}`);
+        link.setAttribute("aria-label", tag.trim() === "18+" ? "Browse communities tagged 18+ minimum joining age" : `Browse ${platform} servers tagged ${tag}`);
         return link;
       }));
       const join = $("#server-join-v3");

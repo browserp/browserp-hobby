@@ -133,6 +133,19 @@ test("published game/directory pages arrive with unique content and crawlable se
     assert.equal(response.headers["cdn-cache-control"], "no-store");
   }
 });
+test("server-rendered cards show one player state and bring forward an explicit 18+ joining tag", async () => {
+  const ageServer = { ...server, tags: ["serious rp", "storytelling", "18+"] };
+  const data = { ...defaultData, directory: async () => ({ servers: [ageServer], total: 1 }) };
+  for (const path of ["/servers", "/games/fivem"]) {
+    const doc = (await request(path, { data })).document();
+    const card = doc.querySelector(".discovery-card-v10");
+    assert.ok(card, path);
+    assert.equal(card.querySelector(".discovery-card-identity-v10 .status"), null);
+    assert.equal(card.querySelector(".player-count-v10").dataset.playerState, "unknown");
+    assert.equal(card.querySelector(".server-tags a:first-child").textContent, "18+");
+    assert.equal(card.querySelector(".server-tags a:first-child").classList.contains("server-age-tag-v11"), true);
+  }
+});
 test("public page identities match the homepage brand and its genuine alternate names", async () => {
   const home = new JSDOM(read("public/index.html"));
   try {

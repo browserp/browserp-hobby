@@ -177,8 +177,20 @@ export async function contentModeration(req, res, { staff = false, requestId, ..
     const url = new URL(req.url, "http://browserp.local");
     const before = cursor(url.searchParams.get("before"));
     if (staff) {
-      if (url.searchParams.has("id")) return { items: [await call("staff_content_moderation_item", { p_id: id(url.searchParams.get("id")) }, session.accessToken)], nextBefore: null };
       const kind = url.searchParams.get("kind") || "all";
+      if (kind === "message-count") {
+        if (before || url.searchParams.has("id")) throw fail("Choose one message review view.");
+        const result = await call("staff_member_message_pending_count", {}, session.accessToken);
+        if (!Number.isSafeInteger(result?.pendingCount) || result.pendingCount < 0) throw fail("Message review count is unavailable.", 503);
+        return { pendingCount: result.pendingCount };
+      }
+      if (url.searchParams.has("id")) return { items: [await call("staff_content_moderation_item", { p_id: id(url.searchParams.get("id")) }, session.accessToken)], nextBefore: null };
+      if (kind === "message") {
+        const page = await call("staff_member_message_reviews", { p_before_id: before?.id || null }, session.accessToken);
+        const items = Array.isArray(page?.items) ? page.items : [];
+        const last = items.at(-1);
+        return { items, nextBefore: page?.nextBeforeId && last ? JSON.stringify({ createdAt: last.createdAt, id: page.nextBeforeId }) : null };
+      }
       if (!["all", "comment", "display_name", "avatar"].includes(kind)) throw fail("Choose a valid content kind.");
       return contentPage(await call("staff_content_moderation", { p_kind: kind, p_before: before }, session.accessToken));
     }
@@ -190,6 +202,9 @@ export async function contentModeration(req, res, { staff = false, requestId, ..
     if (!["approve", "block"].includes(body.action)) throw fail("Choose a valid content decision.");
     const reason = sanitizePlainText(body.reason, 500);
     if (reason.length < 5) throw fail("Add a short reason of at least five characters.");
+    if (body.kind === "message") return { item: await call("staff_decide_member_message", {
+      p_id: itemId, p_version: expectedVersion, p_action: body.action, p_reason: reason, p_request_id: requestId
+    }, session.accessToken) };
     return { item: await call("staff_decide_content", { p_id: itemId, p_version: expectedVersion, p_action: body.action, p_reason: reason, p_request_id: requestId }, session.accessToken) };
   }
   if (body.action !== "appeal") throw fail("Choose a valid appeal action.");

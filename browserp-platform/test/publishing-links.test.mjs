@@ -82,8 +82,8 @@ test("initial directory cards use logo first, three existing features and honest
       assert.equal(card.querySelector('h3 a').getAttribute('href'), '/server/community');
       assert.equal(card.querySelector('.server-meta a[aria-label^="Region"]').getAttribute('href'), '/servers?platform=roblox&region=United+States');
       assert.equal(card.querySelector(".server-tags").nextElementSibling.className, "server-card-bottom");
-      assert.equal(card.querySelector(".status").textContent, "Community listing");
-      assert.equal(card.querySelector(".status").classList.contains("live"), false);
+      assert.equal(card.querySelector(".discovery-card-identity-v10 .status"), null);
+      assert.equal(card.querySelector(".player-count-v10").dataset.playerState, "listing");
       assert.match(card.querySelector(".server-card-bottom").textContent, /Live player count not provided/);
       assert.equal(card.querySelector(".player-count-v10").classList.contains("is-live"), false);
       assert.equal(card.querySelector(".server-card-media svg,.server-tags img"), null);
@@ -99,7 +99,8 @@ test("initial directory cards do not turn withheld telemetry into a live or offl
   const dom = new JSDOM(output.body);
   try {
     const card = dom.window.document.querySelector(".server-card");
-    assert.equal(card.querySelector(".status").textContent, "Status unavailable");
+    assert.equal(card.querySelector(".discovery-card-identity-v10 .status"), null);
+    assert.equal(card.querySelector(".player-count-v10").dataset.playerState, "unknown");
     assert.equal(card.querySelector(".player-count-v10").textContent, "Player count unavailable");
     assert.equal(card.querySelector(".player-count-v10").classList.contains("is-live"), false);
   } finally { dom.window.close(); }

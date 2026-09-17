@@ -99,7 +99,6 @@
 .navigation-link-v6:hover { transform: none; border-color: var(--interactive-edge); background: var(--surface-hover); }
 .navigation-link-v6[aria-current="page"] { border-color: var(--interactive-edge); background: var(--selection-surface); box-shadow: inset 3px 0 var(--pink); }
 .navigation-link-icon-v6 { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 8px; color: var(--pink-strong); background: rgb(236 79 166 / .09); }
-.navigation-link-v6:nth-child(2) .navigation-link-icon-v6 { color: var(--violet); background: rgb(155 108 255 / .1); }
 .navigation-link-icon-v6 svg { width: 18px; height: 18px; }
 .navigation-link-copy-v6 { display: grid; flex: 1; min-width: 0; gap: 2px; }
 .navigation-link-copy-v6 strong { font-size: 15px; line-height: 1.4; overflow-wrap: anywhere; }

@@ -31,8 +31,8 @@ test("rendered info cards and compact metadata retain platform region language f
   const server = { platform_id: "redm", platform_name: "RedM", region: "Europe", language: "French", framework: "VORP", online: false };
   const engagement = { accessType: "Whitelist" };
   const facts = platforms.facts(server, engagement);
-  assert.deepEqual(Array.from(facts.children, (card) => text(card.children[0])), ["Game", "Region", "Language", "Server setup", "Access", "Player status"]);
-  assert.deepEqual(Array.from(facts.children, (card) => text(card.children[1])), ["RedM", "Europe", "French", "VORP", "Whitelist", "Status unavailable"]);
+  assert.deepEqual(Array.from(facts.children, (card) => text(card.children[0])), ["Game", "Region", "Language", "Server setup", "Access"]);
+  assert.deepEqual(Array.from(facts.children, (card) => text(card.children[1])), ["RedM", "Europe", "French", "VORP", "Whitelist"]);
   assert.deepEqual(Array.from(platforms.metadata(server, engagement).children, text), ["RedM", "Europe", "French", "VORP", "Whitelist"]);
   assert.equal(text(platforms.facts({ platform_id: "minecraft" }).children[2].children[1]), "Not specified");
 });

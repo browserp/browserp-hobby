@@ -117,15 +117,14 @@
 }
 .discovery-card-v10 .discovery-card-identity-v10 {
   position: relative; z-index: 2; display: grid !important;
-  grid-template-columns: 64px minmax(0, 1fr); grid-template-rows: minmax(28px,auto) auto;
-  align-items: center; gap: 3px 12px;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center; gap: 12px;
 }
 .discovery-card-v10 .discovery-card-identity-v10 .server-card-media {
-  grid-column: auto !important; grid-row: 1 / span 2 !important;
+  grid-column: auto !important; grid-row: 1 !important;
   align-self: stretch; width: 64px !important; height: 64px !important;
 }
 .discovery-card-v10 .discovery-card-identity-v10 h3 { grid-column: 2; grid-row: 1; margin: 0; min-width: 0; }
-.discovery-card-v10 .discovery-card-identity-v10 .status { grid-column: 2; grid-row: 2; justify-self: start; }
 .discovery-card-v10 .server-description { position: relative; z-index: 2; margin: 0; }
 .discovery-card-v10 .server-card-bottom {
   position: relative; z-index: 2; display: flex !important; flex-wrap: wrap;
@@ -167,15 +166,28 @@
 }
 .discovery-card-v10 .server-tags a:is(:hover,:focus-visible) { border-color: var(--pink); color: var(--text); background: var(--selection-surface); }
 .discovery-card-v10 .server-tags a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.discovery-card-v10 .server-tags a.server-age-tag-v11,
+#server-tags-v3 a.server-age-tag-v11 {
+  border-color: color-mix(in srgb, var(--danger) 55%, var(--line));
+  background: color-mix(in srgb, var(--danger) 12%, var(--panel));
+  color: var(--danger); font-weight: 800;
+}
+.discovery-card-v10 .server-tags a.server-age-tag-v11:is(:hover,:focus-visible),
+#server-tags-v3 a.server-age-tag-v11:is(:hover,:focus-visible) {
+  border-color: var(--danger); background: color-mix(in srgb, var(--danger) 20%, var(--panel)); color: var(--danger);
+}
+#server-tags-v3 a.server-age-tag-v11::before { content: none; }
 .discovery-card-v10 .server-card-bottom .player-count-v10 {
   display: inline-flex; align-items: center; gap: 8px; width: fit-content;
   min-height: 34px; padding: 5px 10px; border: 1px solid var(--line);
   border-radius: 8px; background: var(--panel-2); color: var(--copy);
   font-size: 12px; font-weight: 750; font-variant-numeric: tabular-nums;
 }
-.discovery-card-v10 .server-card-bottom .player-count-v10.is-live { border-color: color-mix(in srgb,var(--success) 34%,var(--line)); color: var(--success); }
-.discovery-card-v10 .server-card-bottom .player-count-v10.is-live::before {
-  content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: currentColor;
+:root body:not(.staff-v3):not([data-staff-page]) .discovery-card-v10 .server-card-bottom .player-count-v10.is-live {
+  border-color: color-mix(in srgb,var(--success) 50%,var(--line)); color: var(--success);
+}
+:root body:not(.staff-v3):not([data-staff-page]) .discovery-card-v10 .server-card-bottom .player-count-v10.is-live::before {
+  content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--success);
 }
 :root[data-brand-motion="off"] .discovery-card-v10 .server-card-bottom .player-count-v10.is-live::before { animation: none; }
 @media (prefers-reduced-motion: no-preference) {
@@ -232,8 +244,10 @@
 :root[data-brand-motion="off"] .public-nav-v6 > .button-primary-v3 { animation: none !important; filter: none; }
 @media (forced-colors: active) {
   :root body[data-page="home"] .home-hero-intro h1 .gradient-text-v3 { background-image: none !important; }
-  .discovery-card-v10 .discovery-meta-v10 > :is(a,span),.discovery-card-v10 .status,
+  .discovery-card-v10 .discovery-meta-v10 > :is(a,span),
   .discovery-card-v10 .server-tags a,.discovery-card-v10 .player-count-v10 { border-color: CanvasText; background: Canvas; color: CanvasText; }
+  .discovery-card-v10 .server-tags a.server-age-tag-v11,#server-tags-v3 a.server-age-tag-v11 { border-color: CanvasText; background: Canvas; color: CanvasText; }
+  :root body:not(.staff-v3):not([data-staff-page]) .discovery-card-v10 .server-card-bottom .player-count-v10.is-live::before { background: Highlight; }
 }
 
 /* Timed staff feature: visible only while the server is the active home boost. */
@@ -243,7 +257,6 @@
   box-shadow: 0 0 0 1px color-mix(in srgb, #ef83bf 35%, transparent), 0 12px 30px color-mix(in srgb, #d94694 12%, transparent);
 }
 :root body[data-page="home"] #featured-server-list .server-boosted-v11 .server-card { position: relative; }
-:root body[data-page="home"] #featured-server-list .server-boosted-v11 .status { margin-inline-end: 35px; }
 .server-boost-flame-v11 {
   position: absolute; z-index: 3; top: 12px; right: 12px; display: grid; place-items: center;
   width: 30px; height: 30px; border: 1px solid color-mix(in srgb, #ee70b5 55%, var(--line));

@@ -70,7 +70,8 @@ test("a full asynchronous FiveM page keeps its tall results and dynamic cards fr
   assert.equal(h.w.getComputedStyle(heading).opacity, "1");
   firstCard.dataset.playerFreshUntil = String(Date.now() - 1);
   h.w.dispatchEvent(new h.w.Event("pageshow"));
-  assert.equal(firstCard.querySelector(".status").textContent, "Needs refresh");
+  assert.equal(firstCard.querySelector(".discovery-card-identity-v10 .status"), null);
+  assert.equal(firstCard.querySelector(".player-count-v10").textContent, "Player count needs a refresh");
   assert.equal(firstCard.querySelector(".player-count-v10").classList.contains("is-live"), false);
   h.w.dispatchEvent(new h.w.Event("pagehide"));
 });

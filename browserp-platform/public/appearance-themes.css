@@ -1,6 +1,6 @@
 /* Optional appearances for the current BrowseRP application.
-   Default is deliberately absent: the current design remains its own source
-   of truth. These rules change presentation, never page structure or features.
+   Default keeps its own palette, with only the shared primary-button motion
+   added below. These rules change presentation, never structure or features.
    Dark takes its colours from the preserved gm9926 design; its button motion
    follows the continuous, fixed-size refinement from 14 September 2026. */
 :root[data-theme="dark"] {
@@ -113,6 +113,32 @@
   }
 }
 
+/* The journal accent follows the homepage's saturated logo colours and pace.
+   Keep this local to "call home"; game labels, buttons and theme surfaces retain
+   their own identities. Light uses the same readable stops as the homepage. */
+:root body[data-blog-page="index"]:not(.staff-v3):not([data-staff-page]) .journal-hero-v6 h1 > span {
+  --journal-headline-gradient: linear-gradient(100deg, #ef398e 0%, #fc7cc1 24%, #a653cb 50%, #398ed9 76%, #12c6e5 100%);
+}
+:root[data-theme="light"] body[data-blog-page="index"]:not(.staff-v3):not([data-staff-page]) .journal-hero-v6 h1 > span {
+  --journal-headline-gradient: linear-gradient(100deg, #a90868 0%, #b51e78 24%, #6834ac 50%, #2468ab 76%, #006d84 100%);
+}
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  @media screen and (forced-colors: none) {
+    :root body[data-blog-page="index"]:not(.staff-v3):not([data-staff-page]) .journal-hero-v6 h1 > span {
+      background-image: var(--journal-headline-gradient);
+      background-size: 210% 100%;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      :root body[data-blog-page="index"]:not(.staff-v3):not([data-staff-page]) .journal-hero-v6 h1 > span {
+        animation: headline-gradient-v3 5.5s ease-in-out infinite alternate;
+      }
+    }
+  }
+}
+:root[data-brand-motion="off"] body[data-blog-page="index"]:not(.staff-v3):not([data-staff-page]) .journal-hero-v6 h1 > span {
+  animation-play-state: paused !important;
+}
+
 /* Dark and Light primary actions use one colour clock across pointer entry and exit.
    primary-motion.js eases the playback rate without resetting the phase. */
 @property --primary-emphasis { syntax: "<number>"; inherits: false; initial-value: 0; }
@@ -207,6 +233,42 @@
   }
   @media (prefers-reduced-motion: reduce) {
     :root[data-theme="dark"] body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary) { transition: none; }
+  }
+}
+
+/* Default keeps its existing action palette and shares the same continuous
+   colour clock. Hover changes speed/brightness, never position or geometry. */
+@media screen and (forced-colors: none) {
+  :root[data-theme="default"] body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary) {
+    background-size: 160% 100% !important; background-position: 50% 50%;
+    filter: brightness(1); transform: none !important;
+    transition: border-color var(--motion-fast), filter 480ms ease, box-shadow 480ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    :root[data-theme="default"] body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary):not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]):not([aria-busy="true"]) {
+      animation: primary-colour-drift 6.5s ease-in-out infinite alternate;
+    }
+  }
+  :root[data-theme="default"] body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary):focus-visible:not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]):not([aria-busy="true"]) {
+    filter: brightness(1.12); box-shadow: var(--button-primary-shadow-hover) !important;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    :root[data-theme="default"] body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary):hover:not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]):not([aria-busy="true"]) {
+      filter: brightness(1.12); box-shadow: var(--button-primary-shadow-hover) !important;
+    }
+  }
+  :root[data-theme="default"] body [data-primary-motion="paused"],
+  :root[data-theme="default"][data-primary-motion="paused"] body [data-primary-motion],
+  :root[data-theme="default"][data-brand-motion="off"] body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary) {
+    animation-play-state: paused !important;
+  }
+  :root[data-theme="default"][data-brand-motion="off"] body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary) {
+    filter: none !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :root[data-theme="default"] body :is(.button-primary-v3, .button-primary, .small-button-primary, .ds-button-primary) {
+      animation: none !important; transition: none; filter: none !important;
+    }
   }
 }
 

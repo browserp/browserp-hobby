@@ -130,7 +130,7 @@ function discoveryMetadata(server) {
     return `<a ${attributes} href="/servers?${escapeHTML(params)}">${content}</a>`;
   }).join("")}${server.verified ? '<span class="metadata-value-v5">Owner verified</span>' : ""}</div>`;
 }
-function facts(server) { return `<dl class="server-info-grid-v5" data-platform="${server.platform_id}">${[...entries(server), ["Player status", server.applicationOnly ? "Live player count not provided" : "Check live status on this page"]].map(([label, value], i) => `<div class="server-info-card-v5${i >= 4 ? " server-info-wide-v5" : ""}"><dt>${label}</dt><dd>${i ? escapeHTML(value || "Not specified") : badge(server)}</dd></div>`).join("")}</dl>`; }
+function facts(server) { return `<dl class="server-info-grid-v5" data-platform="${server.platform_id}">${entries(server).map(([label, value], i) => `<div class="server-info-card-v5${i >= 4 ? " server-info-wide-v5" : ""}"><dt>${label}</dt><dd>${i ? escapeHTML(value || "Not specified") : badge(server)}</dd></div>`).join("")}</dl>`; }
 function initials(server) { return escapeHTML(server.name.split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase() || "RP"); }
 function playerCardState(server) {
   const count = value => {
@@ -143,22 +143,21 @@ function playerCardState(server) {
     && (capacity === null || capacity >= players) && Number.isFinite(checkedAt)
     && checkedAt <= Date.now() + 60000 && Date.now() - checkedAt <= 300000;
   const state = server.applicationOnly ? "listing" : fresh ? "live" : server.online === true ? "stale" : server.online === false ? "offline" : "unknown";
-  const status = state === "listing" ? "Community listing" : state === "live" ? "Live count" : state === "stale" ? "Needs refresh" : state === "offline" ? "Reported offline" : "Status unavailable";
   const countText = state === "listing" ? "Live player count not provided" : state === "live"
     ? `${players.toLocaleString()}${capacity !== null ? ` / ${capacity.toLocaleString()}` : ""} players${server.count_scope === "network" ? " across the network" : ""}`
-    : state === "stale" ? "Player count needs a refresh" : "Player count unavailable";
+    : state === "stale" ? "Player count needs a refresh" : state === "offline" ? "Reported offline · player count unavailable" : "Player count unavailable";
   const title = state === "listing" ? "This community does not publish a live player count" : state === "live" ? "A recently checked player count" : state === "stale" ? "The last player count is no longer recent" : "No current player count is available";
-  return { state, status, countText, title, fresh };
+  return { state, countText, title, fresh };
 }
 function card(server) {
   const image = server.logo_url || server.banner_url;
   const href = `/server/${encodeURIComponent(server.slug)}`;
   const player = playerCardState(server);
-  const tags = server.tags.slice(0, 3).map((tag) => {
+  const tags = [...server.tags.filter(tag => tag.trim() === "18+"), ...server.tags.filter(tag => tag.trim() !== "18+")].slice(0, 3).map((tag) => {
     const params = new URLSearchParams({ feature: tag, platform: server.platform_id });
-    return `<a href="/servers?${escapeHTML(params)}" aria-label="${escapeHTML(`Find communities tagged ${tag}`)}">${escapeHTML(tag)}</a>`;
+    return `<a${tag.trim() === "18+" ? ' class="server-age-tag-v11"' : ""} href="/servers?${escapeHTML(params)}" aria-label="${escapeHTML(tag.trim() === "18+" ? "Find communities tagged 18+ minimum joining age" : `Find communities tagged ${tag}`)}">${escapeHTML(tag)}</a>`;
   }).join("");
-  return `<div class="server-card discovery-card-v10" data-platform="${escapeHTML(server.platform_id)}"><div class="server-card-top discovery-card-identity-v10"><div class="server-card-media">${image ? `<img class="server-card-media-image" src="${escapeHTML(image)}" alt="" loading="lazy" width="96" height="96">` : `<span class="server-initials">${initials(server)}</span>`}</div><h3><a class="discovery-card-title-v10" href="${href}">${escapeHTML(server.name)}</a></h3><span class="status ${player.state}" data-player-state="${player.state}">${player.status}</span></div><p class="server-description">${escapeHTML(server.description)}</p>${discoveryMetadata(server)}<div class="server-tags">${tags}</div><div class="server-card-bottom"><strong class="player-count-v10 is-${player.state}${player.fresh ? " is-live" : ""}" title="${escapeHTML(player.title)}">${escapeHTML(player.countText)}</strong><a class="server-card-action" href="${href}">View listing</a></div></div>`;
+  return `<div class="server-card discovery-card-v10" data-platform="${escapeHTML(server.platform_id)}"><div class="server-card-top discovery-card-identity-v10"><div class="server-card-media">${image ? `<img class="server-card-media-image" src="${escapeHTML(image)}" alt="" loading="lazy" width="96" height="96">` : `<span class="server-initials">${initials(server)}</span>`}</div><h3><a class="discovery-card-title-v10" href="${href}">${escapeHTML(server.name)}</a></h3></div><p class="server-description">${escapeHTML(server.description)}</p>${discoveryMetadata(server)}<div class="server-tags">${tags}</div><div class="server-card-bottom"><strong class="player-count-v10 is-${player.state}${player.fresh ? " is-live" : ""}" data-player-state="${player.state}" title="${escapeHTML(player.title)}">${escapeHTML(player.countText)}</strong><a class="server-card-action" href="${href}">View listing</a></div></div>`;
 }
 function gameCard(id) { const [name, line] = games[id]; return `<a class="game-hub-card-v4 game-official-card-v6" data-platform="${id}" href="/games/${id}"><span class="game-hub-mark-v4"><img src="${gameArtwork(id)}" alt="" width="460" height="215" class="game-artwork-v5 game-card-artwork-v5 game-official-artwork-v6"></span><span class="game-hub-copy-v4"><strong>${name}</strong><small>${line}</small></span><b>Explore servers</b></a>`; }
 function navGames(current) { return Object.entries(games).map(([id, [name]]) => `<a class="game-nav-chip-v4${id === current ? " is-selected" : ""}" data-platform="${id}" data-game="${id}" href="/games/${id}"${id === current ? ' aria-current="page"' : ""}><img class="game-artwork-v5 game-nav-mark-v4 game-official-artwork-v6" src="${gameArtwork(id)}" alt="" width="160" height="80">${name}</a>`).join(""); }
@@ -331,6 +330,16 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         if (!member || member.username !== username) throw notFound();
         res.setHeader("Cache-Control", "private, no-store");
         let html = await readTemplate("user");
+        if (member.visibility === "basic") {
+          const handle = escapeHTML(username);
+          const avatar = member.avatarUrl === `/api/public/basic-profile-avatar?username=${username}`
+            ? `<img src="${escapeHTML(member.avatarUrl)}" alt="" width="98" height="98">` : "RP";
+          const basic = `<main id="main" class="member-page-v7"><div class="shell-v3"><article class="member-basic-v7" aria-label="Basic member profile"><div class="member-avatar-v7" aria-hidden="true">${avatar}</div><div class="member-basic-content-v7"><h1>@${handle}</h1><a id="member-message-v7" class="button-v3 button-primary-v3" data-username="${handle}" href="/dashboard?message=${handle}#inbox" hidden>Message</a></div></article></div></main>`;
+          const full = /<main id="main" class="member-page-v7">[\s\S]*?<\/main>/;
+          if (!full.test(html)) throw notFound();
+          html = html.replace(full, basic);
+          return send(200, head(html, { title: `@${username} — BrowseRP`, description: "Basic BrowseRP member profile.", path: null, noindex: true }));
+        }
         const avatar = member.avatarUrl ? `<img src="${escapeHTML(member.avatarUrl)}" alt="" width="98" height="98">`
           : escapeHTML(member.displayName.slice(0, 2).toUpperCase());
         const posted = (member.servers || []).map(publicServer).filter(Boolean);
@@ -340,6 +349,7 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         html = attribute(html, "member-banner-v7", { "data-banner": member.bannerStyle });
         html = attribute(html, "member-empty-v7", { hidden: posted.length ? "" : false });
         html = attribute(html, "member-report-form-v7", { "data-username": username });
+        html = attribute(html, "member-message-v7", { "data-username": username, href: `/dashboard?message=${username}#inbox` });
         const publiclyVisible = member.visibility === "public";
         return send(200, head(html, { title: `${member.displayName} (@${username}) — BrowseRP`, description: `${member.displayName}'s BrowseRP member profile and posted roleplay communities.`, path: publiclyVisible ? path : null, noindex: !publiclyVisible,
           ...(publiclyVisible ? { structured: { "@context": "https://schema.org", "@type": "ProfilePage", name: `${member.displayName} on BrowseRP`, url: ORIGIN + path, mainEntity: { "@type": "Person", name: member.displayName, identifier: username }, isPartOf: website } } : {}) }));
@@ -349,7 +359,7 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         const result = await data.server(slug); const server = publicServer(result?.server); if (!server || server.slug !== slug) throw notFound();
         let html = await readTemplate("server");
         html = attribute(html, "server-detail-v3", { "data-platform": server.platform_id, "data-public-rendered": "true" });
-        for (const [id, value] of [["server-name-v3", escapeHTML(server.name)], ["server-description-v3", escapeHTML(server.description)], ["server-platform-v3", `${server.platform_name} roleplay listing`], ["server-meta-v3", metadata(server)], ["server-info-v5", facts(server)], ["server-initials-v3", server.logo_url ? `<img class="server-import-logo-v3" src="${escapeHTML(server.logo_url)}" alt="" width="96" height="96">` : initials(server)], ["server-status-v3", server.applicationOnly ? "Live player count not provided" : "Check live status on this page"], ["server-tags-v3", server.tags.filter(tag => tag.trim()).map(tag => `<a class="tag-v3 server-tag-link-v8" href="${escapeHTML(`/servers?${new URLSearchParams({ platform: server.platform_id, feature: tag })}`)}" aria-label="${escapeHTML(`Browse ${server.platform_name} servers tagged ${tag}`)}">${escapeHTML(tag)}</a>`).join("")]]) html = slot(html, id, value);
+        for (const [id, value] of [["server-name-v3", escapeHTML(server.name)], ["server-description-v3", escapeHTML(server.description)], ["server-platform-v3", `${server.platform_name} roleplay listing`], ["server-meta-v3", metadata(server)], ["server-info-v5", facts(server)], ["server-initials-v3", server.logo_url ? `<img class="server-import-logo-v3" src="${escapeHTML(server.logo_url)}" alt="" width="96" height="96">` : initials(server)], ["server-status-v3", server.applicationOnly ? "Live player count not provided" : "Check live status on this page"], ["server-tags-v3", server.tags.filter(tag => tag.trim()).map(tag => `<a class="tag-v3 server-tag-link-v8${tag.trim() === "18+" ? " server-age-tag-v11" : ""}" href="${escapeHTML(`/servers?${new URLSearchParams({ platform: server.platform_id, feature: tag })}`)}" aria-label="${escapeHTML(tag.trim() === "18+" ? "Browse communities tagged 18+ minimum joining age" : `Browse ${server.platform_name} servers tagged ${tag}`)}">${escapeHTML(tag)}</a>`).join("")]]) html = slot(html, id, value);
         for (const [id, href] of [["server-join-v3", server.community_url], ["server-website-v3", server.website_url], ["server-connect-v3", result.connect]]) if (href && safeURL(href)) html = attribute(html, id, { href, hidden: false, rel: "noopener noreferrer" });
         if (result.connect) html = slot(html, "server-connect-v3", "Connect via Cfx");
         const joining = server.roblox ? `<section class="server-community-joining" id="server-roblox-joining"><h2>How to join</h2><p>${escapeHTML(server.roblox.joiningInstructions)}</p><a class="button-v3 button-secondary-v3" href="${escapeHTML(server.roblox.experienceUrl)}" target="_blank" rel="noopener noreferrer">View Roblox experience</a></section>` : server.minecraft_address ? `<div class="server-minecraft-address" id="server-minecraft-address"><strong>Minecraft ${server.minecraft_edition === "bedrock" ? "Bedrock" : "Java"} address</strong><code>${escapeHTML(server.minecraft_address)}</code></div>` : "";

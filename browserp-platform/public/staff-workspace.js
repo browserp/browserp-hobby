@@ -14,17 +14,19 @@
     const nav = sidebar?.querySelector(".staff-nav-v3");
     if (!nav || sidebar.dataset.staffAppearance) return;
     sidebar.dataset.staffAppearance = "ready";
-    const mark = make("span", "Staff workspace", "staff-workspace-label");
+    const mark = make("span", "Staff panel", "staff-workspace-label");
     sidebar.querySelector(".logo-v3")?.after(mark);
-    const tools = make("nav", undefined, "staff-local-nav"); tools.setAttribute("aria-label", "Website tools");
+    const tools = make("nav", undefined, "staff-local-nav"); tools.setAttribute("aria-label", "Staff panel tools");
     const groups = [
-      ["Your work", [["Duty & availability", "overview-duty"], ["Your sign-in security", "overview-authenticators"]]],
-      ["Website tools", [["Blog posts", "overview-publishing"], ["Adverts & enquiries", "overview-adverts"], ["Listing checks", "overview-refresh-health"], ["Registrations", "overview-users"]]]
+      ["Your work", [["Availability", "overview-duty"], ["Your sign-in security", "overview-authenticators"]]],
+      ["Website tools", [["Blog posts", "overview-publishing"], ["Adverts & enquiries", "overview-adverts"], ["Listing checks", "overview-refresh-health"], ["Registrations", "overview-users"], ["Boost a server", "overview-featured-boost"]]]
     ];
     for (const [label, links] of groups) {
       tools.append(make("span", label, "staff-nav-group-v3"));
       for (const [text, hash] of links) {
-        const link = make("a", text); link.href = `/staffpanel/overview#${hash}`; tools.append(link);
+        const link = make("a", text); link.href = `/staffpanel/overview#${hash}`; link.dataset.overviewTool = hash;
+        if (hash === "overview-featured-boost") link.hidden = true;
+        tools.append(link);
       }
     }
     sidebar.append(tools);

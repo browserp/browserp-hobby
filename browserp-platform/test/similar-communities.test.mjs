@@ -101,7 +101,8 @@ test("the listing UI has useful empty and recoverable error states without showi
   assert.equal(card.querySelector(".player-count-v10").classList.contains("is-live"), true);
   card.dataset.playerFreshUntil = String(Date.now() - 1);
   window.dispatchEvent(new window.Event("pageshow"));
-  assert.equal(card.querySelector(".status").textContent, "Needs refresh");
+  assert.equal(card.querySelector(".discovery-card-identity-v10 .status"), null);
+  assert.equal(card.querySelector(".player-count-v10").textContent, "Player count needs a refresh");
   assert.equal(card.querySelector(".player-count-v10").classList.contains("is-live"), false);
   fail = true; section.querySelector("[data-similar-retry]").click(); await settle();
   assert.equal(section.dataset.state, "error"); assert.match(state.textContent, /temporarily unavailable/); assert.equal(section.querySelector("[data-similar-retry]").hidden, false);

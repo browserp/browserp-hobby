@@ -20,11 +20,13 @@ test("refresh health renders actual run counts, accessible history and per-game 
   try {
     assert.match(h.root.textContent, /Automatic checks are healthy/);
     assert.match(h.root.textContent, /55 \/ 55/); assert.match(h.root.textContent, /15 observations were unchanged/);
+    assert.match(h.root.textContent, /Up-to-date player counts/);
+    assert.match(h.root.textContent, /Outdated or missing counts/);
     assert.equal(h.root.querySelectorAll(".refresh-health-game").length, 3);
     assert.equal(h.root.querySelector("table caption").textContent, "Recent automatic check runs · UTC");
     assert.equal(h.root.querySelectorAll("th[scope=col]").length, 8);
     assert.equal(h.root.querySelector(".refresh-health-state").getAttribute("role"), "status");
-    const details = h.root.querySelector("details"); assert.equal(details.open, false); details.open = true; details.querySelector("summary").focus();
+    const details = h.root.querySelector("details"); assert.equal(details.open, false); assert.equal(details.querySelector("summary").textContent, "Technical diagnostics"); details.open = true; details.querySelector("summary").focus();
     await h.instance.refresh(); assert.equal(h.root.querySelector("details").open, true);
     assert.equal(h.dom.window.document.activeElement, h.root.querySelector("summary"));
     assert.deepEqual(calls, [["/api/admin/refresh-health"], ["/api/admin/refresh-health"]], "the update action only rereads health");

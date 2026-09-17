@@ -35,10 +35,14 @@ for (const kind of ['directory', 'game']) {
     const escaped = h.render({ ...server, tags: ['<img src=x onerror=bad()>'], logo_url: 'javascript:bad()', banner_url: '//untrusted.example/image.png' });
     assert.equal(escaped.querySelector('.server-tags img'), null); assert.equal(escaped.querySelector('.server-tags').textContent, '<img src=x onerror=bad()>'); assert.equal(escaped.querySelector('.server-card-media img'), null);
     assert.equal(h.render({ ...server, tags: null }).querySelector('.server-tags').children.length, 0);
+    const age = h.render({ ...server, tags: ['economy', 'jobs', '18+'] });
+    assert.equal(age.querySelector('.server-tags a:first-child').textContent, '18+');
+    assert.equal(age.querySelector('.server-tags a:first-child').classList.contains('server-age-tag-v11'), true);
   });
   test(`${kind} Roblox card uses Community listing and never implies a measured live count`, t => {
     const card = fixture(t, kind).render({ ...server, platform_id: 'roblox', framework: 'Emergency experience', applicationOnly: true });
-    assert.equal(card.querySelector('.status').textContent, 'Community listing'); assert.equal(card.querySelector('.status').classList.contains('live'), false);
+    assert.equal(card.querySelector('.discovery-card-identity-v10 .status'), null);
+    assert.equal(card.querySelector('.player-count-v10').dataset.playerState, 'listing');
     assert.equal(card.querySelector('.server-card-bottom strong').textContent, 'Live player count not provided');
   });
 }
@@ -53,7 +57,8 @@ for (const [kind, playerText] of [['directory', '41 / 100 players'], ['game', '4
       'server-card-bottom'
     ]);
     assert.equal(card.querySelector('.discovery-card-identity-v10 .server-card-media').nextElementSibling.tagName, 'H3');
-    assert.equal(card.querySelector('.discovery-card-identity-v10 .status').textContent, 'Live count');
+    assert.equal(card.querySelector('.discovery-card-identity-v10 .status'), null);
+    assert.equal(card.querySelector('.player-count-v10').classList.contains('is-live'), true);
     assert.equal(card.querySelector('.server-description').textContent, server.description);
     assert.equal(card.querySelector('.server-meta').nextElementSibling, card.querySelector('.server-tags'));
     assert.equal(card.querySelector('.server-card-bottom strong').textContent, playerText);
@@ -67,7 +72,7 @@ for (const [kind, playerText] of [['directory', '41 / 100 players'], ['game', '4
 for (const kind of ['directory', 'game']) {
   test(`${kind} card reserves the live dot for a recently checked real player count`, t => {
     const card = fixture(t, kind).render({ ...server, checked_at: new Date(Date.now() - 301000).toISOString() });
-    assert.equal(card.querySelector('.status').textContent, 'Needs refresh');
+    assert.equal(card.querySelector('.discovery-card-identity-v10 .status'), null);
     assert.equal(card.querySelector('.player-count-v10').classList.contains('is-live'), false);
     assert.equal(card.querySelector('.player-count-v10').textContent, 'Player count needs a refresh');
   });
@@ -82,7 +87,7 @@ test('public and staff controller documents load the same standalone touch helpe
 });
 test('shared-card surfaces load the refinement stylesheet before their appearance theme', () => {
   for (const file of ['server.html', 'user.html']) {
-    const html = read(file), refinement = html.indexOf('/discovery-refinement.css?v=20260917-release1'), appearance = html.indexOf('/appearance-themes.css');
+    const html = read(file), refinement = html.indexOf('/discovery-refinement.css?v='), appearance = html.indexOf('/appearance-themes.css');
     assert.ok(refinement >= 0, file); assert.ok(refinement < appearance, file);
   }
 });

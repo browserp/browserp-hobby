@@ -91,6 +91,16 @@ test("member/staff review endpoints validate actions, versions, cursors and boun
  const result=await contentModeration(req("POST",{id:submission,action:"appeal",expectedVersion:1,statement:"Please review the context.",decision:"approve",score:0}),{},deps);
  assert.equal(result.item.id,submission);assert.equal(calls[0].name,"member_appeal_content");assert.deepEqual(Object.keys(calls[0].args).sort(),["p_id","p_statement","p_version"]);
  await contentModeration(req("POST",{id:submission,action:"block",expectedVersion:1,reason:"A staff reason."}),{},{...deps,staff:true,requestId:"fixture"});assert.equal(calls[1].name,"staff_decide_content");
+ const messagePage=await contentModeration(req("GET",undefined,"/api/admin/content-moderation?kind=message"),{},{...deps,staff:true,requestId:"fixture"});
+ assert.deepEqual(messagePage.items,[]);assert.equal(calls.at(-1).name,"staff_member_message_reviews");
+ const count=await contentModeration(req("GET",undefined,"/api/admin/content-moderation?kind=message-count"),{},
+   {...deps,staff:true,rpc:async(name,args,token)=>{calls.push({name,args,token});return {pendingCount:3};}});
+ assert.deepEqual(count,{pendingCount:3});assert.equal(calls.at(-1).name,"staff_member_message_pending_count");
+ await assert.rejects(contentModeration(req("GET",undefined,"/api/admin/content-moderation?kind=message-count"),{},
+   {...deps,staff:true}),/unavailable/);
+ await contentModeration(req("POST",{id:submission,kind:"message",action:"approve",expectedVersion:2,reason:"Reviewed private message."}),{},{...deps,staff:true,requestId:"fixture"});
+ assert.equal(calls.at(-1).name,"staff_decide_member_message");
+ assert.equal(calls.at(-1).args.p_version,2);
 });
 
 test("private upload registration precedes upload and never targets public storage",async()=>{

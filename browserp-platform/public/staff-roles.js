@@ -33,7 +33,6 @@
     const root = document.querySelector("#overview-roles");
     if (!root) return;
     root.replaceChildren();
-    root.append(node("h2", "Roles & staff"), node("p", "View staff responsibilities, manage roles below your own, or request a change for review.", "prose-v3"));
     if (!permissions?.readStaff && !permissions?.manageStaff && !permissions?.manageRoles) {
       root.append(node("p", "Your current role cannot view the staff catalogue.", "staff-state-v3"));
       return;

@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
+import { readFileSync } from "node:fs";
 import { createPublicPageHandler, handlesPublicPage } from "../lib/public-pages.js";
-import { memberProfileVisible, publicMemberContents, publicMemberView } from "../lib/public-members.js";
+import { basicMemberAvatar, memberProfileVisible, publicMemberByUsername, publicMemberContents, publicMemberView } from "../lib/public-members.js";
 
 const alice = "01234567-1234-4234-8234-0123456789ab";
 const bob = "11234567-1234-4234-8234-0123456789ab";
@@ -28,6 +29,8 @@ test("public member pages show only approved presentation, real badge explanatio
   assert.equal(page.document.querySelector('script:not([src]):not([type="application/ld+json"])'), null, "member content must not become executable markup");
   assert.match(page.document.querySelector("#member-bio-v7").textContent, /<script>private<\/script>/);
   assert.equal(page.document.querySelector("#member-report-form-v7").dataset.username, "gamer_one");
+  assert.equal(page.document.querySelector("#member-message-v7").getAttribute("href"), "/dashboard?message=gamer_one#inbox");
+  assert.equal(page.document.querySelector("#member-message-v7").hidden, true, "contact action waits for session status");
   assert.match(page.headers["cache-control"], /no-store/);
   assert.match(page.document.querySelector('link[rel="canonical"]').href, /\/user\/gamer_one$/);
 });
@@ -45,6 +48,73 @@ test("invisible and malformed member paths return the existing safe missing page
   assert.equal(memberProfileVisible("members", bob, alice), true);
   assert.equal(memberProfileVisible("private", bob, alice), false);
   assert.equal(memberProfileVisible("private", alice, alice), true);
+  assert.equal(memberProfileVisible("basic", null, alice), true);
+});
+
+test("opt-in basic profile exposes only handle and approved picture, never private details", async () => {
+  const row = { id: alice, username: "gamer_one", profile_visibility: "basic", display_name: "Secret Display", approved_bio: "Secret bio", bio_review_status: "approved", approved_avatar_url: `https://www.browserp.com/api/public/profile-avatar?id=${bob}`, avatar_review_status: "approved", joined_at: "2026-09-01T10:00:00Z", banner_style: "afterglow" };
+  const view = publicMemberView(row, { staffRole: "Admin", badges: [{ label: "Private badge" }] }, [server]);
+  assert.deepEqual(view, { username: "gamer_one", avatarUrl: "/api/public/basic-profile-avatar?username=gamer_one", visibility: "basic" });
+  const page = await request("/user/gamer_one", { member: async () => view });
+  assert.equal(page.statusCode, 200);
+  assert.equal(page.document.querySelector("h1").textContent, "@gamer_one");
+  assert.equal(page.document.querySelector(".member-basic-v7 img").getAttribute("src"), view.avatarUrl);
+  assert.equal(page.document.querySelector("#member-message-v7").getAttribute("href"), "/dashboard?message=gamer_one#inbox");
+  assert.equal(page.document.querySelector("#member-bio-v7, #member-banner-v7, #member-joined-v7, #member-badges-v7, #member-server-grid-v7, #member-report-form-v7"), null);
+  for (const secret of [alice, bob, "Secret Display", "Secret bio", "Admin", "Private badge", "Moon City", "afterglow"]) assert.equal(page.body.includes(secret), false, secret);
+  assert.match(page.headers["cache-control"], /no-store/);
+  assert.equal(page.document.querySelector('meta[name="robots"]').content, "noindex,follow");
+  assert.equal(page.document.querySelector('link[rel="canonical"]'), null);
+});
+
+test("basic profile lookup stays public and does not query full details or old private accounts", async () => {
+  const makeRow = visibility => ({ id: alice, username: "gamer_one", profile_visibility: visibility, avatar_review_status: "pending_review", approved_avatar_url: `https://www.browserp.com/api/public/profile-avatar?id=${bob}` });
+  const paths = [];
+  const basic = await publicMemberByUsername("gamer_one", {}, {}, { restClient: async path => { paths.push(path); return [makeRow("basic")]; } });
+  assert.deepEqual(basic, { username: "gamer_one", avatarUrl: null, visibility: "basic" });
+  assert.equal(paths.length, 1, "basic pages must not read submissions, badges or server listings");
+  const direct = await publicMemberContents(makeRow("basic"), { restClient: async () => { throw new Error("full details queried"); }, rpcClient: async () => { throw new Error("badges queried"); } });
+  assert.deepEqual(direct, basic);
+  assert.equal(memberProfileVisible("private", null, alice), false);
+  assert.equal(memberProfileVisible("members", null, alice), false);
+});
+
+test("basic approved picture proxy hides the submission UUID and rechecks approval", async () => {
+  const approved = `https://www.browserp.com/api/public/profile-avatar?id=${bob}`;
+  const bytes = Buffer.from("synthetic approved picture");
+  const calls = [];
+  const image = await basicMemberAvatar("gamer_one", {
+    restClient: async path => { calls.push(path); return [{ username: "gamer_one", profile_visibility: "basic", avatar_review_status: "approved", approved_avatar_url: approved }]; },
+    rpcClient: async (name, args) => { calls.push([name, args]); return { assetId: alice, version: 2 }; },
+    assetReader: async (submission, asset) => { calls.push([submission, asset]); return { bytes, mimeType: "image/png" }; }
+  });
+  assert.equal(image.bytes, bytes);
+  assert.equal(image.mimeType, "image/png");
+  assert.equal(calls.length, 5);
+  await assert.rejects(basicMemberAvatar("gamer_one", { restClient: async () => [{ username: "gamer_one", profile_visibility: "private", avatar_review_status: "approved", approved_avatar_url: approved }] }), { status: 404 });
+  await assert.rejects(basicMemberAvatar("gamer_one", { restClient: async () => [{ username: "gamer_one", profile_visibility: "members", avatar_review_status: "approved", approved_avatar_url: approved }] }), { status: 404 });
+  let version = 0;
+  await assert.rejects(basicMemberAvatar("gamer_one", {
+    restClient: async () => [{ username: "gamer_one", profile_visibility: "basic", avatar_review_status: "approved", approved_avatar_url: approved }],
+    rpcClient: async () => ({ assetId: alice, version: ++version }),
+    assetReader: async () => ({ bytes, mimeType: "image/png" })
+  }), { status: 404 });
+  let profileRead = 0;
+  await assert.rejects(basicMemberAvatar("gamer_one", {
+    restClient: async () => [{ username: "gamer_one", profile_visibility: ++profileRead === 1 ? "basic" : "private", avatar_review_status: "approved", approved_avatar_url: approved }],
+    rpcClient: async () => ({ assetId: alice, version: 1 }),
+    assetReader: async () => ({ bytes, mimeType: "image/png" })
+  }), { status: 404 });
+});
+
+test("basic visibility is additive in the editor, API and migration", () => {
+  const portal = readFileSync(new URL("../public/browserp-portal-v2.js", import.meta.url), "utf8");
+  const router = readFileSync(new URL("../api/router.js", import.meta.url), "utf8");
+  const migration = readFileSync(new URL("../supabase/migrations/20260917023624_basic_public_profile_visibility.sql", import.meta.url), "utf8");
+  assert.match(portal, /\["basic", "Basic profile — username and approved picture only"\]/);
+  assert.match(router, /\["public", "members", "private", "basic"\]\.includes\(visibility\)/);
+  assert.match(migration, /default 'public'|existing public default/);
+  assert.match(migration, /'public','members','private','basic'/);
 });
 
 test("approved profile fields and published safe listings survive projection while pending and adult content do not", () => {

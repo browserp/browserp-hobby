@@ -20,6 +20,7 @@ function harness(t, handlers = {}) {
     calls.push({ path, options });
     if (path === "/api/admin/overview") return (handlers.dashboard || dashboard)();
     if (path === "/api/admin/moderation?view=summary") return (handlers.access || access)();
+    if (path === "/api/admin/content-moderation?kind=message-count") return (handlers.messageReviews || (() => ({ pendingCount: 0 })))();
     if (path.startsWith("/api/admin/overview?range=")) return (handlers.website || website)(path.split("=")[1]);
     throw new Error(`Unexpected endpoint ${path}`);
   };
@@ -43,6 +44,30 @@ test("real website-only ranged response and separate dashboard populate prioriti
   app.node('[data-overview-range="90d"]').click(); await flush();
   assert.equal(app.calls.filter(call => call.path === "/api/admin/overview").length, 1, "changing chart period does not remount/refetch review work");
   assert.equal(app.node('[data-overview-priority="pendingSubmissions"]').textContent, "3");
+});
+
+test("message review priority calls the count-only route for effective reviewers", async t => {
+  const reviewerAccess = () => { const result = access(); result.summary.permissions.keys = ["moderation.resolve"]; return result; };
+  const app = harness(t, { access: reviewerAccess, messageReviews: () => ({ pendingCount: 4 }) });
+  const controller = await app.init(); t.after(() => controller.destroy());
+  const card = app.node('[data-overview-priority-card="messages.review"]');
+  assert.equal(card.hidden, false);
+  assert.equal(app.text('[data-overview-priority="pendingMessages"]'), "4");
+  assert.equal(card.getAttribute("href"), "/staffpanel/moderation#content?kind=message");
+  assert.equal(app.calls.filter(call => call.path === "/api/admin/content-moderation?kind=message-count").length, 1);
+
+  const noPermission = harness(t, { messageReviews: () => { throw new Error("The count route must not be requested"); } });
+  const noPermissionController = await noPermission.init(); t.after(() => noPermissionController.destroy());
+  assert.equal(noPermission.node('[data-overview-priority-card="messages.review"]').hidden, true);
+  assert.equal(noPermission.calls.some(call => call.path === "/api/admin/content-moderation?kind=message-count"), false);
+});
+
+test("message review count remains unavailable rather than becoming zero after a failed read", async t => {
+  const reviewerAccess = () => { const result = access(); result.summary.permissions.keys = ["moderation.resolve"]; return result; };
+  const app = harness(t, { access: reviewerAccess, messageReviews: () => { throw Object.assign(new Error("Count service unavailable"), { status: 503 }); } });
+  const controller = await app.init(); t.after(() => controller.destroy());
+  assert.equal(app.node('[data-overview-priority-card="messages.review"]').hidden, false);
+  assert.equal(app.text('[data-overview-priority="pendingMessages"]'), "Unavailable");
 });
 
 test("raw role defaults cannot suppress effective override grants or expose override-denied previews", async t => {

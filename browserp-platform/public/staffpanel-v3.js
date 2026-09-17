@@ -743,13 +743,72 @@
     });
     compact.addEventListener?.("change",()=>setOpen(false));setOpen(false);
   }
+  function focusOverviewTool() {
+    if (document.body.dataset.staffPage !== "overview") return;
+    const main = $("#website-overview");
+    const views = { "overview-duty": "availability", "overview-authenticators": "security", "overview-publishing": "publishing", "overview-adverts": "adverts", "overview-refresh-health": "health", "overview-users": "users", "overview-featured-boost": "boost" };
+    const labels = {
+      home: ["Overview", "Current attention, staff availability and recent activity."],
+      availability: ["Availability", "Let teammates know whether you are available, busy or away."],
+      security: ["Your sign-in security", "Manage the security methods that protect your staff access."],
+      publishing: ["Blog posts", "Create and manage community updates."],
+      adverts: ["Adverts & enquiries", "Manage website placements and advertising enquiries."],
+      health: ["Listing checks", "Review up-to-date player counts and import health."],
+      users: ["Registrations", "Review current account registration trends."],
+      boost: ["Boost a server", "Feature one published community on the homepage for a set time."]
+    };
+    const reveal = () => {
+      let id = "";
+      try { id = decodeURIComponent(location.hash.slice(1)); } catch { return; }
+      const target = $$('[id]', main).find(element => element.id === id);
+      const enclosingPanel = target?.closest("[data-overview-view]");
+      const view = views[id] || enclosingPanel?.dataset.overviewView.split(/\s+/).find(name => name !== "home") || "home";
+      main.dataset.overviewFocus = view;
+      $$('[data-overview-view]', main).forEach(panel => {
+        panel.dataset.overviewRouteHidden = String(!panel.dataset.overviewView.split(/\s+/).includes(view));
+      });
+      const back = $("#overview-focus-back"); if (back) back.hidden = view === "home";
+      const [title, subtitle] = labels[view] || labels.home;
+      $(".staff-top-v3 h1", main).textContent = title;
+      $(".staff-top-v3 h1 + p", main).textContent = subtitle;
+      if (!target) return;
+      const disclosure = target.matches("details") ? target : target.closest("details");
+      if (disclosure) disclosure.open = true;
+      const focusTarget = target.matches("summary,h1,h2,h3") ? target : target.querySelector("summary,h1,h2,h3") || target;
+      focusTarget.tabIndex = -1;
+      focusTarget.focus({ preventScroll: true });
+    };
+    const navigate = hash => { if (location.hash !== hash) location.hash = hash; reveal(); };
+    $$(".staff-local-nav a[href^='/staffpanel/overview#']").forEach(link => link.addEventListener("click", event => {
+      event.preventDefault();
+      navigate(link.hash);
+    }));
+    $("#overview-focus-back")?.addEventListener("click", event => {
+      event.preventDefault();
+      navigate("#overview");
+    });
+    window.addEventListener("hashchange", reveal);
+    reveal();
+  }
+  function updateModerationHeading() {
+    if (document.body.dataset.staffPage !== "moderation") return;
+    const labels = { summary: "Review overview", members: "Members", servers: "Servers", claims: "Server claims", reports: "Reports", queue: "Listing reviews", content: "Content moderation", profiles: "Profiles", activity: "Account activity", staff: "Staff & roles", bans: "Bans", appeals: "Appeals", security: "Website risks", "data-requests": "Data requests", logs: "Staff action history" };
+    const heading = $(".staff-top-v3 h1");
+    const update = () => {
+      if (!location.hash) { heading.textContent = "Moderation"; return; }
+      let view = "summary";
+      try { view = window.BrowseRPModerationFilters?.parse(location.hash)?.view || view; } catch { /* The moderation UI will handle an invalid hash. */ }
+      heading.textContent = labels[view] || "Moderation";
+    };
+    window.addEventListener("hashchange", update); update();
+  }
   async function init(){
     const legacy = { profiles: "profiles", accounts: "activity", staff: "staff", security: "bans" };
     const pageKey = document.body.dataset.staffPage;
     if (legacy[pageKey]) { location.replace(`/staffpanel/moderation#${legacy[pageKey]}`); return; }
     if (pageKey === "content") { location.replace("/staffpanel/overview#overview-adverts"); return; }
     if (pageKey === "overview" && location.hash === "#overview-roles") { location.replace("/staffpanel/moderation#staff"); return; }
-    mobile();applyTheme(document.documentElement.dataset.theme||preferredTheme());if(!await ensureStaff())return;startPresence();void window.BrowseRPStaffRefreshHealth?.init({api});window.BrowseRPStaffScrapers?.init({api});try{const page=document.body.dataset.staffPage;if(page==="overview") {
+    mobile();applyTheme(document.documentElement.dataset.theme||preferredTheme());if(!await ensureStaff())return;focusOverviewTool();updateModerationHeading();startPresence();void window.BrowseRPStaffRefreshHealth?.init({api});window.BrowseRPStaffScrapers?.init({api});try{const page=document.body.dataset.staffPage;if(page==="overview") {
       advertisingEnquiries = window.BrowseRPAdvertisingEnquiries?.initStaff({ api, accountId: state.session?.user?.id, root: $("#advertising-enquiries"), onAuthFailure: showLogin });
       let toolsMounted = false;
       await window.BrowseRPStaffOverview.init({ api, onAuthFailure: showLogin, onLoad: async (website) => {

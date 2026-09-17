@@ -68,7 +68,7 @@
     const menu = make("details", undefined, "staff-scrapers-menu");
     menu.open = isPage;
     const summary = make("summary");
-    summary.append(make("span", "Scrapers"));
+    summary.append(make("span", "Import servers"));
     const links = make("div", undefined, "staff-scrapers-links");
     let focusSection = false;
     for (const game of games) {
@@ -116,7 +116,7 @@
       const revision = ++generation; scraper?.destroy(); scraper = null;
       const selected = games.find((game) => location.hash === `#${game.id}`);
       const title = document.querySelector("#scrapers-title");
-      title.textContent = selected?.id === "roblox" ? "Roblox applications" : selected ? `${selected.name} scraper` : "Scrapers";
+      title.textContent = selected?.id === "roblox" ? "Roblox applications" : selected ? `${selected.name} server import` : "Import servers";
       document.title = `${title.textContent} — BrowseRP Staff`;
       for (const link of links.children) {
         if (selected?.id === link.dataset.platform) link.setAttribute("aria-current", "page");

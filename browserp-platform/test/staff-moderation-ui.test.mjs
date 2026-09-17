@@ -93,6 +93,10 @@ test("individual permission guidance is attached to the authorised form and abse
     assert.equal(Boolean(form), canDelegate);
     assert.equal(editorLoads, canDelegate ? 1 : 0);
     if (canDelegate) {
+      const disclosure = form.closest("details");
+      assert.equal(disclosure?.tagName, "DETAILS");
+      assert.equal(disclosure?.querySelector("summary")?.textContent, "Custom permissions");
+      assert.notEqual(disclosure?.open, true, "Custom permissions start collapsed");
       const guidance = app.document.querySelector(`#${form.attributes["aria-describedby"]}`);
       assert.ok(guidance, "The form must reference its visible explanation for assistive technology");
       assert.match(guidance.textContent, /Role default follows their assigned role/);
@@ -101,6 +105,20 @@ test("individual permission guidance is attached to the authorised form and abse
       assert.equal(form.querySelector('[name="reason"]').required, true);
     }
   }
+});
+
+test("empty moderation results avoid historical filler and unnecessary pagination", async () => {
+  const app = harness(async url => url.includes("view=summary") ? { summary: summary() } : { workspace: workspace([], { total: 0 }) }, "#servers");
+  const controller = await app.init();
+  assert.match(text(app.root), /No matching records/);
+  assert.doesNotMatch(text(app.root), /No placeholder results are shown/);
+  assert.equal(app.document.querySelector(".moderation-pagination"), null);
+  controller.destroy();
+});
+
+test("activity and staff action history do not present historical totals as waiting counts", () => {
+  assert.match(source, /logs: \["Staff action history"/);
+  assert.match(source, /!\['activity', 'logs'\]\.includes\(view\)/);
 });
 
 test("moderation filters round-trip privately, route the content queue, and reset platform and region descendants", () => {
@@ -150,8 +168,33 @@ test("unified content moderation uses private evidence, type permissions and ver
   const profileCards = profileApp.nodes(".moderation-record");
   assert.equal(profileCards[0].querySelectorAll("button").some(button => button.textContent === "Approve"), false, "profile reviewers cannot decide comments");
   assert.equal(profileCards[1].querySelectorAll("button").some(button => button.textContent === "Approve"), true, "profile reviewers can decide profile pictures");
+  assert.equal(profileApp.nodes("option").some(option => option.textContent === "Private messages"), false,
+    "profile-only reviewers are not offered private messages");
   assert.match(text(profileApp.root), /Profile picture/);
   profileController.destroy();
+});
+
+test("private message review uses its own filter and a versioned staff decision", async () => {
+  const writes = [], requests = [];
+  const message = { id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd", kind: "message", status: "pending_review",
+    text: "Synthetic pending message", sender: "alice_rp", recipient: "bob_rp", version: 2, createdAt: "2026-09-17T03:00:00Z" };
+  const app = harness(async (url, options) => {
+    requests.push(url);
+    if (options?.method === "POST") { writes.push(JSON.parse(options.body)); return { item: { ...message, status: "delivered" } }; }
+    if (url.includes("view=summary")) return { summary: summary() };
+    return { items: [message], nextBefore: null };
+  }, "#content?kind=message");
+  const controller = await app.init();
+  assert.ok(requests.some(url => url.includes("kind=message")));
+  assert.equal(app.nodes("option").some(option => option.textContent === "Private messages"), true);
+  assert.match(text(app.root), /Synthetic pending message/);
+  assert.match(text(app.root), /alice_rp.*bob_rp/);
+  const editing = app.button("Approve").emit("click"); await flush();
+  const dialog = app.document.querySelector("dialog"); dialog.querySelector("textarea").value = "Reviewed against the content policy.";
+  assert.match(text(dialog), /Deliver this reviewed message/);
+  await dialog.querySelector("form").emit("submit"); await editing;
+  assert.deepEqual(writes[0], { id: message.id, kind: "message", action: "approve", expectedVersion: 2, reason: "Reviewed against the content policy." });
+  controller.destroy();
 });
 
 test("content appeals expose approve or keep-blocked decisions without a public warning state", async () => {

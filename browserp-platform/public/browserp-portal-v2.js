@@ -260,7 +260,9 @@
     } catch { /* A clear unavailable state is shown below if no provider works. */ }
     if (remainingProviders) providers = Object.fromEntries(["discord", "google"].map(provider => [provider, providers[provider] === true && remainingProviders.includes(provider)]));
     const requestedReturn = new URLSearchParams(location.search).get("returnTo") || "";
-    const returnTo = staffOnly ? "/staff" : ["/profile", "/profile?section=your-data", "/dashboard"].includes(accountReturn) ? accountReturn : /^\/server\/[a-z0-9-]+\/?$/i.test(requestedReturn) ? requestedReturn : "/dashboard";
+    const messageTarget = location.pathname === "/dashboard" ? new URLSearchParams(location.search).get("message") : null;
+    const messageReturn = /^[a-z0-9_]{3,30}$/.test(messageTarget || "") ? `/dashboard?message=${messageTarget}` : null;
+    const returnTo = staffOnly ? "/staff" : messageReturn || (["/profile", "/profile?section=your-data", "/dashboard"].includes(accountReturn) ? accountReturn : /^\/server\/[a-z0-9-]+\/?$/i.test(requestedReturn) ? requestedReturn : "/dashboard");
     if (providers.discord) actions.append(providerButton(`/api/auth/discord?returnTo=${encodeURIComponent(returnTo)}`, "button button-primary", "Continue with Discord", "discord"));
     if (!staffOnly && providers.google) actions.append(providerButton(`/api/auth/google?returnTo=${encodeURIComponent(returnTo)}`, "button button-secondary", "Continue with Google", "google"));
     if (actions.childElementCount === 0) actions.append(make("p", "portal-status error", "Sign-in is temporarily unavailable. Please try again later."));
@@ -324,6 +326,7 @@
       let targetId = "";
       try { targetId = decodeURIComponent(location.hash.slice(1)); } catch { return sections[0] || null; }
       if (byId.has(targetId)) return byId.get(targetId);
+      if (!targetId && /^[a-z0-9_]{3,30}$/.test(new URLSearchParams(location.search).get("message") || "")) return byId.get("inbox") || sections[0] || null;
       const target = targetId ? [...stack.querySelectorAll("[id]")].find(element => element.id === targetId) : null;
       return sections.find(section => target && section.contains(target)) || sections[0] || null;
     };
@@ -572,7 +575,7 @@
     const visibilityField = make("label", "portal-field");
     append(visibilityField, make("span", "", "Profile visibility"));
     const visibility = make("select"); visibility.name = "visibility";
-    [["public", "Public"], ["members", "Signed-in members"], ["private", "Private"]].forEach(([value, text]) => {
+    [["public", "Public — full profile"], ["basic", "Basic profile — username and approved picture only"], ["members", "Signed-in members"], ["private", "Private — no public profile"]].forEach(([value, text]) => {
       const option = make("option", "", text); option.value = value; option.selected = value === (profile?.profile_visibility || profile?.visibility || "public"); visibility.append(option);
     });
     visibilityField.append(visibility);
@@ -814,7 +817,7 @@
       logout.addEventListener("click", signOut);
       heading.actions.append(logout);
       content.append(heading.head);
-      const sectionNav = portalNav([["#listings", "Listings"], ["#submissions", "Reviews"], ["#saved", "Favourites"], ["#recent", "Recent"], ["#notifications", "Notifications"], ["#content-status", "Content status"], ["#account", "Profile & privacy"]]);
+      const sectionNav = portalNav([["#listings", "Listings"], ["#submissions", "Reviews"], ["#saved", "Favourites"], ["#recent", "Recent"], ["#notifications", "Notifications"], ["#inbox", "Messages"], ["#content-status", "Content status"], ["#account", "Profile & privacy"]]);
       content.append(sectionNav);
 
       const metrics = make("section", "metric-grid-v2");
@@ -834,6 +837,9 @@
         dashboardFavorites(favorites, refresh),
         dashboardRecent(),
         dashboardNotifications(notifications, unread, refresh),
+        window.BrowseRPMemberInbox?.mount({ api, accountId: session.user.id, toast,
+          isCurrent: () => !state.sessionEnded && state.session === session })
+          || panel("inbox", "Messages", "Your messages are temporarily unavailable. Refresh this page."),
         dashboardContentModeration(),
         dashboardProfile(profile, refresh)
       );

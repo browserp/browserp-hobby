@@ -118,15 +118,11 @@
       && (capacity === null || capacity >= players) && Number.isFinite(checkedAt)
       && checkedAt <= Date.now() + 60000 && Date.now() - checkedAt <= 300000;
     const playerState = server.applicationOnly ? "listing" : freshCount ? "live" : server.online === true ? "stale" : server.online === false ? "offline" : "unknown";
-    const statusText = playerState === "listing" ? "Community listing" : playerState === "live" ? "Live count" : playerState === "stale" ? "Needs refresh" : playerState === "offline" ? "Reported offline" : "Status unavailable";
-
     const top = element("div", "server-card-top discovery-card-identity-v10");
     const heading = element("h3", "");
     const titleLink = element("a", "discovery-card-title-v10", server.name || "Roleplay server");
     titleLink.href = listingHref; heading.append(titleLink);
-    const status = element("span", `status ${playerState}`, statusText);
-    status.dataset.playerState = playerState;
-    top.append(media, heading, status);
+    top.append(media, heading);
     if (server.staffBoosted) {
       const flame = element("span", "server-boost-flame-v11", "🔥");
       flame.title = "Boosted server";
@@ -147,15 +143,17 @@
     card.append(window.BrowseRPPlatforms.discoveryMetadata(preview));
 
     const tags = element("div", "server-tags");
-    (Array.isArray(server.tags) ? server.tags : []).slice(0, directoryPreview ? 2 : 3).forEach((tag) => {
+    const availableTags = Array.isArray(server.tags) ? server.tags : [];
+    [...availableTags.filter(tag => String(tag || "").trim() === "18+"), ...availableTags.filter(tag => String(tag || "").trim() !== "18+")]
+      .slice(0, directoryPreview ? 2 : 3).forEach((tag) => {
       const label = String(tag || "").trim();
       if (!label) return;
-      const link = element("a", "", label);
+      const link = element("a", label === "18+" ? "server-age-tag-v11" : "", label);
       const platform = window.BrowseRPPlatforms.idFor(server);
       const filters = new URLSearchParams({ feature: label });
       if (platform !== "other") filters.set("platform", platform);
       link.href = `/servers?${filters}`;
-      link.setAttribute("aria-label", `Find communities tagged ${label}`);
+      link.setAttribute("aria-label", label === "18+" ? "Find communities tagged 18+ minimum joining age" : `Find communities tagged ${label}`);
       tags.append(link);
     });
     card.append(tags);
@@ -163,9 +161,10 @@
     const bottom = element("div", "server-card-bottom");
     const playerText = playerState === "listing" ? "Live player count not provided" : playerState === "live"
       ? `${players.toLocaleString()}${capacity !== null ? ` / ${capacity.toLocaleString()}` : ""} players${server.count_scope === "network" ? " across the network" : ""}`
-      : playerState === "stale" ? "Player count needs a refresh" : "Player count unavailable";
+      : playerState === "stale" ? "Player count needs a refresh" : playerState === "offline" ? "Reported offline · player count unavailable" : "Player count unavailable";
     const view = element("a", "server-card-action", "View listing"); view.href = listingHref;
     const playerCount = element("strong", `player-count-v10 is-${playerState}${freshCount ? " is-live" : ""}`, playerText);
+    playerCount.dataset.playerState = playerState;
     playerCount.title = playerState === "listing" ? "This community does not publish a live player count" : playerState === "live" ? "A recently checked player count" : playerState === "stale" ? "The last player count is no longer recent" : "No current player count is available";
     bottom.append(playerCount, view);
     card.append(bottom);
@@ -221,10 +220,8 @@
 
   function expirePlayerState(card) {
     card.removeAttribute("data-player-fresh-until");
-    const status = select(".status", card);
-    if (status) { status.className = "status stale"; status.dataset.playerState = "stale"; status.textContent = "Needs refresh"; }
     const count = select(".player-count-v10", card);
-    if (count) { count.className = "player-count-v10 is-stale"; count.title = "The last player count is no longer recent"; count.textContent = "Player count needs a refresh"; }
+    if (count) { count.className = "player-count-v10 is-stale"; count.dataset.playerState = "stale"; count.title = "The last player count is no longer recent"; count.textContent = "Player count needs a refresh"; }
   }
 
   function schedulePlayerStateExpiry(list) {

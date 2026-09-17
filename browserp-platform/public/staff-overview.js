@@ -140,14 +140,20 @@
       if (hadFocus) surface.focus({ preventScroll: true });
     }
 
-    function renderWork(overview, capabilities) {
+    function renderWork(overview, capabilities, messageReviews = { allowed: false, pendingCount: null }) {
       // Dashboard permissions are role defaults. These booleans reflect effective grants/denials.
       const permissionKeys = { "servers.review": "readListings", "reports.read": "readReports", "security.read": "readSecurity", "audit.read": "readAudit" };
       const permissions = Object.keys(permissionKeys).filter(key => capabilities[permissionKeys[key]] === true);
-      $$("[data-overview-priority-card]").forEach(card => { card.hidden = !permissions.includes(card.dataset.overviewPriorityCard); });
+      $$("[data-overview-priority-card]").forEach(card => {
+        card.hidden = card.dataset.overviewPriorityCard === "messages.review" ? messageReviews.allowed !== true : !permissions.includes(card.dataset.overviewPriorityCard);
+      });
       const priorities = $("#overview-priorities");
       if (priorities) priorities.hidden = !$$("[data-overview-priority-card]").some(card => !card.hidden);
       $$("[data-overview-priority]").forEach(element => {
+        if (element.dataset.overviewPriority === "pendingMessages") {
+          element.textContent = messageReviews.allowed === true && count(messageReviews.pendingCount) ? number.format(messageReviews.pendingCount) : "Unavailable";
+          return;
+        }
         const value = overview[element.dataset.overviewPriority];
         const capability = { pendingSubmissions: "readListings", openReports: "readReports", securityAlerts: "readSecurity" }[element.dataset.overviewPriority];
         element.textContent = capabilities[capability] === true ? count(value) ? number.format(value) : "Unavailable" : "—";
@@ -268,7 +274,19 @@
         const capabilities = access.value?.summary?.capabilities;
         if (!overview || !["pendingSubmissions", "openReports", "securityAlerts"].every(key => count(overview[key])) || !["listingQueue", "reportQueue", "recentAudit"].every(key => Array.isArray(overview[key]))) throw new Error("The review dashboard response is incomplete.");
         if (!capabilities || !["readListings", "readReports", "readSecurity", "readAudit"].every(key => typeof capabilities[key] === "boolean")) throw new Error("Effective review permissions are unavailable.");
-        renderWork(overview, capabilities);
+        const keys = Array.isArray(access.value?.summary?.permissions?.keys) ? access.value.summary.permissions.keys : [];
+        const messageReviews = { allowed: keys.includes("moderation.resolve"), pendingCount: null };
+        if (messageReviews.allowed) {
+          try {
+            const response = await api("/api/admin/content-moderation?kind=message-count");
+            if (!count(response?.pendingCount)) throw new Error("Message review count is unavailable.");
+            messageReviews.pendingCount = response.pendingCount;
+          } catch (error) {
+            if (error?.status === 401) { endAccess(error); return null; }
+            if (error?.status === 403) messageReviews.allowed = false;
+          }
+        }
+        renderWork(overview, capabilities, messageReviews);
         state.workReceivedAt = new Date().toISOString();
         workStatusText(`Review queues and audit received ${timestamp.format(new Date(state.workReceivedAt))} UTC · Current snapshot`, "live");
         return overview;

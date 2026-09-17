@@ -54,12 +54,27 @@ test("staff Overview shortcuts lead to sections that exist in the page", t => {
   const { window: w } = dom;
   w.eval(read("staff-workspace.js"));
   w.BrowseRPStaffAppearance.mount();
+  assert.equal(w.document.querySelector(".staff-workspace-label").textContent, "Staff panel");
   const shortcuts = [...w.document.querySelectorAll(".staff-local-nav a")];
   assert.ok(shortcuts.length > 0);
   for (const link of shortcuts) {
     const destination = new URL(link.href);
     assert.equal(destination.pathname, "/staffpanel/overview");
     assert.ok(w.document.getElementById(destination.hash.slice(1)), link.textContent);
+  }
+});
+
+test("staff entry pages use one sidebar panel label and plain page headings", () => {
+  const expectations = {
+    "staffpanel-overview.html": "Overview",
+    "staffpanel-moderation.html": "Moderation",
+    "staffpanel-scrapers.html": "Import servers"
+  };
+  for (const [file, heading] of Object.entries(expectations)) {
+    const html = read(file);
+    assert.doesNotMatch(html, /staff-nav-group-v3">Workspace</, file);
+    assert.doesNotMatch(html, /<span class="eyebrow-v3">Staff panel</, file);
+    assert.match(html, new RegExp(`<h1[^>]*>${heading}</h1>`), file);
   }
 });
 

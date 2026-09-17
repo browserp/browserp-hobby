@@ -166,6 +166,10 @@
       "destination": "/api/router?_route=me/overview"
     },
     {
+      "source": "/api/me/messages",
+      "destination": "/api/router?_route=me/messages"
+    },
+    {
       "source": "/api/me/preferences",
       "destination": "/api/router?_route=me/preferences"
     },

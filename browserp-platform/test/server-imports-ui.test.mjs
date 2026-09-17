@@ -105,7 +105,7 @@ test("Player refresh changes only status, pauses while hidden, and preserves an 
     const before = h.requests.length; h.visibility("hidden"); await timer.callback(); assert.equal(h.requests.length, before);
     h.visibility("visible"); await timer.callback(); await tick();
     assert.equal(h.$("#server-status-v3").textContent, "17 / 64 online");
-    assert.equal(h.$("#server-info-v5 .server-info-card-v5:last-child dd").textContent, "17 / 64 online");
+    assert.equal(h.w.document.querySelectorAll("#server-info-v5 .server-info-card-v5").length, 5);
     assert.equal(h.$("#claim-draft").value, "Keep this unfinished claim"); assert.equal(h.claims.length, 1);
     await timer.callback(); await tick();
     assert.equal(h.$("#server-status-v3").textContent, "Player count unavailable");
@@ -117,7 +117,7 @@ test("Player refresh changes only status, pauses while hidden, and preserves an 
 test("Missing, inconsistent and stale counts never render as a fabricated live zero", async () => {
   for (const patch of [{ players: null }, { players: 65 }, { checked_at: new Date(Date.now() - 600_000).toISOString() }, { checked_at: null }, { online: null }]) {
     const h = await harness([{ ...fixture(), ...patch }]);
-    try { assert.equal(h.$("#server-status-v3").textContent, "Player count unavailable", JSON.stringify(patch)); assert.equal(h.$("#server-info-v5 .server-info-card-v5:last-child dd").textContent, "Player count unavailable"); }
+    try { assert.equal(h.$("#server-status-v3").textContent, "Player count unavailable", JSON.stringify(patch)); assert.equal(h.w.document.querySelectorAll("#server-info-v5 .server-info-card-v5").length, 5); }
     finally { h.dom.window.close(); }
   }
 });

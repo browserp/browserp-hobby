@@ -70,7 +70,7 @@
   }
   function facts(server, engagement = {}) {
     const list = theme(node("dl", "server-info-grid-v5"), idFor(server));
-    const rows = [...entries(server, engagement), ["Player status", server.applicationOnly ? "Live player count not provided" : server.online ? `${server.players || 0} / ${server.capacity || "?"} online` : "Status unavailable"]];
+    const rows = entries(server, engagement);
     rows.forEach(([label, value], index) => {
       const card = node("div", `server-info-card-v5${index >= 4 ? " server-info-wide-v5" : ""}`);
       const detail = node("dd", "");

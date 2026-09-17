@@ -101,12 +101,12 @@ test("storage failures leave all appearance choices usable for the current page"
   }
 });
 
-test("the motion clock loads once for either Dark or Light, but never for Default alone", t => {
-  for (const first of ["dark", "light"]) {
+test("the motion clock loads once for every appearance, including a Default-only visit", t => {
+  for (const first of ["default", "dark", "light"]) {
     const { w } = page(t);
     const form = w.document.querySelector("form");
     w.document.dispatchEvent(new w.Event("DOMContentLoaded"));
-    assert.equal(w.document.querySelector("script[data-theme-motion]"), null);
+    assert.equal(w.document.querySelectorAll("script[data-theme-motion]").length, 1);
     w.BrowseRPTheme.set(first);
     assert.equal(w.document.querySelectorAll("script[data-theme-motion]").length, 1, first);
     for (const theme of ["default", "dark", "light", "default"]) w.BrowseRPTheme.set(theme);
@@ -199,7 +199,7 @@ test("switching themes keeps the homepage collage and every current game destina
   }
 });
 
-for (const theme of ["dark", "light"]) test(`${theme} hover eases the existing clock, respects motion-off, and stops accelerating in Default`, t => {
+for (const theme of ["default", "dark", "light"]) test(`${theme} hover eases the existing clock and respects motion-off across appearance changes`, t => {
   const { w } = page(t);
   const control = w.document.createElement("button");
   control.className = "button-primary-v3";
@@ -232,7 +232,7 @@ for (const theme of ["dark", "light"]) test(`${theme} hover eases the existing c
   assert.equal(animation.playbackRate, 2.4);
   assert.equal(animation.currentTime, 4200);
   w.BrowseRPTheme.set("default"); frame(); frame(650);
-  assert.equal(animation.playbackRate, 1, "Default never accelerates even if a previous animation remains during a transition");
+  assert.equal(animation.playbackRate, 2.4, "Default shares the current colour clock without resetting the hovered rate");
   w.BrowseRPTheme.set(theme); frame(); frame(480);
   assert.equal(animation.playbackRate, 2.4, "returning to the selected theme restores the hovered rate smoothly");
   hovered = false;
@@ -243,13 +243,30 @@ for (const theme of ["dark", "light"]) test(`${theme} hover eases the existing c
   w.document.documentElement.dataset.brandMotion = "off";
   w.dispatchEvent(new w.CustomEvent("browserp:brand-motion-changed")); frame(); frame(650);
   assert.equal(animation.playbackRate, 1);
-  w.BrowseRPTheme.set("light"); frame();
-  w.BrowseRPTheme.set("dark"); frame(); frame(650);
+  for (const next of ["default", "light", "dark", theme]) { w.BrowseRPTheme.set(next); frame(); }
+  frame(650);
   assert.equal(animation.playbackRate, 1, "switching themes does not turn disabled motion back on");
   w.document.documentElement.dataset.brandMotion = "on";
   media.matches = false;
   media.dispatchEvent(new w.Event("change")); frame();
   assert.equal(animation.playbackRate, 1, "reduced motion never accelerates the animation");
+  media.matches = true;
+  media.dispatchEvent(new w.Event("change")); frame(240);
+  assert.ok(animation.playbackRate > 1 && animation.playbackRate < 2.4);
+  w.document.documentElement.dataset.brandMotion = "off";
+  w.dispatchEvent(new w.CustomEvent("browserp:brand-motion-changed")); frame();
+  assert.equal(animation.playbackRate, 1, "motion-off cancels an in-progress acceleration");
+  frame(1000);
+  assert.equal(animation.playbackRate, 1, "a cancelled ramp cannot resume itself");
+  w.document.documentElement.dataset.brandMotion = "on";
+  w.dispatchEvent(new w.CustomEvent("browserp:brand-motion-changed")); frame(); frame(480);
+  assert.equal(animation.playbackRate, 2.4, "motion-on resumes the hovered rate without recreating the animation");
+  w.dispatchEvent(new w.Event("pagehide")); frame(1000);
+  assert.equal(animation.playbackRate, 1);
+  assert.equal(w.document.documentElement.dataset.primaryMotion, "paused");
+  w.dispatchEvent(new w.Event("pageshow")); frame(480);
+  assert.equal(animation.playbackRate, 2.4);
+  assert.equal(animation.currentTime, 4200, "preference and visibility changes preserve the colour phase");
 });
 
 

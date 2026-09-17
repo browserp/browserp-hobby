@@ -14,7 +14,7 @@
     claims: ["Server claims", "Review ownership requests and filter verified Discord community owners.", "reviewClaims", null],
     reports: ["Reports", "Review active reports and their history. Deleted reports remain recoverable and audited.", "readReports", "reports"],
     queue: ["Listing reviews", "Review submitted server listings and record a decision.", "readListings", "listings"],
-    content: ["Content moderation", "Review comments, display names and profile pictures in one private queue.", "readQueue", null],
+    content: ["Content moderation", "Review comments, profile details and private messages before delivery.", "readQueue", null],
     profiles: ["Profiles", "Screen profile content before it appears publicly.", "reviewProfiles", "profiles"],
     activity: ["Account activity", "Inspect recorded account and sign-in events, with protected network evidence handled separately.", "readActivity", "activity"],
     staff: ["Staff & roles", "View role responsibilities, request reviewed changes and manage staff within your authority.", "readStaff", "staff"],
@@ -22,7 +22,7 @@
     appeals: ["Appeals", "Review requests to restore access and record your decision.", "reviewAppeals", "appeals"],
     security: ["Website risks", "Investigate recorded site-wide security signals, MFA controls and protected evidence requests.", "readSecurity", "security"],
     "data-requests": ["Data requests", "Review private requests for a copy, correction or deletion of account data.", null, null],
-    logs: ["Logs", "Search recorded staff audit events. Account activity and security signals have their own sections.", "readAudit", "audit"]
+    logs: ["Staff action history", "Search recorded staff audit events. Account activity and security signals have their own sections.", "readAudit", "audit"]
   };
   const ACTIVE_VIEWS = ["reports", "queue", "profiles", "bans", "appeals", "security"];
   const LABELS = { q: "Search", status: "Status", kind: "Content type", platform: "Game", region: "Region", language: "Language", mode: "Framework / mode", feature: "Feature / tag", access: "Access", online: "Online now", verified: "Verified", beginner: "Beginner friendly", from: "From", to: "To", severity: "Severity", targetType: "Target", userId: "Account ID" };
@@ -69,7 +69,7 @@
         if (label) items.push(make("span", label, "staff-nav-group-v3"));
         items.push(...visible.map((view) => {
         const item = make("a", META[view][0]); item.href = F.serialize(view); if (view === state.view) item.setAttribute("aria-current", "page");
-        const count = state.summary?.counts?.[META[view][3]]; if (hasCount(count)) item.append(make("span", number.format(count), "moderation-tab-count")); return item;
+        const count = state.summary?.counts?.[META[view][3]]; if (!['activity', 'logs'].includes(view) && hasCount(count)) item.append(make("span", number.format(count), "moderation-tab-count")); return item;
         }));
       }
       $("#moderation-tabs").replaceChildren(...items);
@@ -134,7 +134,9 @@
       if (state.view === "content") {
         const row = make("div", undefined, "moderation-filter-grid");
         const select = (name, options) => { const item = field(LABELS[name], name, { value: state.filters[name] || (name === "status" ? "all" : ""), type: "select", options }); item.control.addEventListener("change", () => applyFilter(name, item.control.value)); return item.wrapper; };
-        row.append(select("kind", [{ value: "", label: "All content types" }, { value: "comment", label: "Comments" }, { value: "display_name", label: "Display names" }, { value: "avatar", label: "Profile pictures" }]));
+        const kinds = [{ value: "", label: "Comments and profiles" }, { value: "comment", label: "Comments" }, { value: "display_name", label: "Display names" }, { value: "avatar", label: "Profile pictures" }];
+        if (key("moderation.resolve")) kinds.push({ value: "message", label: "Private messages" });
+        row.append(select("kind", kinds));
         const clear = button("Clear filters"); clear.addEventListener("click", () => { state.filters = {}; state.cursors = [null]; updateUrl(); void loadRecords(); });
         form.append(row, clear);
         const chips = make("div", undefined, "moderation-filter-chips");
@@ -187,15 +189,19 @@
       }
       disclosure.append(list); return disclosure;
     }
-    const contentKindLabel = (value) => ({ comment: "Comment", display_name: "Display name", avatar: "Profile picture" })[value] || "Content";
+    const contentKindLabel = (value) => ({ comment: "Comment", display_name: "Display name", avatar: "Profile picture", message: "Private message" })[value] || "Content";
     const contentVersion = (record) => {
       const value = Number(record?.version ?? record?.expectedVersion);
       return Number.isSafeInteger(value) && value > 0 ? value : 0;
     };
-    const canDecideContent = (record) => record.kind === "comment" ? key("moderation.resolve") : ["display_name", "avatar"].includes(record.kind) ? key("profiles.review") : false;
+    const canDecideContent = (record) => ["comment", "message"].includes(record.kind) ? key("moderation.resolve") : ["display_name", "avatar"].includes(record.kind) ? key("profiles.review") : false;
     function contentAction(record, action) {
       const appealed = ["submitted", "pending", "pending_review", "under_review"].includes(String(record.appealStatus || "").toLowerCase());
-      const copy = action === "approve"
+      const copy = record.kind === "message"
+        ? action === "approve"
+          ? ["Approve message", "Deliver this reviewed message if current contact settings, blocks and account restrictions still allow it.", "Approve and deliver"]
+          : ["Block message", "Keep this message from the recipient and give its sender a clear reason.", "Block message"]
+        : action === "approve"
         ? appealed
           ? ["Approve appeal", "Accept this appeal and publish the reviewed item. The current version will be checked before saving.", "Approve appeal"]
           : ["Approve content", "Publish this reviewed item. The current version will be checked before the decision is saved.", "Approve and publish"]
@@ -203,13 +209,13 @@
       return modal(copy[0], copy[1], () => ({}), copy[2], async (_, reason) => {
         const version = contentVersion(record);
         if (!version) throw new Error("Refresh this item before recording a decision.");
-        await api("/api/admin/content-moderation", { method: "POST", body: JSON.stringify({ id: record.id, action, expectedVersion: version, reason }) });
+        await api("/api/admin/content-moderation", { method: "POST", body: JSON.stringify({ id: record.id, kind: record.kind === "message" ? "message" : undefined, action, expectedVersion: version, reason }) });
       });
     }
     function contentRecordCard(record) {
       const card = make("article", undefined, "moderation-record moderation-content-record-v3");
       const head = make("div", undefined, "moderation-record-head"); const copy = make("div", undefined, "moderation-record-title");
-      copy.append(make("h3", contentKindLabel(record.kind)), make("p", [record.displayName || record.memberName || "", date(record.createdAt)].filter(Boolean).join(" · "), "moderation-record-meta"));
+      copy.append(make("h3", contentKindLabel(record.kind)), make("p", [record.kind === "message" ? `@${record.sender} → @${record.recipient}` : record.displayName || record.memberName || "", date(record.createdAt)].filter(Boolean).join(" · "), "moderation-record-meta"));
       head.append(copy); if (record.status) { const badge = make("span", human(record.status), "moderation-state"); badge.dataset.state = record.status; head.append(badge); } card.append(head);
       if (record.kind === "avatar") {
         const supplied = safeInternalLink(record.previewUrl || record.preview_url || record.avatarPreviewUrl || record.avatar_preview_url);
@@ -231,7 +237,7 @@
       }
       card.append(actionsRoot);
       if (canDecideContent(record) && !contentVersion(record) && ["pending_review", "blocked"].includes(record.status)) card.append(make("p", "Refresh this item before recording a decision.", "moderation-inline-note"));
-      card.append(details(record, [["id", "Content ID"], ["kind", "Content type"], ["status", "Status"], ["reason", "Decision reason"], ["createdAt", "Submitted"], ["reviewedAt", "Reviewed"], ["appealStatus", "Appeal status"], ["appealDecision", "Appeal decision"]]));
+      card.append(details(record, [["id", "Content ID"], ["kind", "Content type"], ["status", "Status"], ["reason", "Decision reason"], ["checkCode", "Content check"], ["createdAt", "Submitted"], ["reviewedAt", "Reviewed"], ["appealStatus", "Appeal status"], ["appealDecision", "Appeal decision"]]));
       return card;
     }
     function recordCard(record) {
@@ -367,8 +373,8 @@
         if (state.view === "security") { const extra = make("section"); extra.id = "moderation-security-controls"; root.append(extra); }
         const meta = make("p", state.view === "content" ? `${number.format(workspace.items.length)} private item${workspace.items.length === 1 ? "" : "s"} shown on this page` : `${number.format(workspace.items.length)} shown · ${hasCount(workspace.total) ? number.format(workspace.total) : "Unknown"} matching records`, "moderation-result-meta"); root.append(meta);
         const records = make("div", undefined, "moderation-records");
-        if (workspace.items.length) records.append(...workspace.items.map(recordCard)); else records.append(empty("No matching records", state.view === "content" ? "No private content items match these filters." : "Try a different search or clear the filters. No placeholder results are shown.")); root.append(records);
-        const paging = make("div", undefined, "moderation-pagination"); const previous = button("← Previous"); previous.disabled = state.cursors.length < 2; previous.addEventListener("click", () => { state.cursors.pop(); void loadRecords(); }); const next = button("Next →"); next.disabled = !workspace.nextCursor; next.addEventListener("click", () => { if (workspace.nextCursor) { state.cursors.push(workspace.nextCursor); void loadRecords(); } }); paging.append(previous, make("span", `Page ${state.cursors.length} · Up to 25 records per page`), next); root.append(paging);
+        if (workspace.items.length) records.append(...workspace.items.map(recordCard)); else records.append(empty("No matching records", state.view === "content" ? "No private content items match these filters." : "Try a different search or clear the filters.")); root.append(records);
+        if (workspace.items.length || workspace.nextCursor || state.cursors.length > 1) { const paging = make("div", undefined, "moderation-pagination"); const previous = button("← Previous"); previous.disabled = state.cursors.length < 2; previous.addEventListener("click", () => { state.cursors.pop(); void loadRecords(); }); const next = button("Next →"); next.disabled = !workspace.nextCursor; next.addEventListener("click", () => { if (workspace.nextCursor) { state.cursors.push(workspace.nextCursor); void loadRecords(); } }); paging.append(previous, make("span", `Page ${state.cursors.length} · Up to 25 records per page`), next); root.append(paging); }
       });
       if (state.view === "security" && actions.securityControls) {
         const mount = $("#moderation-security-controls");
@@ -378,12 +384,12 @@
     }
     async function renderStaff() {
       if (state.mountedStaff && $("#overview-roles", root)) return;
-      root.replaceChildren(heading("staff")); const roles = make("section", undefined, "moderation-staff-box"); roles.id = "overview-roles"; root.append(roles);
-      const permissions = make("section", undefined, "moderation-staff-box");
+      root.replaceChildren(); const roles = make("section", undefined, "moderation-staff-box"); roles.id = "overview-roles"; root.append(roles);
+      const permissions = make("details", undefined, "moderation-staff-box");
       if (key("staff.permissions.manage")) {
         const guidance = make("p", "Role default follows their assigned role. Allow grants this permission to this person; Deny blocks it even if their role allows it. Sign-in and two-factor rules still apply. Select the person first and give a reason before saving.");
         guidance.id = "permission-guidance-v3";
-        permissions.append(make("h3", "Individual permission overrides"), guidance);
+        permissions.append(make("summary", "Custom permissions"), guidance);
         const form = make("form", undefined, "staff-form-v3"); form.id = "permission-form-v3";
         form.setAttribute("aria-describedby", guidance.id);
         const user = field("Staff member", "staffMember", { type: "select", required: true }); user.control.id = "permission-user";
