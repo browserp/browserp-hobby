@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { JSDOM } from "jsdom";
-import { publicStaffRoster, publicStaffView, safePublicStaffAvatar } from "../lib/public-staff.js";
+import { LEGACY_FLATTENED_MARK, TRANSPARENT_MARK, publicStaffRoster, publicStaffView, safePublicStaffAvatar } from "../lib/public-staff.js";
 
 const root = resolve(import.meta.dirname, "..");
 const page = readFileSync(resolve(root, "public/staff.html"), "utf8");
@@ -203,6 +203,26 @@ test("public roster client renders its dynamic join label with DOM APIs, safe av
   assert.equal(dom.window.document.querySelector("#staff-public-count")?.textContent, "2 staff members");
   assert.equal(dom.window.document.querySelectorAll('.staff-public-card a[href="/user/browse_owner"]').length, 2, "the public staff avatar and name open the public profile");
   assert.equal(dom.window.document.querySelectorAll(".staff-public-card:nth-child(2) a").length, 0, "an unsafe or private link never removes the staff card or becomes navigation");
+});
+
+test("staff roster renders the exact transparent site mark while rejecting other local avatar paths", async t => {
+  const owner = publicStaffView([memberships[2]], roles, profiles.map(profile => profile.id === ownerId
+    ? { ...profile, approved_avatar_url: LEGACY_FLATTENED_MARK } : profile))[0];
+  assert.equal(owner.avatarUrl, TRANSPARENT_MARK);
+  const dom = new JSDOM(page, { url: "https://browserp.test/staff", runScripts: "outside-only" });
+  t.after(() => dom.window.close());
+  dom.window.fetch = async () => ({ ok: true, json: async () => ({ staff: [
+    owner,
+    { ...owner, displayName: "Other Local Path", profileUrl: null, avatarUrl: "/assets/browserp-icon-512.png?variant=unsafe" },
+    { ...owner, displayName: "Other Host", profileUrl: null, avatarUrl: "https://evil.example/assets/browserp-icon-512.png" }
+  ] }) });
+  dom.window.eval(script);
+  for (let i = 0; i < 3; i++) await new Promise(resolve => setImmediate(resolve));
+  const cards = dom.window.document.querySelectorAll(".staff-public-card");
+  assert.equal(cards[0].querySelector(".staff-public-avatar img")?.getAttribute("src"), TRANSPARENT_MARK);
+  assert.equal(cards[1].querySelector(".staff-public-avatar img"), null);
+  assert.equal(cards[2].querySelector(".staff-public-avatar img"), null);
+  assert.equal(cards[1].querySelector(".staff-public-avatar-fallback")?.textContent, "OL");
 });
 
 test("existing API functions expose the safe roster without creating a thirteenth Vercel function", () => {

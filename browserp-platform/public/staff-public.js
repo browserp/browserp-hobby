@@ -18,6 +18,7 @@
 
   function safeAvatar(value) {
     if (typeof value !== "string" || value.length > 800) return "";
+    if (value === "/assets/browserp-icon-512.png") return value;
     try {
       const url = new URL(value);
       const discord = url.protocol === "https:" && url.hostname === "cdn.discordapp.com" && url.pathname.startsWith("/avatars/");
