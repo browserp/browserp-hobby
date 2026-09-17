@@ -63,7 +63,9 @@ test("opt-in basic profile exposes only handle and approved picture, never priva
   assert.equal(page.document.querySelector("#member-bio-v7, #member-banner-v7, #member-joined-v7, #member-badges-v7, #member-server-grid-v7, #member-report-form-v7"), null);
   for (const secret of [alice, bob, "Secret Display", "Secret bio", "Admin", "Private badge", "Moon City", "afterglow"]) assert.equal(page.body.includes(secret), false, secret);
   assert.match(page.headers["cache-control"], /no-store/);
-  assert.equal(page.document.querySelector('meta[name="robots"]').content, "noindex,follow");
+  const preview = process.env.VERCEL_ENV === "preview";
+  assert.equal(page.document.querySelector('meta[name="robots"]').content, preview ? "noindex,nofollow" : "noindex,follow");
+  if (preview) assert.equal(page.headers["x-robots-tag"], "noindex, nofollow");
   assert.equal(page.document.querySelector('link[rel="canonical"]'), null);
 });
 
