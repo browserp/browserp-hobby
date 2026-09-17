@@ -48,6 +48,21 @@ test("resizing staff navigation restores desktop access and skip link preserves 
   assert.equal(h.w.location.hash, "#fivem"); assert.equal(h.w.document.activeElement, h.main);
 });
 
+test("staff Overview shortcuts lead to sections that exist in the page", t => {
+  const dom = new JSDOM(read("staffpanel-overview.html"), { url: "https://browserp.test/staffpanel/overview", runScripts: "outside-only" });
+  t.after(() => dom.window.close());
+  const { window: w } = dom;
+  w.eval(read("staff-workspace.js"));
+  w.BrowseRPStaffAppearance.mount();
+  const shortcuts = [...w.document.querySelectorAll(".staff-local-nav a")];
+  assert.ok(shortcuts.length > 0);
+  for (const link of shortcuts) {
+    const destination = new URL(link.href);
+    assert.equal(destination.pathname, "/staffpanel/overview");
+    assert.ok(w.document.getElementById(destination.hash.slice(1)), link.textContent);
+  }
+});
+
 test("staff finishing styles precede shared appearance layers on every private entry point and stay off public pages", () => {
   const files = readdirSync(new URL("../public", import.meta.url)).filter(file => file.endsWith(".html"));
   for (const file of files) {

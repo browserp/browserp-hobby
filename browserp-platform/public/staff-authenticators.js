@@ -118,10 +118,15 @@
       if (root.open) { if (!state.busy) void load(); }
       else { state.generation++; clearEditor(); tools.replaceChildren(); say(""); }
     }
+    function revealDeepLink() {
+      if (location.hash === "#overview-authenticators") root.open = true;
+    }
+    const shortcut = document.querySelector('.staff-local-nav a[href="/staffpanel/overview#overview-authenticators"]');
     function leave() { clearEditor(); }
     root.addEventListener("toggle", toggle); window.addEventListener("pagehide", leave);
-    const controller = { destroy() { state.destroyed = true; state.generation++; clearEditor(); tools.replaceChildren(); root.removeEventListener("toggle", toggle); window.removeEventListener("pagehide", leave); if (active === controller) active = null; } };
-    active = controller; if (root.open) void load(); return controller;
+    window.addEventListener("hashchange", revealDeepLink); shortcut?.addEventListener("click", revealDeepLink);
+    const controller = { destroy() { state.destroyed = true; state.generation++; clearEditor(); tools.replaceChildren(); root.removeEventListener("toggle", toggle); window.removeEventListener("pagehide", leave); window.removeEventListener("hashchange", revealDeepLink); shortcut?.removeEventListener("click", revealDeepLink); if (active === controller) active = null; } };
+    active = controller; const initiallyOpen = root.open; revealDeepLink(); if (initiallyOpen) void load(); return controller;
   }
   window.BrowseRPStaffAuthenticators = Object.freeze({ init });
 })();

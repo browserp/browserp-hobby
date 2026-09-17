@@ -75,8 +75,11 @@
       if (!response.ok) throw new Error("Directory unavailable");
       const data = await response.json();
       if (closed || current !== request) return;
-      if (!data.facets || !Array.isArray(data.facets.region) || !Array.isArray(data.facets.feature)) throw new Error("Choices unavailable");
-      dependentChoices(data.facets); status.textContent = "";
+      const facets = data?.facets;
+      if (!facets || typeof facets !== "object" || Array.isArray(facets)
+        || ["region", "feature"].some(key => Object.hasOwn(facets, key) && !Array.isArray(facets[key]))) throw new Error("Choices unavailable");
+      // The directory omits a facet key when there are no positive choices.
+      dependentChoices({ region: facets.region || [], feature: facets.feature || [] }); status.textContent = "";
     } catch {
       if (closed || current !== request) return;
       status.textContent = "Current choices couldn’t be loaded. You can still search with your selections, or try again.";

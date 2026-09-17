@@ -8,8 +8,8 @@ const primary = { id: "first", label: "Main phone", status: "verified" };
 const backup = { id: "backup", label: "Backup phone", status: "verified" };
 const pending = { id: "pending", label: "Spare device", status: "unverified" };
 const payload = (factors = [primary]) => ({ authenticators: { factors, maxFactors: 3, canAdd: factors.length < 3 } });
-async function harness(t, handler = async () => payload()) {
-  const dom = new JSDOM('<details id="overview-authenticators"><summary>Your sign-in security</summary><div data-authenticators-content></div></details>', { url: "https://browserp.test/staffpanel/overview", runScripts: "outside-only" });
+async function harness(t, handler = async () => payload(), hash = "") {
+  const dom = new JSDOM('<nav class="staff-local-nav"><a href="/staffpanel/overview#overview-authenticators">Your sign-in security</a></nav><details id="overview-authenticators"><summary>Your sign-in security</summary><div data-authenticators-content></div></details>', { url: `https://browserp.test/staffpanel/overview${hash}`, runScripts: "outside-only" });
   const w = dom.window; t.after(() => w.close()); const calls = []; w.eval(script);
   const controller = w.BrowseRPStaffAuthenticators.init({ api: async (path, options) => { calls.push({ path, options }); return handler(path, options); } });
   const root = w.document.querySelector("details");
@@ -19,6 +19,18 @@ async function harness(t, handler = async () => payload()) {
     async close() { root.open = false; root.dispatchEvent(new w.Event("toggle")); await tick(); },
     submit(form) { form.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); } };
 }
+
+test("a direct sign-in security link opens its section after load and opens it again when selected", async t => {
+  const h = await harness(t, async () => payload(), "#overview-authenticators");
+  await tick();
+  assert.equal(h.root.open, true);
+  assert.match(h.text(), /Main phone/);
+  await h.close();
+  assert.equal(h.root.open, false);
+  h.$(".staff-local-nav a").click(); await tick();
+  assert.equal(h.root.open, true);
+  assert.match(h.text(), /Main phone/);
+});
 
 test("personal sign-in security loads on opening and hides removal of the only verified factor", async t => {
   const h = await harness(t); assert.equal(h.calls.length, 0); await h.open();

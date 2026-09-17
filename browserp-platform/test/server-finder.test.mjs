@@ -89,6 +89,20 @@ test("API failure offers retry without fake choices, and reset preserves a usabl
   assert.equal(h.timers.size, 1, "Only the outstanding request's timeout remains");
 });
 
+test("successful empty facets show honest open choices while malformed present facets offer retry", async t => {
+  const h = harness(t, { platform: "minecraft" });
+  await h.resolve(0, {});
+  assert.deepEqual(h.values("region"), ["all"]);
+  assert.deepEqual(h.values("feature"), ["all"]);
+  assert.match(h.$('[data-finder-note="region"]').textContent, /No specific regions are listed/);
+  assert.match(h.$('[data-finder-note="feature"]').textContent, /No specific features are listed/);
+  assert.equal(h.$("[data-finder-retry]").hidden, true);
+  h.select("platform", "fivem");
+  await h.resolve(1, { region: null, feature: [] });
+  assert.equal(h.$("[data-finder-retry]").hidden, false);
+  assert.match(h.$("[data-finder-status]").textContent, /couldn’t be loaded/);
+});
+
 test("missing JavaScript model leaves a normal visible form instead of a broken wizard", t => {
   const h = harness(t, { model: false });
   assert.equal(h.requests.length, 0); assert.equal(h.$("[data-finder-steps]").hidden, true); assert.equal(h.$("[data-finder-submit]").hidden, false);
