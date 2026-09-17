@@ -14,9 +14,9 @@ function render(pathname) {
     setAttribute(name, value) { this.attributes[name] = value; }
   }
   const nodes = new Map();
-  const document = { title: "", querySelector(selector) { if (!nodes.has(selector)) nodes.set(selector, new Element()); return nodes.get(selector); }, createElement: (tag) => new Element(tag), createDocumentFragment: () => new Element("#fragment"), createTextNode: text => new Element("#text", text), createElementNS: (_, tag) => new Element(tag) };
+  const document = { title: "", addEventListener() {}, querySelector(selector) { if (!nodes.has(selector)) nodes.set(selector, new Element()); return nodes.get(selector); }, createElement: (tag) => new Element(tag), createDocumentFragment: () => new Element("#fragment"), createTextNode: text => new Element("#text", text), createElementNS: (_, tag) => new Element(tag) };
   const requests = [];
-  const context = { document, location: { pathname, search: "" }, URLSearchParams, window: { BrowseRPSearch: { mount({ fixedGame }) { requests.push(`/api/servers?platform=${fixedGame}`); } }, BrowseRPPlatforms: { theme(element, id) { element.dataset.platform = id; } } }, fetch: async(url) => { requests.push(url); return { ok: true, json: async() => ({ servers: [] }) }; } };
+  const context = { document, location: { pathname, search: "" }, URLSearchParams, window: { addEventListener() {}, BrowseRPSearch: { mount({ fixedGame }) { requests.push(`/api/servers?platform=${fixedGame}`); } }, BrowseRPPlatforms: { theme(element, id) { element.dataset.platform = id; } } }, fetch: async(url) => { requests.push(url); return { ok: true, json: async() => ({ servers: [] }) }; } };
   vm.runInNewContext(readFileSync(new URL("../public/browserp-games.js", import.meta.url), "utf8"), context);
   return { nodes, document, requests };
 }

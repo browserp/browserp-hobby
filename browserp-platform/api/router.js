@@ -889,6 +889,29 @@ const routes = {
 
   "admin/adverts/media": endpoint("POST", staffAdvertMedia),
 
+  "admin/featured-boost": endpoint(["GET", "POST"], async (req, res, id) => {
+    if (req.method === "POST") assertSameOrigin(req);
+    const session = await getSession(req, res, { required: true, provider: "discord" });
+    if (req.method === "GET") return ok(res, { feature: await rpc("staff_featured_boost_control", {}, session.accessToken) });
+    await rateLimit(req, "staff-featured-boost", 12, 300);
+    const body = await readBody(req, 8 * 1024);
+    const action = (typeof body.action === "string" ? body.action.trim().toLowerCase() : "");
+    const durationHours = body.durationHours;
+    const expectedVersion = body.expectedVersion;
+    if (!["start", "end"].includes(action) || !Number.isSafeInteger(expectedVersion) || expectedVersion < 0
+      || (action === "start" && (!Number.isSafeInteger(durationHours) || durationHours < 1 || durationHours > 720))) {
+      throw Object.assign(new Error("Choose a server, duration and valid boost action."), { status: 400 });
+    }
+    return ok(res, { result: await rpc("staff_set_featured_boost", {
+      p_action: action,
+      p_server_id: action === "start" ? uuid(body.serverId, "Choose a published server.") : null,
+      p_duration_hours: action === "start" ? durationHours : null,
+      p_expected_version: expectedVersion,
+      p_reason: reason(body.reason, 5),
+      p_request_id: id
+    }, session.accessToken) });
+  }),
+
   "admin/adverts": endpoint(["GET", "POST"], async (req, res, id) => {
     if (req.method === "POST") assertSameOrigin(req);
     const session = await getSession(req, res, { required: true, provider: "discord" });

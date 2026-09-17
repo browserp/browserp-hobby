@@ -8,6 +8,9 @@
   };
   const select = (selector, root = document) => root.querySelector(selector);
   const DISCOVER_GAME_IDS = Object.freeze(["fivem", "redm", "roblox", "minecraft"]);
+  let playerExpiryTimer = null;
+  let featuredExpiryTimer = null;
+  let featuredExpiresAt = 0;
 
   async function api(path, options = {}) {
     const method = String(options.method || "GET").toUpperCase();
@@ -103,15 +106,35 @@
       media.append(image);
     } else media.append(initial);
 
-    const top = element("div", "server-card-top");
-    top.append(media);
-    const status = element("span", `status${!server.applicationOnly && server.online ? " online" : ""}`, server.applicationOnly ? "Community listing" : server.online ? "Online now" : "Status unavailable");
-    top.append(status);
-    card.append(top);
+    const playerNumber = (value) => {
+      if (value === null || value === undefined || value === "" || typeof value === "boolean") return null;
+      const parsed = Number(value);
+      return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
+    };
+    const checkedAt = Date.parse(String(server.checked_at || server.checkedAt || server.observed_at || server.observedAt || ""));
+    const players = playerNumber(server.players);
+    const capacity = playerNumber(server.capacity ?? server.max_players);
+    const freshCount = !server.applicationOnly && server.online === true && players !== null
+      && (capacity === null || capacity >= players) && Number.isFinite(checkedAt)
+      && checkedAt <= Date.now() + 60000 && Date.now() - checkedAt <= 300000;
+    const playerState = server.applicationOnly ? "listing" : freshCount ? "live" : server.online === true ? "stale" : server.online === false ? "offline" : "unknown";
+    const statusText = playerState === "listing" ? "Community listing" : playerState === "live" ? "Live count" : playerState === "stale" ? "Needs refresh" : playerState === "offline" ? "Reported offline" : "Status unavailable";
 
+    const top = element("div", "server-card-top discovery-card-identity-v10");
     const heading = element("h3", "");
     const titleLink = element("a", "discovery-card-title-v10", server.name || "Roleplay server");
-    titleLink.href = listingHref; heading.append(titleLink); card.append(heading);
+    titleLink.href = listingHref; heading.append(titleLink);
+    const status = element("span", `status ${playerState}`, statusText);
+    status.dataset.playerState = playerState;
+    top.append(media, heading, status);
+    if (server.staffBoosted) {
+      const flame = element("span", "server-boost-flame-v11", "🔥");
+      flame.title = "Boosted server";
+      flame.setAttribute("aria-label", "Boosted server");
+      flame.tabIndex = 0;
+      top.append(flame);
+    }
+    card.append(top);
     card.append(element("p", "server-description", server.description || "Open the listing to learn more about this community."));
     // Preview-only omission of optional unknowns. Do not change the source
     // record, joining requirements, status, or detail/compare disclosures.
@@ -124,17 +147,32 @@
     card.append(window.BrowseRPPlatforms.discoveryMetadata(preview));
 
     const tags = element("div", "server-tags");
-    (Array.isArray(server.tags) ? server.tags : []).slice(0, directoryPreview ? 2 : 3).forEach((tag) => tags.append(element("span", "", tag)));
+    (Array.isArray(server.tags) ? server.tags : []).slice(0, directoryPreview ? 2 : 3).forEach((tag) => {
+      const label = String(tag || "").trim();
+      if (!label) return;
+      const link = element("a", "", label);
+      const platform = window.BrowseRPPlatforms.idFor(server);
+      const filters = new URLSearchParams({ feature: label });
+      if (platform !== "other") filters.set("platform", platform);
+      link.href = `/servers?${filters}`;
+      link.setAttribute("aria-label", `Find communities tagged ${label}`);
+      tags.append(link);
+    });
     card.append(tags);
 
     const bottom = element("div", "server-card-bottom");
-    const playerText = server.applicationOnly ? "Live player count not provided" : server.online
-      ? `${Number(server.players || 0).toLocaleString()}${server.capacity ? ` / ${Number(server.capacity).toLocaleString()}` : ""} players${server.count_scope === "network" ? " across the network" : ""}`
-      : "Player count unavailable";
+    const playerText = playerState === "listing" ? "Live player count not provided" : playerState === "live"
+      ? `${players.toLocaleString()}${capacity !== null ? ` / ${capacity.toLocaleString()}` : ""} players${server.count_scope === "network" ? " across the network" : ""}`
+      : playerState === "stale" ? "Player count needs a refresh" : "Player count unavailable";
     const view = element("a", "server-card-action", "View listing"); view.href = listingHref;
-    bottom.append(element("strong", "", playerText), view);
+    const playerCount = element("strong", `player-count-v10 is-${playerState}${freshCount ? " is-live" : ""}`, playerText);
+    playerCount.title = playerState === "listing" ? "This community does not publish a live player count" : playerState === "live" ? "A recently checked player count" : playerState === "stale" ? "The last player count is no longer recent" : "No current player count is available";
+    bottom.append(playerCount, view);
     card.append(bottom);
-    return window.BrowseRPShortlist?.wrap(card, server) || card;
+    if (freshCount) card.dataset.playerFreshUntil = String(checkedAt + 300000);
+    const item = window.BrowseRPShortlist?.wrap(card, server) || card;
+    if (server.staffBoosted) item.classList.add("server-boosted-v11");
+    return item;
   }
 
   function directoryAdvert(list) {
@@ -162,10 +200,7 @@
       if (advert.parentElement !== list) list.append(advert);
       [...list.childNodes].forEach(child => { if (child !== advert) child.remove(); });
     } else list.replaceChildren();
-    if (!servers.length) {
-      list.setAttribute("aria-busy", "false");
-      return;
-    }
+    if (!servers.length) { list.setAttribute("aria-busy", "false"); clearPlayerStateExpiry(); return; }
     servers.forEach((server, index) => {
       const item = serverCard(server, page === "servers" && list.id === "server-list");
       window.__browserpReveal?.register?.(item, Math.min(index, 8) * 12, true);
@@ -176,6 +211,57 @@
       else list.append(item);
     });
     list.setAttribute("aria-busy", "false");
+    schedulePlayerStateExpiry(list);
+  }
+
+  function clearPlayerStateExpiry() {
+    if (playerExpiryTimer !== null) window.clearTimeout(playerExpiryTimer);
+    playerExpiryTimer = null;
+  }
+
+  function expirePlayerState(card) {
+    card.removeAttribute("data-player-fresh-until");
+    const status = select(".status", card);
+    if (status) { status.className = "status stale"; status.dataset.playerState = "stale"; status.textContent = "Needs refresh"; }
+    const count = select(".player-count-v10", card);
+    if (count) { count.className = "player-count-v10 is-stale"; count.title = "The last player count is no longer recent"; count.textContent = "Player count needs a refresh"; }
+  }
+
+  function schedulePlayerStateExpiry(list) {
+    clearPlayerStateExpiry();
+    const now = Date.now();
+    const cards = [...list.querySelectorAll(".server-card[data-player-fresh-until]")];
+    cards.filter(card => Number(card.dataset.playerFreshUntil) <= now).forEach(expirePlayerState);
+    const next = cards.map(card => Number(card.dataset.playerFreshUntil)).filter(value => Number.isFinite(value) && value > now).sort((a, b) => a - b)[0];
+    if (!next) return;
+    playerExpiryTimer = window.setTimeout(() => schedulePlayerStateExpiry(list), Math.min(next - now, 2147483647));
+  }
+
+  function cancelFeaturedExpiryTimer() {
+    if (featuredExpiryTimer !== null) window.clearTimeout(featuredExpiryTimer);
+    featuredExpiryTimer = null;
+  }
+
+  function clearFeaturedExpiry() {
+    cancelFeaturedExpiryTimer(); featuredExpiresAt = 0;
+  }
+
+  function removeFeaturedDecoration() {
+    const list = select("#featured-server-list");
+    list?.querySelectorAll(".server-boosted-v11").forEach(item => item.classList.remove("server-boosted-v11"));
+    list?.querySelectorAll(".server-boost-flame-v11").forEach(item => item.remove());
+  }
+
+  function scheduleFeaturedExpiry(expiresAt) {
+    clearFeaturedExpiry();
+    if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) return false;
+    featuredExpiresAt = expiresAt;
+    featuredExpiryTimer = window.setTimeout(() => {
+      featuredExpiryTimer = null;
+      if (document.visibilityState === "hidden") return;
+      featuredExpiresAt = 0; removeFeaturedDecoration(); void featured();
+    }, Math.min(expiresAt - Date.now(), 2147483647));
+    return true;
   }
 
   async function featured() {
@@ -183,8 +269,13 @@
     const empty = select("#featured-empty");
     if (!list || !empty) return;
     try {
-      const payload = await api("/api/servers?sort=recommended&limit=4");
+      const payload = await api("/api/servers?sort=recommended&limit=4&featured=true");
       const servers = Array.isArray(payload.servers) ? payload.servers : [];
+      const boostExpiresAt = Date.parse(String(payload.featuredBoost?.expiresAt || payload.featuredBoost?.expires_at || ""));
+      if (payload.featuredBoost?.slug && scheduleFeaturedExpiry(boostExpiresAt)) {
+        const boosted = servers.find((server) => server.slug === payload.featuredBoost.slug);
+        if (boosted) boosted.staffBoosted = true;
+      } else clearFeaturedExpiry();
       renderServers(list, servers);
       list.hidden = servers.length === 0;
       empty.hidden = servers.length !== 0;
@@ -240,6 +331,19 @@
   }
 
   function home() { window.BrowseRPSearch.home(); featured(); }
+
+  function refreshExpiredFeatured() {
+    if (page !== "home" || document.visibilityState === "hidden") return;
+    if (featuredExpiresAt) {
+      if (Date.now() >= featuredExpiresAt) {
+        clearFeaturedExpiry(); removeFeaturedDecoration(); void featured();
+      } else scheduleFeaturedExpiry(featuredExpiresAt);
+    }
+    const list = select("#featured-server-list"); if (list) schedulePlayerStateExpiry(list);
+  }
+  document.addEventListener("visibilitychange", refreshExpiredFeatured);
+  window.addEventListener("pageshow", refreshExpiredFeatured);
+  window.addEventListener("pagehide", () => { clearPlayerStateExpiry(); cancelFeaturedExpiryTimer(); });
 
   async function loadPlatforms(target, includeAll = false, discoverOnly = false) {
     if (!target) return [];

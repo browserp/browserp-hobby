@@ -9,7 +9,7 @@ const servers = Array.from({ length: 24 }, (_, index) => ({
   slug: `fixture-community-${index}`, name: `Fixture community ${index + 1}`, platform_id: "fivem",
   description: "A synthetic reviewed community used to test a full page of search results.",
   region: "United Kingdom", language: "French", framework: "QBCore", access_type: "allowlisted",
-  online: true, players: index, capacity: 64, tags: ["roleplay"]
+  online: true, players: index, capacity: 64, checked_at: new Date().toISOString(), tags: ["roleplay"]
 }));
 
 async function harness(t, { reduced = false, coarse = false, observerAvailable = true } = {}) {
@@ -68,6 +68,11 @@ test("a full asynchronous FiveM page keeps its tall results and dynamic cards fr
   const heading = h.$("#game-results-v4 .section-head-v3");
   assert.equal(heading.classList.contains("reveal-v3"), false, "Nested headings should not replay the parent reveal");
   assert.equal(h.w.getComputedStyle(heading).opacity, "1");
+  firstCard.dataset.playerFreshUntil = String(Date.now() - 1);
+  h.w.dispatchEvent(new h.w.Event("pageshow"));
+  assert.equal(firstCard.querySelector(".status").textContent, "Needs refresh");
+  assert.equal(firstCard.querySelector(".player-count-v10").classList.contains("is-live"), false);
+  h.w.dispatchEvent(new h.w.Event("pagehide"));
 });
 
 test("reduced-motion game pages display asynchronous results without relying on an observer", async t => {

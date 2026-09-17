@@ -1,0 +1,7 @@
+.staff-featured-boost .staff-featured-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.staff-featured-boost .staff-featured-fields label { display: grid; gap: 6px; color: var(--copy); font-weight: 700; }
+.staff-featured-boost .staff-featured-fields label:has(input), .staff-featured-boost .staff-featured-actions { grid-column: 1 / -1; }
+.staff-featured-boost :is(select,input) { min-width: 0; width: 100%; min-height: 44px; padding: 9px 12px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--panel); color: var(--text); font: inherit; }
+.staff-featured-boost .staff-featured-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.staff-featured-boost [data-boost-status].is-error { color: var(--danger,#ee737f); }
+@media (max-width: 650px) { .staff-featured-boost .staff-featured-fields { grid-template-columns: minmax(0,1fr); } }

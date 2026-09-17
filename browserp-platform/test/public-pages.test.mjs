@@ -233,6 +233,24 @@ test("unknown, unpublished, malformed and missing pages return 404; dependency o
   const head = await request("/server/cali-rp", { method: "HEAD" }); assert.equal(head.statusCode, 200); assert.equal(head.body, "");
   assert.equal((await request("/servers", { method: "POST" })).statusCode, 405);
 });
+test("directory outages keep search and game navigation usable without claiming zero results", async () => {
+  const unavailable = async () => { throw Object.assign(new Error("PRIVATE_DATABASE_TIMEOUT"), { code: "57014" }); };
+  for (const path of ["/servers?region=Europe", "/games/fivem?region=Europe", "/games/roblox?query=city"]) {
+    const response = await request(path, { data: { ...defaultData, directory: unavailable } });
+    const doc = response.document();
+    assert.equal(response.statusCode, 503, path);
+    assert.equal(response.headers["retry-after"], "60");
+    assert.match(response.headers["x-robots-tag"], /noindex/);
+    assert.equal(doc.querySelector('meta[name="robots"]').content, "noindex,follow");
+    assert.ok(doc.querySelector(path.startsWith("/servers") ? "#discovery-controls" : "#game-discovery-controls"));
+    assert.equal(doc.querySelector(path.startsWith("/servers") ? "#result-count" : "#game-result-count").textContent, "Servers temporarily unavailable");
+    assert.equal(doc.querySelector(path.startsWith("/servers") ? "#directory-empty" : "#game-server-empty-v4").hidden, false);
+    assert.equal(doc.querySelector(path.startsWith("/servers") ? "#server-list" : "#game-server-list-v4").dataset.publicRendered, undefined);
+    assert.equal(doc.querySelectorAll(".server-card:not(.server-card-skeleton)").length, 0);
+    assert.equal(doc.querySelector('a[href="' + path + '"]')?.textContent, "Try again");
+    assert.doesNotMatch(response.body, /PRIVATE_DATABASE_TIMEOUT|0 servers|No servers match those filters/);
+  }
+});
 test("legacy template URLs permanently redirect to the public page, never a user supplied host", async () => {
   for (const [from, to] of [["/game?game=fivem", "/games/fivem"], ["/game", "/games"], ["/game?game=fivem&access=public&offset=24&utm_source=old", "/games/fivem?access=public&offset=24"], ["/game?region=United+Kingdom", "/servers?region=United+Kingdom"], ["/server?slug=cali-rp", "/server/cali-rp"], ["/blog-post?slug=choosing-a-community", "/blog/choosing-a-community"]]) {
     const response = await request(from, { headers: { host: "evil.test", cookie: "private-session" } }); assert.equal(response.statusCode, 308); assert.equal(response.headers.location, to);

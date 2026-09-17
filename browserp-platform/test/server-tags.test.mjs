@@ -53,7 +53,18 @@ test("live server refresh preserves clickable tag filters and directory cards co
   const directory = new JSDOM(await page("/servers"));
   try {
     const card = directory.window.document.querySelector(".server-card");
-    assert.equal(card.querySelectorAll(".server-tags span").length, 3);
+    const tagLinks = [...card.querySelectorAll(".server-tags > a")];
+    assert.equal(tagLinks.length, 3);
+    for (const [index, link] of tagLinks.entries()) {
+      const destination = new URL(link.getAttribute("href"), "https://www.browserp.com");
+      assert.equal(destination.origin, "https://www.browserp.com");
+      assert.equal(destination.pathname, "/servers");
+      assert.equal(destination.searchParams.get("platform"), "fivem");
+      assert.equal(destination.searchParams.get("feature"), server.tags[index]);
+      assert.equal(link.textContent, server.tags[index]);
+      assert.equal(link.getAttribute("aria-label"), `Find communities tagged ${server.tags[index]}`);
+      assert.equal(link.querySelector("img,script,a"), null, "Tag text cannot turn into markup or nested links");
+    }
     assert.equal(card.querySelectorAll("a a").length, 0);
     assert.ok(card.querySelector('.discovery-meta-v10 a[href="/servers?platform=fivem&language=English"]'));
   } finally { directory.window.close(); }

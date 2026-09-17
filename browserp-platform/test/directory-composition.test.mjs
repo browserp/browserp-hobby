@@ -35,6 +35,17 @@ async function harness(t, { realSearch = false, deferInitial = false, prerendere
   return { w, doc: w.document, list: w.document.getElementById("server-list"), ad: w.document.getElementById("directory-advert"), setRows(value) { rows = value; }, setFail(value) { fail = value; }, release() { deferInitial = false; releaseInitial(); } };
 }
 
+async function featuredHarness(t, featuredBoost) {
+  const dom = new JSDOM(read("index.html"), { url: "https://browserp.test/", runScripts: "outside-only", pretendToBeVisual: true });
+  t.after(() => dom.window.close());
+  const w = dom.window; w.BrowseRPSearch = { home() {} };
+  w.fetch = async url => ({ ok: true, json: async () => String(url).includes("featured=true")
+    ? { servers: [{ ...server(1), online: true, players: 8, capacity: 32, checked_at: new Date().toISOString() }], featuredBoost }
+    : { authenticated: false } });
+  w.eval(read("browserp-platforms.js")); w.eval(read("browserp-directory.js")); await tick();
+  return { w, list: w.document.getElementById("featured-server-list") };
+}
+
 test("static first-load skeletons precede requests and clear for success, empty or error without replacing SSR", async t => {
   const initial = new JSDOM(read("servers.html"));
   assert.equal(initial.window.document.querySelectorAll(".directory-initial-skeleton").length, 3);
@@ -87,7 +98,7 @@ test("inline advert survives redraws, pagination and empty results without losin
   const card = h.list.querySelector(".server-card");
   assert.doesNotMatch(card.querySelector(".server-meta").textContent, /Not confirmed|Unknown/);
   assert.match(card.textContent, /Application required/);
-  assert.match(card.textContent, /Status unavailable/);
+  assert.match(card.textContent, /Reported offline/);
   assert.match(card.textContent, /Player count unavailable/);
   assert.equal(h.list.querySelectorAll(".server-shortlist-actions").length, 7);
   assert.equal(card.querySelector("button"), null, "Save/Compare stay outside the listing link");
@@ -112,4 +123,18 @@ test("visible sort/filter count and real empty/error/retry transitions retain th
   assert.equal(h.list.hidden, false); assert.equal(h.list.children[2], h.ad);
   assert.equal(pause.getAttribute("aria-pressed"), "true");
   assert.equal(h.doc.getElementById("result-count").textContent, "2 servers");
+});
+
+test("home Boost decoration requires a future expiry and fresh player decoration expires in an open tab", async t => {
+  const future = await featuredHarness(t, { slug: "community-1", expiresAt: new Date(Date.now() + 60000).toISOString() });
+  const card = future.list.querySelector(".server-card");
+  assert.ok(future.list.querySelector(".server-boosted-v11"));
+  card.dataset.playerFreshUntil = String(Date.now() - 1);
+  future.w.dispatchEvent(new future.w.Event("pageshow"));
+  assert.equal(card.querySelector(".status").textContent, "Needs refresh");
+  assert.equal(card.querySelector(".player-count-v10").classList.contains("is-live"), false);
+  future.w.dispatchEvent(new future.w.Event("pagehide"));
+  const expired = await featuredHarness(t, { slug: "community-1", expiresAt: new Date(Date.now() - 1).toISOString() });
+  assert.equal(expired.list.querySelector(".server-boosted-v11"), null);
+  expired.w.dispatchEvent(new expired.w.Event("pagehide"));
 });

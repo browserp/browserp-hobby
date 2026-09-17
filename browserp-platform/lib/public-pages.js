@@ -63,7 +63,7 @@ export function publicServer(row) {
   server.applicationOnly = row.platform_id === "roblox";
   server.roblox = server.applicationOnly ? publicRobloxDetails(row.roblox) : null;
   // Initial documents deliberately avoid a live count which could go stale without JavaScript.
-  server.online = false; server.players = null; server.capacity = null;
+  server.online = null; server.players = null; server.capacity = null;
   return server;
 }
 function postView(row, body = false) {
@@ -132,10 +132,33 @@ function discoveryMetadata(server) {
 }
 function facts(server) { return `<dl class="server-info-grid-v5" data-platform="${server.platform_id}">${[...entries(server), ["Player status", server.applicationOnly ? "Live player count not provided" : "Check live status on this page"]].map(([label, value], i) => `<div class="server-info-card-v5${i >= 4 ? " server-info-wide-v5" : ""}"><dt>${label}</dt><dd>${i ? escapeHTML(value || "Not specified") : badge(server)}</dd></div>`).join("")}</dl>`; }
 function initials(server) { return escapeHTML(server.name.split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase() || "RP"); }
+function playerCardState(server) {
+  const count = value => {
+    if (value === null || value === undefined || value === "" || typeof value === "boolean") return null;
+    const parsed = Number(value); return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
+  };
+  const players = count(server.players), capacity = count(server.capacity ?? server.max_players);
+  const checkedAt = Date.parse(String(server.checked_at || server.checkedAt || server.observed_at || server.observedAt || ""));
+  const fresh = !server.applicationOnly && server.online === true && players !== null
+    && (capacity === null || capacity >= players) && Number.isFinite(checkedAt)
+    && checkedAt <= Date.now() + 60000 && Date.now() - checkedAt <= 300000;
+  const state = server.applicationOnly ? "listing" : fresh ? "live" : server.online === true ? "stale" : server.online === false ? "offline" : "unknown";
+  const status = state === "listing" ? "Community listing" : state === "live" ? "Live count" : state === "stale" ? "Needs refresh" : state === "offline" ? "Reported offline" : "Status unavailable";
+  const countText = state === "listing" ? "Live player count not provided" : state === "live"
+    ? `${players.toLocaleString()}${capacity !== null ? ` / ${capacity.toLocaleString()}` : ""} players${server.count_scope === "network" ? " across the network" : ""}`
+    : state === "stale" ? "Player count needs a refresh" : "Player count unavailable";
+  const title = state === "listing" ? "This community does not publish a live player count" : state === "live" ? "A recently checked player count" : state === "stale" ? "The last player count is no longer recent" : "No current player count is available";
+  return { state, status, countText, title, fresh };
+}
 function card(server) {
   const image = server.logo_url || server.banner_url;
   const href = `/server/${encodeURIComponent(server.slug)}`;
-  return `<div class="server-card discovery-card-v10" data-platform="${escapeHTML(server.platform_id)}"><div class="server-card-top"><div class="server-card-media">${image ? `<img class="server-card-media-image" src="${escapeHTML(image)}" alt="" loading="lazy" width="96" height="96">` : `<span class="server-initials">${initials(server)}</span>`}</div><span class="status">${server.applicationOnly ? "Community listing" : "Reviewed listing"}</span></div><h3><a class="discovery-card-title-v10" href="${href}">${escapeHTML(server.name)}</a></h3><p class="server-description">${escapeHTML(server.description)}</p>${discoveryMetadata(server)}<div class="server-tags">${server.tags.slice(0, 3).map(tag => `<span>${escapeHTML(tag)}</span>`).join("")}</div><div class="server-card-bottom"><strong>${server.applicationOnly ? "Live player count not provided" : "Check live status"}</strong><a class="server-card-action" href="${href}">View listing</a></div></div>`;
+  const player = playerCardState(server);
+  const tags = server.tags.slice(0, 3).map((tag) => {
+    const params = new URLSearchParams({ feature: tag, platform: server.platform_id });
+    return `<a href="/servers?${escapeHTML(params)}" aria-label="${escapeHTML(`Find communities tagged ${tag}`)}">${escapeHTML(tag)}</a>`;
+  }).join("");
+  return `<div class="server-card discovery-card-v10" data-platform="${escapeHTML(server.platform_id)}"><div class="server-card-top discovery-card-identity-v10"><div class="server-card-media">${image ? `<img class="server-card-media-image" src="${escapeHTML(image)}" alt="" loading="lazy" width="96" height="96">` : `<span class="server-initials">${initials(server)}</span>`}</div><h3><a class="discovery-card-title-v10" href="${href}">${escapeHTML(server.name)}</a></h3><span class="status ${player.state}" data-player-state="${player.state}">${player.status}</span></div><p class="server-description">${escapeHTML(server.description)}</p>${discoveryMetadata(server)}<div class="server-tags">${tags}</div><div class="server-card-bottom"><strong class="player-count-v10 is-${player.state}${player.fresh ? " is-live" : ""}" title="${escapeHTML(player.title)}">${escapeHTML(player.countText)}</strong><a class="server-card-action" href="${href}">View listing</a></div></div>`;
 }
 function gameCard(id) { const [name, line] = games[id]; return `<a class="game-hub-card-v4 game-official-card-v6" data-platform="${id}" href="/games/${id}"><span class="game-hub-mark-v4"><img src="${gameArtwork(id)}" alt="" width="460" height="215" class="game-artwork-v5 game-card-artwork-v5 game-official-artwork-v6"></span><span class="game-hub-copy-v4"><strong>${name}</strong><small>${line}</small></span><b>Explore servers</b></a>`; }
 function navGames(current) { return Object.entries(games).map(([id, [name]]) => `<a class="game-nav-chip-v4${id === current ? " is-selected" : ""}" data-platform="${id}" data-game="${id}" href="/games/${id}"${id === current ? ' aria-current="page"' : ""}><img class="game-artwork-v5 game-nav-mark-v4 game-official-artwork-v6" src="${gameArtwork(id)}" alt="" width="160" height="80">${name}</a>`).join(""); }
@@ -260,7 +283,25 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         }
         if (isDirectory || game) {
           const filters = model.normalize({ ...Object.fromEntries(url.searchParams), ...(game ? { platform: id } : {}), limit: 24 });
-          const result = await data.directory(filters);
+          let result;
+          try { result = await data.directory(filters); }
+          catch {
+            // Keep the search controls and game navigation available while the catalogue recovers.
+            // A failed lookup has no trustworthy result count, facets or empty-search conclusion.
+            const listID = isDirectory ? "server-list" : "game-server-list-v4";
+            const emptyID = isDirectory ? "directory-empty" : "game-server-empty-v4";
+            html = slot(html, listID, "", { "aria-busy": "false", "data-public-rendered": false });
+            html = slot(html, isDirectory ? "result-count" : "game-result-count", "Servers temporarily unavailable");
+            html = slot(html, emptyID, `<h3>We couldn’t load the directory.</h3><p>Your search and filters are still available. Try again in a moment.</p><a class="button-v3 button-secondary-v3" href="${escapeHTML(url.pathname + url.search)}">Try again</a>`, { hidden: false });
+            if (game) {
+              html = attribute(html, "game-results-v4", { hidden: false });
+              html = slot(html, "game-results-title-v4", `${game[0]} servers`);
+              html = attribute(html, "game-directory-link-v4", { href: `/servers?platform=${id}` });
+            }
+            res.setHeader("X-Robots-Tag", "noindex, nofollow");
+            res.setHeader("Retry-After", "60");
+            return send(503, head(html, { title: "Discover temporarily unavailable — BrowseRP", description: "BrowseRP is temporarily unable to load directory results. Please try again shortly.", path: null, noindex: true }));
+          }
           if (!Array.isArray(result?.servers) || !Number.isSafeInteger(result.total) || result.total < 0) throw new Error("Invalid public directory response");
           if (filters.offset && filters.offset >= result.total) throw notFound();
           const servers = result.servers.map(publicServer).filter(Boolean);

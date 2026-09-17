@@ -76,11 +76,11 @@ test("the listing UI has useful empty and recoverable error states without showi
   const dom = new JSDOM(page(), { url: "https://www.browserp.com/server/current-rp", runScripts: "outside-only", pretendToBeVisual: true });
   const { window } = dom; t.after(() => window.close());
   window.document.querySelector("#server-detail-v3").dataset.platform = "fivem";
-  let fail = false; const requests = [];
+  let fail = false; let similar = [current]; const requests = [];
   window.fetch = async (url, options) => {
     requests.push({ url: String(url), options });
     if (fail) return json({}, 503);
-    return json({ servers: [current] });
+    return json({ servers: similar });
   };
   window.eval(script("browserp-platforms.js"));
   window.eval(script("similar-communities.js"));
@@ -90,6 +90,19 @@ test("the listing UI has useful empty and recoverable error states without showi
   assert.equal(section.querySelector("[data-similar-list]").children.length, 0);
   assert.equal(section.querySelector("[data-similar-browse]").getAttribute("href"), "/servers?platform=fivem");
   assert.equal(requests[0].options.credentials, "same-origin"); assert.equal(requests[0].url, "/api/servers?similar=current-rp");
+  similar = [server("nearby-rp", { online: true, players: 24, capacity: 64, checked_at: new Date().toISOString(), tags: ["police", "economy"] })];
+  section.querySelector("[data-similar-retry]").click(); await settle();
+  const card = section.querySelector(".server-card");
+  assert.equal(section.dataset.state, "ready");
+  assert.equal(card.tagName, "DIV");
+  assert.equal(card.querySelector(".discovery-card-identity-v10 h3 a").getAttribute("href"), "/server/nearby-rp");
+  assert.equal(card.querySelector(".server-tags a").getAttribute("href"), "/servers?feature=police&platform=fivem");
+  assert.equal(card.querySelectorAll(".server-meta a[aria-label^=\"Region\"]").length, 1);
+  assert.equal(card.querySelector(".player-count-v10").classList.contains("is-live"), true);
+  card.dataset.playerFreshUntil = String(Date.now() - 1);
+  window.dispatchEvent(new window.Event("pageshow"));
+  assert.equal(card.querySelector(".status").textContent, "Needs refresh");
+  assert.equal(card.querySelector(".player-count-v10").classList.contains("is-live"), false);
   fail = true; section.querySelector("[data-similar-retry]").click(); await settle();
   assert.equal(section.dataset.state, "error"); assert.match(state.textContent, /temporarily unavailable/); assert.equal(section.querySelector("[data-similar-retry]").hidden, false);
 });

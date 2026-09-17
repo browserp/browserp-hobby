@@ -127,6 +127,11 @@ test("public pages and fallback API load without external secrets", async () => 
   assert.deepEqual(payload.servers, []);
   assert.equal(payload.total, 0);
 
+  const featured = await fetch(`${origin}/api/servers?featured=true&limit=4`);
+  assert.equal(featured.status, 200);
+  assert.equal(featured.headers.get("cache-control"), "no-store", "an expired or withdrawn staff slot must never survive in a stale CDN response");
+  assert.equal((await featured.json()).featuredBoost, null);
+
   const developers = await (await fetch(`${origin}/api/developers`)).json();
   const resources = await (await fetch(`${origin}/api/resources`)).json();
   assert.deepEqual(developers.developers, []);

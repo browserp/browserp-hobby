@@ -19,9 +19,9 @@ function directoryHarness(search = "") {
   const names = { fivem: "FiveM", redm: "RedM", roblox: "Roblox", minecraft: "Minecraft", forza: "Forza", dayz: "DayZ" };
   const platforms = Object.entries(names).reverse().map(([id, name]) => ({ id, name }));
   const context = {
-    document: { body: { dataset: {} }, createElement: () => new Element(), getElementById: (id) => nodes.get(id) },
+    document: { body: { dataset: {} }, createElement: () => new Element(), getElementById: (id) => nodes.get(id), addEventListener() {} },
     location: { search }, URLSearchParams,
-    window: { BrowseRPPlatforms: { theme(node, id) { node.dataset.platform = id; } } },
+    window: { BrowseRPPlatforms: { theme(node, id) { node.dataset.platform = id; } }, addEventListener() {} },
     requestAnimationFrame: (callback) => callback(),
     fetch: async () => ({ ok: true, json: async () => ({ platforms }) })
   };

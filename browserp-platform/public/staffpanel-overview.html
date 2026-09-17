@@ -33,15 +33,17 @@
   <link rel="stylesheet" href="/staff-authenticators.css?v=1">
   <script src="/staff-authenticators.js?v=1" defer></script>
   <link rel="stylesheet" href="/staff-adverts.css?v=2.13.0">
+  <link rel="stylesheet" href="/staff-featured-boost.css?v=20260917-1">
   <link rel="stylesheet" href="/staff-publishing.css?v=1">
   <script src="/publishing-content.js?v=2.18.0" defer></script>
   <script src="/staff-duty.js?v=1" defer></script>
   <script src="/staff-overview.js?v=20260914-layout1" defer></script>
   <script src="/staff-adverts.js?v=2.17.0" defer></script>
+  <script src="/staff-featured-boost.js?v=20260917-1" defer></script>
   <link rel="stylesheet" href="/advertising-enquiries.css?v=2.17.0">
   <script src="/advertising-enquiries.js?v=2.17.0" defer></script>
   <script src="/staff-publishing.js?v=2.10.3" defer></script>
-  <script src="/staff-scrapers.js?v=2.20.4" defer></script><script src="/touch-feedback.js?v=2.18.0" defer></script><script src="/staffpanel-v3.js?v=20260916-themes1" defer></script>
+  <script src="/staff-scrapers.js?v=2.20.4" defer></script><script src="/touch-feedback.js?v=2.18.0" defer></script><script src="/staffpanel-v3.js?v=20260917-release1" defer></script>
   <link rel="stylesheet" href="/staff-scrapers.css?v=2.9.0">
   <link rel="stylesheet" href="/staff-layout.css?v=20260914-layout1">
   <link rel="stylesheet" href="/design-system.css?v=20260915-blocktype-buttons1">
@@ -99,6 +101,17 @@
       </section>
       <section id="overview-refresh-health" data-refresh-health aria-label="Live listing checks"></section>
       <section id="overview-adverts" class="overview-module" aria-label="Advertisements"><div data-advert-campaigns><div class="overview-section-heading"><div><span class="eyebrow-v3">Website placements</span><h2>Advertisements</h2><p>Loading advertisements…</p></div></div></div><section id="advertising-enquiries" aria-label="Advertising enquiries"><h3>Advertising enquiries</h3><p>Checking enquiry access…</p></section></section>
+      <section id="overview-featured-boost" class="overview-module staff-featured-boost" aria-labelledby="featured-boost-title" hidden inert>
+        <div class="overview-section-heading"><div><span class="eyebrow-v3">Homepage feature</span><h2 id="featured-boost-title">Boost a server</h2><p>Feature one published community at the top of New roleplay communities for a set time.</p></div></div>
+        <p data-boost-status role="status">Loading boost controls…</p>
+        <button data-boost-retry class="button-v3 button-secondary-v3" type="button" hidden>Reload boost controls</button>
+        <div class="staff-featured-fields">
+          <label>Server <select data-boost-server disabled><option value="">Choose a published server</option></select></label>
+          <label>How long <select data-boost-duration disabled><option value="1">1 hour</option><option value="6">6 hours</option><option value="24">1 day</option><option value="72">3 days</option><option value="168">7 days</option><option value="336">14 days</option><option value="720">30 days</option></select></label>
+          <label>Reason for staff record <input data-boost-reason disabled type="text" minlength="5" maxlength="500" placeholder="Why is this server being featured?"></label>
+          <div class="staff-featured-actions"><button data-boost-start disabled class="button-v3 button-primary-v3" type="button">Start boost</button><button data-boost-end disabled class="button-v3 button-secondary-v3" type="button" hidden>End current boost</button></div>
+        </div>
+      </section>
       <section id="overview-publishing" class="overview-module" aria-label="Blog publishing"><div class="overview-section-heading"><div><span class="eyebrow-v3">Community updates</span><h2>Blog posts</h2><p>Loading publishing tools…</p></div><a class="button-v3 button-secondary-v3" href="/blog">View blog</a></div></section>
       <section class="overview-users ds-chart-frame" id="overview-users" aria-labelledby="overview-users-title">
         <div class="overview-section-heading"><div><span class="eyebrow-v3">Website reporting</span><h2 id="overview-users-title">Registrations</h2><p>Current accounts by signup date · UTC</p></div>

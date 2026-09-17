@@ -757,6 +757,7 @@
         toolsMounted = true;
         await Promise.allSettled([
           window.BrowseRPStaffAdverts.init({ api, permissions: website.permissions }),
+          window.BrowseRPStaffFeaturedBoost?.init({ api }),
           window.BrowseRPStaffPublishing.init({ api, permissions: website.permissions })
         ]);
       }});

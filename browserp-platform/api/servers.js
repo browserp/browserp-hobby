@@ -7,7 +7,7 @@ import { developmentCatalogAllowed } from "../lib/config.js";
 import { enrichImportedServers, refreshDueFiveMServers } from "../lib/fivem-workflow.js";
 import { discoverServers } from "../lib/discovery.js";
 import { filterServers } from "../lib/directory.js";
-import { assertSameOrigin, publicJson, readBody } from "../lib/http.js";
+import { assertSameOrigin, json, publicJson, readBody } from "../lib/http.js";
 import { assessContent, sanitizePlainText } from "../lib/moderation.js";
 import { processContentCheck } from "../lib/content-moderation.js";
 import { rateLimit } from "../lib/rate-limit.js";
@@ -17,6 +17,12 @@ import { readSimilarCommunities, selectSimilarCommunities } from "../lib/similar
 
 function safeText(value, limit) {
   return String(value || "").trim().slice(0, limit);
+}
+
+function activeFeaturedBoost(value) {
+  const expiry = Date.parse(value?.expiresAt || "");
+  return value && typeof value.slug === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value.slug)
+    && Number.isFinite(expiry) && expiry > Date.now();
 }
 
 export default endpoint(["GET", "POST"], async (req, res) => {
@@ -102,12 +108,40 @@ export default endpoint(["GET", "POST"], async (req, res) => {
   }
   if (!Array.isArray(servers)) servers = [];
   if (slug) servers = servers.filter((server) => String(server.slug || "").toLowerCase() === slug).slice(0, 1);
+  let featuredBoost = null, boostedCandidate = null;
+  if (!slug && filters.featured === "true") {
+    try {
+      featuredBoost = await rpc("public_featured_boost", {});
+      if (activeFeaturedBoost(featuredBoost)) {
+        const boosted = await rpc("search_server_directory", {
+          p_slug: featuredBoost.slug, p_query: "", p_platform: "all", p_region: "all",
+          p_online: false, p_verified: false, p_beginner: false, p_sort: "recommended", p_limit: 1
+        });
+        const first = Array.isArray(boosted) ? boosted.find((item) => item.slug === featuredBoost.slug) : null;
+        const constrained = Boolean(filters.query || (filters.platform && filters.platform !== "all") || (filters.region && filters.region !== "all") || filters.online === "true" || filters.verified === "true" || filters.beginner === "true");
+        if (first && (!constrained || servers.some((item) => item.id === first.id))) boostedCandidate = first;
+      }
+    } catch { featuredBoost = null; }
+  }
   servers = await enrichMinecraftServers(await enrichImportedServers(servers, { refresh: Boolean(slug) }), { refresh: Boolean(slug) });
   servers = await enrichRobloxApplications(servers);
+  // Resolve and enrich the promoted listing separately, then check the expiry
+  // again immediately before sending. A slow request cannot extend a staff slot.
+  if (boostedCandidate && activeFeaturedBoost(featuredBoost)) {
+    try {
+      const [enriched] = await enrichRobloxApplications(await enrichMinecraftServers(await enrichImportedServers([boostedCandidate], { refresh: false }), { refresh: false }));
+      if (enriched?.id === boostedCandidate.id && activeFeaturedBoost(featuredBoost)) {
+        servers = [enriched, ...servers.filter((item) => item.id !== enriched.id)].slice(0, Math.min(Math.max(Number(filters.limit) || 4, 1), 100));
+      } else featuredBoost = null;
+    } catch { featuredBoost = null; }
+  } else featuredBoost = null;
   let engagement = null;
   if (slug && servers.length) {
     try { engagement = await rpc("public_server_engagement", { p_slug: slug }); }
     catch (error) { if (!developmentCatalogAllowed()) throw error; }
   }
-  return publicJson(res, { servers, total: servers.length, engagement }, slug ? 30 : 20);
+  const payload = { servers, total: servers.length, engagement, featuredBoost };
+  // A featured response can be revoked at any moment; CDN stale serving would
+  // keep an expired or withdrawn promotion visible after its database removal.
+  return filters.featured === "true" && !slug ? json(res, 200, payload) : publicJson(res, payload, slug ? 30 : 20);
 });

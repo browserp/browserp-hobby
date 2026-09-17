@@ -21,6 +21,7 @@
   const AVAILABLE_GAME_IDS = new Set(["fivem", "redm", "roblox", "minecraft"]);
   const AVAILABLE_GAMES = GAMES.filter((game) => AVAILABLE_GAME_IDS.has(game.id));
   const UPCOMING_GAMES = GAMES.filter((game) => !AVAILABLE_GAME_IDS.has(game.id) && !game.future);
+  let playerExpiryTimer = null;
 
   const $ = (selector) => document.querySelector(selector);
   const node = (tag, className, text) => { const item = document.createElement(tag); if (className) item.className = className; if (text !== undefined) item.textContent = text; return item; };
@@ -101,16 +102,62 @@
       image.src = artwork[0]; media.append(image);
     } else media.append(initial);
     const applicationOnly = server.applicationOnly === true;
-    const top = node("div", "server-card-top"); top.append(media, node("span", `status${!applicationOnly && server.online ? " online" : ""}`, applicationOnly ? "Community listing" : server.online ? "Online now" : "Status unavailable"));
+    const playerNumber = (value) => {
+      if (value === null || value === undefined || value === "" || typeof value === "boolean") return null;
+      const parsed = Number(value);
+      return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
+    };
+    const checkedAt = Date.parse(String(server.checked_at || server.checkedAt || server.observed_at || server.observedAt || ""));
+    const players = playerNumber(server.players);
+    const capacity = playerNumber(server.capacity ?? server.max_players);
+    const freshCount = !applicationOnly && server.online === true && players !== null
+      && (capacity === null || capacity >= players) && Number.isFinite(checkedAt)
+      && checkedAt <= Date.now() + 60000 && Date.now() - checkedAt <= 300000;
+    const playerState = applicationOnly ? "listing" : freshCount ? "live" : server.online === true ? "stale" : server.online === false ? "offline" : "unknown";
+    const statusText = playerState === "listing" ? "Community listing" : playerState === "live" ? "Live count" : playerState === "stale" ? "Needs refresh" : playerState === "offline" ? "Reported offline" : "Status unavailable";
+    const top = node("div", "server-card-top discovery-card-identity-v10");
     const title = node("h3", ""); const titleLink = node("a", "discovery-card-title-v10", server.name || "Roleplay server");
     titleLink.href = listingHref; title.append(titleLink);
-    link.append(top, title, node("p", "server-description", server.description || "Open the listing to learn more."), window.BrowseRPPlatforms.discoveryMetadata(server));
+    const status = node("span", `status ${playerState}`, statusText); status.dataset.playerState = playerState;
+    top.append(media, title, status);
+    link.append(top, node("p", "server-description", server.description || "Open the listing to learn more."), window.BrowseRPPlatforms.discoveryMetadata(server));
     const tags = node("div", "server-tags");
-    (Array.isArray(server.tags) ? server.tags : []).slice(0, 3).forEach(tag => tags.append(node("span", "", tag)));
+    (Array.isArray(server.tags) ? server.tags : []).slice(0, 3).forEach((tag) => {
+      const label = String(tag || "").trim(); if (!label) return;
+      const filters = new URLSearchParams({ feature: label });
+      const platform = window.BrowseRPPlatforms.idFor(server); if (platform !== "other") filters.set("platform", platform);
+      const tagLink = node("a", "", label); tagLink.href = `/servers?${filters}`;
+      tagLink.setAttribute("aria-label", `Find communities tagged ${label}`); tags.append(tagLink);
+    });
     link.append(tags);
     const bottom = node("div", "server-card-bottom"); const view = node("a", "server-card-action", "View listing"); view.href = listingHref;
-    bottom.append(node("strong", "", applicationOnly ? "Live player count not provided" : server.online ? `${Number(server.players || 0).toLocaleString()} players${server.count_scope === "network" ? " across the network" : ""}` : "Player count unavailable"), view); link.append(bottom);
+    const playerText = playerState === "listing" ? "Live player count not provided" : playerState === "live"
+      ? `${players.toLocaleString()} players${server.count_scope === "network" ? " across the network" : ""}`
+      : playerState === "stale" ? "Player count needs a refresh" : "Player count unavailable";
+    const playerCount = node("strong", `player-count-v10 is-${playerState}${freshCount ? " is-live" : ""}`, playerText);
+    playerCount.title = playerState === "listing" ? "This community does not publish a live player count" : playerState === "live" ? "A recently checked player count" : playerState === "stale" ? "The last player count is no longer recent" : "No current player count is available";
+    bottom.append(playerCount, view); link.append(bottom);
+    if (freshCount) link.dataset.playerFreshUntil = String(checkedAt + 300000);
     return window.BrowseRPShortlist?.wrap(link, server) || link;
+  }
+
+  function clearPlayerExpiry() {
+    if (playerExpiryTimer !== null) window.clearTimeout(playerExpiryTimer);
+    playerExpiryTimer = null;
+  }
+  function expirePlayerState(card) {
+    card.removeAttribute("data-player-fresh-until");
+    const status = card.querySelector(".status");
+    if (status) { status.className = "status stale"; status.dataset.playerState = "stale"; status.textContent = "Needs refresh"; }
+    const count = card.querySelector(".player-count-v10");
+    if (count) { count.className = "player-count-v10 is-stale"; count.title = "The last player count is no longer recent"; count.textContent = "Player count needs a refresh"; }
+  }
+  function schedulePlayerExpiry(list) {
+    clearPlayerExpiry();
+    const now = Date.now(), cards = [...list.querySelectorAll(".server-card[data-player-fresh-until]")];
+    cards.filter(card => Number(card.dataset.playerFreshUntil) <= now).forEach(expirePlayerState);
+    const next = cards.map(card => Number(card.dataset.playerFreshUntil)).filter(value => Number.isFinite(value) && value > now).sort((a, b) => a - b)[0];
+    if (next) playerExpiryTimer = window.setTimeout(() => schedulePlayerExpiry(list), Math.min(next - now, 2147483647));
   }
 
   function render() {
@@ -173,9 +220,13 @@
     gameCopy($("#game-results-title-v4"), game.id === "roblox" ? "Roblox communities" : `${game.name} servers`);
     $("#game-results-lead-v4").textContent = `Reviewed ${game.line.toLowerCase()} listings appear below.`;
     $("#game-directory-link-v4").href = `/servers?platform=${encodeURIComponent(game.id)}`;
-    window.BrowseRPSearch.mount({ root: $("#game-discovery-controls"), list: $("#game-server-list-v4"), empty: $("#game-server-empty-v4"), count: $("#game-result-count"), fixedGame: game.id, render: (list, servers) => list.replaceChildren(...servers.map(serverCard)) });
+    window.BrowseRPSearch.mount({ root: $("#game-discovery-controls"), list: $("#game-server-list-v4"), empty: $("#game-server-empty-v4"), count: $("#game-result-count"), fixedGame: game.id, render: (list, servers) => { list.replaceChildren(...servers.map(serverCard)); schedulePlayerExpiry(list); } });
   }
 
-  window.BrowseRPDirectory = { render: (list, servers) => list.replaceChildren(...servers.map(serverCard)) };
+  window.BrowseRPDirectory = { render: (list, servers) => { list.replaceChildren(...servers.map(serverCard)); schedulePlayerExpiry(list); } };
+  const refreshPlayerExpiry = () => { if (document.visibilityState !== "hidden") { const list = $("#game-server-list-v4"); if (list) schedulePlayerExpiry(list); } };
+  document.addEventListener("visibilitychange", refreshPlayerExpiry);
+  window.addEventListener("pageshow", refreshPlayerExpiry);
+  window.addEventListener("pagehide", clearPlayerExpiry);
   render();
 })();

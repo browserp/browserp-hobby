@@ -75,20 +75,34 @@ test("initial directory cards use logo first, three existing features and honest
     try {
       assert.equal(output.statusCode, 200);
       const card = dom.window.document.querySelector(".server-card");
-      assert.deepEqual([...card.querySelectorAll(".server-tags span")].map(span => span.textContent), row.tags.slice(0, 3));
-      assert.deepEqual([...card.children].map(node => node.matches("h3") ? "title" : node.className), ["server-card-top", "title", "server-description", "server-meta platform-meta-v5 discovery-meta-v10", "server-tags", "server-card-bottom"]);
+      assert.deepEqual([...card.querySelectorAll(".server-tags a")].map(link => link.textContent), row.tags.slice(0, 3));
+      assert.equal(card.querySelector(".server-tags a").getAttribute("href"), "/servers?feature=Story-led&platform=roblox");
+      assert.deepEqual([...card.children].map(node => node.className), ["server-card-top discovery-card-identity-v10", "server-description", "server-meta platform-meta-v5 discovery-meta-v10", "server-tags", "server-card-bottom"]);
       assert.equal(card.querySelector(".server-description").nextElementSibling.className, "server-meta platform-meta-v5 discovery-meta-v10");
       assert.equal(card.querySelector('h3 a').getAttribute('href'), '/server/community');
       assert.equal(card.querySelector('.server-meta a[aria-label^="Region"]').getAttribute('href'), '/servers?platform=roblox&region=United+States');
       assert.equal(card.querySelector(".server-tags").nextElementSibling.className, "server-card-bottom");
       assert.equal(card.querySelector(".status").textContent, "Community listing");
-      assert.equal(card.querySelector(".status").classList.contains("online"), false);
+      assert.equal(card.querySelector(".status").classList.contains("live"), false);
       assert.match(card.querySelector(".server-card-bottom").textContent, /Live player count not provided/);
+      assert.equal(card.querySelector(".player-count-v10").classList.contains("is-live"), false);
       assert.equal(card.querySelector(".server-card-media svg,.server-tags img"), null);
       assert.equal(card.querySelector(".server-card-media-image")?.getAttribute("src") || null, row.logo_url ? "/assets/logo.png" : row.banner_url ? "/assets/banner.png" : null);
       if (!row.logo_url && !row.banner_url) assert.equal(card.querySelector(".server-initials").textContent, "AC");
     } finally { dom.window.close(); }
   }
+});
+test("initial directory cards do not turn withheld telemetry into a live or offline claim", async () => {
+  const row = { name: "Measured elsewhere", slug: "measured-elsewhere", platform_id: "fivem", description: "Initial documents wait for the client refresh.", region: "United Kingdom", language: "English", framework: "QBCore", access_type: "public", tags: ["economy"], online: true, players: 24, capacity: 64, checked_at: new Date().toISOString() };
+  const output = { setHeader() {}, end(value) { this.body = value; } };
+  await createPublicPageHandler({ data: { directory: async () => ({ servers: [row], total: 1 }) } })({ url: "/servers", method: "GET", headers: {} }, output);
+  const dom = new JSDOM(output.body);
+  try {
+    const card = dom.window.document.querySelector(".server-card");
+    assert.equal(card.querySelector(".status").textContent, "Status unavailable");
+    assert.equal(card.querySelector(".player-count-v10").textContent, "Player count unavailable");
+    assert.equal(card.querySelector(".player-count-v10").classList.contains("is-live"), false);
+  } finally { dom.window.close(); }
 });
 test("homepage declares BrowseRP once with its canonical publisher identity and loads coordinated touch feedback once", () => {
   const dom = new JSDOM(read("public/index.html"));

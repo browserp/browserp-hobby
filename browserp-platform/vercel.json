@@ -254,6 +254,10 @@
       "destination": "/api/router?_route=admin/adverts/media"
     },
     {
+      "source": "/api/admin/featured-boost",
+      "destination": "/api/router?_route=admin/featured-boost"
+    },
+    {
       "source": "/api/admin/adverts",
       "destination": "/api/router?_route=admin/adverts"
     },
