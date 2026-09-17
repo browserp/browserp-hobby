@@ -2,8 +2,8 @@
    remain the source of truth; only presentation and link affordances change. */
 .account-trigger-v3 .account-avatar-v3 {
   display: block;
-  background: linear-gradient(135deg, #f5d2ea, #bca5e7 55%, #9de9ed);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / .28);
+  background: transparent;
+  box-shadow: none;
 }
 :root body[data-page="home"] .home-hero-intro h1 .gradient-text-v3,
 :root:is([data-theme="dark"], [data-theme="light"]) body[data-page="home"] .home-hero-intro h1 .gradient-text-v3 {
