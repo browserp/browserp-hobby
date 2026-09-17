@@ -388,20 +388,6 @@ body:is([data-page="profile"], [data-page="dashboard"]) .access-gate-v2 h1 { fon
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-copy-v3 { padding-top: 125cqi; }
   :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3:not(.artwork-unavailable) .side-ad-shade-v3 { background: linear-gradient(180deg, transparent calc(125cqi - 32px), #0c0e13 125cqi); }
 }
-/* Wide placements use the complete portrait creative beside the message.
-   The approved artwork is 800 × 1000, so filling a landscape stage crops it. */
-@container (min-width: 561px) {
-  :root body:not(.staff-v3):not([data-staff-page]) .banner-ad-v7:not(.artwork-unavailable) .side-ad-stage-v3 { grid-template-columns: 44px minmax(0, 1fr) minmax(190px, 30%) 44px; min-height: clamp(280px, 35cqi, 380px); background: #090911; }
-  :root body:not(.staff-v3):not([data-staff-page]) .banner-ad-v7:not(.artwork-unavailable) .side-ad-image-v3 { left: auto; right: 64px; width: calc(30% - 12px); object-fit: contain; object-position: center; }
-  :root body:not(.staff-v3):not([data-staff-page]) .banner-ad-v7:not(.artwork-unavailable) .side-ad-shade-v3 { background: linear-gradient(90deg, #090911 0%, #090911 52%, #090911bb 72%, #09091144); }
-  :root body:not(.staff-v3):not([data-staff-page]) .banner-ad-v7:not(.artwork-unavailable) .ad-arrow-next-v3 { grid-column: 4; }
-}
-@container (max-width: 560px) {
-  :root body:not(.staff-v3):not([data-staff-page]) .banner-ad-v7:not(.artwork-unavailable) .side-ad-stage-v3 { padding-top: clamp(210px, 90cqi, 380px); background: #090911; }
-  :root body:not(.staff-v3):not([data-staff-page]) .banner-ad-v7:not(.artwork-unavailable) .side-ad-image-v3 { width: 100%; height: clamp(210px, 90cqi, 380px); object-fit: contain; object-position: center top; }
-  :root body:not(.staff-v3):not([data-staff-page]) .banner-ad-v7:not(.artwork-unavailable) .side-ad-copy-v3 { padding-top: 12px; }
-  :root body:not(.staff-v3):not([data-staff-page]) .banner-ad-v7:not(.artwork-unavailable) .side-ad-shade-v3 { background: linear-gradient(180deg, transparent 0%, transparent 52%, #090911 78%); }
-}
 :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3,
 :root body:not(.staff-v3):not([data-staff-page]) .banner-ad-v7.side-ad-v3 { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 :root body:not(.staff-v3):not([data-staff-page]) .side-ad-v3 .ad-controls-v3 { padding: 8px 12px; border: 0; background: transparent; box-shadow: none; gap: 4px 12px; flex-wrap: wrap; align-items: center; }

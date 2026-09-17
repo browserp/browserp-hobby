@@ -181,6 +181,7 @@ test("creative framing never selects stage geometry or disables the existing ima
   }
   assert.match(shared, /min-height: clamp\(280px, 35cqi, 560px\)/);
   assert.match(shared, /min-height: calc\(125cqi \+ 360px\)/);
+  assert.doesNotMatch(shared, /\.banner-ad-v7:not\(\.artwork-unavailable\) \.side-ad-(?:stage|image|shade|copy)-v3/, "The approved full-bleed banner keeps the shared stage, artwork, overlay and copy composition");
   assert.match(read("browserp-v3.css"), /transition: opacity \.35s ease, transform 7s ease/);
   assert.match(shared, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.side-ad-image-v3 \{ transition: none;/);
 });

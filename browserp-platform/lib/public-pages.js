@@ -332,7 +332,7 @@ export function createPublicPageHandler({ data = source, readTemplate = template
         let html = await readTemplate("user");
         if (member.visibility === "basic") {
           const handle = escapeHTML(username);
-          const avatar = member.avatarUrl === `/api/public/basic-profile-avatar?username=${username}`
+          const avatar = member.avatarUrl === `/api/public/basic-profile-avatar?username=${username}` || member.avatarUrl === "/assets/browserp-icon-512.png"
             ? `<img src="${escapeHTML(member.avatarUrl)}" alt="" width="98" height="98">` : "RP";
           const basic = `<main id="main" class="member-page-v7"><div class="shell-v3"><article class="member-basic-v7" aria-label="Basic member profile"><div class="member-avatar-v7" aria-hidden="true">${avatar}</div><div class="member-basic-content-v7"><h1>@${handle}</h1><a id="member-message-v7" class="button-v3 button-primary-v3" data-username="${handle}" href="/dashboard?message=${handle}#inbox" hidden>Message</a></div></article></div></main>`;
           const full = /<main id="main" class="member-page-v7">[\s\S]*?<\/main>/;
@@ -344,7 +344,12 @@ export function createPublicPageHandler({ data = source, readTemplate = template
           : escapeHTML(member.displayName.slice(0, 2).toUpperCase());
         const posted = (member.servers || []).map(publicServer).filter(Boolean);
         const joined = member.joinedAt ? `Joined ${new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(member.joinedAt))}` : "";
-        const badges = [...(member.staffRole ? [{ kind: "staff_role", label: member.staffRole, description: `Active BrowseRP staff role: ${member.staffRole}.` }] : []), ...(member.badges || [])];
+        const staffBadge = member.staffRole === "Owner"
+          ? { kind: "staff_owner", label: "BrowseRP Owner", description: "Active protected BrowseRP owner role." }
+          : member.staffRole === "Management"
+            ? { kind: "staff_management", label: "BrowseRP Management", description: "Active BrowseRP Management staff role." }
+          : member.staffRole ? { kind: "staff_role", label: member.staffRole, description: `Active BrowseRP staff role: ${member.staffRole}.` } : null;
+        const badges = [...(staffBadge ? [staffBadge] : []), ...(member.badges || [])];
         for (const [id, value] of [["member-name-v7", escapeHTML(member.displayName)], ["member-handle-v7", `@${escapeHTML(username)}`], ["member-joined-v7", escapeHTML(joined)], ["member-avatar-v7", avatar], ["member-bio-v7", escapeHTML(member.bio || "No bio yet.")], ["member-badges-v7", badges.map(memberBadge).join("")], ["member-server-grid-v7", posted.map(card).join("")]]) html = slot(html, id, value);
         html = attribute(html, "member-banner-v7", { "data-banner": member.bannerStyle });
         html = attribute(html, "member-empty-v7", { hidden: posted.length ? "" : false });

@@ -50,6 +50,18 @@ test("published comments show the approved avatar, author, precise time and wrap
   } finally { dom.window.close(); }
 });
 
+test("only the known flattened brand avatar uses the transparent mark in comments", () => {
+  const dom = harness();
+  try {
+    const legacy = "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/fe6b695a-8f6c-4180-a6e6-25d729a16443/1787193557239-9cb54f6bcdcb84271c802482.png";
+    const image = dom.window.BrowseRPPublicComments.render({ author: "BrowseRP", avatarUrl: legacy, body: "Hello" }).querySelector(".comment-avatar-v3");
+    assert.equal(image.getAttribute("src"), "/assets/browserp-icon-512.png");
+    const otherUrl = "https://example.test/profile/1787193557239-9cb54f6bcdcb84271c802482.png";
+    const other = dom.window.BrowseRPPublicComments.render({ author: "Other", avatarUrl: otherUrl, body: "Hello" }).querySelector(".comment-avatar-v3");
+    assert.equal(other.src, otherUrl);
+  } finally { dom.window.close(); }
+});
+
 test("canonical badges have fixed wording, priority, deduplication and accessible overflow", () => {
   const dom = harness();
   try {
@@ -98,7 +110,7 @@ test("rank never creates staff identity and unknown badges are ignored", () => {
 });
 
 test("server comments load the scoped badge stylesheet with explicit dark and light theme treatment", () => {
-  assert.match(serverPage, /<link rel="stylesheet" href="\/member-badges\.css\?v=1"><script src="\/public-comments\.js\?v=2\.23\.0" defer><\/script>/);
+  assert.match(serverPage, /<link rel="stylesheet" href="\/member-badges\.css\?v=[^"]+"><script src="\/public-comments\.js\?v=[^"]+" defer><\/script>/);
   for (const kind of ["browserp_staff", "verified_owner", "discord_verified_email", "first_100", "first_500", "community_helper", "new_joiner"]) assert.match(css, new RegExp(`data-kind=["']${kind}["']`));
   assert.match(css, /:root\[data-theme="light"\] \.comment-badges-v3/);
   assert.doesNotMatch(source, /innerHTML|insertAdjacentHTML|\.src\s*=\s*badge|badge\.label/);

@@ -34,6 +34,16 @@ test("a custom uploaded avatar takes precedence over the provider and approved f
   assert.equal(document.querySelector(".portal-head .portal-avatar img").src, "https://example.test/my-upload.png");
 });
 
+test("the exact older flattened BrowseRP mark displays as the transparent site asset", async t => {
+  const legacy = "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/fe6b695a-8f6c-4180-a6e6-25d729a16443/1787193557239-9cb54f6bcdcb84271c802482.png";
+  const { document } = await profilePage(t, { display_name: "BrowseRP", avatar_url: legacy });
+  for (const image of document.querySelectorAll(".portal-head .portal-avatar img, .profile-picture-preview-v3 img")) {
+    assert.equal(image.getAttribute("src"), "/assets/browserp-icon-512.png");
+  }
+  const other = await profilePage(t, { display_name: "Other", avatar_url: "https://example.test/profile/1787193557239-9cb54f6bcdcb84271c802482.png" });
+  assert.equal(other.document.querySelector(".portal-head .portal-avatar img").src, "https://example.test/profile/1787193557239-9cb54f6bcdcb84271c802482.png");
+});
+
 test("broken or unsafe avatars fall back to initials without an empty broken image", async t => {
   const h = await profilePage(t, { display_name: "Gaming Member", avatar_url: "https://example.test/unavailable.png" });
   const headingAvatar = h.document.querySelector(".portal-head .portal-avatar");

@@ -43,7 +43,7 @@
     // An older upload of the BrowseRP mark was flattened against black. Show
     // the identical transparent site asset in the account chip; the approved
     // profile record and every other member's uploaded avatar stay untouched.
-    const legacyMark = new URL(url).pathname.endsWith("/1787193557239-9cb54f6bcdcb84271c802482.png");
+    const legacyMark = url === "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/fe6b695a-8f6c-4180-a6e6-25d729a16443/1787193557239-9cb54f6bcdcb84271c802482.png";
     image.addEventListener("error", () => image.replaceWith(node("span", "account-initials-v3", initials(name))), { once: true }); image.src = legacyMark ? "/assets/browserp-icon-512.png" : url;
     return image;
   }

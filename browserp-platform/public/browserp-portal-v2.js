@@ -115,7 +115,9 @@
 
   function profileAvatarUrl(profile) {
     const candidates = [profile?.custom_avatar_url, profile?.customAvatarUrl, profile?.avatar_url, profile?.avatarUrl, profile?.approved_avatar_url, profile?.approvedAvatarUrl];
-    return candidates.map(safeHttpsUrl).find(Boolean) || "";
+    const url = candidates.map(safeHttpsUrl).find(Boolean) || "";
+    return url === "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/fe6b695a-8f6c-4180-a6e6-25d729a16443/1787193557239-9cb54f6bcdcb84271c802482.png"
+      ? "/assets/browserp-icon-512.png" : url;
   }
 
   function profileAvatar(profile, className, name) {

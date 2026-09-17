@@ -14,11 +14,19 @@ test("premium page layer remains public and page-scoped", () => {
 });
 
 test("game and journal labels have explicit narrow-width wrapping", () => {
-  assert.match(css, /\.game-official-card-v6 > b\s*\{[^}]*white-space: normal;[^}]*overflow-wrap: anywhere;/);
-  assert.match(css, /@media \(max-width: 480px\)[\s\S]*?\.game-official-card-v6 > b\s*\{[^}]*grid-column: 1 \/ -1;/);
+  assert.match(css, /\.game-official-card-v6\.game-hub-card-v4 > b\s*\{[^}]*white-space: normal;[^}]*overflow-wrap: anywhere;/);
+  assert.match(css, /@media \(max-width: 480px\)[\s\S]*?\.game-official-card-v6\.game-hub-card-v4 > b\s*\{[^}]*grid-column: 1 \/ -1;/);
   assert.match(css, /\.journal-hero-v6 h1 br\s*\{[^}]*display: inline-block;[^}]*width: \.3em;/);
   assert.match(css, /\.journal-heading-v6\s*\{[^}]*flex-wrap: wrap;/);
   assert.match(css, /\.journal-heading-v6 > span\s*\{[^}]*overflow-wrap: anywhere;/);
+});
+
+test("game cards keep their full-bleed artwork while restoring the content rail", () => {
+  assert.match(css, /body\[data-page="games"\] main :is\(\.game-hub-grid-v4, \.game-future-grid-v6\) \.game-official-card-v6 \.game-hub-mark-v4\s*\{[^}]*border-radius: 19px 19px 0 0;/);
+  assert.match(css, /body\[data-page="games"\] main :is\(\.game-hub-grid-v4, \.game-future-grid-v6\) \.game-official-card-v6\.game-hub-card-v4 \.game-hub-copy-v4\s*\{[^}]*padding-left: clamp\(16px, 1\.4vw, 22px\);/);
+  assert.match(css, /body\[data-page="games"\] main :is\(\.game-hub-grid-v4, \.game-future-grid-v6\) \.game-official-card-v6\.game-hub-card-v4 > b\s*\{[^}]*margin-right: clamp\(16px, 1\.4vw, 22px\);/);
+  assert.match(css, /@media \(max-width: 480px\)[\s\S]*?\.game-hub-copy-v4\s*\{[^}]*padding-left: 16px;/);
+  assert.match(css, /@media \(max-width: 480px\)[\s\S]*?\.game-official-card-v6\.game-hub-card-v4 > b\s*\{[^}]*grid-row: 3;[^}]*margin: 0 16px;/);
 });
 
 test("public team names and narrow member badge help remain visible", () => {

@@ -4,6 +4,7 @@ import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
 import { createPublicPageHandler, handlesPublicPage } from "../lib/public-pages.js";
 import { basicMemberAvatar, memberProfileVisible, publicMemberByUsername, publicMemberContents, publicMemberView } from "../lib/public-members.js";
+import { displayAvatar, LEGACY_FLATTENED_MARK, TRANSPARENT_MARK } from "../lib/public-staff.js";
 
 const alice = "01234567-1234-4234-8234-0123456789ab";
 const bob = "11234567-1234-4234-8234-0123456789ab";
@@ -33,6 +34,26 @@ test("public member pages show only approved presentation, real badge explanatio
   assert.equal(page.document.querySelector("#member-message-v7").hidden, true, "contact action waits for session status");
   assert.match(page.headers["cache-control"], /no-store/);
   assert.match(page.document.querySelector('link[rel="canonical"]').href, /\/user\/gamer_one$/);
+});
+
+test("the protected owner role receives a distinct public badge without changing other staff roles", async () => {
+  const owner = { ...member, username: "role_owner", displayName: "Role owner", staffRole: "Owner", badges: [] };
+  const page = await request("/user/role_owner", { member: async username => username === owner.username ? owner : null });
+  const badge = page.document.querySelector('.member-badge-v7[data-kind="staff_owner"]');
+  assert.equal(badge?.textContent, "BrowseRP Owner");
+  assert.equal(badge?.getAttribute("aria-label"), "BrowseRP Owner: Active protected BrowseRP owner role.");
+  assert.equal(page.document.querySelector('.member-badge-v7[data-kind="staff_role"]'), null);
+  assert.match(readFileSync(new URL("../public/member-public.css", import.meta.url), "utf8"), /member-badge-v7\[data-kind="staff_owner"\]/);
+  assert.equal(page.document.querySelectorAll(".member-badge-v7").length, 1);
+});
+
+test("the verified Management role remains distinct from the protected owner badge", async () => {
+  const manager = { ...member, username: "role_manager", displayName: "Role manager", staffRole: "Management", badges: [] };
+  const page = await request("/user/role_manager", { member: async username => username === manager.username ? manager : null });
+  const badge = page.document.querySelector('.member-badge-v7[data-kind="staff_management"]');
+  assert.equal(badge?.textContent, "BrowseRP Management");
+  assert.equal(badge?.getAttribute("aria-label"), "BrowseRP Management: Active BrowseRP Management staff role.");
+  assert.equal(page.document.querySelector('.member-badge-v7[data-kind="staff_owner"]'), null);
 });
 
 test("invisible and malformed member paths return the existing safe missing page", async () => {
@@ -67,6 +88,17 @@ test("opt-in basic profile exposes only handle and approved picture, never priva
   assert.equal(page.document.querySelector('meta[name="robots"]').content, preview ? "noindex,nofollow" : "noindex,follow");
   if (preview) assert.equal(page.headers["x-robots-tag"], "noindex, nofollow");
   assert.equal(page.document.querySelector('link[rel="canonical"]'), null);
+});
+
+test("the approved flattened brand upload shows its transparent equivalent on public and basic profiles", async () => {
+  const row = { id: alice, username: "gamer_one", display_name: "BrowseRP", profile_visibility: "public", approved_avatar_url: LEGACY_FLATTENED_MARK, avatar_review_status: "approved" };
+  assert.equal(publicMemberView(row).avatarUrl, TRANSPARENT_MARK);
+  const basic = publicMemberView({ ...row, profile_visibility: "basic" });
+  assert.equal(basic.avatarUrl, TRANSPARENT_MARK);
+  const page = await request("/user/gamer_one", { member: async () => basic });
+  assert.equal(page.document.querySelector(".member-basic-v7 img").getAttribute("src"), TRANSPARENT_MARK);
+  assert.equal(displayAvatar("https://example.test/profile/1787193557239-9cb54f6bcdcb84271c802482.png"), "https://example.test/profile/1787193557239-9cb54f6bcdcb84271c802482.png");
+  assert.equal(publicMemberView({ ...row, avatar_review_status: "pending_review" }).avatarUrl, null);
 });
 
 test("basic profile lookup stays public and does not query full details or old private accounts", async () => {

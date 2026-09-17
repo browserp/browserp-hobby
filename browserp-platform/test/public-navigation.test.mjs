@@ -154,13 +154,19 @@ const member = {
   user: { profile: { display_name: "Alex Rivers", avatar_review_status: "approved", avatar_url: "https://cdn.discordapp.com/avatar.png" } }
 };
 
-test("the older flattened BrowseRP avatar uses the transparent site mark only in the account chip", async () => {
+test("the exact older flattened BrowseRP avatar uses the transparent site mark in the account chip", async () => {
   const h = harness();
   try {
-    const legacy = "https://example.test/profile/1787193557239-9cb54f6bcdcb84271c802482.png";
+    const legacy = "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/fe6b695a-8f6c-4180-a6e6-25d729a16443/1787193557239-9cb54f6bcdcb84271c802482.png";
     await sessionHydration(h, { session: { ...member, user: { profile: { display_name: "Member", avatar_url: legacy } } } });
     assert.equal(h.$(".account-trigger-v3 .account-avatar-v3").getAttribute("src"), "/assets/browserp-icon-512.png");
   } finally { h.dom.window.close(); }
+  const spoof = harness();
+  try {
+    const otherUrl = "https://example.test/profile/1787193557239-9cb54f6bcdcb84271c802482.png";
+    await sessionHydration(spoof, { session: { ...member, user: { profile: { display_name: "Other", avatar_url: otherUrl } } } });
+    assert.equal(spoof.$(".account-trigger-v3 .account-avatar-v3").src, otherUrl);
+  } finally { spoof.dom.window.close(); }
   const other = harness();
   try {
     await sessionHydration(other, { session: member });

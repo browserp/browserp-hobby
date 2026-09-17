@@ -5,6 +5,11 @@ const USERNAME = /^[a-z0-9_]{3,30}$/;
 const ROLE_KEY = /^[a-z0-9_]{2,40}$/;
 const CONTROL = /[\u0000-\u001f\u007f]/;
 const PROFILE_MEDIA_ORIGIN = "https://kywabzfgjoqiznnxygbq.supabase.co";
+export const LEGACY_FLATTENED_MARK = `${PROFILE_MEDIA_ORIGIN}/storage/v1/object/public/profile-media/fe6b695a-8f6c-4180-a6e6-25d729a16443/1787193557239-9cb54f6bcdcb84271c802482.png`;
+export const TRANSPARENT_MARK = "/assets/browserp-icon-512.png";
+export function displayAvatar(url) {
+  return url === LEGACY_FLATTENED_MARK ? TRANSPARENT_MARK : url;
+}
 
 function boundedText(value, minimum, maximum) {
   const text = typeof value === "string" ? value.trim() : "";
@@ -63,7 +68,7 @@ export function publicStaffView(memberships, roles, profiles, presence = []) {
       const displayName = boundedText(profile?.display_name, 2, 48);
       if (!userId || !role || !profile || !displayName) return [];
       const avatarUrl = profile.avatar_review_status === "approved"
-        ? safePublicStaffAvatar(profile.approved_avatar_url)
+        ? displayAvatar(safePublicStaffAvatar(profile.approved_avatar_url))
         : null;
       const profileUrl = profile.profile_visibility === "public" && USERNAME.test(profile.username || "")
         ? `/user/${profile.username}` : null;

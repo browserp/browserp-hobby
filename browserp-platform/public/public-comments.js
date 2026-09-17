@@ -34,7 +34,8 @@
     image.referrerPolicy = "no-referrer";
     image.decoding = "async";
     image.addEventListener("error", () => image.replaceWith(fallbackAvatar(name)), { once: true });
-    image.src = source;
+    image.src = source === "https://kywabzfgjoqiznnxygbq.supabase.co/storage/v1/object/public/profile-media/fe6b695a-8f6c-4180-a6e6-25d729a16443/1787193557239-9cb54f6bcdcb84271c802482.png"
+      ? "/assets/browserp-icon-512.png" : source;
     return image;
   }
 

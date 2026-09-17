@@ -1,5 +1,5 @@
 import { getSession, rest, rpc } from "./supabase.js";
-import { safePublicStaffAvatar } from "./public-staff.js";
+import { displayAvatar, LEGACY_FLATTENED_MARK, TRANSPARENT_MARK, safePublicStaffAvatar } from "./public-staff.js";
 import { readContentAsset } from "./content-moderation.js";
 import { rasterType } from "./server-media.js";
 
@@ -20,7 +20,7 @@ export function publicMemberView(row, badges, servers) {
   const avatarUrl = row.avatar_review_status === "approved" ? safePublicStaffAvatar(row.approved_avatar_url) : null;
   if (row.profile_visibility === "basic") return {
     username: row.username,
-    avatarUrl: avatarUrl ? `/api/public/basic-profile-avatar?username=${row.username}` : null,
+    avatarUrl: avatarUrl === LEGACY_FLATTENED_MARK ? TRANSPARENT_MARK : avatarUrl ? `/api/public/basic-profile-avatar?username=${row.username}` : null,
     visibility: "basic"
   };
   return {
@@ -28,7 +28,7 @@ export function publicMemberView(row, badges, servers) {
     username: row.username,
     displayName: String(row.display_name || row.username).slice(0, 48),
     bio: row.bio_review_status === "approved" ? String(row.approved_bio || "").slice(0, 500) : "",
-    avatarUrl,
+    avatarUrl: displayAvatar(avatarUrl),
     joinedAt: Number.isFinite(Date.parse(row.joined_at || "")) ? row.joined_at : null,
     bannerStyle: BANNERS.has(row.banner_style) ? row.banner_style : "aurora",
     visibility: row.profile_visibility,
@@ -119,7 +119,7 @@ export async function publicCreatorForServer(slug) {
   const profile = await rpc("public_server_creator", { p_slug: slug });
   if (!profile || !USERNAME.test(profile.username || "")) return null;
   return { username: profile.username, displayName: String(profile.displayName || profile.username).slice(0, 48),
-    avatarUrl: safePublicStaffAvatar(profile.avatarUrl) };
+    avatarUrl: displayAvatar(safePublicStaffAvatar(profile.avatarUrl)) };
 }
 
 export { USERNAME as publicUsernamePattern, BANNERS as publicBannerStyles };

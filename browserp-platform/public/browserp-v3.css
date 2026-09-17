@@ -374,6 +374,7 @@ img { display: block; max-width: 100%; }
 .comment-v3 { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: var(--radius-md); background: color-mix(in srgb,var(--panel) 96%,var(--pink)); }
 .comment-heading-v3 { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .comment-avatar-v3,.comment-initials-v3 { flex: none; width: 42px; height: 42px; border: 1px solid var(--line-strong); border-radius: 50%; object-fit: cover; background: var(--panel-2); }
+.comment-avatar-v3 { background: transparent; }
 .comment-initials-v3 { display: grid; place-items: center; color: var(--text); font-size: 12px; font-weight: 800; }
 .comment-identity-v3 { display: grid; min-width: 0; gap: 1px; }
 .comment-author-line-v3 { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; min-width: 0; }
