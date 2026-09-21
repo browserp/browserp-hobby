@@ -122,6 +122,7 @@
     const heading = element("h3", "");
     const titleLink = element("a", "discovery-card-title-v10", server.name || "Roleplay server");
     titleLink.href = listingHref; heading.append(titleLink);
+    if (server.staffBoosted) heading.append(element("span", "server-boost-label-v12", "Boosted server"));
     top.append(media, heading);
     card.append(top);
     card.append(element("p", "server-description", server.description || "Open the listing to learn more about this community."));
@@ -239,7 +240,7 @@
   function removeFeaturedDecoration() {
     const list = select("#featured-server-list");
     list?.querySelectorAll(".server-boosted-v11").forEach(item => { item.classList.remove("server-boosted-v11"); item.removeAttribute("title"); });
-    list?.querySelectorAll(".server-boost-flame-v11").forEach(item => item.remove());
+    list?.querySelectorAll(".server-boost-flame-v11, .server-boost-label-v12").forEach(item => item.remove());
   }
 
   function scheduleFeaturedExpiry(expiresAt) {

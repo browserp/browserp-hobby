@@ -250,6 +250,19 @@
   :root body:not(.staff-v3):not([data-staff-page]) .discovery-card-v10 .server-card-bottom .player-count-v10.is-live::before { background: Highlight; }
 }
 
+/* A readable status label stays in normal flow beneath the server name. */
+.server-boost-label-v12 {
+  display: table; margin-top: 8px; max-width: 100%; padding: 5px 10px;
+  border: 1px solid color-mix(in srgb, var(--pink) 65%, var(--line));
+  border-radius: 999px; background: color-mix(in srgb, var(--pink) 12%, var(--panel));
+  color: var(--pink); font-size: 12px; line-height: 1.4; font-weight: 700;
+  letter-spacing: .02em; overflow-wrap: anywhere;
+}
+@keyframes boost-border-pulse {
+  0%, 100% { opacity: .45; }
+  50% { opacity: 1; }
+}
+
 /* Boosted cards use the selected theme's button colours without obscuring content. */
 :root body[data-page="home"] #featured-server-list > .server-boosted-v11 { position: relative; }
 :root body[data-page="home"] #featured-server-list > .server-boosted-v11::after {
@@ -262,7 +275,7 @@
 }
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   :root body[data-page="home"] #featured-server-list > .server-boosted-v11::after {
-    animation: primary-colour-drift 6.5s ease-in-out infinite alternate;
+    animation: primary-colour-drift 6.5s ease-in-out infinite alternate, boost-border-pulse 2.8s ease-in-out infinite;
   }
   :root:not([data-brand-motion="off"]) body[data-page="home"] #featured-server-list > .server-boosted-v11:focus-within::after { filter: brightness(1.14); }
   @media (hover: hover) and (pointer: fine) {
