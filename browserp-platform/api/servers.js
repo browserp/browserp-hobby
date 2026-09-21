@@ -25,6 +25,18 @@ function activeFeaturedBoost(value) {
     && Number.isFinite(expiry) && expiry > Date.now();
 }
 
+export async function refreshDuePublicSources(sources = [
+  { name: "fivem", refresh: refreshDueFiveMServers },
+  { name: "minecraft", refresh: refreshDueMinecraftServers }
+], warn = console.warn) {
+  const outcomes = await Promise.allSettled(sources.map(({ refresh }) => Promise.resolve().then(refresh)));
+  const failedSources = outcomes.flatMap((outcome, index) => outcome.status === "rejected" ? [sources[index].name] : []);
+  if (failedSources.length) {
+    warn(JSON.stringify({ event: "directory.source_refresh_failed", sources: failedSources }));
+  }
+  return { outcomes, failedSources };
+}
+
 export default endpoint(["GET", "POST"], async (req, res) => {
   const url = new URL(req.url, "http://browserp.local");
   if (req.method === "GET" && url.searchParams.has("history")) {
@@ -83,7 +95,9 @@ export default endpoint(["GET", "POST"], async (req, res) => {
     }
     return ok(res, { result, ...(moderation ? { moderation } : {}) }, 201);
   }
-  if (!slug) await Promise.all([refreshDueFiveMServers(),refreshDueMinecraftServers()]);
+  // Refresh failures must not take the public directory down. The stored
+  // listing and status data remains valid while the next refresh retries.
+  if (!slug) await refreshDuePublicSources();
   if (filters.discover === "true" && !slug) {
     const result = await discoverServers(filters);
     result.servers = await enrichRobloxApplications(await enrichMinecraftServers(await enrichImportedServers(result.servers)));

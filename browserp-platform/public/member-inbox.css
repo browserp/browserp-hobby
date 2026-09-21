@@ -50,6 +50,11 @@
   .member-inbox-compose h3 { grid-column: 1 / -1; }
   .member-inbox-compose > button { grid-column: 1 / -1; justify-self: start; }
 }
+@media (min-width: 621px) and (max-width: 1099px) {
+  .member-inbox-conversation { grid-template-columns: minmax(0, 1fr); }
+  .member-inbox-conversation > span { grid-column: 1; grid-row: 3; text-align: left; }
+  .member-inbox-unread { grid-column: 1; grid-row: 4; justify-self: start; }
+}
 @media (max-width: 620px) {
   .member-inbox-settings,
   .member-inbox-compose,
