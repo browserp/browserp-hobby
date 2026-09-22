@@ -17,9 +17,10 @@ test("the four homepage artwork quadrants are independent accessible game destin
   assert.deepEqual(links.map(link => link.getAttribute("href")), [
     "/games/fivem", "/games/redm", "/games/roblox", "/games/minecraft"
   ]);
-  assert.deepEqual(links.map(link => link.textContent.trim()), [
+  assert.deepEqual(links.map(link => link.getAttribute("aria-label")), [
     "Explore FiveM roleplay", "Explore RedM roleplay", "Explore Roblox roleplay", "Explore Minecraft roleplay"
   ]);
+  assert.deepEqual(links.map(link => link.querySelector(".hero-game-label")?.textContent), ["FiveM", "RedM", "Roblox", "Minecraft"]);
   assert.ok(links.every(link => !link.closest(".home-game-discovery, .game-grid-v3")), "hero links are not intercepted by homepage game filters");
   assert.equal(artwork.querySelectorAll("a a, button, [role='button']").length, 0);
   assert.equal(dom.window.document.querySelector(".home-hero-pattern")?.getAttribute("aria-hidden"), "true", "decorative motion remains inert");
